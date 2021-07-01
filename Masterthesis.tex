@@ -43,7 +43,7 @@
 
 %%% BIBLIOGRAPHY
 \usepackage[style=authoryear, backend=biber, maxcitenames=2]{biblatex}
-\addbibresource{Reference.bib}
+\addbibresource{references.bib}
 
 \usepackage{./Macros}
 
@@ -63,29 +63,28 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DOCUMENT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-\listoffixmes % cf. fixme package
-\frontmatter
-\titelpage
+	\listoffixmes % cf. fixme package
+	\frontmatter
+	\titelpage
 
-\include{./chapter/declaration}
-\cleardoublepage
+	\include{./chapter/declaration}
+	\cleardoublepage
 
-%\include{./chapter/preface}
-\setcounter{tocdepth}{1}
+	%\include{./chapter/preface}
+	\setcounter{tocdepth}{1}
 
-\tableofcontents
+	\tableofcontents
 
-\mainmatter % starts normal page numbering
-% \include{./chapter/introduction}
-% \include{...}
+	\mainmatter % starts normal page numbering
+	% \include{./chapter/introduction}
+	\include{./chapter/stochastic_approximation}
 
-\clearpage
-\appendix
-% \include{./chapter/appendix_01}
+	\clearpage
+	\appendix
+	% \include{./chapter/appendix_01}
 
-\backmatter
-\printbibliography
-
+	\backmatter
+	\printbibliography
 \end{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
