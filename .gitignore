@@ -1,0 +1,15 @@
+*.aux
+*.run.xml
+*.out
+*.log
+*.fls
+*.fdb_latexmk
+*synctex.gz
+*.toc
+*.bbl
+*.bcf
+*.blg
+*.pdf
+*.lox
+*.synctex(busy)
+*.dvi

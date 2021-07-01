@@ -1,0 +1,77 @@
+\RequirePackage{ifthen}
+\newcommand{\factor}{5}
+\newlength{\hheight}\newlength{\hdepth}
+\settoheight{\hheight}{\huge I}
+\settodepth{\hdepth}{\huge g}
+\addtolength{\hheight}{\hdepth}
+\newcommand{\hstrut}{\rule[-\hdepth]{0pt}{\hheight}}
+\newlength{\Lheight}\newlength{\Ldepth}
+\settoheight{\Lheight}{\Large I}
+\settodepth{\Ldepth}{\Large g}
+\addtolength{\Lheight}{\Ldepth}
+\newcommand{\Lstrut}{\rule[-\Ldepth]{0pt}{\Lheight}}
+\newlength{\gap}\setlength{\gap}{18pt}
+\newcommand{\T@telI}{\@empty}
+	\newcommand{\titellineI}[1]{\renewcommand{\T@telI}{#1}}
+\newcommand{\T@telII}{\@empty}
+	\newcommand{\titellineII}[1]{\renewcommand{\T@telII}{#1}\renewcommand{\factor}{4}}
+\newcommand{\T@telIII}{\@empty}
+	\newcommand{\titellineIII}[1]{\renewcommand{\T@telIII}{#1}\renewcommand{\factor}{3}}
+\newcommand{\UT@telI}{\@empty}
+	\newcommand{\subtitellineI}[1]{\renewcommand{\UT@telI}{#1}\renewcommand{\factor}{4}}
+\newcommand{\UT@telII}{\@empty}
+	\newcommand{\subtitellineII}[1]{\renewcommand{\UT@telII}{#1}\renewcommand{\factor}{3}}
+\newcommand{\V@rNachName}{\@empty}
+	\newcommand{\firstLastName}[1]{\renewcommand{\V@rNachName}{#1}}
+\newcommand{\G@bDatum}{\@empty}
+	\newcommand{\birthdate}[1]{\renewcommand{\G@bDatum}{#1}}
+\newcommand{\G@bOrt}{\@empty}
+	\newcommand{\birthplace}[1]{\renewcommand{\G@bOrt}{#1}}
+\newcommand{\M@tNr}{\@empty}
+	\newcommand{\MatNr}[1]{\renewcommand{\M@tNr}{#1}}
+\newcommand{\B@treuer}{\@empty}
+	\newcommand{\Supervisor}[1]{\renewcommand{\B@treuer}{#1}}
+\newcommand{\@bgDatum}{\@empty}
+	\newcommand{\DueDate}[1]{\renewcommand{\@bgDatum}{#1}}
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\titelpage}{%
+\ifthenelse{\equal\T@telI\@empty}{\titellineI{Titelline 1}}{\relax}
+\ifthenelse{\equal\V@rNachName\@empty}{\firstLastName{Vorname Nachname}}{\relax}
+\ifthenelse{\equal\G@bDatum\@empty}{\birthdate{???}}{\relax}
+\ifthenelse{\equal\G@bOrt\@empty}{\birthplace{???}}{\relax}
+\ifthenelse{\equal\M@tNr\@empty}{\MatNr{???}}{\relax}
+\ifthenelse{\equal\B@treuer\@empty}{\Supervisor{???}}{\relax}
+\ifthenelse{\equal\@bgDatum\@empty}{\DueDate{???}}{\relax}
+\begin{titlepage}
+\setlength{\parindent}{0pt}
+\begin{center}
+\vspace*{3\baselineskip}
+{\Large\textsc{University of Mannheim}}
+\par\vspace{3\baselineskip}
+{\Large Master Thesis}
+\par\vspace{\factor\gap}
+{\huge\hstrut\T@telI}
+\ifthenelse{\not\equal\T@telII\@empty}{\par\vspace{6pt}{\huge\hstrut\T@telII}}{\relax}
+\ifthenelse{\not\equal\T@telIII\@empty}{\par\vspace{6pt}{\huge\hstrut\T@telIII}}{\relax}
+\ifthenelse{\not\equal\UT@telI\@empty}{\par\vspace{10pt}{\LARGE\Lstrut\UT@telI}}{\relax}
+\ifthenelse{\not\equal\UT@telII\@empty}{\par\vspace{6pt}{\LARGE\Lstrut\UT@telII}}{\relax}
+\par\vspace{3\baselineskip}
+{\large by}\\[1.5ex]
+{\Large\bfseries \V@rNachName}
+\par\vspace{1\baselineskip}
+{\large
+born on the \G@bDatum\ in \G@bOrt\\[.5ex]
+matriculation number \M@tNr}
+
+\par\vspace{1\baselineskip}
+{\large
+in the\\[1ex]
+Faculty of Mathematics\\[1ex]
+Supervisor: \B@treuer}
+\par\vspace{2\baselineskip}
+{\large Due Date: \@bgDatum}
+\end{center}
+\end{titlepage}
+}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endinput

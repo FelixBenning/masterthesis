@@ -1,0 +1,91 @@
+\documentclass[11pt, a4paper]{book}
+
+%%% ENCODING, FONT & LOCALIZATION
+\usepackage[utf8]{inputenc} % use unicode input-encoding (allows unicode characters in the .tex files, default: Asci)
+\usepackage{lmodern} % vectorized version of the "computer modern" font (default) (https://tex.stackexchange.com/q/1390/148164, https://tex.stackexchange.com/q/147194/148164)
+\usepackage[ngerman, english]{babel} %% last language is main
+%\shorthandoff{"} %babel breaks tikz-cd otherwise (activate if used)
+\usepackage{csquotes} %% biblatex wants csquotes (localized quotes) if babel is present
+
+%%% GENERAL IMPROVEMENTS
+\usepackage[hidelinks]{hyperref} %% clickable links
+\usepackage{enumitem} %% better (customizable) enumerations (e.g. \begin{enumerate}[label=(\roman*)])
+
+%%% EDITING (Annotations, TODO, etc.) 
+\usepackage[draft]{fixme} %final removes annotations %draft includes annotations
+\fxsetup{theme=color}
+%%\fxnote{some note} ,\fxwarning{}, \fxerror{}, \fxfatal{} <- does not allow [final] to compile
+
+%%% STYLING
+\setlength{\parindent}{0em} % No indentation for new paragraphs
+\usepackage{emptypage} % removes pagenumbers on empty pages
+\makeatletter \@twosidefalse \makeatother
+
+%%% GRAPHICS & PLOTS
+
+% \usepackage{graphicx} % enable pictures
+% \usepackage{wrapfig} % textwrapping around figures
+% \usepackage{tikz, tikz-cd, pgfplots} % plots and sketches
+% \pgfplotsset{compat=1.16}
+
+%%% CODE
+
+%%% MATH
+\usepackage{mathtools} % mathtools fixes some things from amsmath and adds some new features
+\usepackage{amsthm, amssymb} % amsthm -> proof env, amssymb -> additional symbols
+\usepackage{bbm} % blackboard numbers: usage \mathbbm{1} (amssymb \mathbb{1} looks bad)
+
+% %% contradiction symbol
+% \RequirePackage{wasysym} % lightning symbol
+% \newcommand*{\contradiction}[1][]{\quad\text{{\LARGE\lightning} #1}\ }
+
+%> see also Macros.sty
+
+%%% BIBLIOGRAPHY
+\usepackage[style=authoryear, backend=biber, maxcitenames=2]{biblatex}
+\addbibresource{Reference.bib}
+
+\usepackage{./Macros}
+
+\usepackage{./Title}
+\firstLastName{Felix Benning}
+\birthdate{27.11.1996}
+\birthplace{Nürtingen}
+\MatNr{1501817}
+\titellineI{Stochastic Optimization}
+% \titellineII{}
+% \titellineIII{}
+\subtitellineI{State of the Art}
+%\subtitellineII{}
+\Supervisor{Leif Döring}
+\DueDate{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DOCUMENT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\listoffixmes % cf. fixme package
+\frontmatter
+\titelpage
+
+\include{./chapter/declaration}
+\cleardoublepage
+
+%\include{./chapter/preface}
+\setcounter{tocdepth}{1}
+
+\tableofcontents
+
+\mainmatter % starts normal page numbering
+% \include{./chapter/introduction}
+% \include{...}
+
+\clearpage
+\appendix
+% \include{./chapter/appendix_01}
+
+\backmatter
+\printbibliography
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
