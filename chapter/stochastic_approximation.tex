@@ -37,7 +37,7 @@ problem tractable.
 While Lipschitz continuity 
 %
 \begin{align*}
-	| L(\theta_1) - L(\theta_2) | < K | \theta_1 - \theta_2 |
+	| L(\theta_1) - L(\theta_2) | < K_0 | \theta_1 - \theta_2 |
 \end{align*}
 %
 is sufficient to find an \(\epsilon\)-solution \(\hat{\theta}\) inside a unit
@@ -50,20 +50,20 @@ is sufficient to find an \(\epsilon\)-solution \(\hat{\theta}\) inside a unit
 in finite time, it still requires a full \emph{grid search} with time complexity
 %
 \begin{align*}
-	\left(\left\lfloor \frac{K}{2\epsilon}\right\rfloor + 1\right)^n
+	\left(\left\lfloor \frac{K_0}{2\epsilon}\right\rfloor + 1\right)^n
 \end{align*}
 %
 where \(n\) is the dimension of \(\theta\). The fact that grid search is
 sufficient can be seen by tiling the space into a grid and asking the oracle
 for the value of the loss function at each center. If the minimum is placed in
 some tile, the Lipschitz continuity forces the center of the tile to be \(\epsilon\)
-close to it.
+close to it \parencite[cf.][p. 11]{nesterovLecturesConvexOptimization2018}.
 
 The fact that this is necessary can easily be seen by imagining a "resisting
 oracle" which places the minimum in just the last gridelement where we look
-\parencite[cf.][p.13]{nesterovLecturesConvexOptimization2018}. The exponential
+\parencite[cf.][p. 13]{nesterovLecturesConvexOptimization2018}. The exponential
 increase of complexity in the dimension makes the problem intractable for even
-mild dimensions and precisions (e.g. \(n=11\), \(\epsilon=0.01\), \(K=2\)
+mild dimensions and precisions (e.g. \(n=11\), \(\epsilon=0.01\), \(K_0=2\)
 implies millions of years of computation). So we have to make further
 assumptions. \fxnote{annealing? evolutionary algorithms?}
 
@@ -72,7 +72,164 @@ assumptions. \fxnote{annealing? evolutionary algorithms?}
 A step up from zero order methods (such as grid search) are first order methods
 using the first derivative (the gradient). This requires a "first order oracle"
 which can provide us with \(L(\theta)\) and \(\nabla L(\theta)\) at any point
-\(\theta\).
+\(\theta\). One immediately obvious way to utilize this information is to
+incrementally move in the direction of steepest decent, i.e.
+%
+\begin{align*}
+	\theta_{n+1} = \theta_n - \eta\nabla L(\theta_n).
+\end{align*}
+%
+A useful way to look at this equation is to notice that it is the
+discretization of an ordinary differential equation (ODE)
+%
+\begin{align*}
+	\dot{\theta}_n \approx \frac{\theta_{n+1} - \theta_n}{\eta}
+	= - \nabla L(\theta_n).
+\end{align*}
+%
+Here \(\eta\) is the time delta between discretizations \(t_n\) and \(t_{n+1}\).
+This of course implies \(t_n = n\eta\). And for \(\eta\to\infty\), we arrive
+at the ODE
+%
+\begin{align*}
+	\dot{\theta}(t) = -\nabla L(\theta(t)).
+\end{align*}
+%
+If you are familiar with Lyapunov functions you will not be surprised by the next
+few arguments:
+%
+\begin{align*}
+	L(\theta(t_1)) - L(\theta(t_0))
+	&= \int_{t_0}^{t_1} \nabla L(\theta(s)) \cdot \dot{\theta}(s) ds
+	= \int_{t_0}^{t_1} -\|\nabla L(\theta(s))\|^2 ds
+	\le 0\\
+\end{align*}
+%
+immediately implies \(L(\theta(t_0)) \ge L(\theta(t_1)) \ge \dots \ge 0\)
+which implies convergence. But not necessarily a convergent \(\theta(t)\).
+
+The first thing we might want to ensure, is that the gradient \(\nabla L(\theta(t))\)
+actually converges to zero. If we know that the gradient being larger \(\epsilon\)
+implies it being larger \(\epsilon/2\) in a \(\delta\) environment around any
+such occurance, we can immediately see that the number of times the gradient
+sticks its head above \(\epsilon\) must be finite, as
+%
+\begin{align}\label{bounded gradient integral}
+	0 \le \liminf_{t\to\infty} L(\theta(t))
+	=  L(\theta(t_0)) - \int_{t_0}^\infty \|\nabla L(\theta(s))\|^2 ds.
+\end{align}
+%
+So uniform continuity is sufficient for convergence of \(\nabla L(\theta(t))\).
+But that still does not ensure that \(\theta(t)\) converges, only that its
+derivative \(\dot{\theta}(t) = -\nabla L(\theta(t))\) converges. The logarithm
+is an obvious example where this goes wrong.
+
+Additionally we are currently talking about a theoretical ODE where the timestep
+is infinitesimal. So let us first return to a discretized gradient. Under the
+assumption that \(\nabla L\) is Lipschitz continuous
+%
+\begin{align*}
+	\| \nabla L(\theta) - \nabla L(\tilde{\theta})\| \le K_1 \|\theta-\tilde{\theta}\|
+\end{align*}
+%
+we have for \(\theta_{n+1}=\theta_n-\eta\nabla L(\theta_n)\)
+%
+\begin{align}
+	L(\theta_{n+1})
+	&\lxle{\ref{Lipschitz Gradient implies taylor inequality}} L(\theta_n) 
+	+ \langle\nabla L(\theta_n),\theta_{n+1} - \theta_n\rangle
+	+ \tfrac{K_1}{2} \| \theta_{n+1} - \theta_n\|^2 
+	\label{bound increment}\\
+	&= L(\theta_n)
+	+ \langle\nabla L(\theta_n), -\eta\nabla L(\theta_n)\rangle
+	+ \tfrac{K_1}{2}\eta^2\| \nabla L(\theta_n)\|^2
+	\nonumber\\
+	&=L(\theta_n) - \eta(1-\tfrac{\eta K_1}{2})\|\nabla L(\theta_n)\|^2
+	\nonumber
+\end{align}
+%
+this means that for \(\eta=\tfrac{2\alpha}{K_1}\), \(\alpha \in (0,1)\)
+parameterizes all the \(\eta\) for which we can guarantee a positive decrease
+%
+\begin{align*}
+	L(\theta_{n+1}) - L(\theta_n)
+	\le - \tfrac{2}{K_1}\alpha (1-\alpha)\|\nabla L(\theta_n)\|^2
+\end{align*}
+%
+with the optimal choice of \(\eta=\tfrac{1}{K_1}\) (\(\alpha=1/2\)) resulting
+in 
+%
+\begin{align*}
+	L(\theta_{n+1}) - L(\theta_n)
+	\le - \tfrac{1}{2K_1}\|\nabla L(\theta_n)\|^2.
+\end{align*}
+%
+Summing over these increments results in a very similar equation to
+(\ref{bounded gradient integral})
+%
+\begin{align*}
+	\inf_{\theta} L(\theta) \le L(\theta_n) 
+	\le L(\theta_0) - \tfrac{1}{2K_1} \sum_{k=0}^{n-1}\|\nabla L(\theta_k)\|^2
+\end{align*}
+%
+Since \(\eta=\tfrac{1}{K_1}\) is the time increment between the \(\theta_k\)
+we have only lost the factor \(1/2\) in our estimation (\ref{bound increment})
+compared to the precise integral version.
+
+In particular we get
+%
+\begin{align*}
+	\tfrac{n}{2K_1}
+	\underbrace{\tfrac{1}{n} \sum_{k=0}^n \|\nabla L(\theta_k)\|^2}_{
+		=: \overline{\|\nabla L(\theta_n)\|^2}
+	}
+	\le \tfrac{1}{2K_1}\sum_{k=0}^{n-1} \|\nabla L(\theta_k)\|^2 
+	\le L(\theta_0) - \inf_\theta L(\theta)
+\end{align*}
+%
+which implies that the average gradient square converges with \(n\) to zero
+%
+\begin{align*}
+	\overline{\|\nabla L(\theta_n)\|^2}
+	\le \tfrac{1}{n}2 K_1 (L(\theta_0) - \inf_\theta L(\theta)) \in O(\tfrac{1}{n}).
+\end{align*}
+%
+It is important to note the "square" part of the gradient squares. If we had the
+series of unsquared gradient norms being finite as well, we would have
+\(\theta_n\) being a cauchy sequence
+%
+\begin{align*}
+	\|\theta_n - \theta_m \|
+	\le \sum_{k=m}^{n-1} \|\theta_{k+1} - \theta_k\|
+	\le \tfrac{1}{2K_1} \sum_{k=m}^{n-1} \|\nabla L(\theta_k)\|.
+\end{align*}
+%
+This provides us with some intuition how a situation might look like when the
+gradient converges but not the sequence of \(\theta_n\). The gradient would
+behave something like the harmonic series, as its squares converges and the
+\(\theta_n\) would behave like the partial sums of the harmonic series which
+behaves in the limit like the logarithm.
+
+It is difficult to formulate an example in finite space, but
+%
+\begin{align*}
+	L(\theta) &= \exp(-\theta) \\
+	\dot{\theta} &= -\nabla L(\theta)
+\end{align*}
+%
+implies
+%
+\begin{align*}
+	\theta(t) &= \log(t)\\
+	\nabla L(t) &= -\tfrac1t
+\end{align*}
+%
+which provides intuition how "flat" a minima has to be to cause such behaviour.
+The minimum in \(\infty\) has an infinitely wide basin which flattens out
+more and more. If we wanted such an example in a bounded space we would have
+to try and coil up such an infinite slope into a spiral, which spirals outwards
+to avoid convergence.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

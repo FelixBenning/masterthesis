@@ -1,0 +1,33 @@
+
+% !TEX root = ../Masterthesis.tex
+
+\chapter{Technical Proofs}
+
+\section{Convex Analysis}
+
+\begin{lemma}[\citeauthor{nesterovLecturesConvexOptimization2018}]\label{Lipschitz Gradient implies taylor inequality}
+	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(L\),
+	then we have
+	\begin{align*}
+		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{L}2 \|y-x\|^2
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	See \textcite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}
+	\begin{align*}
+		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
+	\end{align*}
+	implies
+	\begin{align*}
+		&| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \\
+		&\le \int_0^1 | \langle\nabla f(x+\tau(y-x))-\nabla f(x), y-x\rangle | d\tau \\
+		&\lxle{\text{C.S.}}
+		\int_0^1 \|\langle\nabla f(x+\tau(y-x))-\nabla f(x)\| \cdot \|y-x\| d\tau\\
+		&\le \int_0^1 \tau L \|y-x\|^2 d\tau \le \tfrac{L}2 \|y-x\|^2.
+		\qedhere
+	\end{align*}
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endinput
