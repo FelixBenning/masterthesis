@@ -3,7 +3,7 @@
 \newcommand{\dist}{\mathcal{D}}
 \newcommand{\E}{\mathbb{E}}
 
-\chapter{Stochastic Loss}
+\chapter{Classical Optimization}
 
 Let \(f_\theta(X)\) be a (parametrized) prediction for \(Y\), where \(Z=(X,Y)\)
 is drawn from a distribution \(\dist\) of real world examples. The prediction
@@ -19,7 +19,7 @@ And we \emph{want} to minimize the theoretical loss over all examples (risk)
 	L(\theta) := \E_{X,Y\sim \dist} [l(\theta, X, Y)].
 \end{align*}
 
-\section{What could we possibly solve?}
+\section{Zero Order Optimization}
 
 Let us set aside the stochasticity of the problem for a moment and assume we
 could evaluate \(L\) at any point \(\theta\). In other words: we have a "zero
@@ -67,12 +67,16 @@ mild dimensions and precisions (e.g. \(n=11\), \(\epsilon=0.01\), \(K_0=2\)
 implies millions of years of computation). So we have to make further
 assumptions. \fxnote{annealing? evolutionary algorithms?}
 
-\subsection{The Gradient Method}
+\section{First Order Optimization}
 
 A step up from zero order methods (such as grid search) are first order methods
 using the first derivative (the gradient). This requires a "first order oracle"
 which can provide us with \(L(\theta)\) and \(\nabla L(\theta)\) at any point
-\(\theta\). One immediately obvious way to utilize this information is to
+\(\theta\).
+
+\subsection{Gradient Decent}
+
+One immediately obvious way to utilize this information is to
 incrementally move in the direction of steepest decent, i.e.
 %
 \begin{align*}
@@ -105,8 +109,13 @@ few arguments:
 	\le 0\\
 \end{align*}
 %
-immediately implies \(L(\theta(t_0)) \ge L(\theta(t_1)) \ge \dots \ge 0\)
+immediately implies
+\begin{align*}
+	L(\theta(t_0)) \ge L(\theta(t_1)) \ge \dots \ge 0
+\end{align*}
 which implies convergence. But not necessarily a convergent \(\theta(t)\).
+
+\subsection{Convergence of the Gradient}
 
 The first thing we might want to ensure, is that the gradient \(\nabla L(\theta(t))\)
 actually converges to zero. If we know that the gradient being larger \(\epsilon\)
@@ -225,10 +234,161 @@ implies
 \end{align*}
 %
 which provides intuition how "flat" a minima has to be to cause such behaviour.
-The minimum in \(\infty\) has an infinitely wide basin which flattens out
+The minimum at \(\infty\) has an infinitely wide basin which flattens out
 more and more. If we wanted such an example in a bounded space we would have
 to try and coil up such an infinite slope into a spiral, which spirals outwards
 to avoid convergence.
+
+\subsection{All Roads Lead to Convexity}
+
+Before we further tighten our restrictions on \(L\) to ensure convergene, let
+me point out the following lemma
+%
+\begin{lemma}
+	If \(f\) is differentiable, then derivative \(\nabla f\) is
+	bounded (w.r.t. the operator norm) by constant \(K\) iff the function
+	\(f\) is Lipschitz continuous with Lipschitz constant \(K\).
+\end{lemma}
+\begin{proof}
+	Lipschitz continuity is implied by the mean value theorem
+	\begin{align*}
+		\|f(x_1) - f(x_0)\|
+		&\le \|\nabla f(x_0 + \xi(x_1-x_0))\| \|x_1- x_0\|\\
+		&\le K \|x_1-x_0\|.
+	\end{align*}
+	%
+	The opposite direction is implied by
+	%
+	\begin{align*}
+		\|\nabla f(x_0)\|
+		&\equiv \sup_{v} \frac{\|\nabla f(x_0)v\|}{\|v\|}
+		= \sup_{v} \lim_{v\to 0}\frac{\|\nabla f(x_0)v\|}{\|v\|}\\
+		&\lxle{\Delta}\sup_{v} \lim_{v\to 0}
+		(
+			\underbrace{
+				\tfrac{\|f(x_0 + v) - f(x_0) \|}{\|v\|}
+			}_{
+				\le K
+			}
+			+ \underbrace{
+				\tfrac{\|\nabla f(x_0)v + f(x_0) - f(x_0 +v)\|}{\|v\|}
+			}_{
+				\to 0 \text{ (derivative definition)}
+			}
+		)
+	\end{align*}
+	%
+	where we have used the scalability of the norm to multiply \(v\) with a
+	decreasing factor both in the numerator and denominator in order to introduce
+	the limit.
+\end{proof}
+
+Lipschitz continuity of \(\nabla L\) is thus equivalent to boundedness of the
+Hesse matrix \(\nabla^2 L\). And since the Hesse matrix is symmetric and thus
+diagnoizable with an orthonormal basis, the operatornorm of it is equal to its
+largest absolute eigenvalue. The Lipschitz constant thus bounds the speed at
+which the gradient changes in the direction of an eigenvector corresponding to
+this largest absolute eigenvalue.
+
+The slower the gradient changes, the further we can walk before we have to
+take another measurement. For this reason the optimal learning rate is
+inversely proportional to the Lipschitz constant.
+
+The Lipschitz constant \(K_1\) restricts how sharp the minima can be, 
+this ensures that we do not overshoot it and bounce around aimlessly with a 
+learning rate that is much too high. But as we have seen above, a very flat
+minima might decelerate gradient decent so much that our prarmeter \(\theta_n\)
+never converges.
+
+So it is a natural conclusion to bound the Hesse matrix from below as well.
+Now if there is a local minima somewhere, then it can not have negative
+eigenvalues in its Hessian. Those would imply a direction in which the gradient
+\emph{decreases} below zero and thus that the minima is in fact not a minima.
+So if we assume that the absolute eigenvalues are bounded from below, assume
+that \emph{a} local minima exists, and assume that the second derivative is
+continuous, then the positive eigenvalues around that local minima can
+never become negative due to the lower bound on the aboslute eigenvalues and
+continuity. In other words: We are assuming strong, global convexity. Which of
+course is anything but a natural assumption.
+
+Alternatively one could make this assumption only about the local minimum and
+make continuity assumptions about the second derivative, then there is a local
+space around the minimum where this bound holds and we can get convergence
+statments conditioned on starting in this local space.
+
+Since neither option resembles real applications, we will focus on the intuition
+similarly to \textcite{gohWhyMomentumReally2017} instead of mathematical rigor.
+For a proper treatment of the local case see \textcite[Theorem
+1.2.4]{nesterovLecturesConvexOptimization2018} and for the global case see
+\textcite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}.
+
+\subsection{Visualizing the Second Order Taylor Approximation}
+If we assume our Hesse matrix \(\nabla^2 L(\theta)\) to be positive definite
+(all eigenvalues positive), then for a second order Taylor approximation
+%
+\begin{align*}
+	L(\theta+v) \approx T_2L(\theta+v)
+	= L(\theta) + v^T \nabla L(\theta) + \tfrac12 v^T \nabla^2 L(\theta) v
+\end{align*}
+%
+we can find the minimum 
+\begin{align*}
+	v^* = -(\nabla^2 L(\theta))^{-1}\nabla L(\theta)
+\end{align*}
+by setting the first derivative to zero
+%
+\begin{align*}
+	\nabla T_2L(\theta+v) = \nabla L(\theta) + \nabla^2L(\theta) v \xeq{!} 0.
+\end{align*}
+%
+This minimum allows us not only to rewrite the taylor derivative
+%
+\begin{align*}
+	\nabla T_2L(\theta+v) = \nabla^2 L(\theta)(v-v^*),
+\end{align*}
+%
+but also the original taylor approximation
+%
+\begin{align*}
+	T_2L(\theta+v)
+	&= L(\theta) - v^T \nabla^2 L(\theta) v^* + \tfrac12 v^T \nabla^2 L(\theta) v \\
+	&= \underbrace{L(\theta) - \tfrac12 v^* \nabla^2 L(\theta) v^*}_{=: \alpha \text{ (const)}}
+	+ \tfrac12 (v-v^*)^T \nabla^2 L(\theta)(v-v^*).
+\end{align*}
+%
+To get absolute instead of relative coordinates to \(\theta\) we set
+%
+\begin{align*}
+	\theta^* := \theta + v^* = \theta -(\nabla^2 L(\theta))^{-1}\nabla L(\theta),
+\end{align*}
+%
+and obtain the notion of a paraboloid centered around \(\theta^*\)
+%
+\begin{align}
+	L(y) = \tfrac12 (y- \theta^*) \nabla^2 L(\theta) (y-\theta^*) + \alpha + o(\|y-\theta\|^2)
+\end{align}
+%
+To fully appreciate Figure~\ref{fig: 2d paraboloid}, we only need to realize
+that the diagonizability of \(\nabla^2 L(\theta)\)
+%
+\begin{align}\label{diagnalization of the Hesse matrix}
+	V \nabla^2 L(\theta) V^T
+	= \text{diag}(\lambda_1,\dots,\lambda_n), \qquad V=(v_1,\dots, v_n)
+\end{align}
+%
+\begin{wrapfigure}{O}{0.6\textwidth}
+	\centering
+	\def\svgwidth{0.58\textwidth}
+	\input{media/contour.pdf_tex}
+	\caption{Assuming \(\theta^*=0\), \(\lambda_1=1, \lambda_2=2\), \(v_1=(\sin(1), \cos(1))\)}
+	\label{fig: 2d paraboloid}
+\end{wrapfigure}
+%
+implies that once we have selected the center \(\theta^*\) and the direction of
+one eigenspace in two dimensions, the other eigenspace has to be
+orthogonal to the first one which fully determines its direction at this point. 
+
+\subsection{From Eigenvalues to Convergence Rate}
 
 
 
