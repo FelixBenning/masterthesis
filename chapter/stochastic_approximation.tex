@@ -330,6 +330,10 @@ For a proper treatment of the local case see \textcite[Theorem
 1.2.4]{nesterovLecturesConvexOptimization2018} and for the global case see
 \textcite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}.
 
+\fxnote{Different angle: If we achieve a contraction towards our minimum, the
+function necessarily has to be convex, cf. https://youtu.be/6WeyTUnbwQQ?t=1020}
+
+
 \subsection{Visualizing the Second Order Taylor Approximation}
 If we assume our Hesse matrix \(\nabla^2 L(\theta)\) to be positive definite
 (all eigenvalues positive), then for a second order Taylor approximation
@@ -546,6 +550,7 @@ at the upper end of the interval in (\ref{eq: learning rate restriction
 	= \frac{\lambda_d - \lambda_1}{\lambda_d + \lambda_1}\\
 	&= \frac{\lambda_d/\lambda_1-1}{\lambda_d/\lambda_1+1}
 \end{align*}
+\fxnote{use different representation (only one kappa)}
 %
 becomes close to one if the condition number \(\kappa:=\lambda_d/\lambda_1\)
 is large.
@@ -555,7 +560,20 @@ our visualization in Figure \ref{fig: 2d paraboloid}. When the eigenvalues are
 the same, the contours are concentric circles and the gradient points right at
 the center.
 
+\fxnote{strong convexity and lipshitz continuity of gradient as lower and
+upper bound, sketch convergence proof using that instead of eigenvalues}
+
 \subsection{Momentum}
+
+\subsection{Optimal Methods/Bounds/Coloring/Value function learning}
+
+\subsection{Nestrov Optimal Method/Nestrov Momentum}
+
+\subsection{Newton}
+
+\subsection{Conjugate Gradient}
+
+\subsection{Runge Kutta}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
