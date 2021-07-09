@@ -476,7 +476,16 @@ top of them is of little concern. But being close to zero in such a component
 still means slow movement away, since we are multiplying by it. This is a
 common explanation for the observation of temporary plateaus in machine learning
 which "suddenly fall off" once the exponential factor ramps up and causes a
-sharp drop in the loss.
+sharp drop in the loss (Figure \ref{fig: visualize saddlepoint gd}).
+
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_gd.pdf_tex}
+	\caption{Start=\(0.001v_1+4v_2\), \(\lambda_1=-1, \lambda_2=2\), learning rate\(=0.8\)}
+	\label{fig: visualize saddlepoint gd}
+\end{figure}
+
 \fxnote{famous saddlepoint illustration with lossplot}
 
 Let us consider strictly positive eigenvalues now and assume that our

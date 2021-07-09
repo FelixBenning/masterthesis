@@ -152,7 +152,7 @@ plot(mapslices(f, decent_steps;dims=(1))', st=:scatter, label="loss")
 # ╟─491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
 # ╠═f15c0419-96ec-4b9f-afab-00e4e8883146
 # ╠═45306bbd-ccfa-43bc-a90c-1c1b88f28a46
-# ╟─f76998fa-a01e-4f5f-b714-2440a2f8dd50
+# ╠═f76998fa-a01e-4f5f-b714-2440a2f8dd50
 # ╟─fa713758-2713-4446-aa5c-f5fa1e2f601c
 # ╟─342ee539-d5da-43a6-b7ec-7717c338207c
 # ╟─9bcec655-65b9-4444-b6ab-38ab8ab5d169

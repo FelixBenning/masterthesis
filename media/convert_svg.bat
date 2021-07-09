@@ -1,0 +1,1 @@
+inkscape -D media/*.svg -o media/*.pdf --export-latex
