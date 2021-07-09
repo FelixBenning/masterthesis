@@ -61,12 +61,9 @@ end
 
 # ╔═╡ dc609f58-f607-4772-bdb0-f2db25475e18
 begin
-	plot(-5:0.1:5, -5:0.1:5, f, levels=-50:5:80, st=:contour, aspectratio=1)
+	plot(-5:0.1:5, -5:0.1:5, f, levels=-50:5:80, st=:contour)
 	plot!([0,0], [0,0], quiver=(eigen[1,:], eigen[2,:]), st=:quiver)
 end
-
-# ╔═╡ d445dc20-853f-40ae-a2cd-31252b655392
-eigenvec1
 
 # ╔═╡ 3d9d041e-5d53-410f-a1ce-e63b264ea924
 # savefig("contour.svg")
@@ -129,7 +126,11 @@ begin
 		title="Loss", 
 		xlabel="Iteration",
 	)
-	plot(losssurface, loss, layout=grid(1,2, widths=[0.7,0.3]))
+	plot(
+		losssurface, loss, 
+		layout=grid(1,2, widths=[0.7,0.3]), 
+		fontfamily="Computer Modern"
+	)
 end
 
 # ╔═╡ 88a2c894-3bae-4147-8513-45cf5a9be959
@@ -144,13 +145,12 @@ plot(mapslices(f, decent_steps;dims=(1))', st=:scatter, label="loss")
 # ╠═47e61ea1-5bf5-4ff0-81a1-f9471ac933f1
 # ╟─f709e1de-aaac-4eb0-a2e0-a2bfa6ae6370
 # ╟─9e5a1fdd-30de-436e-9090-6142494617b8
-# ╠═6ed6aa03-88e1-4e8a-9bfc-60e3d22058e5
-# ╠═c3e4e730-d97d-11eb-0340-1d1e2fd0167a
-# ╠═dc609f58-f607-4772-bdb0-f2db25475e18
-# ╠═d445dc20-853f-40ae-a2cd-31252b655392
+# ╟─6ed6aa03-88e1-4e8a-9bfc-60e3d22058e5
+# ╟─c3e4e730-d97d-11eb-0340-1d1e2fd0167a
+# ╟─dc609f58-f607-4772-bdb0-f2db25475e18
 # ╠═3d9d041e-5d53-410f-a1ce-e63b264ea924
 # ╟─491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
-# ╠═f15c0419-96ec-4b9f-afab-00e4e8883146
+# ╟─f15c0419-96ec-4b9f-afab-00e4e8883146
 # ╠═45306bbd-ccfa-43bc-a90c-1c1b88f28a46
 # ╠═f76998fa-a01e-4f5f-b714-2440a2f8dd50
 # ╟─fa713758-2713-4446-aa5c-f5fa1e2f601c
