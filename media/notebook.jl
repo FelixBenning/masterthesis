@@ -112,9 +112,6 @@ $(@bind lr Slider(
 # ╔═╡ c5d4b530-3e8f-4a46-888f-22b54b4be7e2
 log_rates = log.(abs.(1 .-lr.*[lambda_1,lambda_2])) 
 
-# ╔═╡ 153912e8-4724-41bd-bad6-c1a7b94803a8
-log.(5 ./[eigenvec1'*start,eigenvec2'*start]) ./log_rates
-
 # ╔═╡ 342ee539-d5da-43a6-b7ec-7717c338207c
 max_steps = 
 if maximum(log_rates) > 0
@@ -175,7 +172,7 @@ begin
 	momentum[:,1] = [0,0]
 	for step in 2:mom_steps
 		momentum[:,step]= (
-			(1- sqrt(mom_lr)*friction)*momentum[:, step-1] 
+			(1- friction)*momentum[:, step-1] 
 			- gradient(f, momentum_steps[:, step-1])[1]
 		)
 		momentum_steps[:,step] = momentum_steps[:,step-1] + mom_lr * momentum[:,step]
@@ -251,9 +248,8 @@ md"# Appendix"
 # ╟─f76998fa-a01e-4f5f-b714-2440a2f8dd50
 # ╟─02bfcd93-3512-4d75-9bb2-021fbf226a31
 # ╟─fa713758-2713-4446-aa5c-f5fa1e2f601c
-# ╠═c5d4b530-3e8f-4a46-888f-22b54b4be7e2
-# ╠═153912e8-4724-41bd-bad6-c1a7b94803a8
-# ╠═342ee539-d5da-43a6-b7ec-7717c338207c
+# ╟─c5d4b530-3e8f-4a46-888f-22b54b4be7e2
+# ╟─342ee539-d5da-43a6-b7ec-7717c338207c
 # ╟─9bcec655-65b9-4444-b6ab-38ab8ab5d169
 # ╟─e12b1bcb-4bbf-4adb-b277-c5703486ec72
 # ╟─2d3d6cdf-42f5-4c51-b3fe-58f227bb5aac
