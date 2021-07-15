@@ -30,9 +30,9 @@ Here \(\eta\) is the time delta between discretizations \(t_n\) and \(t_{n+1}\).
 This of course implies \(t_n = n\eta\). And for \(\eta\to\infty\), we arrive
 at the ODE
 %
-\begin{align*}
+\begin{align}\label{eq: velocity is gradient}
 	\dot{\theta}(t) = -\nabla L(\theta(t)).
-\end{align*}
+\end{align}
 %
 If you are familiar with Lyapunov functions you will not be surprised by the next
 few arguments:
@@ -505,18 +505,6 @@ the center.
 
 \fxnote{strong convexity and lipshitz continuity of gradient as lower and
 upper bound, sketch convergence proof using that instead of eigenvalues}
-
-\subsection{Momentum}
-
-\subsection{Optimal Methods/Bounds/Coloring/Value function learning}
-
-\subsection{Nestrov Optimal Method/Nestrov Momentum}
-
-\subsection{Newton}
-
-\subsection{Conjugate Gradient}
-
-\subsection{Runge Kutta}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

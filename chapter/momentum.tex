@@ -1,8 +1,111 @@
 % !TEX root = ../Masterthesis.tex
 
+\newcommand{\momentum}{p}
+
 \chapter{Momentum}
 
-\section{Motivation}
+To understand why the convergence rate is poor when the condition
+number is high, we can visualize a high ratio of the lowest to the highest
+eigenvalue as a narrow ravine. The gradient points in the direction of the
+strongest decent which is mostly opposite of the ravine and only slightly
+along its length. This causes our iterate to bounce back and forth between
+the walls of the ravine.
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_bad_contitioning.pdf_tex}
+	\caption{Momentum reduces fluctuations and converges faster}
+	\label{fig: visualize bad conditioning}
+\end{figure}
+
+As a fix it seems appropriate to average the gradients in some sense, to
+cancel out the opposing jumps and go straight down the ravine. In other words
+we want to build momentum. Now if we move according to the sum (integral) of
+the gradients, then our velocity stops being equal to the gradient but instead
+becomes the antiderivative of the gradient.
+
+So instead setting our gradient equal to the velocity (\ref{eq: velocity is
+gradient}), we want to set the acceleration equal to our gradient
+%
+\begin{align*}
+	\ddot{\theta} = -\nabla L(\theta).
+\end{align*}
+%
+It is also intuitive that without friction we are going to massively overshoot
+the minimum, so we are also going to add a "friction force" inversely proportional
+to our current velocity
+%
+\begin{align}\label{eq: acceleration is gradient + friction}
+	\ddot{\theta} = -\nabla L(\theta) - \mu \dot{\theta}
+\end{align}
+%
+The naive way to discretize a second order ODE, is to convert it into a first
+order ODE
+%
+\begin{align*}
+	\dot{y} := \begin{pmatrix}
+		\dot{\theta}\\
+		\ddot{\theta}
+	\end{pmatrix}
+	= \begin{pmatrix}
+		\dot{\theta} \\
+		-\nabla L(\theta) - \mu \dot{\theta}
+	\end{pmatrix}
+	=: g\Big(\begin{pmatrix}
+		\theta \\
+		\dot{\theta}
+	\end{pmatrix}\Big)
+	= g(y)
+\end{align*}
+%
+Which allows us to naively discretize our ODE with the Euler discretization
+%
+\begin{subequations}
+\begin{align}
+	\theta_{n+1} &= \theta_n + \eta \momentum_n \label{eq: naive momentum move}\\
+	\momentum_{n+1} &= \momentum_n + \eta [-\nabla L(\theta_n) - \mu \momentum_n]
+	\label{eq: naive momentum}\\ \nonumber
+	&= (1-\eta\mu)\momentum_n - \eta\nabla L(\theta_n).
+\end{align}
+\end{subequations}
+%
+Here we use \(\momentum\) to denote the momentum (velocity \(\dot{\theta}\)
+assuming unit mass).
+If we plug the second equation (\ref{eq: naive momentum}) into the first
+equation (\ref{eq: naive momentum move}) we get
+%
+\begin{align*}
+	\theta_{n+1}
+	&= \theta_n + \eta [(1-\eta\mu)\momentum_{n-1} - \eta\nabla L(\theta_{n-1})].
+\end{align*}
+%
+This means we are using gradient information from \(\theta_{n-1}\) to update
+\(\theta_{n+1}\). If we instead use the most up to date information
+\(\momentum_{n+1}\) instead of \(\momentum_n\) for the \(\theta_{n+1}\) update,
+we get the well known \emph{heavy ball method} (momentum method) first proposed
+by \textcite{polyakMethodsSpeedingConvergence1964} and wonderfully illustrated
+by \textcite{gohWhyMomentumReally2017}.
+
+\begin{definition}[Momentum Method]
+	\begin{subequations}
+	\begin{align}
+		\theta_{n+1} &= \theta_n + \eta \momentum_{n+1} \label{eq: momentum move}\\
+		\momentum_{n+1} &= (1-\eta\mu)\momentum_n - \eta\nabla L(\theta_n)
+		\label{eq: momentum}
+	\end{align}
+	\end{subequations}
+	%
+	An equivalent formulation obtained by plugging (\ref{eq: momentum}) into
+	(\ref{eq: momentum move}) is
+	%
+	\begin{align}
+		\theta_{n+1}
+		&= \theta_n + (1-\eta\mu)(\theta_n - \theta_{n-1}) - \eta^2\nabla L(\theta_n)
+	\end{align}
+\end{definition}
+
+
 
 \section{Convergence Rate}
 
