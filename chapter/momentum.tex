@@ -1,6 +1,7 @@
 % !TEX root = ../Masterthesis.tex
 
 \newcommand{\momentum}{p}
+\newcommand{\friction}{\mu}
 
 \chapter{Momentum}
 
@@ -25,22 +26,22 @@ we want to build momentum. Now if we move according to the sum (integral) of
 the gradients, then our velocity stops being equal to the gradient but instead
 becomes the antiderivative of the gradient.
 
-So instead setting our gradient equal to the velocity (\ref{eq: velocity is
-gradient}), we want to set the acceleration equal to our gradient
+So instead of setting our gradient equal to the velocity like in (\ref{eq:
+velocity is gradient}), we want to set the acceleration equal to our gradient
 %
 \begin{align*}
 	\ddot{\theta} = -\nabla L(\theta).
 \end{align*}
 %
-It is also intuitive that without friction we are going to massively overshoot
-the minimum, so we are also going to add a "friction force" inversely proportional
-to our current velocity
+But without friction we are going to massively overshoot the minimum, so we are
+also going to add a "friction force" inversely proportional to our current
+velocity
 %
 \begin{align}\label{eq: acceleration is gradient + friction}
-	\ddot{\theta} = -\nabla L(\theta) - \mu \dot{\theta}
+	\ddot{\theta} = -\nabla L(\theta) - \friction \dot{\theta}.
 \end{align}
 %
-The naive way to discretize a second order ODE, is to convert it into a first
+The standard way to discretize a second order ODE is to convert it into a first
 order ODE
 %
 \begin{align*}
@@ -50,23 +51,24 @@ order ODE
 	\end{pmatrix}
 	= \begin{pmatrix}
 		\dot{\theta} \\
-		-\nabla L(\theta) - \mu \dot{\theta}
+		-\nabla L(\theta) - \friction \dot{\theta}
 	\end{pmatrix}
 	=: g\Big(\begin{pmatrix}
 		\theta \\
 		\dot{\theta}
 	\end{pmatrix}\Big)
-	= g(y)
+	= g(y).
 \end{align*}
 %
 Which allows us to naively discretize our ODE with the Euler discretization
+\fxnote{whitespace issue with subequations}
 %
 \begin{subequations}
 \begin{align}
 	\theta_{n+1} &= \theta_n + \eta \momentum_n \label{eq: naive momentum move}\\
-	\momentum_{n+1} &= \momentum_n + \eta [-\nabla L(\theta_n) - \mu \momentum_n]
+	\momentum_{n+1} &= \momentum_n + \eta [-\nabla L(\theta_n) - \friction \momentum_n]
 	\label{eq: naive momentum}\\ \nonumber
-	&= (1-\eta\mu)\momentum_n - \eta\nabla L(\theta_n).
+	&= (1-\eta\friction)\momentum_n - \eta\nabla L(\theta_n).
 \end{align}
 \end{subequations}
 %
@@ -77,7 +79,7 @@ equation (\ref{eq: naive momentum move}) we get
 %
 \begin{align*}
 	\theta_{n+1}
-	&= \theta_n + \eta [(1-\eta\mu)\momentum_{n-1} - \eta\nabla L(\theta_{n-1})].
+	&= \theta_n + \eta [(1-\eta\friction)\momentum_{n-1} - \eta\nabla L(\theta_{n-1})].
 \end{align*}
 %
 This means we are using gradient information from \(\theta_{n-1}\) to update
@@ -91,7 +93,7 @@ by \textcite{gohWhyMomentumReally2017}.
 	\begin{subequations}
 	\begin{align}
 		\theta_{n+1} &= \theta_n + \eta \momentum_{n+1} \label{eq: momentum move}\\
-		\momentum_{n+1} &= (1-\eta\mu)\momentum_n - \eta\nabla L(\theta_n)
+		\momentum_{n+1} &= (1-\eta\friction)\momentum_n - \eta\nabla L(\theta_n)
 		\label{eq: momentum}
 	\end{align}
 	\end{subequations}
@@ -101,15 +103,71 @@ by \textcite{gohWhyMomentumReally2017}.
 	%
 	\begin{align}
 		\theta_{n+1}
-		&= \theta_n + (1-\eta\mu)(\theta_n - \theta_{n-1}) - \eta^2\nabla L(\theta_n)
+		&= \theta_n + (1-\eta\friction)(\theta_n - \theta_{n-1}) - \eta^2\nabla L(\theta_n)
 	\end{align}
 \end{definition}
+%
+Nesterov's momentum is even more aggressive: Instead of using \(p_{n+1}\) for
+the \(\theta_{n+1}\) update, it considers the certain "momentum move"
+to calculate an intermediate position \(y_{n+1}\)
+%
+\begin{align*}
+	\theta_{n+1}
+	&= \theta_n + \overbrace{\eta [(1-\eta\friction)\momentum_n}^{\text{"momentum move"}}
+	- \eta\nabla L(\theta_n)] \\
+	&= y_{n+1} - \eta^2 \nabla L(\theta_n).
+\end{align*}
+%
+It then uses that intermediate position to calculate the gradient instead of the
+previous position \(\theta_n\).
+\begin{definition}[Nesterov's Momentum]
+	\begin{subequations}
+	\begin{align}
+		\theta_{n+1} &= \theta_n + \eta \momentum_{n+1} \label{eq: nesterov momentum move}\\
+		\momentum_{n+1}
+		&= (1-\eta\friction)\momentum_n
+		- \eta\nabla L[\theta_n + \eta(1-\eta\friction)\momentum_n]
+		\label{eq: nesterov momentum}
+		\\ \nonumber
+		&= (1-\eta\friction)\momentum_n
+		- \eta\nabla L[\underbrace{
+			\theta_n + (1-\eta\friction)(\theta_n - \theta_{n-1})
+		}_{= y_{n+1}}]
+	\end{align}
+	\end{subequations}
+	%
+	Discarding the momentum term and solely using the intermediate position
+	results in the simplified version
+	%
+	\begin{subequations} \label{eq: nesterov intermediate position version}
+	\begin{align}
+		\theta_{n+1} &= y_{n+1} - \eta^2 \nabla L(y_{n+1})\\
+		y_{n+1}&= \theta_n + (1-\eta\friction)(\theta_n - \theta_{n-1})
+	\end{align}
+	\end{subequations}
+\end{definition}
+%
+\begin{remark}\fxwarning{too informal?}
+	This method is said to date back to \textcite{nesterovMethodSolvingConvex1983}.
+	But not only is the original text in Russian, it also seems to be impossible
+	to find on the internet. Fortunately, \citeauthor{nesterovMethodSolvingConvex1983}
+	wrote textbooks, \citetitle{nesterovLecturesConvexOptimization2018}
+	(\citeyear{nesterovLecturesConvexOptimization2018}) being the most recent.
+	Unfortunately, the chapter 2.2 on optimal methods provides barely any
+	intuition at all and it is advisable to consult other sources (e.g.
+	\textcite{dontlooWhatDifferenceMomentum2016}). If you
+	want to recognize this scheme in \textcite{nesterovLecturesConvexOptimization2018}
+	compare (\ref{eq: nesterov intermediate position version}) with Nesterov's
+	Constant Step Scheme III (2.2.22).
+ \end{remark}
 
 
 
 \section{Convergence Rate}
 
 \section{Theoretical Limits}
+
+\section{Adam \& Nadam}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
