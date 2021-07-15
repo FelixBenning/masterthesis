@@ -78,6 +78,38 @@
   primaryclass = {cs, math, stat}
 }
 
+@online{bachNonstronglyconvexSmoothStochastic2013,
+  title = {Non-Strongly-Convex Smooth Stochastic Approximation with Convergence Rate {{O}}(1/n)},
+  author = {Bach, Francis and Moulines, Eric},
+  date = {2013-06-10},
+  url = {http://arxiv.org/abs/1306.2119},
+  urldate = {2021-07-15},
+  abstract = {We consider the stochastic approximation problem where a convex function has to be minimized, given only the knowledge of unbiased estimates of its gradients at certain points, a framework which includes machine learning methods based on the minimization of the empirical risk. We focus on problems without strong convexity, for which all previously known algorithms achieve a convergence rate for function values of O(1/n\^\{1/2\}). We consider and analyze two algorithms that achieve a rate of O(1/n) for classical supervised learning problems. For least-squares regression, we show that averaged stochastic gradient descent with constant step-size achieves the desired rate. For logistic regression, this is achieved by a simple novel stochastic gradient algorithm that (a) constructs successive local quadratic approximations of the loss functions, while (b) preserving the same running time complexity as stochastic gradient descent. For these algorithms, we provide a non-asymptotic analysis of the generalization error (in expectation, and also in high probability for least-squares), and run extensive experiments on standard machine learning benchmarks showing that they often outperform existing approaches.},
+  archiveprefix = {arXiv},
+  eprint = {1306.2119},
+  eprinttype = {arxiv},
+  file = {C\:\\gdrive\\ZoteroPaper\\2013_Bach_Moulines\\Bach_Moulines_2013_Non-strongly-convex smooth stochastic approximation with convergence rate O(1-n).pdf;C\:\\Users\\felix\\Zotero\\storage\\CFCQP8CT\\1306.html},
+  keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Machine Learning},
+  primaryclass = {cs, math, stat}
+}
+
+@article{benkoNystromMethodsSingular2008,
+  title = {Nyström Methods and Singular Second-Order Differential Equations},
+  author = {Benko, David and Biles, Daniel C. and Robinson, Mark P. and Spraker, John S.},
+  date = {2008-10-01},
+  journaltitle = {Computers \& Mathematics with Applications},
+  shortjournal = {Computers \& Mathematics with Applications},
+  volume = {56},
+  pages = {1975--1980},
+  issn = {0898-1221},
+  doi = {10.1016/j.camwa.2008.04.023},
+  abstract = {Chawla, Jain and Subramanian studied the application of Nyström methods to a class of singular initial value problems. Following their approach, we generalize this class by applying the Nyström method to the initial value problem for an equation of the form y″+p(t)y′+q(t,y(t))=0,t∈(0,1] where p has a certain specified type of singularity and q is sufficiently differentiable, and then we determine the order of convergence.~This is followed by computational evidence.},
+  file = {C\:\\gdrive\\ZoteroPaper\\2008_Benko et al\\Benko et al_2008_Nyström methods and singular second-order differential equations.pdf;C\:\\Users\\felix\\Zotero\\storage\\BRE8SCJA\\S0898122108002757.html},
+  keywords = {Lane–Emden equation,Numerical approximation,Nyström method,Second-order differential equation,Singular differential equations},
+  langid = {english},
+  number = {8}
+}
+
 @online{bottouOptimizationMethodsLargeScale2018,
   title = {Optimization {{Methods}} for {{Large}}-{{Scale Machine Learning}}},
   author = {Bottou, Léon and Curtis, Frank E. and Nocedal, Jorge},
@@ -124,6 +156,22 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2007_Bray_Dean\\Bray_Dean_2007_The statistics of critical points of Gaussian fields on large-dimensional spaces.pdf;C\:\\Users\\felix\\Zotero\\storage\\RV2A6TST\\0611023.html},
   keywords = {Condensed Matter - Disordered Systems and Neural Networks,Condensed Matter - Statistical Mechanics},
   number = {15}
+}
+
+@online{bubeckConvexOptimizationAlgorithms2015,
+  title = {Convex {{Optimization}}: {{Algorithms}} and {{Complexity}}},
+  shorttitle = {Convex {{Optimization}}},
+  author = {Bubeck, Sébastien},
+  date = {2015-11-16},
+  url = {http://arxiv.org/abs/1405.4980},
+  urldate = {2021-07-12},
+  abstract = {This monograph presents the main complexity theorems in convex optimization and their corresponding algorithms. Starting from the fundamental theory of black-box optimization, the material progresses towards recent advances in structural optimization and stochastic optimization. Our presentation of black-box optimization, strongly influenced by Nesterov's seminal book and Nemirovski's lecture notes, includes the analysis of cutting plane methods, as well as (accelerated) gradient descent schemes. We also pay special attention to non-Euclidean settings (relevant algorithms include Frank-Wolfe, mirror descent, and dual averaging) and discuss their relevance in machine learning. We provide a gentle introduction to structural optimization with FISTA (to optimize a sum of a smooth and a simple non-smooth term), saddle-point mirror prox (Nemirovski's alternative to Nesterov's smoothing), and a concise description of interior point methods. In stochastic optimization we discuss stochastic gradient descent, mini-batches, random coordinate descent, and sublinear algorithms. We also briefly touch upon convex relaxation of combinatorial problems and the use of randomness to round solutions, as well as random walks based methods.},
+  archiveprefix = {arXiv},
+  eprint = {1405.4980},
+  eprinttype = {arxiv},
+  file = {C\:\\gdrive\\ZoteroPaper\\2015_Bubeck\\Bubeck_2015_Convex Optimization.pdf;C\:\\Users\\felix\\Zotero\\storage\\CLBZ7TQV\\1405.html},
+  keywords = {Computer Science - Computational Complexity,Computer Science - Machine Learning,Mathematics - Numerical Analysis,Mathematics - Optimization and Control,Statistics - Machine Learning},
+  primaryclass = {cs, math, stat}
 }
 
 @online{bubeckGeometricAlternativeNesterov2015,
@@ -368,6 +416,27 @@
   abstract = {Numerical optimization is at the core of much of machine learning. In this post, we derive the L-BFGS algorithm, commonly used in batch machine learning applications.},
   file = {C\:\\Users\\felix\\Zotero\\storage\\YPWGNHR8\\understanding-lbfgs.html},
   organization = {{aria42}}
+}
+
+@book{hairerSolvingOrdinaryDifferential1993,
+  title = {Solving {{Ordinary Differential Equations I}}: {{Nonstiff Problems}}},
+  shorttitle = {Solving {{Ordinary Differential Equations I}}},
+  author = {Hairer, Ernst},
+  date = {1993},
+  edition = {Second Revised Edition},
+  publisher = {{Springer Berlin Heidelberg}},
+  location = {{Berlin, Heidelberg}},
+  doi = {10.1007/978-3-540-78862-1},
+  abstract = {This book deals with methods for solving nonstiff ordinary differential equations. The first chapter describes the historical development of the classical theory from Newton, Leibniz, Euler, and Hamilton to limit cycles and strange attractors. In a second chapter a modern treatment of Runge-Kutta and extrapolation methods is given. Also included are continuous methods for dense output, parallel Runge-Kutta methods, special methods for Hamiltonian systems, second order differential equations and delay equations. The third chapter begins with the classical theory of multistep methods, and concludes with the theory of general linear methods. Many applications from physics, chemistry, biology, and astronomy together with computer programs and numerical comparisons are presented. The book will be immensely useful to graduate students and researchers in numerical analysis and scientific computing, and to scientists in the fields mentioned above. "This is the revised version of the first edition of Vol. I published in 1987. ….Vols. I and II (SSCM 14) of Solving Ordinary Differential Equations together are the standard text on numerical methods for ODEs. ..This book is well written and is together with Vol. II, the most comprehensive modern text on numerical integration methods for ODEs. It may serve a a text book for graduate courses, ..and also as a reference book for all those who have to solve ODE problems numerically." Zeitschrift für Angewandte Mathematik und Physik},
+  editora = {Wanner, Gerhard and Nørsett, Syvert P.},
+  editoratype = {collaborator},
+  file = {C\:\\gdrive\\ZoteroPaper\\1993_Hairer\\Hairer_1993_Solving Ordinary Differential Equations I.pdf},
+  isbn = {978-3-540-78862-1},
+  keywords = {Global analysis (Mathematics); Numerical analysis; Mathematics},
+  langid = {english},
+  number = {8},
+  pagetotal = {xv+528},
+  series = {Springer {{Series}} in {{Computational Mathematics}}}
 }
 
 @online{hardtTrainFasterGeneralize2016,
@@ -978,14 +1047,13 @@
   author = {Su, Weijie and Boyd, Stephen and Candes, Emmanuel J.},
   date = {2015-10-27},
   url = {http://arxiv.org/abs/1503.01243},
-  urldate = {2021-07-05},
-  abstract = {We derive a second-order ordinary differential equation (ODE) which is the limit of Nesterov’s accelerated gradient method. This ODE exhibits approximate equivalence to Nesterov’s scheme and thus can serve as a tool for analysis. We show that the continuous time ODE allows for a better understanding of Nesterov’s scheme. As a byproduct, we obtain a family of schemes with similar convergence rates. The ODE interpretation also suggests restarting Nesterov’s scheme leading to an algorithm, which can be rigorously proven to converge at a linear rate whenever the objective is strongly convex.},
+  urldate = {2021-07-12},
+  abstract = {We derive a second-order ordinary differential equation (ODE) which is the limit of Nesterov's accelerated gradient method. This ODE exhibits approximate equivalence to Nesterov's scheme and thus can serve as a tool for analysis. We show that the continuous time ODE allows for a better understanding of Nesterov's scheme. As a byproduct, we obtain a family of schemes with similar convergence rates. The ODE interpretation also suggests restarting Nesterov's scheme leading to an algorithm, which can be rigorously proven to converge at a linear rate whenever the objective is strongly convex.},
   archiveprefix = {arXiv},
   eprint = {1503.01243},
   eprinttype = {arxiv},
-  file = {C\:\\Users\\felix\\Zotero\\storage\\G9I2DZKB\\Su et al. - 2015 - A Differential Equation for Modeling Nesterov's Ac.pdf},
+  file = {C\:\\gdrive\\ZoteroPaper\\2015_Su et al\\Su et al_2015_A Differential Equation for Modeling Nesterov's Accelerated Gradient Method.pdf;C\:\\Users\\felix\\Zotero\\storage\\Y73GE2KR\\1503.html},
   keywords = {Mathematics - Classical Analysis and ODEs,Mathematics - Optimization and Control,Statistics - Machine Learning},
-  langid = {english},
   primaryclass = {math, stat}
 }
 
@@ -1053,6 +1121,23 @@
   file = {C\:\\Users\\felix\\Zotero\\storage\\8YKQI8GP\\Truong et al. - 2021 - A fast and simple modification of Newton's method .pdf;C\:\\Users\\felix\\Zotero\\storage\\8GQNPF9E\\2006.html},
   keywords = {Computer Science - Machine Learning,Mathematics - Dynamical Systems,Mathematics - Numerical Analysis,Mathematics - Optimization and Control,Statistics - Machine Learning},
   primaryclass = {cs, math, stat}
+}
+
+@inproceedings{tsybakovOptimalRatesAggregation2003,
+  title = {Optimal {{Rates}} of {{Aggregation}}},
+  booktitle = {Learning {{Theory}} and {{Kernel Machines}}},
+  author = {Tsybakov, Alexandre B.},
+  editor = {Schölkopf, Bernhard and Warmuth, Manfred K.},
+  date = {2003},
+  pages = {303--313},
+  publisher = {{Springer}},
+  location = {{Berlin, Heidelberg}},
+  doi = {10.1007/978-3-540-45167-9_23},
+  abstract = {We study the problem of aggregation of M arbitrary estimators of a regression function with respect to the mean squared risk. Three main types of aggregation are considered: model selection, convex and linear aggregation. We define the notion of optimal rate of aggregation in an abstract context and prove lower bounds valid for any method of aggregation. We then construct procedures that attain these bounds, thus establishing optimal rates of linear, convex and model selection type aggregation.},
+  file = {C\:\\gdrive\\ZoteroPaper\\2003_Tsybakov\\Tsybakov_2003_Optimal Rates of Aggregation.pdf},
+  isbn = {978-3-540-45167-9},
+  langid = {english},
+  series = {Lecture {{Notes}} in {{Computer Science}}}
 }
 
 @online{wilsonMarginalValueAdaptive2018,

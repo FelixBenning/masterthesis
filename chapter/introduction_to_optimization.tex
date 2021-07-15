@@ -1,0 +1,76 @@
+% !TEX root = ../Masterthesis.tex
+\newcommand{\dist}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+
+\chapter{Introduction to Optimization}
+
+
+Let \(f_\theta(X)\) be a (parametrized) prediction for \(Y\), where \(Z=(X,Y)\)
+is drawn from a distribution \(\dist\) of real world examples. The prediction
+error of our parameter \(\theta\) is a loss function \(l(\theta, X, Y)\), e.g. 
+%
+\begin{align*}
+	l(\theta, x, y) := (f_\theta(x) - y)^2.
+\end{align*}
+%
+And we \emph{want} to minimize the theoretical loss over all examples (risk)
+%
+\begin{align*}
+	L(\theta) := \E_{X,Y\sim \dist} [l(\theta, X, Y)].
+\end{align*}
+
+\section{Zero Order Optimization}
+
+Let us set aside the stochasticity of the problem for a moment and assume we
+could evaluate \(L\) at any point \(\theta\). In other words: we have a "zero
+order oracle" which can tell us \(L(\theta)\) for any \(\theta\) for a fixed
+computational cost.
+
+If we assume an infinite number of possible inputs \(\theta\), it does not matter
+how much and where we sample \(L\) there is always a different \(\theta\) where
+\(L\) might be arbitrarily lower. This notion is formalized in various "No-Free-Lunch
+Theorems". We must therefore start making assumptions about \(L\) to make this
+problem tractable.
+
+\subsection{Grid Search}
+
+
+While Lipschitz continuity 
+%
+\begin{align*}
+	| L(\theta_1) - L(\theta_2) | < K_0 | \theta_1 - \theta_2 |
+\end{align*}
+%
+is sufficient to find an \(\epsilon\)-solution \(\hat{\theta}\) inside a unit
+(hyper-)cube
+%
+\begin{align*}
+	L(\hat{\theta}) \le \inf_{\theta: 0\le\theta_i\le 1} L(\theta) + \epsilon
+\end{align*}
+%
+in finite time, it still requires a full \emph{grid search} with time complexity
+%
+\begin{align*}
+	\left(\left\lfloor \frac{K_0}{2\epsilon}\right\rfloor + 1\right)^n
+\end{align*}
+%
+where \(n\) is the dimension of \(\theta\). The fact that grid search is
+sufficient can be seen by tiling the space into a grid and asking the oracle
+for the value of the loss function at each center. If the minimum is placed in
+some tile, the Lipschitz continuity forces the center of the tile to be \(\epsilon\)
+close to it \parencite[cf.][p. 11]{nesterovLecturesConvexOptimization2018}.
+
+The fact that this is necessary can easily be seen by imagining a "resisting
+oracle" which places the minimum in just the last grid element where we look
+\parencite[cf.][p. 13]{nesterovLecturesConvexOptimization2018}. The exponential
+increase of complexity in the dimension makes the problem intractable for even
+mild dimensions and precisions (e.g. \(n=11\), \(\epsilon=0.01\), \(K_0=2\)
+implies millions of years of computation). So we have to make further
+assumptions. 
+
+\fxnote{simulated annealing? evolutionary algorithms?}{\subsection{Heuristics}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endinput
