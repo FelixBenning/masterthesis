@@ -4,7 +4,7 @@
 \newcommand{\diag}{\text{diag}}
 \newcommand{\rate}{\text{rate}}
 
-\chapter{Gradient Decent}
+\chapter{Gradient Decent (GD)}
 
 A step up from zero order methods (such as grid search) are first order methods
 using the first derivative (the gradient). This requires a "first order oracle"
@@ -35,7 +35,7 @@ at the ODE
 \end{align}
 %
 If you are familiar with Lyapunov functions you will not be surprised by the next
-few arguments:
+argument:
 %
 \begin{align*}
 	L(\theta(t_1)) - L(\theta(t_0))
@@ -46,9 +46,258 @@ few arguments:
 %
 immediately implies
 \begin{align*}
-	L(\theta(t_0)) \ge L(\theta(t_1)) \ge \dots \ge 0
+	L(\theta(t_0)) \ge L(\theta(t_1)) \ge \dots \ge \inf_\theta L(\theta) \ge 0
 \end{align*}
-which implies convergence. But not necessarily a convergent \(\theta(t)\).
+which implies convergence. But not necessarily a convergent \(\theta(t)\) and
+not necessarily convergence to \(\inf_\theta L(\theta)\).
+
+\section{Visualizing the 2nd Taylor Approximation}
+
+To build some intuition what leads to convergence of \(\theta(t)\) let us
+consider more simple cases. If we assume our Hesse matrix \(\nabla^2
+L(\theta)\) exists and is positive definite (all eigenvalues positive), then for
+the second order Taylor approximation
+%
+\begin{align*}
+	L(\theta+v) \approx T_2L(\theta+v)
+	= L(\theta) + v^T \nabla L(\theta) + \tfrac12 v^T \nabla^2 L(\theta) v
+\end{align*}
+%
+we can find the minimum 
+\begin{align*}
+	\hat{v} = -(\nabla^2 L(\theta))^{-1}\nabla L(\theta)
+\end{align*}
+by setting the first derivative to zero
+%
+\begin{align*}
+	\nabla T_2L(\theta+v) = \nabla L(\theta) + \nabla^2L(\theta) v \xeq{!} 0.
+\end{align*}
+%
+This minimum allows us not only to rewrite the taylor derivative
+%
+\begin{align*}
+	\nabla T_2L(\theta+v) = \nabla^2 L(\theta)(v-\hat{v}),
+\end{align*}
+%
+but also the original taylor approximation
+%
+\begin{align*}
+	T_2L(\theta+v)
+	&= L(\theta) - v^T \nabla^2 L(\theta) \hat{v} + \tfrac12 v^T \nabla^2 L(\theta) v \\
+	&= \underbrace{L(\theta) - \tfrac12 \hat{v} \nabla^2 L(\theta) \hat{v}}_{=: c(\theta) \text{ (const)}}
+	+ \tfrac12 (v-\hat{v})^T \nabla^2 L(\theta)(v-\hat{v}).
+\end{align*}
+%
+To get absolute instead of relative coordinates to \(\theta\) we set
+%
+\begin{align*}
+	\hat{\theta} := \theta + \hat{v} = \theta -(\nabla^2 L(\theta))^{-1}\nabla L(\theta),
+\end{align*}
+%
+and obtain the notion of a paraboloid centered around \(\hat{\theta}\)
+%
+\begin{align}\label{paraboloid approximation of L}
+	L(y) = \tfrac12 (y- \hat{\theta}) \nabla^2 L(\theta) (y-\hat{\theta}) + c(\theta) + o(\|y-\theta\|^2)
+\end{align}
+%
+\begin{wrapfigure}{O}{0.65\textwidth}
+	\centering
+	\def\svgwidth{0.65\textwidth}
+	\input{media/contour.pdf_tex}
+	\caption{Assuming \(\hat{\theta}=0\), \(\lambda_1=1, \lambda_2=2\), \(v_1=(\sin(1), \cos(1))\)}
+	\label{fig: 2d paraboloid}
+\end{wrapfigure}
+%
+To fully appreciate Figure~\ref{fig: 2d paraboloid}, we now only need to realize
+that the diagonizability of \(\nabla^2 L(\theta)\)
+%
+\begin{align}\label{eq: diagnalization of the Hesse matrix}
+	V \nabla^2 L(\theta) V^T
+	= \diag(\lambda_1,\dots,\lambda_d), \qquad V=(v_1,\dots, v_d)
+\end{align}
+%
+implies that once we have selected the center \(\hat{\theta}\) and the direction of
+one eigenspace in two dimensions, the other eigenspace has to be
+orthogonal to the first one which fully determines its direction at this point. 
+
+Before we move on I want to briefly mention that we only really needed the
+positive definiteness of \(\nabla^2 L(\theta)\) to make it invertible, so that
+\(\hat{v}\) is well defined. If it was not positive definite but still invertible,
+then \(\hat{v}\) would not be a minimum but all the other arguments would still
+hold.
+In that case the eigenvalues might be negative as well as positive, which would
+represent a saddle point, or all negative which would represent a maximum.
+So now we are only assuming that the second derivative exists and has no
+eigenvalues equal to zero.
+
+\section{From Eigenvalues to Convergence Rate}
+
+Using the representation (\ref{paraboloid approximation of L}) of \(L\) we
+can write the gradient at \(\theta\) as
+%
+\begin{align*}
+	\nabla L(\theta)
+	=  \nabla^2 L(\theta)(\theta-\hat{\theta})
+	\ (= -\nabla^2 L(\theta)\hat{v})
+\end{align*}
+%
+But note that \(\hat{\theta}\) depends on \(\theta\), so we need to index both
+by \(n\) to rewrite gradient decent
+%
+\begin{align*}
+	\theta_{n+1} &= \theta_n - \eta\nabla L(\theta_n)\\
+	&= \theta_n - \eta\nabla^2 L(\theta_n)(\theta_n - \hat{\theta}_n).
+\end{align*}
+%
+Subtracting \(\hat{\theta}_n\) from both sides we obtain the following
+transformation 
+%
+\begin{align*}
+	\theta_{n+1} - \hat{\theta}_n
+	&= (\identity - \eta\nabla^2 L(\theta_n) ) (\theta_n - \hat{\theta}_n).
+\end{align*}
+%
+Taking a closer look at this transformation matrix we can use (\ref{eq:
+diagnalization of the Hesse matrix}) to see
+%
+\begin{align*}
+	\identity - \eta\nabla^2 L(\theta_n)
+	&= V(\identity - \eta\cdot\diag(\lambda_1,\dots,\lambda_d) )V^T \\
+	&= V\cdot\diag(1-\eta\lambda_1, \dots,1-\eta\lambda_d)V^T.
+\end{align*}
+%
+Now if we assume like \textcite{gohWhyMomentumReally2017}, that the second
+taylor approximation is accurate and thus that \(\nabla^2 L(\theta)=H\) is a
+constant, then \(\hat{\theta}_n = \theta^*\) is the real minimum and we get
+%
+\begin{align}
+	\theta_n - \theta^*
+	= V\cdot\diag[(1-\eta\lambda_1)^n,\dots,(1-\eta\lambda_d)^n] V^T (\theta_0 - \theta^*)
+\end{align}
+%
+by induction. Decomposing the difference into the eigenspaces of \(H\) we can 
+see that each component scales exponentially on its own 
+%
+\begin{align*}
+	\langle \theta_n -\theta^*, v_i\rangle
+	= (1-\eta\lambda_i)^n \langle \theta_0 - \theta^*, v_i\rangle
+\end{align*}
+%
+This is beautifully illustrated with interactive graphs in
+\citetitle{gohWhyMomentumReally2017} by \citeauthor{gohWhyMomentumReally2017}.
+
+\subsection{Negative eigenvalues}
+
+Now if \(\lambda_i<0\), then \(1-h\lambda_i\) would be greater
+than one which would repel this component \(\langle \theta_0 - \theta^*,
+v_i\rangle\) away from \(\theta^*\). This is a good thing, since \(\theta^*\)
+is a maximum in this component. This means we will walk down local minima and
+saddle points no matter the learning rate assuming  this component  was not
+zero to begin with. In case of a maximum this would mean that we would start
+right on top of the maximum, in case of a saddle point it implies starting on
+the rim such that one can not roll down either side.
+
+But since we are ultimately interested in stochastic loss functions, the
+stochasticity would push us off these narrow equilibria so being right on
+top of them is of little concern. But being close to zero in such a component
+still means slow movement away, since we are multiplying by it. This is a
+common explanation for the observation of temporary plateaus in machine learning
+which "suddenly fall off" once the exponential factor ramps up and causes a
+sharp drop in the loss (Figure~\ref{fig: visualize saddlepoint gd}).
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_gd.pdf_tex}
+	\caption{Start=\(0.001v_1+4v_2\), \(\lambda_1=-1, \lambda_2=2\), learning rate\(=0.8\)}
+	\label{fig: visualize saddlepoint gd}
+\end{figure}
+
+\subsection{Assuming Convexity}
+
+Let us consider strictly positive eigenvalues now and assume that our
+eigenvalues are already sorted
+%
+\begin{align}
+	0 < \lambda_1 \le \dots \le \lambda_d.
+\end{align}
+%
+Then for positive learning rates all exponentiation bases are smaller than one
+%
+\begin{align*}
+	1-\eta\lambda_d \le \dots \le 1-\eta\lambda_1 \le 1.
+\end{align*}
+%
+But to ensure convergence we also need that all of them are larger than \(-1\).
+This leads us to the condition
+\begin{align}\label{eq: learning rate restriction (eigenvalue)}
+	0< \eta < 2/\lambda_d
+\end{align}
+%
+% As you might recall
+%  this is the exact same condition we have already seen (cf.
+% (\ref{learning rate
+% restrictions})) if you also recall Lemma \ref{lem: lipschitz and bounded
+% derivative}.
+% Since that lemma states that the Lipschitz constant \(K_1\) of the gradient was the
+% same as the operator norm of \(\nabla^2 L\) which happens to be the largest 
+% absolute eigenvalue \(\lambda_d\).
+%
+% Now in that situation we tried to make the gradient converge as quickly as
+% possible and found that \(\eta=1/\lambda_d\) would provide the best bounds.
+%
+% This selection of the learning rate greedily reduces the exponentiation factor
+% of the eigenspace corresponding to the largest eigenvalue to zero. Ensuring
+% that the component which contributes the most to the size of the gradient is
+% reduced to nothing immediately.
+%
+Selecting \(\eta = 1/\lambda_d\) reduces the exponentiation base ("rate") of the
+corresponding eigenspace to zero ensuring convergence in one step.
+But if we want to maximize the convergence rate of \(\theta_n\), this is not
+the best selection.
+
+We can reduce the rates of the other eigenspaces if we
+increase the learning rate further, getting them closer to zero. At this point
+we are of course overshooting zero with the largest learning rate, so we only
+continue with this until we get closer to \(-1\) with the largest eigenvalue
+than we are to \(1\) with the smallest:
+%
+\begin{align*}
+	\rate(\eta)=\max_{i} |1-\eta\lambda_i| = \max\{|1-\eta\lambda_1|, |1-\eta\lambda_d|\}.
+\end{align*}
+%
+This is minimized when
+%
+\begin{align*}
+	1-\eta\lambda_1 = \eta\lambda_d -1,
+\end{align*}
+%
+implying
+%
+\begin{align*}
+	\eta^* = \frac{2}{\lambda_1 + \lambda_d}.
+\end{align*}
+%
+If \(\lambda_1\) is much smaller than \(\lambda_d\), this leaves \(\eta\)
+at the upper end of the interval in (\ref{eq: learning rate restriction
+(eigenvalue)}). And the optimal convergence rate
+%
+\begin{align*}
+	\rate(\eta^*)
+	% &= 1-\eta^* \lambda_1
+	= 1 - \frac{2}{1+\kappa}
+	\qquad \kappa:=\lambda_d/\lambda_1 \ge 1
+\end{align*}
+%
+becomes close to one if the condition number \(\kappa\) is large.
+If all the eigenvalues are the same on the other hand, the condition number
+becomes one and the rate is zero, implying instant convergence. This is not
+surprising if we recall our visualization in Figure~\ref{fig: 2d paraboloid}.
+When the eigenvalues are the same, the contours are concentric circles and the
+gradient points right at the center.
+
+\fxnote{strong convexity and lipshitz continuity of gradient as lower and
+upper bound, sketch convergence proof using that instead of eigenvalues}
 
 \section{Convergence of the Gradient}
 
@@ -266,245 +515,6 @@ For a proper treatment of the local case see \textcite[Theorem
 function necessarily has to be convex, cf. https://youtu.be/6WeyTUnbwQQ?t=1020}
 
 
-\section{Visualizing the 2nd Taylor Approximation}
-If we assume our Hesse matrix \(\nabla^2 L(\theta)\) to be positive definite
-(all eigenvalues positive), then for a second order Taylor approximation
-%
-\begin{align*}
-	L(\theta+v) \approx T_2L(\theta+v)
-	= L(\theta) + v^T \nabla L(\theta) + \tfrac12 v^T \nabla^2 L(\theta) v
-\end{align*}
-%
-we can find the minimum 
-\begin{align*}
-	\hat{v} = -(\nabla^2 L(\theta))^{-1}\nabla L(\theta)
-\end{align*}
-by setting the first derivative to zero
-%
-\begin{align*}
-	\nabla T_2L(\theta+v) = \nabla L(\theta) + \nabla^2L(\theta) v \xeq{!} 0.
-\end{align*}
-%
-This minimum allows us not only to rewrite the taylor derivative
-%
-\begin{align*}
-	\nabla T_2L(\theta+v) = \nabla^2 L(\theta)(v-\hat{v}),
-\end{align*}
-%
-but also the original taylor approximation
-%
-\begin{align*}
-	T_2L(\theta+v)
-	&= L(\theta) - v^T \nabla^2 L(\theta) \hat{v} + \tfrac12 v^T \nabla^2 L(\theta) v \\
-	&= \underbrace{L(\theta) - \tfrac12 \hat{v} \nabla^2 L(\theta) \hat{v}}_{=: \alpha \text{ (const)}}
-	+ \tfrac12 (v-\hat{v})^T \nabla^2 L(\theta)(v-\hat{v}).
-\end{align*}
-%
-To get absolute instead of relative coordinates to \(\theta\) we set
-%
-\begin{align*}
-	\hat{\theta} := \theta + \hat{v} = \theta -(\nabla^2 L(\theta))^{-1}\nabla L(\theta),
-\end{align*}
-%
-and obtain the notion of a paraboloid centered around \(\hat{\theta}\)
-%
-\begin{align}\label{paraboloid approximation of L}
-	L(y) = \tfrac12 (y- \hat{\theta}) \nabla^2 L(\theta) (y-\hat{\theta}) + \alpha + o(\|y-\theta\|^2)
-\end{align}
-%
-To fully appreciate Figure~\ref{fig: 2d paraboloid}, we only need to realize
-that the diagonizability of \(\nabla^2 L(\theta)\)
-%
-\begin{align}\label{diagnalization of the Hesse matrix}
-	V \nabla^2 L(\theta) V^T
-	= \diag(\lambda_1,\dots,\lambda_d), \qquad V=(v_1,\dots, v_d)
-\end{align}
-%
-\begin{wrapfigure}{O}{0.65\textwidth}
-	\centering
-	\def\svgwidth{0.65\textwidth}
-	\input{media/contour.pdf_tex}
-	\caption{Assuming \(\hat{\theta}=0\), \(\lambda_1=1, \lambda_2=2\), \(v_1=(\sin(1), \cos(1))\)}
-	\label{fig: 2d paraboloid}
-\end{wrapfigure}
-%
-implies that once we have selected the center \(\hat{\theta}\) and the direction of
-one eigenspace in two dimensions, the other eigenspace has to be
-orthogonal to the first one which fully determines its direction at this point. 
-
-Before we move on I want to briefly mention that we only really needed the
-positive definiteness of \(\nabla^2 L(\theta)\) to make it invertible, so that
-\(\hat{v}\) is well defined. If it was not positive definite but still invertible,
-then \(\hat{v}\) would not be a minimum but all the other arguments would still
-hold.
-In that case the eigenvalues might be negative as well as positive, which would
-represent a saddle point, or all negative which would represent a maximum.
-
-\section{From Eigenvalues to Convergence Rate}
-
-Using the representation (\ref{paraboloid approximation of L}) of \(L\) we
-can write the gradient at \(\theta\) as
-%
-\begin{align*}
-	\nabla L(\theta)
-	=  \nabla^2 L(\theta)(\theta-\hat{\theta})
-	\ (= -\nabla^2 L(\theta)\hat{v})
-\end{align*}
-%
-But note that \(\hat{\theta}\) depends on \(\theta\), so we need index both
-by \(n\) to rewrite gradient decent
-%
-\begin{align*}
-	\theta_{n+1} &= \theta_n - \eta\nabla L(\theta_n)\\
-	&= \theta_n - \eta\nabla^2 L(\theta_n)(\theta_n - \hat{\theta}_n).
-\end{align*}
-%
-Subtracting \(\hat{\theta}_n\) from both sides we obtain the following
-transformation 
-%
-\begin{align*}
-	\theta_{n+1} - \hat{\theta}_n
-	&= (\identity - \eta\nabla^2 L(\theta_n) ) (\theta_n - \hat{\theta}_n).
-\end{align*}
-%
-Taking a closer look at this transformation matrix we can see
-%
-\begin{align*}
-	\identity - \eta\nabla^2 L(\theta_n)
-	&= V(\identity - \eta\cdot\diag(\lambda_1,\dots,\lambda_d) )V^T \\
-	&= V\cdot\diag(1-\eta\lambda_1, \dots,1-\eta\lambda_d)V^T.
-\end{align*}
-%
-Now if we assume like \textcite{gohWhyMomentumReally2017}, that the second
-taylor approximation is accurate and thus that \(\nabla^2 L(\theta)=H\) is a
-constant, then \(\hat{\theta}_n = \theta^*\) is the real minimum and we get
-%
-\begin{align}
-	\theta_n - \theta^*
-	= V\cdot\diag[(1-\eta\lambda_1)^n,\dots,(1-\eta\lambda_d)^n] V^T (\theta_0 - \theta^*)
-\end{align}
-%
-by induction. Decomposing the difference into the eigenspaces of \(H\) we can 
-see that each component scales exponentially on its own 
-%
-\begin{align*}
-	\langle \theta_n -\theta^*, v_i\rangle = (1-\eta\lambda_i)^n \langle \theta_0 - \theta^*, v_i\rangle
-\end{align*}
-%
-This is beautifully illustrated with interactive graphs in
-\citetitle{gohWhyMomentumReally2017} by \citeauthor{gohWhyMomentumReally2017}.
-
-\subsection{A Note on negative eigenvalues}
-
-Now if we have negative eigenvalues, then \(1-h\lambda_i\) would be greater
-than one which repels this component away from \(\theta^*\). This is a good
-thing, since \(\theta^*\) is a maximum in this component. This means we will
-walk down local minima and saddle points no matter the learning rate \emph{if}
-this component was not zero to begin with. In case of a maximum this would mean
-that we would start right on top of the maximum, in case of a saddle point
-it implies starting on the rim such that one can not roll down either side.
-
-But since we are ultimately interested in stochastic loss functions, the
-stochasticity would push us off these narrow equilibria so being right on
-top of them is of little concern. But being close to zero in such a component
-still means slow movement away, since we are multiplying by it. This is a
-common explanation for the observation of temporary plateaus in machine learning
-which "suddenly fall off" once the exponential factor ramps up and causes a
-sharp drop in the loss (Figure \ref{fig: visualize saddlepoint gd}).
-
-\begin{figure}[h]
-	\centering
-	\def\svgwidth{1\textwidth}
-	\input{media/visualize_gd.pdf_tex}
-	\caption{Start=\(0.001v_1+4v_2\), \(\lambda_1=-1, \lambda_2=2\), learning rate\(=0.8\)}
-	\label{fig: visualize saddlepoint gd}
-\end{figure}
-
-\subsection{Assuming Convexity}
-
-Let us consider strictly positive eigenvalues now and assume that our
-eigenvalues are already sorted
-%
-\begin{align}
-	0 < \lambda_1 \le \dots \le \lambda_d.
-\end{align}
-%
-Then for positive learning rates all exponentiation bases are smaller than one
-%
-\begin{align*}
-	1-\eta\lambda_d \le \dots \le 1-\eta\lambda_1 \le 1.
-\end{align*}
-%
-But to ensure convergence we also need that all of them are larger than \(-1\).
-This leads us to the condition
-\begin{align}\label{eq: learning rate restriction (eigenvalue)}
-	0< \eta < 2/\lambda_d
-\end{align}
-As you might recall
- this is the exact same condition we have already seen (cf.
-(\ref{learning rate
-restrictions})) if you also recall Lemma \ref{lem: lipschitz and bounded
-derivative}.
-Since that lemma states that the Lipschitz constant \(K_1\) of the gradient was the
-same as the operator norm of \(\nabla^2 L\) which happens to be the largest 
-absolute eigenvalue \(\lambda_d\).
-
-Now in that situation we tried to make the gradient converge as quickly as
-possible and found that \(\eta=1/\lambda_d\) would provide the best bounds.
-
-This selection of the learning rate greedily reduces the exponentiation factor
-of the eigenspace corresponding to the largest eigenvalue to zero. Ensuring
-that the component which contributes the most to the size of the gradient is
-reduced to nothing immediately.
-
-But if we want to maximize the convergence rate of \(\theta_n\), this is not
-the best selection.
-
-And we can reduce the exponentiation bases of the other eigenspaces if we
-increase the learning rate further, getting them closer to zero. At this point
-we are of course overshooting zero with the largest learning rate, so we only
-continue with this until we get closer to \(-1\) with the largest eigenvalue
-than we are to \(1\) with the smallest. The largest absolute exponentiation base
-is the convergence rate
-%
-\begin{align*}
-	\rate(\eta)=\max_{i} |1-\eta\lambda_i| = \max\{|1-\eta\lambda_1|, |1-\eta\lambda_d|\}.
-\end{align*}
-%
-Which is minimized when
-%
-\begin{align*}
-	1-\eta\lambda_1 = \eta\lambda_d -1,
-\end{align*}
-%
-implying
-%
-\begin{align*}
-	\eta^* = \frac{2}{\lambda_1 + \lambda_d}.
-\end{align*}
-%
-If \(\lambda_1\) is much smaller than \(\lambda_d\), this leaves \(\eta\)
-at the upper end of the interval in (\ref{eq: learning rate restriction
-(eigenvalue)}). And the convergence rate
-%
-\begin{align*}
-	\rate(\eta^*)
-	&= \frac{1-\eta^* \lambda_1}{2} + \frac{\eta^*\lambda_d -1}{2}
-	= \frac{\lambda_d - \lambda_1}{\lambda_d + \lambda_1}\\
-	&= \frac{\lambda_d/\lambda_1-1}{\lambda_d/\lambda_1+1}
-\end{align*}
-\fxnote{use different representation (only one kappa)}
-%
-becomes close to one if the condition number \(\kappa:=\lambda_d/\lambda_1\)
-is large.
-If all the eigenvalues are the same, the condition number becomes one and the
-rate is zero, implying instant convergence. This is not surprising if we recall
-our visualization in Figure \ref{fig: 2d paraboloid}. When the eigenvalues are
-the same, the contours are concentric circles and the gradient points right at
-the center.
-
-\fxnote{strong convexity and lipshitz continuity of gradient as lower and
-upper bound, sketch convergence proof using that instead of eigenvalues}
 
 \section{Heuristics}
 
