@@ -5,15 +5,54 @@
 
 \section{Convex Analysis}
 
-\begin{lemma}[\citeauthor{nesterovLecturesConvexOptimization2018}]\label{Lipschitz Gradient implies taylor inequality}
-	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(L\),
+\begin{lemma}\label{Appdx-lem: lipschitz and bounded derivative}
+	If \(f\) is differentiable, then the derivative \(\nabla f\) is
+	bounded (w.r.t. the operator norm) by constant \(K\) if and only if the function
+	\(f\) is Lipschitz continuous with Lipschitz constant \(K\).
+\end{lemma}
+\begin{proof}
+	Lipschitz continuity is implied by the mean value theorem
+	\begin{align*}
+		\|f(x_1) - f(x_0)\|
+		&\le \|\nabla f(x_0 + \xi(x_1-x_0))\| \|x_1- x_0\|\\
+		&\le K \|x_1-x_0\|.
+	\end{align*}
+	%
+	The opposite direction is implied by
+	%
+	\begin{align*}
+		\|\nabla f(x_0)\|
+		&\equiv \sup_{v} \frac{\|\nabla f(x_0)v\|}{\|v\|}
+		= \sup_{v} \lim_{v\to 0}\frac{\|\nabla f(x_0)v\|}{\|v\|}\\
+		&\lxle{\Delta}\sup_{v} \lim_{v\to 0}
+		(
+			\underbrace{
+				\tfrac{\|f(x_0 + v) - f(x_0) \|}{\|v\|}
+			}_{
+				\le K
+			}
+			+ \underbrace{
+				\tfrac{\|\nabla f(x_0)v + f(x_0) - f(x_0 +v)\|}{\|v\|}
+			}_{
+				\to 0 \text{ (derivative definition)}
+			}
+		)
+	\end{align*}
+	%
+	where we have used the scalability of the norm to multiply \(v\) with a
+	decreasing factor both in the numerator and denominator in order to introduce
+	the limit.
+\end{proof}
+
+\begin{lemma}[\citeauthor{nesterovLecturesConvexOptimization2018}]\label{Appdx-lem: Lipschitz Gradient implies taylor inequality}
+	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(K\),
 	then we have
 	\begin{align*}
-		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{L}2 \|y-x\|^2
+		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{K}2 \|y-x\|^2
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	See \textcite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}
+	From \textcite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}
 	\begin{align*}
 		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
 	\end{align*}
@@ -23,7 +62,7 @@
 		&\le \int_0^1 | \langle\nabla f(x+\tau(y-x))-\nabla f(x), y-x\rangle | d\tau \\
 		&\lxle{\text{C.S.}}
 		\int_0^1 \|\langle\nabla f(x+\tau(y-x))-\nabla f(x)\| \cdot \|y-x\| d\tau\\
-		&\le \int_0^1 \tau L \|y-x\|^2 d\tau \le \tfrac{L}2 \|y-x\|^2.
+		&\le \int_0^1 K \|\tau(y-x)\|\cdot\|y-x\| d\tau = \tfrac{K}2 \|y-x\|^2.
 		\qedhere
 	\end{align*}
 \end{proof}

@@ -1,8 +1,12 @@
 % !TEX root = ../Masterthesis.tex
 
 \newcommand{\identity}{\mathbb{I}}
+\newcommand{\lbound}{\mu_l}
+\newcommand{\ubound}{\mu_u}
 \newcommand{\diag}{\text{diag}}
 \newcommand{\rate}{\text{rate}}
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\firstOrderMethod}{\mathcal{M}}
 
 \chapter{Gradient Decent (GD)}
 
@@ -37,12 +41,12 @@ at the ODE
 If you are familiar with Lyapunov functions you will not be surprised by the next
 argument:
 %
-\begin{align*}
+\begin{align}\label{eq: gradient integral}
 	L(\theta(t_1)) - L(\theta(t_0))
 	&= \int_{t_0}^{t_1} \nabla L(\theta(s)) \cdot \dot{\theta}(s) ds
 	= \int_{t_0}^{t_1} -\|\nabla L(\theta(s))\|^2 ds
-	\le 0\\
-\end{align*}
+	\le 0
+\end{align}
 %
 immediately implies
 \begin{align*}
@@ -51,7 +55,7 @@ immediately implies
 which implies convergence. But not necessarily a convergent \(\theta(t)\) and
 not necessarily convergence to \(\inf_\theta L(\theta)\).
 
-\section{Visualizing the 2nd Taylor Approximation}
+\section{Visualizing the 2nd Taylor Approximation}\label{sec: visualize gd}
 
 To build some intuition what leads to convergence of \(\theta(t)\) let us
 consider more simple cases. If we assume our Hesse matrix \(\nabla^2
@@ -127,10 +131,6 @@ then \(\hat{v}\) would not be a minimum but all the other arguments would still
 hold.
 In that case the eigenvalues might be negative as well as positive, which would
 represent a saddle point, or all negative which would represent a maximum.
-So now we are only assuming that the second derivative exists and has no
-eigenvalues equal to zero.
-
-\section{From Eigenvalues to Convergence Rate}
 
 Using the representation (\ref{paraboloid approximation of L}) of \(L\) we
 can write the gradient at \(\theta\) as
@@ -234,23 +234,6 @@ This leads us to the condition
 	0< \eta < 2/\lambda_d
 \end{align}
 %
-% As you might recall
-%  this is the exact same condition we have already seen (cf.
-% (\ref{learning rate
-% restrictions})) if you also recall Lemma \ref{lem: lipschitz and bounded
-% derivative}.
-% Since that lemma states that the Lipschitz constant \(K_1\) of the gradient was the
-% same as the operator norm of \(\nabla^2 L\) which happens to be the largest 
-% absolute eigenvalue \(\lambda_d\).
-%
-% Now in that situation we tried to make the gradient converge as quickly as
-% possible and found that \(\eta=1/\lambda_d\) would provide the best bounds.
-%
-% This selection of the learning rate greedily reduces the exponentiation factor
-% of the eigenspace corresponding to the largest eigenvalue to zero. Ensuring
-% that the component which contributes the most to the size of the gradient is
-% reduced to nothing immediately.
-%
 Selecting \(\eta = 1/\lambda_d\) reduces the exponentiation base ("rate") of the
 corresponding eigenspace to zero ensuring convergence in one step.
 But if we want to maximize the convergence rate of \(\theta_n\), this is not
@@ -299,114 +282,183 @@ gradient points right at the center.
 \fxnote{strong convexity and lipshitz continuity of gradient as lower and
 upper bound, sketch convergence proof using that instead of eigenvalues}
 
-\section{Convergence of the Gradient}
+\section{Generalization}
 
-The first thing we might want to ensure, is that the gradient \(\nabla L(\theta(t))\)
-actually converges to zero. If we know that the gradient being larger \(\epsilon\)
-implies it being larger \(\epsilon/2\) in a \(\delta\) environment around any
-such occurrence, we can immediately see that the number of times the gradient
-sticks its head above \(\epsilon\) must be finite, as
-%
-\begin{align}\label{bounded gradient integral}
-	0 \le \liminf_{t\to\infty} L(\theta(t))
-	=  L(\theta(t_0)) - \int_{t_0}^\infty \|\nabla L(\theta(s))\|^2 ds.
-\end{align}
-%
-So uniform continuity is sufficient for convergence of \(\nabla L(\theta(t))\).
-But that still does not ensure that \(\theta(t)\) converges, only that its
-derivative \(\dot{\theta}(t) = -\nabla L(\theta(t))\) converges. The logarithm
-is an obvious example where this goes wrong.
+Let us try to get rid of the assumptions we made in \ref{sec: visualize gd}.
 
-Additionally we are currently talking about a theoretical ODE where the timestep
-is infinitesimal. So let us first return to a discretized gradient. Under the
-assumption that \(\nabla L\) is Lipschitz continuous
+\subsection{Lipschitz Gradient}
+
+The most egregious assumption was a constant second derivative. We used this
+constant second derivative to determine the (constant) condition number of
+the (constant) eigenvalues. Since we used only the smallest and largest
+eigenvalue, it is natural to guess that simply bounding the second derivative
+from above and below should be sufficient:
 %
 \begin{align*}
-	\| \nabla L(\theta) - \nabla L(\tilde{\theta})\| \le K_1 \|\theta-\tilde{\theta}\|
+	\lbound \identity \precsim \nabla^2 L(\theta) \precsim \ubound \identity.
 \end{align*}
 %
-we have for \(\theta_{n+1}=\theta_n-\eta\nabla L(\theta_n)\)
+Here \(A \precsim B\) should be read as \(0\precsim B-A\) which we define to mean
+\(B-A\) is positive definite. Using the orthonormal basis of eigenvectors of
+\(\nabla^2 L(\theta)\) to represent \(x\) in the definition of the operator norm
+%
+\begin{align*}
+	\|A\| := \sup_{\|x\| =1} \|Ax\|
+	\left(= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}\right)
+\end{align*}
+%
+it becomes immediately clear that the operator norm is equal to the largest
+absolute eigenvalue. This implies that for positive eigenvalues 
+%
+\begin{align*}
+	\nabla^2 L(\theta) \precsim \ubound\identity
+	\iff \|\nabla^2 L(\theta)\|\le \ubound,
+\end{align*}
+%
+and the following lemma allows us to get rid of the existence of the second
+derivative for the upper bound entirely
+%
+\begin{lemma}\label{lem: lipschitz and bounded derivative}
+	If \(f\) is differentiable, then the derivative \(\nabla f\) is
+	bounded (w.r.t. the operator norm) by constant \(K\) if and only if the function
+	\(f\) is Lipschitz continuous with Lipschitz constant \(K\).
+\end{lemma}
+\begin{proof}
+	See Appendix \ref{Appdx-lem: lipschitz and bounded derivative}.
+\end{proof}
+%
+\noindent
+Now we have to ask ourselves whether Lipschitz continuity of the derivative
+\(\nabla L\)
+%
+\begin{align*}
+	\| \nabla L(\theta) - \nabla L(\tilde{\theta})\|
+	\le \ubound \|\theta-\tilde{\theta}\|
+\end{align*}
+%
+is a reasonable assumption. There are two somewhat convincing reasons why there
+is probably not much more space for generalization.
+
+First, we are using our derivative to define an ODE (\ref{eq: velocity is
+gradient}) and it is very common to use Lipschitz continuity to argue for
+existence, uniqueness and stability of ODEs. While these properties might not
+be needed for effective optimization, working without them will likely be very
+cumbersome.
+
+Second, we need at least uniform continuity of \(\nabla L\) so that the inequality
+%
+\begin{align}\label{eq: bounded gradient integral}
+	\int_{t_0}^\infty \|\nabla L(\theta(s))\|^2 ds
+	&\le L(\theta(t_0)) - \liminf_{t\to\infty} L(\theta(t)) \\
+	&\le L(\theta(t_0)) - \inf_{\theta} L(\theta) < \infty \nonumber
+\end{align}
+%
+derived from (\ref{eq: gradient integral}) is sufficient for a convergent
+\(\|\nabla L(\theta(t))\|\). But that still does not ensure that \(\theta(t)\)
+converges, only that its derivative \(\dot{\theta}(t) = -\nabla L(\theta(t))\)
+converges. The logarithm is an obvious example where this goes wrong.
+
+Before we deal with that problem, let us make sure that we can get convergence
+of the discretized version of gradient decent \(\theta_{n+1}=\theta_n-\eta\nabla
+L(\theta_n)\) too. 
+%
+\begin{lemma}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+	\label{lem: Lipschitz Gradient implies taylor inequality}
+	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(K\),
+	then we have
+	\begin{align*}
+		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{K}2 \|y-x\|^2
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	See Appendix \ref{Appdx-lem: Lipschitz Gradient implies taylor inequality}.
+\end{proof}
+%
+\noindent
+Using the Lipschitz continuity of the gradient and Lemma~\ref{lem: Lipschitz
+Gradient implies taylor inequality} we get
 %
 \begin{align}
 	L(\theta_{n+1})
-	&\lxle{\ref{Lipschitz Gradient implies taylor inequality}} L(\theta_n) 
+	&\le L(\theta_n) 
 	+ \langle\nabla L(\theta_n),\theta_{n+1} - \theta_n\rangle
-	+ \tfrac{K_1}{2} \| \theta_{n+1} - \theta_n\|^2 
+	+ \tfrac{\ubound}{2} \| \theta_{n+1} - \theta_n\|^2 
 	\label{bound increment}\\
 	&= L(\theta_n)
 	+ \langle\nabla L(\theta_n), -\eta\nabla L(\theta_n)\rangle
-	+ \tfrac{K_1}{2}\eta^2\| \nabla L(\theta_n)\|^2
+	+ \tfrac{\ubound}{2}\eta^2\| \nabla L(\theta_n)\|^2
 	\nonumber\\
-	&=L(\theta_n) - \eta(1-\tfrac{\eta K_1}{2})\|\nabla L(\theta_n)\|^2
+	&=L(\theta_n) - \eta(1-\tfrac{\eta \ubound}{2})\|\nabla L(\theta_n)\|^2
 	\nonumber
 \end{align}
 %
-this means that for
+We can then parametrize all learning rates for which we can guarantee a positive
+decrease by
 \begin{align}\label{learning rate restrictions}
-	\eta=\tfrac{2\alpha}{K_1},
+	0<\eta=\tfrac{2\alpha}{\ubound}<\tfrac2\ubound \qquad \alpha \in (0,1).
 \end{align}
 %
-\(\alpha \in (0,1)\) parameterizes all the \(\eta\) for which we can guarantee
-a positive decrease
+This is the same bound we have encountered in the simplified case (\ref{eq:
+learning rate restriction (eigenvalue)}) which tells us that there are no more
+gains to be made. Plugging the parametrization back into the learning rate we
+get
 %
 \begin{align*}
 	L(\theta_{n+1}) - L(\theta_n)
-	\le - \tfrac{2}{K_1}\alpha (1-\alpha)\|\nabla L(\theta_n)\|^2
+	\le - \tfrac{2}{\ubound}\alpha (1-\alpha)\|\nabla L(\theta_n)\|^2.
 \end{align*}
 %
-with the optimal choice of \(\eta=\tfrac{1}{K_1}\) (\(\alpha=1/2\)) resulting
-in 
+The largest decrease is guaranteed by \(\eta=\tfrac{1}{\ubound}\) (\(\alpha=1/2\)).
+\begin{remark}
+	Recall that this sets the rate of the largest eigenvalue to zero eliminating
+	the error in that eigenspace immediately, but it is not the optimal
+	discretization for \(\theta\) to move towards a minimum in parameter space.
+	But here we do not care about the distance in parameter space but the
+	distance between the losses. And favouring the eigenspace with larger
+	eigenvalues is results in greater reductions in the loss.
+\end{remark}
+This results in
 %
 \begin{align*}
 	L(\theta_{n+1}) - L(\theta_n)
-	\le - \tfrac{1}{2K_1}\|\nabla L(\theta_n)\|^2.
+	\le - \tfrac{1}{2\ubound}\|\nabla L(\theta_n)\|^2.
 \end{align*}
 %
 Summing over these increments results in a very similar equation to
-(\ref{bounded gradient integral})
+(\ref{eq: bounded gradient integral})
 %
 \begin{align*}
-	\inf_{\theta} L(\theta) \le L(\theta_n) 
-	\le L(\theta_0) - \tfrac{1}{2K_1} \sum_{k=0}^{n-1}\|\nabla L(\theta_k)\|^2
+	\frac{1}{2\ubound} \sum_{k=0}^{n-1}\|\nabla L(\theta_k)\|^2
+	\le L(\theta_0) - L(\theta_n)
+	\le L(\theta_0) - \inf_{\theta} L(\theta)
 \end{align*}
 %
-Since \(\eta=\tfrac{1}{K_1}\) is the time increment between the \(\theta_k\)
+Since \(\tfrac{1}{\ubound}\) is the time increment \(\eta\) between the \(\theta_k\)
 we have only lost the factor \(1/2\) in our estimation (\ref{bound increment})
 compared to the precise integral version.
-
-In particular we get
+In particular we get a convergent average of squared gradients
 %
 \begin{align*}
-	\tfrac{n}{2K_1}
-	\underbrace{\tfrac{1}{n} \sum_{k=0}^n \|\nabla L(\theta_k)\|^2}_{
-		=: \overline{\|\nabla L(\theta_n)\|^2}
-	}
-	\le \tfrac{1}{2K_1}\sum_{k=0}^{n-1} \|\nabla L(\theta_k)\|^2 
-	\le L(\theta_0) - \inf_\theta L(\theta)
+	\frac{1}{n} \sum_{k=0}^n \|\nabla L(\theta_k)\|^2
+	\le \frac{2 \ubound}{n} (L(\theta_0) - \inf_\theta L(\theta)) \in O(1/n).
 \end{align*}
 %
-which implies that the average gradient square converges with \(n\) to zero
+\subsection{Without a Lower Bound for Eigenvalues}
 %
-\begin{align*}
-	\overline{\|\nabla L(\theta_n)\|^2}
-	\le \tfrac{1}{n}2 K_1 (L(\theta_0) - \inf_\theta L(\theta)) \in O(\tfrac{1}{n}).
-\end{align*}
-%
-It is important to note the "square" part of the gradient squares. If we had the
-series of unsquared gradient norms being finite as well, we would have
-\(\theta_n\) being a cauchy sequence
+It is important to note the "square" part. If the series of unsquared gradient
+norms were finite as well, the \(\theta_n\) would be a cauchy sequence
 %
 \begin{align*}
 	\|\theta_n - \theta_m \|
 	\le \sum_{k=m}^{n-1} \|\theta_{k+1} - \theta_k\|
-	\le \tfrac{1}{2K_1} \sum_{k=m}^{n-1} \|\nabla L(\theta_k)\|.
+	\le \eta \sum_{k=m}^{n-1} \|\nabla L(\theta_k)\|.
 \end{align*}
 %
 This provides us with some intuition how a situation might look like when the
 gradient converges but not the sequence of \(\theta_n\). The gradient would
 behave something like the harmonic series, as its squares converges and the
 \(\theta_n\) would behave like the partial sums of the harmonic series which
-behaves in the limit like the logarithm.
+behaves like the logarithm in the limit.
 
 It is difficult to formulate an example in finite space, but
 %
@@ -428,92 +480,44 @@ more and more. If we wanted such an example in a bounded space we would have
 to try and coil up such an infinite slope into a spiral, which spirals outwards
 to avoid convergence.
 
-\section{All Roads Lead to Convexity}
-
-Before we further tighten our restrictions on \(L\) to ensure convergence, let
-me point out the following lemma
+Since our example is one dimensional we can also immediately see the "eigenvalue"
 %
-\begin{lemma}\label{lem: lipschitz and bounded derivative}
-	If \(f\) is differentiable, then derivative \(\nabla f\) is
-	bounded (w.r.t. the operator norm) by constant \(K\) iff the function
-	\(f\) is Lipschitz continuous with Lipschitz constant \(K\).
-\end{lemma}
+\begin{align*}
+	\nabla^2 L(\theta(t)) = \exp(-\theta(t)) = 1/t
+\end{align*}
+%
+which decreases towards zero stalling the movement towards the minimum.
+
+\subsubsection{The Colorization Problem}
+
+\begin{assumption}\label{assmpt: parameter in linear hull of gradients}
+
+\end{assumption}
+
+\begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+	For any \(\theta_0\in\reals^d\), any \(k\) such that \(0\le k\le \tfrac12 (d-1)\),
+	there exists a convex, smooth function \(f\) with Lipschitz continuous
+	derivative such that for any first order method \(\firstOrderMethod\)
+	satisfying Assumption~\ref{assmpt: parameter in linear hull of gradients}
+	we have
+	\begin{subequations}
+	\begin{align}
+		f(\theta_k) - \inf_\theta f(\theta)
+		&\ge \frac{3\ubound \|\theta_0 - \theta^*\|^2}{32(k+1)^2} \\
+		\|\theta_k -\theta^*\|^2 
+		&\ge \frac18 \|\theta_0 - \theta^*\|^2
+	\end{align}
+	\end{subequations}
+	where \(\theta^* = \arg\min_\theta f(\theta)\).
+\end{theorem}
 \begin{proof}
-	Lipschitz continuity is implied by the mean value theorem
-	\begin{align*}
-		\|f(x_1) - f(x_0)\|
-		&\le \|\nabla f(x_0 + \xi(x_1-x_0))\| \|x_1- x_0\|\\
-		&\le K \|x_1-x_0\|.
-	\end{align*}
-	%
-	The opposite direction is implied by
-	%
-	\begin{align*}
-		\|\nabla f(x_0)\|
-		&\equiv \sup_{v} \frac{\|\nabla f(x_0)v\|}{\|v\|}
-		= \sup_{v} \lim_{v\to 0}\frac{\|\nabla f(x_0)v\|}{\|v\|}\\
-		&\lxle{\Delta}\sup_{v} \lim_{v\to 0}
-		(
-			\underbrace{
-				\tfrac{\|f(x_0 + v) - f(x_0) \|}{\|v\|}
-			}_{
-				\le K
-			}
-			+ \underbrace{
-				\tfrac{\|\nabla f(x_0)v + f(x_0) - f(x_0 +v)\|}{\|v\|}
-			}_{
-				\to 0 \text{ (derivative definition)}
-			}
-		)
-	\end{align*}
-	%
-	where we have used the scalability of the norm to multiply \(v\) with a
-	decreasing factor both in the numerator and denominator in order to introduce
-	the limit.
+	See \textcite[Theorem 2.1.7]{nesterovLecturesConvexOptimization2018}
 \end{proof}
 
-Lipschitz continuity of \(\nabla L\) is thus equivalent to boundedness of the
-Hesse matrix \(\nabla^2 L\). And since the Hesse matrix is symmetric and thus
-diagonizable with an orthonormal basis, the operator norm of it is equal to its
-largest absolute eigenvalue. The Lipschitz constant thus bounds the speed at
-which the gradient changes in the direction of an eigenvector corresponding to
-this largest absolute eigenvalue.
+\subsection{Strong Convexity}
 
-The slower the gradient changes, the further we can walk before we have to
-take another measurement. For this reason the optimal learning rate is
-inversely proportional to the Lipschitz constant.
-
-The Lipschitz constant \(K_1\) restricts how sharp the minima can be, 
-this ensures that we do not overshoot it and bounce around aimlessly with a 
-learning rate that is much too high. But as we have seen above, a very flat
-minima might decelerate gradient decent so much that our parameter \(\theta_n\)
-never converges.
-
-So it is a natural conclusion to bound the Hesse matrix from below as well.
-Now if there is a local minima somewhere, then it can not have negative
-eigenvalues in its Hessian. Those would imply a direction in which the gradient
-\emph{decreases} below zero and thus that the minima is in fact not a minima.
-So if we assume that the absolute eigenvalues are bounded from below, assume
-that \emph{a} local minima exists, and assume that the second derivative is
-continuous, then the positive eigenvalues around that local minima can
-never become negative due to the lower bound on the absolute eigenvalues and
-continuity. In other words: We are assuming strong, global convexity. Which of
-course is anything but a natural assumption.
-
-Alternatively one could make this assumption only about the local minimum and
-make continuity assumptions about the second derivative, then there is a local
-space around the minimum where this bound holds and we can get convergence
-statements conditioned on starting in this local space.
-
-Since neither option resembles real applications, we will focus on the intuition
-similarly to \textcite{gohWhyMomentumReally2017} instead of mathematical rigor.
-For a proper treatment of the local case see \textcite[Theorem
-1.2.4]{nesterovLecturesConvexOptimization2018} and for the global case see
-\textcite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}.
-
-\fxnote{Different angle: If we achieve a contraction towards our minimum, the
+\fxnote{If we achieve a contraction towards our minimum, the
 function necessarily has to be convex, cf. https://youtu.be/6WeyTUnbwQQ?t=1020}
-
 
 
 \section{Heuristics}
