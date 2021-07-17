@@ -30,9 +30,9 @@ discretization of an ordinary differential equation (ODE)
 	= - \nabla L(\theta_n).
 \end{align*}
 %
-Here \(\eta\) is the time delta between discretizations \(t_n\) and \(t_{n+1}\).
-This of course implies \(t_n = n\eta\). And for \(\eta\to\infty\), we arrive
-at the ODE
+Here the "learning rate" \(\eta\) is the time delta between discretizations
+\(t_n\) and \(t_{n+1}\). This of course implies \(t_n = n\eta\). And for
+\(\eta\to\infty\), we arrive at the ODE
 %
 \begin{align}\label{eq: velocity is gradient}
 	\dot{\theta}(t) = -\nabla L(\theta(t)).
@@ -88,7 +88,7 @@ but also the original taylor approximation
 \begin{align*}
 	T_2L(\theta+v)
 	&= L(\theta) - v^T \nabla^2 L(\theta) \hat{v} + \tfrac12 v^T \nabla^2 L(\theta) v \\
-	&= \underbrace{L(\theta) - \tfrac12 \hat{v} \nabla^2 L(\theta) \hat{v}}_{=: c(\theta) \text{ (const)}}
+	&= \underbrace{L(\theta) - \tfrac12 \hat{v} \nabla^2 L(\theta) \hat{v}}_{=: c(\theta) \text{ (const.)}}
 	+ \tfrac12 (v-\hat{v})^T \nabla^2 L(\theta)(v-\hat{v}).
 \end{align*}
 %
@@ -282,12 +282,9 @@ gradient points right at the center.
 \fxnote{strong convexity and lipshitz continuity of gradient as lower and
 upper bound, sketch convergence proof using that instead of eigenvalues}
 
-\section{Generalization}
+\section{Lipschitz Gradient}
 
 Let us try to get rid of the assumptions we made in \ref{sec: visualize gd}.
-
-\subsection{Lipschitz Gradient}
-
 The most egregious assumption was a constant second derivative. We used this
 constant second derivative to determine the (constant) condition number of
 the (constant) eigenvalues. Since we used only the smallest and largest
@@ -424,6 +421,8 @@ This results in
 	\le - \tfrac{1}{2\ubound}\|\nabla L(\theta_n)\|^2.
 \end{align*}
 %
+\subsubsection{Dead End: Convergence of the Gradient}
+
 Summing over these increments results in a very similar equation to
 (\ref{eq: bounded gradient integral})
 %
@@ -442,8 +441,6 @@ In particular we get a convergent average of squared gradients
 	\frac{1}{n} \sum_{k=0}^n \|\nabla L(\theta_k)\|^2
 	\le \frac{2 \ubound}{n} (L(\theta_0) - \inf_\theta L(\theta)) \in O(1/n).
 \end{align*}
-%
-\subsection{Without a Lower Bound for Eigenvalues}
 %
 It is important to note the "square" part. If the series of unsquared gradient
 norms were finite as well, the \(\theta_n\) would be a cauchy sequence
@@ -486,9 +483,40 @@ Since our example is one dimensional we can also immediately see the "eigenvalue
 	\nabla^2 L(\theta(t)) = \exp(-\theta(t)) = 1/t
 \end{align*}
 %
-which decreases towards zero stalling the movement towards the minimum.
+which decreases towards zero, stalling the movement towards the minimum.
 
-\subsubsection{The Colorization Problem}
+\section{Convexity/Convergence of the Loss}
+
+While we do need lower bounds on the second derivative to achieve convergence
+of \(\theta(t)\) as motivated in the previous section we can get convergence
+of the loss
+
+\begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+	Let \(L\) be convex, differentiable with Lipschitz gradient, then Gradient
+	Decent with learning rate \(0 < \eta < 2/\ubound\) results in
+	\begin{align*}
+		L(\theta_n) - \inf_\theta L(\theta)
+		\le \frac{2\ubound\|\theta_0 - \theta^*\|}{4 + n\ubound\eta(2-\ubound\eta)}
+		\in O(1/n)
+	\end{align*}
+	with the optimal rate of convergence being achieved for \(\eta=1/\ubound\).
+\end{theorem}
+\begin{proof}
+	See \textcite[Theorem 2.1.14, Corollary
+	2.1.2]{nesterovLecturesConvexOptimization2018}
+ \end{proof}
+
+It turns out that we can even get convergence of the loss if we only assume
+Lipschitz continuity of \(L\) itself. But this form of "Subgradient Decent"
+requires a bounded, convex parameter set we project back into if we leave and
+a decreasing learning rate. And since we can not guarantee a monotonic decrease
+with subgradients, the name "decent" is generally avoided and we have to keep
+a running minimum. See \textcite[Section 3.2.3]{nesterovLecturesConvexOptimization2018}
+or \textcite[Section 3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
+treatment. The convergence rate is not only dependent on the size of the
+parameter set but it also decreases to \(O(1/\sqrt{n})\).
+
+\subsection{Complexity Bound: The Colorization Problem}
 
 \begin{assumption}\label{assmpt: parameter in linear hull of gradients}
 
@@ -514,7 +542,7 @@ which decreases towards zero stalling the movement towards the minimum.
 	See \textcite[Theorem 2.1.7]{nesterovLecturesConvexOptimization2018}
 \end{proof}
 
-\subsection{Strong Convexity}
+\section{Strong Convexity}
 
 \fxnote{If we achieve a contraction towards our minimum, the
 function necessarily has to be convex, cf. https://youtu.be/6WeyTUnbwQQ?t=1020}
