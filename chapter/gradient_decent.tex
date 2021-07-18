@@ -7,6 +7,8 @@
 \newcommand{\rate}{\text{rate}}
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\firstOrderMethod}{\mathcal{M}}
+\newcommand{\linSpan}{\text{span}}
+\newcommand{\dimension}{d}
 
 \chapter{Gradient Decent (GD)}
 
@@ -581,7 +583,7 @@ Since our example is one dimensional we can also immediately see the "eigenvalue
 %
 which decreases towards zero, stalling the movement towards the minimum.
 
-\section{Convexity/Convergence of the Loss}
+\section{Convex Convergence Theorems}
 
 While we do need lower bounds on the second derivative to achieve convergence
 of \(\theta(t)\) as motivated in the previous section we can get convergence
@@ -618,9 +620,82 @@ parameter set \(B\) but it also decreases to \(O(B/\sqrt{n})\).
 
 \subsection{Complexity Bound: The Colorization Problem}
 
-\begin{assumption}\label{assmpt: parameter in linear hull of gradients}
+Now that we found convergence rates for gradient decent on convex problems, can
+we find a lower bound for the complexity of the problem? I.e. how fast could
+an algorithm we could possibly think of be? To tackle this problem let us first
+make an assumption about what this algorithm can do.
 
+Unrolling our gradient decent algorithm
+%
+\begin{align*}
+	\theta_n = \theta_0 - \eta\sum_{k=0}^{n-1} \nabla L(\theta_k)
+\end{align*}
+%
+we can see that even if we allowed custom learning rates for every iteration
+%
+\begin{align*}
+	\theta_n = \theta_0 - \sum_{k=0}^{n-1} \eta_k \nabla L(\theta_k)
+\end{align*}
+%
+we would still end up in the linear span of all gradients, shifted by \(\theta_0\).
+An obvious assumption for a class of optimization methods would thus be
+%
+\begin{assumption}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+	\label{assmpt: parameter in linear hull of gradients}
+	The \(n\)-th iterate of the optimization method is contained in the span of all
+	previous gradients shifted by the initial starting point
+	\begin{align*}
+		\theta_n \in \linSpan\{\nabla L(\theta_k) : 0\le k \le n-1\} + \theta_0
+	\end{align*}
 \end{assumption}
+
+Now the question becomes: How can we utilize this assumption to construct a
+function which is difficult to optimize?
+
+\textcite{gohWhyMomentumReally2017} provides an intuitive interpretation for a loss
+function taken from \textcite[Section 2.1.2]{nesterovLecturesConvexOptimization2018}
+which I will try to reproduce here.
+
+Consider an empty elongated swimming pool with a running tap on one side. Then
+the second meter of the swimming pool will only start to get wet once the first
+meter of it contains water. Similarly the \(n\)-th meter will only get wet
+once the \((n-1)\)-th meter contains water. If the flow rate would only depend
+on the current water level difference, one could thus express a simplified
+water level recursion as follows\footnote{In the limit this would become the
+well known differential equation for heat.}: 
+%
+\begin{align*}
+	\theta_{n+1}^{(i)}
+	&= \theta_{n}^{(i)}
+	+ \eta 
+	\begin{cases}
+		[\theta_{n}^{(i-1)} - \theta_{n}^{(i)}] + [\theta_{n}^{(i+1)} - \theta_{n}^{(i)}]
+		&  1 < i < \dimension \\
+		[1 - \theta_{n}^{(1)}] + [\theta_{n}^{(2)} - \theta_{n}^{(1)}]
+		& i = 1 \\
+		[\theta_{n}^{(i-1)} - \theta_{n}^{(i)}]
+		& i = \dimension
+	\end{cases}
+\end{align*}
+%
+For the \fxnote{appendix?}{(convex)} loss function
+%
+\begin{align*}
+	L(\theta) = \frac12 (\theta^{(1)}-1)^2  + \frac12 \sum_{k=1}^{\dimension-1} (\theta^{(k)}-\theta^{(k+1)})^2
+\end{align*}
+%
+this is just the gradient decent recursion. Now here is the crucial insight:
+
+Since any weight (parameter component) is only affected once its neighbors are
+affected, the second weight can not be affected before the second step since
+the first weight is only filled in the first step. And since the second weight
+will be unaffected until the second step, the third weight will be unaffected
+until the third step, etc.
+
+Therefore the \(\dimension - n\) last components will still be zero in
+step \(n\), because the linear span of all the gradients so far is still
+contained in the subspace \(\reals^n\) of \(\reals^\dimension\). Formalizing
+this argument results in the following theorem.
 
 \begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
 	For any \(\theta_0\in\reals^d\), any \(k\) such that \(0\le k\le \tfrac12 (d-1)\),
@@ -641,6 +716,15 @@ parameter set \(B\) but it also decreases to \(O(B/\sqrt{n})\).
 \begin{proof}
 	See \textcite[Theorem 2.1.7]{nesterovLecturesConvexOptimization2018}
 \end{proof}
+
+\begin{remark}
+	This type of loss function is not unlikely to be encountered in real
+	problems. E.g. in reinforcement learning with sparse rewards the estimation
+	of the value function over states requires the back-propagation of this
+	reward through the states that lead up to it. "Eligibility traces"
+	\parencite[Chapter 12]{suttonReinforcementLearningIntroduction2018}
+	are an attempt to speed this process up.
+	\end{remark}
 
 \section{Strong Convexity}\label{sec: Strong Convexity}
 
