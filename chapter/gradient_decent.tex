@@ -152,10 +152,10 @@ by \(n\) to rewrite gradient decent
 Subtracting \(\hat{\theta}_n\) from both sides we obtain the following
 transformation 
 %
-\begin{align*}
+\begin{align}\label{eq: Matrix GD Formulation}
 	\theta_{n+1} - \hat{\theta}_n
 	&= (\identity - \eta\nabla^2 L(\theta_n) ) (\theta_n - \hat{\theta}_n).
-\end{align*}
+\end{align}
 %
 Taking a closer look at this transformation matrix we can use (\ref{eq:
 diagnalization of the Hesse matrix}) to see
@@ -186,7 +186,7 @@ see that each component scales exponentially on its own
 This is beautifully illustrated with interactive graphs in
 \citetitle{gohWhyMomentumReally2017} by \citeauthor{gohWhyMomentumReally2017}.
 
-\subsection{Negative eigenvalues}
+\subsection{Negative Eigenvalues}\label{subsec: Negative Eigenvalues}
 
 Now if \(\lambda_i<0\), then \(1-h\lambda_i\) would be greater
 than one which would repel this component \(\langle \theta_0 - \theta^*,
@@ -282,7 +282,7 @@ gradient points right at the center.
 \fxnote{strong convexity and lipshitz continuity of gradient as lower and
 upper bound, sketch convergence proof using that instead of eigenvalues}
 
-\section{Lipschitz Gradient}
+\section{Generalizing Assumptions}
 
 Let us try to get rid of the assumptions we made in \ref{sec: visualize gd}.
 The most egregious assumption was a constant second derivative. We used this
@@ -296,7 +296,98 @@ from above and below should be sufficient:
 \end{align*}
 %
 Here \(A \precsim B\) should be read as \(0\precsim B-A\) which we define to mean
-\(B-A\) is positive definite. Using the orthonormal basis of eigenvectors of
+\(B-A\) is positive definite.
+
+\subsection{Convexity}
+
+Assuming positive eigenvalues is assuming convexity, and there is not really a
+way around that. As we have seen in Subsection~\ref{subsec: Negative
+Eigenvalues}, negative eigenvalues act as a repelling force, preventing the
+transformation (\ref{eq: Matrix GD Formulation}) from being a contraction.
+
+For this reason authors generally assume either global convexity, or local
+convexity together with the assumption that the starting point is in this
+locally convex area. This is a reasonable assumption since the negative
+eigenvalues mentioned above will force us out of regions where this is not
+the case. And if we assume that our loss function \(L\) goes to infinity when
+our parameters go to infinity, together with the fact that we are descending
+down the loss, then we immediately get a bounded (compact) area 
+%
+\begin{align*}
+	\{\theta : L(\theta) \le L(\theta_0)\} = L^{-1}([0, L(\theta_0)])
+\end{align*}
+%
+in which we will stay. We can use that boundedness to argue that we will
+eventually end up in a convex region if we are pushed out of the non-convex
+regions.
+
+That such a convex region exists follows from the existence of a minimum of
+\(L\) in that compact region which necessitates non-negative
+eigenvalues. And continuity of the second derivative allows us to extend that to 
+a local ball around the minimum. Eigenvalues equal to zero
+are a bit of an issue, but if they become negative in some epsilon ball
+then moving in that direction would lead us further down. Which is a contradiction
+to our assumption that we created a ball around the minimum of \(L\).
+
+The statement that we are being pushed out of the non-convex regions is a bit
+dubious as we could start right on top of local maxima or rims of saddle points.
+But as we are ultimately interested in stochastic gradient decent, these zero
+measure areas are of little concern. But as we already found out in
+Subsection~\ref{subsec: Negative Eigenvalues}, starting close to such a feature
+increases the amount of time it takes for us to escape that area which means
+we can not really provide an upper bound on the time it takes to end up in
+a locally convex area.
+
+So the best we can do without actually getting into probability theory is to
+hand-wave this starting phase away with the unlikelihood of it taking too long
+due to the exponential repulsion from negative eigenvalues.
+
+In the following we are therefore going to assume convexity. A formulation which
+does not require the second derivative is
+%
+\begin{definition}[Convexity]
+	A function \(f\) is called \emph{convex}, if for all \(x,y\), \(\lambda\in[0,1]\)
+	\begin{align*}
+		f(x + \lambda(y-x)) \le f(x) + \lambda (f(y)-f(x)).
+	\end{align*}
+	If \(f\) is differentiable this is equivalent to the tangent being below
+	the function itself
+	\begin{align*}
+		f(x) + \langle\nabla f(x), y-x\rangle \le f(y).
+	\end{align*}
+	If \(f\) is twice differentiable then this is equivalent to
+	\begin{align*}
+		0\precsim\nabla^2 f.
+	\end{align*}
+ \end{definition}
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_convexity.pdf_tex}
+	\caption{Visualize Convexity Definitions}
+	\label{fig: visualize convexity definition}
+\end{figure}
+%
+\begin{proof}
+	For the equivalence of these convexity definitions see \textcite[Theorem
+	2.1.2, 2.1.4]{nesterovLecturesConvexOptimization2018}\fxnote{appendix?}
+ \end{proof}
+%
+\begin{remark}
+	Now if you recall how the rate of convergence was related to the condition number
+	\(\lambda_d/\lambda_1 =\kappa\), then you will not be surprised to see us 
+	struggle to get a convergence rate with only non-negative eigenvalues in 
+	the remaining section. Because eigenvalues close or equal to zero will blow up this
+	condition number. We will therefore strengthen these assumptions in
+	Section~\ref{sec: Strong Convexity} but we can actually make a few assertions
+	with convexity only.
+\end{remark}
+
+\subsection{Lipschitz Gradient}
+
+We still need a replacement for the upper bound of our second derivative.
+Using the orthonormal basis of eigenvectors of
 \(\nabla^2 L(\theta)\) to represent \(x\) in the definition of the operator norm
 %
 \begin{align*}
@@ -307,34 +398,39 @@ Here \(A \precsim B\) should be read as \(0\precsim B-A\) which we define to mea
 it becomes immediately clear that the operator norm is equal to the largest
 absolute eigenvalue. This implies that for positive eigenvalues 
 %
-\begin{align*}
+\begin{align}
+	\label{eq: operator norm upper bound relation}
 	\nabla^2 L(\theta) \precsim \ubound\identity
 	\iff \|\nabla^2 L(\theta)\|\le \ubound,
-\end{align*}
+\end{align}
 %
 and the following lemma allows us to get rid of the existence of the second
 derivative for the upper bound entirely
 %
 \begin{lemma}\label{lem: lipschitz and bounded derivative}
 	If \(f\) is differentiable, then the derivative \(\nabla f\) is
-	bounded (w.r.t. the operator norm) by constant \(K\) if and only if the function
-	\(f\) is Lipschitz continuous with Lipschitz constant \(K\).
+	bounded (w.r.t. the operator norm) by constant \(K\)
+	\begin{align*}
+		\|\nabla f\| \le K
+	\end{align*}	
+	if and only if the function
+	\(f\) is Lipschitz continuous (Lip. constant \(K\))
+	\begin{align*}
+		\|f(x) - f(y)\| \le K \|x-y\|.
+	\end{align*}
 \end{lemma}
 \begin{proof}
 	See Appendix \ref{Appdx-lem: lipschitz and bounded derivative}.
 \end{proof}
 %
 \noindent
-Now we have to ask ourselves whether Lipschitz continuity of the derivative
-\(\nabla L\)
-%
-\begin{align*}
-	\| \nabla L(\theta) - \nabla L(\tilde{\theta})\|
-	\le \ubound \|\theta-\tilde{\theta}\|
-\end{align*}
-%
-is a reasonable assumption. There are two somewhat convincing reasons why there
-is probably not much more space for generalization.
+So instead of the upper bound on the second derivative we can use Lipschitz
+continuity of the derivative and convexity to formulate the upper and lower
+bound without actually using the derivative.
+
+Now we have to ask ourselves whether this  is a reasonable assumption. There
+are two somewhat convincing reasons why there is probably not much more space
+for generalization.
 
 First, we are using our derivative to define an ODE (\ref{eq: velocity is
 gradient}) and it is very common to use Lipschitz continuity to argue for
@@ -351,13 +447,13 @@ Second, we need at least uniform continuity of \(\nabla L\) so that the inequali
 \end{align}
 %
 derived from (\ref{eq: gradient integral}) is sufficient for a convergent
-\(\|\nabla L(\theta(t))\|\). But that still does not ensure that \(\theta(t)\)
+\(\|\nabla L(\theta(t))\|\). That still does not ensure that \(\theta(t)\)
 converges, only that its derivative \(\dot{\theta}(t) = -\nabla L(\theta(t))\)
-converges. The logarithm is an obvious example where this goes wrong.
-
-Before we deal with that problem, let us make sure that we can get convergence
-of the discretized version of gradient decent \(\theta_{n+1}=\theta_n-\eta\nabla
-L(\theta_n)\) too. 
+converges. The logarithm is an obvious example where this goes wrong. But
+while it is not sufficient, the difference between \(\theta_{n+1}\) and
+\(\theta_n\) is proportional to the gradient. Convergence of the gradient is
+therefore necessary.
+So let us see if we can get convergence of the discrete gradients as well.
 %
 \begin{lemma}[\citeauthor{nesterovLecturesConvexOptimization2018}]
 	\label{lem: Lipschitz Gradient implies taylor inequality}
@@ -504,9 +600,12 @@ of the loss
 \begin{proof}
 	See \textcite[Theorem 2.1.14, Corollary
 	2.1.2]{nesterovLecturesConvexOptimization2018}
- \end{proof}
+\end{proof}
 
-It turns out that we can even get convergence of the loss if we only assume
+\fxnote{More extensive treatment?}{
+And if we can not have convergence of the parameters \(\theta\) we might not
+care as much about the convergence of the gradient either. In that case it
+turns out that we can even get convergence of the loss if we only assume
 Lipschitz continuity of \(L\) itself. But this form of "Subgradient Decent"
 requires a bounded, convex parameter set we project back into if we leave and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
@@ -514,7 +613,8 @@ with subgradients, the name "decent" is generally avoided and we have to keep
 a running minimum. See \textcite[Section 3.2.3]{nesterovLecturesConvexOptimization2018}
 or \textcite[Section 3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
 treatment. The convergence rate is not only dependent on the size of the
-parameter set but it also decreases to \(O(1/\sqrt{n})\).
+parameter set \(B\) but it also decreases to \(O(B/\sqrt{n})\).
+}
 
 \subsection{Complexity Bound: The Colorization Problem}
 
@@ -542,7 +642,7 @@ parameter set but it also decreases to \(O(1/\sqrt{n})\).
 	See \textcite[Theorem 2.1.7]{nesterovLecturesConvexOptimization2018}
 \end{proof}
 
-\section{Strong Convexity}
+\section{Strong Convexity}\label{sec: Strong Convexity}
 
 \fxnote{If we achieve a contraction towards our minimum, the
 function necessarily has to be convex, cf. https://youtu.be/6WeyTUnbwQQ?t=1020}

@@ -207,7 +207,7 @@ begin
 		title="Loss", 
 		xlabel="Iteration",
 		xlim=(0, max_steps+1),
-		ylim=(minimum(gd_loss)-0.2, maximum(gd_loss)+0.2)
+		# ylim=(minimum(gd_loss)-0.2, maximum(gd_loss)+0.2)
 	)
 	mom_loss = mapslices(f, momentum_steps; dims=(1))'
 	plot!(
@@ -218,7 +218,7 @@ begin
 		title="Loss", 
 		xlabel="Iteration",
 		xlim=(0, max_steps+1),
-		ylim=(minimum(mom_loss)-0.2, maximum(mom_loss)+0.2)
+		# ylim=(minimum(mom_loss)-0.2, maximum(mom_loss)+0.2)
 	)
 	gd_viz = plot(
 		losssurface, lossplot, 
@@ -235,10 +235,10 @@ md"# Appendix"
 
 # ╔═╡ Cell order:
 # ╟─f709e1de-aaac-4eb0-a2e0-a2bfa6ae6370
-# ╠═e771e800-f72c-46db-b80d-598c309f9743
+# ╟─e771e800-f72c-46db-b80d-598c309f9743
 # ╟─9e5a1fdd-30de-436e-9090-6142494617b8
 # ╟─6ed6aa03-88e1-4e8a-9bfc-60e3d22058e5
-# ╠═c3e4e730-d97d-11eb-0340-1d1e2fd0167a
+# ╟─c3e4e730-d97d-11eb-0340-1d1e2fd0167a
 # ╟─dc609f58-f607-4772-bdb0-f2db25475e18
 # ╠═3d9d041e-5d53-410f-a1ce-e63b264ea924
 # ╟─491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
