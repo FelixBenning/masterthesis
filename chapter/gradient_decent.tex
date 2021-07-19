@@ -9,180 +9,183 @@
 \newcommand{\firstOrderMethod}{\mathcal{M}}
 \newcommand{\linSpan}{\text{span}}
 \newcommand{\dimension}{d}
+\newcommand{\loss}{L}
+\newcommand{\weights}{\theta}
+\newcommand{\lr}{h}
 
 \chapter{Gradient Decent (GD)}
 
 A step up from zero order methods (such as grid search) are first order methods
 using the first derivative (the gradient). This requires a "first order oracle"
-which can provide us with \(L(\theta)\) and \(\nabla L(\theta)\) at any point
-\(\theta\).
+which can provide us with \(\loss(\weights)\) and \(\nabla \loss(\weights)\) at any point
+\(\weights\).
 
 One immediately obvious way to utilize this information is to
 incrementally move in the direction of steepest decent, i.e.
 %
 \begin{align*}
-	\theta_{n+1} = \theta_n - \eta\nabla L(\theta_n).
+	\weights_{n+1} = \weights_n - \lr\nabla \loss(\weights_n).
 \end{align*}
 %
 A useful way to look at this equation is to notice that it is the
 discretization of an ordinary differential equation (ODE)
 %
 \begin{align*}
-	\dot{\theta}_n \approx \frac{\theta_{n+1} - \theta_n}{\eta}
-	= - \nabla L(\theta_n).
+	\dot{\weights}_n \approx \frac{\weights_{n+1} - \weights_n}{\lr}
+	= - \nabla \loss(\weights_n).
 \end{align*}
 %
-Here the "learning rate" \(\eta\) is the time delta between discretizations
-\(t_n\) and \(t_{n+1}\). This of course implies \(t_n = n\eta\). And for
-\(\eta\to\infty\), we arrive at the ODE
+Here the "learning rate" \(\lr\) is the time delta between discretizations
+\(t_n\) and \(t_{n+1}\). This of course implies \(t_n = n\lr\). And for
+\(\lr\to\infty\), we arrive at the ODE
 %
 \begin{align}\label{eq: velocity is gradient}
-	\dot{\theta}(t) = -\nabla L(\theta(t)).
+	\dot{\weights}(t) = -\nabla \loss(\weights(t)).
 \end{align}
 %
 If you are familiar with Lyapunov functions you will not be surprised by the next
 argument:
 %
 \begin{align}\label{eq: gradient integral}
-	L(\theta(t_1)) - L(\theta(t_0))
-	&= \int_{t_0}^{t_1} \nabla L(\theta(s)) \cdot \dot{\theta}(s) ds
-	= \int_{t_0}^{t_1} -\|\nabla L(\theta(s))\|^2 ds
+	\loss(\weights(t_1)) - \loss(\weights(t_0))
+	&= \int_{t_0}^{t_1} \nabla \loss(\weights(s)) \cdot \dot{\weights}(s) ds
+	= \int_{t_0}^{t_1} -\|\nabla \loss(\weights(s))\|^2 ds
 	\le 0
 \end{align}
 %
 immediately implies
 \begin{align*}
-	L(\theta(t_0)) \ge L(\theta(t_1)) \ge \dots \ge \inf_\theta L(\theta) \ge 0
+	\loss(\weights(t_0)) \ge \loss(\weights(t_1)) \ge \dots \ge \inf_\weights \loss(\weights) \ge 0
 \end{align*}
-which implies convergence. But not necessarily a convergent \(\theta(t)\) and
-not necessarily convergence to \(\inf_\theta L(\theta)\).
+which implies convergence. But not necessarily a convergent \(\weights(t)\) and
+not necessarily convergence to \(\inf_\weights \loss(\weights)\).
 
 \section{Visualizing the 2nd Taylor Approximation}\label{sec: visualize gd}
 
-To build some intuition what leads to convergence of \(\theta(t)\) let us
+To build some intuition what leads to convergence of \(\weights(t)\) let us
 consider more simple cases. If we assume our Hesse matrix \(\nabla^2
-L(\theta)\) exists and is positive definite (all eigenvalues positive), then for
+\loss(\weights)\) exists and is positive definite (all eigenvalues positive), then for
 the second order Taylor approximation
 %
 \begin{align*}
-	L(\theta+v) \approx T_2L(\theta+v)
-	= L(\theta) + v^T \nabla L(\theta) + \tfrac12 v^T \nabla^2 L(\theta) v
+	\loss(\weights+v) \approx T_2\loss(\weights+v)
+	= \loss(\weights) + v^T \nabla \loss(\weights) + \tfrac12 v^T \nabla^2 \loss(\weights) v
 \end{align*}
 %
 we can find the minimum 
 \begin{align*}
-	\hat{v} = -(\nabla^2 L(\theta))^{-1}\nabla L(\theta)
+	\hat{v} = -(\nabla^2 \loss(\weights))^{-1}\nabla \loss(\weights)
 \end{align*}
 by setting the first derivative to zero
 %
 \begin{align*}
-	\nabla T_2L(\theta+v) = \nabla L(\theta) + \nabla^2L(\theta) v \xeq{!} 0.
+	\nabla T_2\loss(\weights+v) = \nabla \loss(\weights) + \nabla^2\loss(\weights) v \xeq{!} 0.
 \end{align*}
 %
 This minimum allows us not only to rewrite the taylor derivative
 %
 \begin{align*}
-	\nabla T_2L(\theta+v) = \nabla^2 L(\theta)(v-\hat{v}),
+	\nabla T_2\loss(\weights+v) = \nabla^2 \loss(\weights)(v-\hat{v}),
 \end{align*}
 %
 but also the original taylor approximation
 %
 \begin{align*}
-	T_2L(\theta+v)
-	&= L(\theta) - v^T \nabla^2 L(\theta) \hat{v} + \tfrac12 v^T \nabla^2 L(\theta) v \\
-	&= \underbrace{L(\theta) - \tfrac12 \hat{v} \nabla^2 L(\theta) \hat{v}}_{=: c(\theta) \text{ (const.)}}
-	+ \tfrac12 (v-\hat{v})^T \nabla^2 L(\theta)(v-\hat{v}).
+	T_2\loss(\weights+v)
+	&= \loss(\weights) - v^T \nabla^2 \loss(\weights) \hat{v} + \tfrac12 v^T \nabla^2 \loss(\weights) v \\
+	&= \underbrace{\loss(\weights) - \tfrac12 \hat{v} \nabla^2 \loss(\weights) \hat{v}}_{=: c(\weights) \text{ (const.)}}
+	+ \tfrac12 (v-\hat{v})^T \nabla^2 \loss(\weights)(v-\hat{v}).
 \end{align*}
 %
-To get absolute instead of relative coordinates to \(\theta\) we set
+To get absolute instead of relative coordinates to \(\weights\) we set
 %
 \begin{align*}
-	\hat{\theta} := \theta + \hat{v} = \theta -(\nabla^2 L(\theta))^{-1}\nabla L(\theta),
+	\hat{\weights} := \weights + \hat{v} = \weights -(\nabla^2 \loss(\weights))^{-1}\nabla \loss(\weights),
 \end{align*}
 %
-and obtain the notion of a paraboloid centered around \(\hat{\theta}\)
+and obtain the notion of a paraboloid centered around \(\hat{\weights}\)
 %
 \begin{align}\label{paraboloid approximation of L}
-	L(y) = \tfrac12 (y- \hat{\theta}) \nabla^2 L(\theta) (y-\hat{\theta}) + c(\theta) + o(\|y-\theta\|^2)
+	\loss(y) = \tfrac12 (y- \hat{\weights}) \nabla^2 \loss(\weights) (y-\hat{\weights}) + c(\weights) + o(\|y-\weights\|^2)
 \end{align}
 %
 \begin{wrapfigure}{O}{0.65\textwidth}
 	\centering
 	\def\svgwidth{0.65\textwidth}
 	\input{media/contour.pdf_tex}
-	\caption{Assuming \(\hat{\theta}=0\), \(\lambda_1=1, \lambda_2=2\), \(v_1=(\sin(1), \cos(1))\)}
+	\caption{Assuming \(\hat{\weights}=0\), \(\lambda_1=1, \lambda_2=2\), \(v_1=(\sin(1), \cos(1))\)}
 	\label{fig: 2d paraboloid}
 \end{wrapfigure}
 %
 To fully appreciate Figure~\ref{fig: 2d paraboloid}, we now only need to realize
-that the diagonizability of \(\nabla^2 L(\theta)\)
+that the diagonizability of \(\nabla^2 \loss(\weights)\)
 %
 \begin{align}\label{eq: diagnalization of the Hesse matrix}
-	V \nabla^2 L(\theta) V^T
+	V \nabla^2 \loss(\weights) V^T
 	= \diag(\lambda_1,\dots,\lambda_d), \qquad V=(v_1,\dots, v_d)
 \end{align}
 %
-implies that once we have selected the center \(\hat{\theta}\) and the direction of
+implies that once we have selected the center \(\hat{\weights}\) and the direction of
 one eigenspace in two dimensions, the other eigenspace has to be
 orthogonal to the first one which fully determines its direction at this point. 
 
 Before we move on I want to briefly mention that we only really needed the
-positive definiteness of \(\nabla^2 L(\theta)\) to make it invertible, so that
+positive definiteness of \(\nabla^2 \loss(\weights)\) to make it invertible, so that
 \(\hat{v}\) is well defined. If it was not positive definite but still invertible,
 then \(\hat{v}\) would not be a minimum but all the other arguments would still
 hold.
 In that case the eigenvalues might be negative as well as positive, which would
 represent a saddle point, or all negative which would represent a maximum.
 
-Using the representation (\ref{paraboloid approximation of L}) of \(L\) we
-can write the gradient at \(\theta\) as
+Using the representation (\ref{paraboloid approximation of L}) of \(\loss\) we
+can write the gradient at \(\weights\) as
 %
 \begin{align*}
-	\nabla L(\theta)
-	=  \nabla^2 L(\theta)(\theta-\hat{\theta})
-	\ (= -\nabla^2 L(\theta)\hat{v})
+	\nabla \loss(\weights)
+	=  \nabla^2 \loss(\weights)(\weights-\hat{\weights})
+	\ (= -\nabla^2 \loss(\weights)\hat{v})
 \end{align*}
 %
-But note that \(\hat{\theta}\) depends on \(\theta\), so we need to index both
+But note that \(\hat{\weights}\) depends on \(\weights\), so we need to index both
 by \(n\) to rewrite gradient decent
 %
 \begin{align*}
-	\theta_{n+1} &= \theta_n - \eta\nabla L(\theta_n)\\
-	&= \theta_n - \eta\nabla^2 L(\theta_n)(\theta_n - \hat{\theta}_n).
+	\weights_{n+1} &= \weights_n - \lr\nabla \loss(\weights_n)\\
+	&= \weights_n - \lr\nabla^2 \loss(\weights_n)(\weights_n - \hat{\weights}_n).
 \end{align*}
 %
-Subtracting \(\hat{\theta}_n\) from both sides we obtain the following
+Subtracting \(\hat{\weights}_n\) from both sides we obtain the following
 transformation 
 %
 \begin{align}\label{eq: Matrix GD Formulation}
-	\theta_{n+1} - \hat{\theta}_n
-	&= (\identity - \eta\nabla^2 L(\theta_n) ) (\theta_n - \hat{\theta}_n).
+	\weights_{n+1} - \hat{\weights}_n
+	&= (\identity - \lr\nabla^2 \loss(\weights_n) ) (\weights_n - \hat{\weights}_n).
 \end{align}
 %
 Taking a closer look at this transformation matrix we can use (\ref{eq:
 diagnalization of the Hesse matrix}) to see
 %
 \begin{align*}
-	\identity - \eta\nabla^2 L(\theta_n)
-	&= V(\identity - \eta\cdot\diag(\lambda_1,\dots,\lambda_d) )V^T \\
-	&= V\cdot\diag(1-\eta\lambda_1, \dots,1-\eta\lambda_d)V^T.
+	\identity - \lr\nabla^2 \loss(\weights_n)
+	&= V(\identity - \lr\cdot\diag(\lambda_1,\dots,\lambda_d) )V^T \\
+	&= V\cdot\diag(1-\lr\lambda_1, \dots,1-\lr\lambda_d)V^T.
 \end{align*}
 %
 Now if we assume like \textcite{gohWhyMomentumReally2017}, that the second
-taylor approximation is accurate and thus that \(\nabla^2 L(\theta)=H\) is a
-constant, then \(\hat{\theta}_n = \theta^*\) is the real minimum and we get
+taylor approximation is accurate and thus that \(\nabla^2 \loss(\weights)=H\) is a
+constant, then \(\hat{\weights}_n = \weights^*\) is the real minimum and we get
 %
 \begin{align}
-	\theta_n - \theta^*
-	= V\cdot\diag[(1-\eta\lambda_1)^n,\dots,(1-\eta\lambda_d)^n] V^T (\theta_0 - \theta^*)
+	\weights_n - \weights^*
+	= V\cdot\diag[(1-\lr\lambda_1)^n,\dots,(1-\lr\lambda_d)^n] V^T (\weights_0 - \weights^*)
 \end{align}
 %
 by induction. Decomposing the difference into the eigenspaces of \(H\) we can 
 see that each component scales exponentially on its own 
 %
 \begin{align*}
-	\langle \theta_n -\theta^*, v_i\rangle
-	= (1-\eta\lambda_i)^n \langle \theta_0 - \theta^*, v_i\rangle
+	\langle \weights_n -\weights^*, v_i\rangle
+	= (1-\lr\lambda_i)^n \langle \weights_0 - \weights^*, v_i\rangle
 \end{align*}
 %
 This is beautifully illustrated with interactive graphs in
@@ -191,8 +194,8 @@ This is beautifully illustrated with interactive graphs in
 \subsection{Negative Eigenvalues}\label{subsec: Negative Eigenvalues}
 
 Now if \(\lambda_i<0\), then \(1-h\lambda_i\) would be greater
-than one which would repel this component \(\langle \theta_0 - \theta^*,
-v_i\rangle\) away from \(\theta^*\). This is a good thing, since \(\theta^*\)
+than one which would repel this component \(\langle \weights_0 - \weights^*,
+v_i\rangle\) away from \(\weights^*\). This is a good thing, since \(\weights^*\)
 is a maximum in this component. This means we will walk down local minima and
 saddle points no matter the learning rate assuming  this component  was not
 zero to begin with. In case of a maximum this would mean that we would start
@@ -227,18 +230,18 @@ eigenvalues are already sorted
 Then for positive learning rates all exponentiation bases are smaller than one
 %
 \begin{align*}
-	1-\eta\lambda_d \le \dots \le 1-\eta\lambda_1 \le 1.
+	1-\lr\lambda_d \le \dots \le 1-\lr\lambda_1 \le 1.
 \end{align*}
 %
 But to ensure convergence we also need that all of them are larger than \(-1\).
 This leads us to the condition
 \begin{align}\label{eq: learning rate restriction (eigenvalue)}
-	0< \eta < 2/\lambda_d
+	0< \lr < 2/\lambda_d
 \end{align}
 %
-Selecting \(\eta = 1/\lambda_d\) reduces the exponentiation base ("rate") of the
+Selecting \(\lr = 1/\lambda_d\) reduces the exponentiation base ("rate") of the
 corresponding eigenspace to zero ensuring convergence in one step.
-But if we want to maximize the convergence rate of \(\theta_n\), this is not
+But if we want to maximize the convergence rate of \(\weights_n\), this is not
 the best selection.
 
 We can reduce the rates of the other eigenspaces if we
@@ -248,28 +251,28 @@ continue with this until we get closer to \(-1\) with the largest eigenvalue
 than we are to \(1\) with the smallest:
 %
 \begin{align*}
-	\rate(\eta)=\max_{i} |1-\eta\lambda_i| = \max\{|1-\eta\lambda_1|, |1-\eta\lambda_d|\}.
+	\rate(\lr)=\max_{i} |1-\lr\lambda_i| = \max\{|1-\lr\lambda_1|, |1-\lr\lambda_d|\}.
 \end{align*}
 %
 This is minimized when
 %
 \begin{align*}
-	1-\eta\lambda_1 = \eta\lambda_d -1,
+	1-\lr\lambda_1 = \lr\lambda_d -1,
 \end{align*}
 %
 implying
 %
 \begin{align*}
-	\eta^* = \frac{2}{\lambda_1 + \lambda_d}.
+	\lr^* = \frac{2}{\lambda_1 + \lambda_d}.
 \end{align*}
 %
-If \(\lambda_1\) is much smaller than \(\lambda_d\), this leaves \(\eta\)
+If \(\lambda_1\) is much smaller than \(\lambda_d\), this leaves \(\lr\)
 at the upper end of the interval in (\ref{eq: learning rate restriction
 (eigenvalue)}). And the optimal convergence rate
 %
 \begin{align*}
-	\rate(\eta^*)
-	% &= 1-\eta^* \lambda_1
+	\rate(\lr^*)
+	% &= 1-\lr^* \lambda_1
 	= 1 - \frac{2}{1+\kappa}
 	\qquad \kappa:=\lambda_d/\lambda_1 \ge 1
 \end{align*}
@@ -294,7 +297,7 @@ eigenvalue, it is natural to guess that simply bounding the second derivative
 from above and below should be sufficient:
 %
 \begin{align*}
-	\lbound \identity \precsim \nabla^2 L(\theta) \precsim \ubound \identity.
+	\lbound \identity \precsim \nabla^2 \loss(\weights) \precsim \ubound \identity.
 \end{align*}
 %
 Here \(A \precsim B\) should be read as \(0\precsim B-A\) which we define to mean
@@ -311,12 +314,12 @@ For this reason authors generally assume either global convexity, or local
 convexity together with the assumption that the starting point is in this
 locally convex area. This is a reasonable assumption since the negative
 eigenvalues mentioned above will force us out of regions where this is not
-the case. And if we assume that our loss function \(L\) goes to infinity when
+the case. And if we assume that our loss function \(\loss\) goes to infinity when
 our parameters go to infinity, together with the fact that we are descending
 down the loss, then we immediately get a bounded (compact) area 
 %
 \begin{align*}
-	\{\theta : L(\theta) \le L(\theta_0)\} = L^{-1}([0, L(\theta_0)])
+	\{\weights : \loss(\weights) \le \loss(\weights_0)\} = \loss^{-1}([0, \loss(\weights_0)])
 \end{align*}
 %
 in which we will stay. We can use that boundedness to argue that we will
@@ -324,12 +327,12 @@ eventually end up in a convex region if we are pushed out of the non-convex
 regions.
 
 That such a convex region exists follows from the existence of a minimum of
-\(L\) in that compact region which necessitates non-negative
+\(\loss\) in that compact region which necessitates non-negative
 eigenvalues. And continuity of the second derivative allows us to extend that to 
 a local ball around the minimum. Eigenvalues equal to zero
 are a bit of an issue, but if they become negative in some epsilon ball
 then moving in that direction would lead us further down. Which is a contradiction
-to our assumption that we created a ball around the minimum of \(L\).
+to our assumption that we created a ball around the minimum of \(\loss\).
 
 The statement that we are being pushed out of the non-convex regions is a bit
 dubious as we could start right on top of local maxima or rims of saddle points.
@@ -390,7 +393,7 @@ does not require the second derivative is
 
 We still need a replacement for the upper bound of our second derivative.
 Using the orthonormal basis of eigenvectors of
-\(\nabla^2 L(\theta)\) to represent \(x\) in the definition of the operator norm
+\(\nabla^2 \loss(\weights)\) to represent \(x\) in the definition of the operator norm
 %
 \begin{align*}
 	\|A\| := \sup_{\|x\| =1} \|Ax\|
@@ -402,8 +405,8 @@ absolute eigenvalue. This implies that for positive eigenvalues
 %
 \begin{align}
 	\label{eq: operator norm upper bound relation}
-	\nabla^2 L(\theta) \precsim \ubound\identity
-	\iff \|\nabla^2 L(\theta)\|\le \ubound,
+	\nabla^2 \loss(\weights) \precsim \ubound\identity
+	\iff \|\nabla^2 \loss(\weights)\|\le \ubound,
 \end{align}
 %
 and the following lemma allows us to get rid of the existence of the second
@@ -440,20 +443,20 @@ existence, uniqueness and stability of ODEs. While these properties might not
 be needed for effective optimization, working without them will likely be very
 cumbersome.
 
-Second, we need at least uniform continuity of \(\nabla L\) so that the inequality
+Second, we need at least uniform continuity of \(\nabla \loss\) so that the inequality
 %
 \begin{align}\label{eq: bounded gradient integral}
-	\int_{t_0}^\infty \|\nabla L(\theta(s))\|^2 ds
-	&\le L(\theta(t_0)) - \liminf_{t\to\infty} L(\theta(t)) \\
-	&\le L(\theta(t_0)) - \inf_{\theta} L(\theta) < \infty \nonumber
+	\int_{t_0}^\infty \|\nabla \loss(\weights(s))\|^2 ds
+	&\le \loss(\weights(t_0)) - \liminf_{t\to\infty} \loss(\weights(t)) \\
+	&\le \loss(\weights(t_0)) - \inf_{\weights} \loss(\weights) < \infty \nonumber
 \end{align}
 %
 derived from (\ref{eq: gradient integral}) is sufficient for a convergent
-\(\|\nabla L(\theta(t))\|\). That still does not ensure that \(\theta(t)\)
-converges, only that its derivative \(\dot{\theta}(t) = -\nabla L(\theta(t))\)
+\(\|\nabla \loss(\weights(t))\|\). That still does not ensure that \(\weights(t)\)
+converges, only that its derivative \(\dot{\weights}(t) = -\nabla \loss(\weights(t))\)
 converges. The logarithm is an obvious example where this goes wrong. But
-while it is not sufficient, the difference between \(\theta_{n+1}\) and
-\(\theta_n\) is proportional to the gradient. Convergence of the gradient is
+while it is not sufficient, the difference between \(\weights_{n+1}\) and
+\(\weights_n\) is proportional to the gradient. Convergence of the gradient is
 therefore necessary.
 So let us see if we can get convergence of the discrete gradients as well.
 %
@@ -474,23 +477,23 @@ Using the Lipschitz continuity of the gradient and Lemma~\ref{lem: Lipschitz
 Gradient implies taylor inequality} we get
 %
 \begin{align}
-	L(\theta_{n+1})
-	&\le L(\theta_n) 
-	+ \langle\nabla L(\theta_n),\theta_{n+1} - \theta_n\rangle
-	+ \tfrac{\ubound}{2} \| \theta_{n+1} - \theta_n\|^2 
+	\loss(\weights_{n+1})
+	&\le \loss(\weights_n) 
+	+ \langle\nabla \loss(\weights_n),\weights_{n+1} - \weights_n\rangle
+	+ \tfrac{\ubound}{2} \| \weights_{n+1} - \weights_n\|^2 
 	\label{bound increment}\\
-	&= L(\theta_n)
-	+ \langle\nabla L(\theta_n), -\eta\nabla L(\theta_n)\rangle
-	+ \tfrac{\ubound}{2}\eta^2\| \nabla L(\theta_n)\|^2
+	&= \loss(\weights_n)
+	+ \langle\nabla \loss(\weights_n), -\lr\nabla \loss(\weights_n)\rangle
+	+ \tfrac{\ubound}{2}\lr^2\| \nabla \loss(\weights_n)\|^2
 	\nonumber\\
-	&=L(\theta_n) - \eta(1-\tfrac{\eta \ubound}{2})\|\nabla L(\theta_n)\|^2
+	&=\loss(\weights_n) - \lr(1-\tfrac{\lr \ubound}{2})\|\nabla \loss(\weights_n)\|^2
 	\nonumber
 \end{align}
 %
 We can then parametrize all learning rates for which we can guarantee a positive
 decrease by
 \begin{align}\label{learning rate restrictions}
-	0<\eta=\tfrac{2\alpha}{\ubound}<\tfrac2\ubound \qquad \alpha \in (0,1).
+	0<\lr=\tfrac{2\alpha}{\ubound}<\tfrac2\ubound \qquad \alpha \in (0,1).
 \end{align}
 %
 This is the same bound we have encountered in the simplified case (\ref{eq:
@@ -499,15 +502,15 @@ gains to be made. Plugging the parametrization back into the learning rate we
 get
 %
 \begin{align*}
-	L(\theta_{n+1}) - L(\theta_n)
-	\le - \tfrac{2}{\ubound}\alpha (1-\alpha)\|\nabla L(\theta_n)\|^2.
+	\loss(\weights_{n+1}) - \loss(\weights_n)
+	\le - \tfrac{2}{\ubound}\alpha (1-\alpha)\|\nabla \loss(\weights_n)\|^2.
 \end{align*}
 %
-The largest decrease is guaranteed by \(\eta=\tfrac{1}{\ubound}\) (\(\alpha=1/2\)).
+The largest decrease is guaranteed by \(\lr=\tfrac{1}{\ubound}\) (\(\alpha=1/2\)).
 \begin{remark}
 	Recall that this sets the rate of the largest eigenvalue to zero eliminating
 	the error in that eigenspace immediately, but it is not the optimal
-	discretization for \(\theta\) to move towards a minimum in parameter space.
+	discretization for \(\weights\) to move towards a minimum in parameter space.
 	But here we do not care about the distance in parameter space but the
 	distance between the losses. And favouring the eigenspace with larger
 	eigenvalues is results in greater reductions in the loss.
@@ -515,8 +518,8 @@ The largest decrease is guaranteed by \(\eta=\tfrac{1}{\ubound}\) (\(\alpha=1/2\
 This results in
 %
 \begin{align*}
-	L(\theta_{n+1}) - L(\theta_n)
-	\le - \tfrac{1}{2\ubound}\|\nabla L(\theta_n)\|^2.
+	\loss(\weights_{n+1}) - \loss(\weights_n)
+	\le - \tfrac{1}{2\ubound}\|\nabla \loss(\weights_n)\|^2.
 \end{align*}
 %
 \subsubsection{Dead End: Convergence of the Gradient}
@@ -525,48 +528,48 @@ Summing over these increments results in a very similar equation to
 (\ref{eq: bounded gradient integral})
 %
 \begin{align*}
-	\frac{1}{2\ubound} \sum_{k=0}^{n-1}\|\nabla L(\theta_k)\|^2
-	\le L(\theta_0) - L(\theta_n)
-	\le L(\theta_0) - \inf_{\theta} L(\theta)
+	\frac{1}{2\ubound} \sum_{k=0}^{n-1}\|\nabla \loss(\weights_k)\|^2
+	\le \loss(\weights_0) - \loss(\weights_n)
+	\le \loss(\weights_0) - \inf_{\weights} \loss(\weights)
 \end{align*}
 %
-Since \(\tfrac{1}{\ubound}\) is the time increment \(\eta\) between the \(\theta_k\)
+Since \(\tfrac{1}{\ubound}\) is the time increment \(\lr\) between the \(\weights_k\)
 we have only lost the factor \(1/2\) in our estimation (\ref{bound increment})
 compared to the precise integral version.
 In particular we get a convergent average of squared gradients
 %
 \begin{align*}
-	\frac{1}{n} \sum_{k=0}^n \|\nabla L(\theta_k)\|^2
-	\le \frac{2 \ubound}{n} (L(\theta_0) - \inf_\theta L(\theta)) \in O(1/n).
+	\frac{1}{n} \sum_{k=0}^n \|\nabla \loss(\weights_k)\|^2
+	\le \frac{2 \ubound}{n} (\loss(\weights_0) - \inf_\weights \loss(\weights)) \in O(1/n).
 \end{align*}
 %
 It is important to note the "square" part. If the series of unsquared gradient
-norms were finite as well, the \(\theta_n\) would be a cauchy sequence
+norms were finite as well, the \(\weights_n\) would be a cauchy sequence
 %
 \begin{align*}
-	\|\theta_n - \theta_m \|
-	\le \sum_{k=m}^{n-1} \|\theta_{k+1} - \theta_k\|
-	\le \eta \sum_{k=m}^{n-1} \|\nabla L(\theta_k)\|.
+	\|\weights_n - \weights_m \|
+	\le \sum_{k=m}^{n-1} \|\weights_{k+1} - \weights_k\|
+	\le \lr \sum_{k=m}^{n-1} \|\nabla \loss(\weights_k)\|.
 \end{align*}
 %
 This provides us with some intuition how a situation might look like when the
-gradient converges but not the sequence of \(\theta_n\). The gradient would
+gradient converges but not the sequence of \(\weights_n\). The gradient would
 behave something like the harmonic series, as its squares converges and the
-\(\theta_n\) would behave like the partial sums of the harmonic series which
+\(\weights_n\) would behave like the partial sums of the harmonic series which
 behaves like the logarithm in the limit.
 
 It is difficult to formulate an example in finite space, but
 %
 \begin{align*}
-	L(\theta) &= \exp(-\theta) \\
-	\dot{\theta} &= -\nabla L(\theta)
+	\loss(\weights) &= \exp(-\weights) \\
+	\dot{\weights} &= -\nabla \loss(\weights)
 \end{align*}
 %
 implies
 %
 \begin{align*}
-	\theta(t) &= \log(t)\\
-	\nabla L(t) &= -\tfrac1t
+	\weights(t) &= \log(t)\\
+	\nabla \loss(t) &= -\tfrac1t
 \end{align*}
 %
 which provides intuition how "flat" a minima has to be to cause such behavior.
@@ -578,26 +581,26 @@ to avoid convergence.
 Since our example is one dimensional we can also immediately see the "eigenvalue"
 %
 \begin{align*}
-	\nabla^2 L(\theta(t)) = \exp(-\theta(t)) = 1/t
+	\nabla^2 \loss(\weights(t)) = \exp(-\weights(t)) = 1/t
 \end{align*}
 %
 which decreases towards zero, stalling the movement towards the minimum.
 
-\section{Convex Convergence Theorems}
+\subsection{Convergence Theorems}\label{sec: convex convergence theorems}
 
 While we do need lower bounds on the second derivative to achieve convergence
-of \(\theta(t)\) as motivated in the previous section we can get convergence
+of \(\weights(t)\) as motivated in the previous section we can get convergence
 of the loss
 
 \begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
-	Let \(L\) be convex, differentiable with Lipschitz gradient, then Gradient
-	Decent with learning rate \(0 < \eta < 2/\ubound\) results in
+	Let \(\loss\) be convex, differentiable with Lipschitz gradient, then Gradient
+	Decent with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align*}
-		L(\theta_n) - \inf_\theta L(\theta)
-		\le \frac{2\ubound\|\theta_0 - \theta^*\|}{4 + n\ubound\eta(2-\ubound\eta)}
+		\loss(\weights_n) - \inf_\weights \loss(\weights)
+		\le \frac{2\ubound\|\weights_0 - \weights^*\|}{4 + n\ubound\lr(2-\ubound\lr)}
 		\in O(1/n)
 	\end{align*}
-	with the optimal rate of convergence being achieved for \(\eta=1/\ubound\).
+	with the optimal rate of convergence being achieved for \(\lr=1/\ubound\).
 \end{theorem}
 \begin{proof}
 	See \textcite[Theorem 2.1.14, Corollary
@@ -605,10 +608,10 @@ of the loss
 \end{proof}
 
 \fxnote{More extensive treatment?}{
-And if we can not have convergence of the parameters \(\theta\) we might not
+And if we can not have convergence of the parameters \(\weights\) we might not
 care as much about the convergence of the gradient either. In that case it
 turns out that we can even get convergence of the loss if we only assume
-Lipschitz continuity of \(L\) itself. But this form of "Subgradient Decent"
+Lipschitz continuity of \(\loss\) itself. But this form of "Subgradient Decent"
 requires a bounded, convex parameter set we project back into if we leave and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
 with subgradients, the name "decent" is generally avoided and we have to keep
@@ -618,26 +621,121 @@ treatment. The convergence rate is not only dependent on the size of the
 parameter set \(B\) but it also decreases to \(O(B/\sqrt{n})\).
 }
 
-\subsection{Complexity Bound: The Colorization Problem}
+\section{Strong Convexity}\label{sec: Strong Convexity}
 
-Now that we found convergence rates for gradient decent on convex problems, can
-we find a lower bound for the complexity of the problem? I.e. how fast could
-an algorithm we could possibly think of be? To tackle this problem let us first
-make an assumption about what this algorithm can do.
+To get convergence of the iterate we need to reintroduce a lower bound on
+the second derivative. As you might recall from Lemma~\ref{lem: Lipschitz
+Gradient implies taylor inequality}, a Lipschitz continuous gradient implies
+a quadratic function provides an upper bound for our loss function
+%
+\begin{align*}
+	\loss(y) \le \loss(x) + \langle \nabla \loss(x), y-x\rangle + \frac\ubound{2}\|y-x\|^2.
+\end{align*}
+%
+And convexity was defined as a lower bound
+%
+\begin{align*}
+	\loss(x) + \langle \nabla \loss(x), y-x\rangle \le \loss(y)
+\end{align*}
+%
+which we will now sharpen this to a quadratic lower bound as well.
+%
+\begin{definition}
+	A function \(\loss\) is \emph{strongly convex}, if for all \(x,y\)
+	\begin{align*}
+		\loss(x) + \langle \nabla \loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \loss(y)
+	\end{align*}
+\end{definition}
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_strong_convexity.pdf_tex}
+	\caption{Strong Convexity provides a tighter lower bound}
+	\label{fig: visualize strong convexity}
+\end{figure}
+%
+Using this new assumption we do get our linear\footnote{
+	In the Numerical Analysis, exponential rate of
+	convergence is called "linear convergence" because the relationship
+	\[
+		\|\weights_{n+1} - \weights^*\| \le c \|\weights_n - \weights^*\|
+	\]
+	is linear. In
+	general convergence order \(q\) implies 
+	\[
+		\|\weights_{n+1} -\weights^*\| \le c\|\weights_n - \weights^*\|^q.
+	\]
+	This is because quadratic convergence (\(q=2\)) already results in an actual
+	rate of convergence of \(c^{\left(2^n\right)}\) which is double exponential and
+	repeated application of \(\exp\) is annoying to write so writers prefer the
+	recursive notation above which motivates this seemingly peculiar naming.
+	The convergence rate we obtained in Section~\ref{sec: convex convergence theorems}
+	is therefore referred to as "sub-linear" convergence.
+}
+rate of convergence which we had in Section~\ref{sec: visualize gd} back
+%
+\begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+	If \(\loss\) is strongly convex, differentiable with Lipschitz gradient, then
+	for learning rate
+	\[0 < \lr < \frac{2}{\lbound + \ubound}\]
+	Gradient Decent generates a sequence \(\weights_n\) satisfying
+	\begin{subequations}
+	\begin{align}
+		\|\weights_n - \weights^*\|
+		&\le \left(
+			1- \frac{2\lr\lbound\ubound}{\lbound+ \ubound}
+		\right)^{n/2}
+		\|\weights_0 - \weights^*\| \\
+		\loss(\weights_n) - \loss(\weights^*)
+		&\le \frac\ubound{2} \left(
+			1- \frac{2\lr\lbound\ubound}{\lbound+ \ubound}
+		\right)^{n}
+		\|\weights_0 - \weights^*\|^2
+	\end{align}
+	\end{subequations}
+	In particular for \(\lr=\tfrac2{\lbound +\ubound}\) we achieve the optimal
+	rate of convergence
+	\begin{subequations}
+	\begin{align}
+		\|\weights_n - \weights^*\|
+		&\le \left(
+			1- \frac{2}{\kappa +1}
+		\right)^n
+		\|\weights_0 - \weights^*\| \\
+		\loss(\weights_n) - \loss(\weights^*)
+		&\le \frac\ubound{2} \left(
+			1- \frac{2}{\kappa +1}
+		\right)^{2n}
+		\|\weights_0 - \weights^*\|^2
+	\end{align}
+	\end{subequations}
+\end{theorem}
+\begin{proof}
+
+\end{proof}
+
+
+\section{Complexity Bounds}
+
+Now that we found convergence rates for gradient decent on (strongly) convex
+problems, can we find a lower bound for the complexity of the problem? I.e. how
+fast could an algorithm we could possibly think of be? To tackle this problem
+let us first make an assumption about what this algorithm can do.
 
 Unrolling our gradient decent algorithm
 %
 \begin{align*}
-	\theta_n = \theta_0 - \eta\sum_{k=0}^{n-1} \nabla L(\theta_k)
+	\weights_n = \weights_0 - \lr\sum_{k=0}^{n-1} \nabla \loss(\weights_k)
 \end{align*}
 %
 we can see that even if we allowed custom learning rates for every iteration
 %
 \begin{align*}
-	\theta_n = \theta_0 - \sum_{k=0}^{n-1} \eta_k \nabla L(\theta_k)
+	\weights_n = \weights_0 - \sum_{k=0}^{n-1} \lr_k \nabla \loss(\weights_k)
 \end{align*}
 %
-we would still end up in the linear span of all gradients, shifted by \(\theta_0\).
+we would still end up in the linear span of all gradients, shifted by \(\weights_0\).
 An obvious assumption for a class of optimization methods would thus be
 %
 \begin{assumption}[\citeauthor{nesterovLecturesConvexOptimization2018}]
@@ -645,7 +743,7 @@ An obvious assumption for a class of optimization methods would thus be
 	The \(n\)-th iterate of the optimization method is contained in the span of all
 	previous gradients shifted by the initial starting point
 	\begin{align*}
-		\theta_n \in \linSpan\{\nabla L(\theta_k) : 0\le k \le n-1\} + \theta_0
+		\weights_n \in \linSpan\{\nabla \loss(\weights_k) : 0\le k \le n-1\} + \weights_0
 	\end{align*}
 \end{assumption}
 
@@ -675,15 +773,15 @@ water level recursion as follows\footnote{In the limit this would become the
 well known differential equation for heat.}: 
 %
 \begin{align*}
-	\theta_{n+1}^{(i)}
-	&= \theta_{n}^{(i)}
-	+ \eta 
+	\weights_{n+1}^{(i)}
+	&= \weights_{n}^{(i)}
+	+ \lr 
 	\begin{cases}
-		[\theta_{n}^{(i-1)} - \theta_{n}^{(i)}] + [\theta_{n}^{(i+1)} - \theta_{n}^{(i)}]
+		[\weights_{n}^{(i-1)} - \weights_{n}^{(i)}] + [\weights_{n}^{(i+1)} - \weights_{n}^{(i)}]
 		&  1 < i < \dimension \\
-		[1 - \theta_{n}^{(1)}] + [\theta_{n}^{(2)} - \theta_{n}^{(1)}]
+		[1 - \weights_{n}^{(1)}] + [\weights_{n}^{(2)} - \weights_{n}^{(1)}]
 		& i = 1 \\
-		[\theta_{n}^{(i-1)} - \theta_{n}^{(i)}]
+		[\weights_{n}^{(i-1)} - \weights_{n}^{(i)}]
 		& i = \dimension
 	\end{cases}
 \end{align*}
@@ -691,7 +789,7 @@ well known differential equation for heat.}:
 For the \fxnote{appendix?}{(convex)} loss function
 %
 \begin{align*}
-	L(\theta) = \frac12 (\theta^{(1)}-1)^2  + \frac12 \sum_{k=1}^{\dimension-1} (\theta^{(k)}-\theta^{(k+1)})^2
+	\loss(\weights) = \frac12 (\weights^{(1)}-1)^2  + \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 \end{align*}
 %
 this is just the gradient decent recursion. Now here is the crucial insight:
@@ -708,20 +806,20 @@ contained in the subspace \(\reals^n\) of \(\reals^\dimension\). Formalizing
 this argument results in the following theorem.
 
 \begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
-	For any \(\theta_0\in\reals^d\), any \(k\) such that \(0\le k\le \tfrac12 (d-1)\),
+	For any \(\weights_0\in\reals^d\), any \(k\) such that \(0\le k\le \tfrac12 (d-1)\),
 	there exists a convex, smooth function \(f\) with Lipschitz continuous
 	derivative such that for any first order method \(\firstOrderMethod\)
 	satisfying Assumption~\ref{assmpt: parameter in linear hull of gradients}
 	we have
 	\begin{subequations}
 	\begin{align}
-		f(\theta_k) - \inf_\theta f(\theta)
-		&\ge \frac{3\ubound \|\theta_0 - \theta^*\|^2}{32(k+1)^2} \\
-		\|\theta_k -\theta^*\|^2 
-		&\ge \frac18 \|\theta_0 - \theta^*\|^2
+		f(\weights_k) - \inf_\weights f(\weights)
+		&\ge \frac{3\ubound \|\weights_0 - \weights^*\|^2}{32(k+1)^2} \\
+		\|\weights_k -\weights^*\|^2 
+		&\ge \frac18 \|\weights_0 - \weights^*\|^2
 	\end{align}
 	\end{subequations}
-	where \(\theta^* = \arg\min_\theta f(\theta)\).
+	where \(\weights^* = \arg\min_\weights f(\weights)\).
 \end{theorem}
 \begin{proof}
 	See \textcite[Theorem 2.1.7]{nesterovLecturesConvexOptimization2018}
@@ -734,46 +832,11 @@ this argument results in the following theorem.
 	reward through the states that lead up to it. "Eligibility traces"
 	\parencite[Chapter 12]{suttonReinforcementLearningIntroduction2018}
 	are an attempt to speed this process up.
-	\end{remark}
+\end{remark}
 
-\section{Strong Convexity}\label{sec: Strong Convexity}
-
-To get convergence of the iterate we need to reintroduce a lower bound on
-the second derivative. As you might recall from Lemma~\ref{lem: Lipschitz
-Gradient implies taylor inequality}, a Lipschitz continuous gradient implies
-a quadratic function provides an upper bound for our loss function
-%
-\begin{align*}
-	L(y) \le L(x) + \langle \nabla L(x), y-x\rangle + \frac\ubound{2}\|y-x\|^2.
-\end{align*}
-%
-And convexity was defined as a lower bound
-%
-\begin{align*}
-	L(x) + \langle \nabla L(x), y-x\rangle \le L(y)
-\end{align*}
-%
-which we will now sharpen this to a quadratic lower bound as well.
-%
-\begin{definition}
-	A function \(L\) is \emph{strongly convex}, if for all \(x,y\)
-	\begin{align*}
-		L(x) + \langle \nabla L(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le L(y)
-	\end{align*}
-\end{definition}
-%
-\begin{figure}[h]
-	\centering
-	\def\svgwidth{1\textwidth}
-	\input{media/visualize_strong_convexity.pdf_tex}
-	\caption{Strong Convexity provides a tighter lower bound}
-	\label{fig: visualize strong convexity}
-\end{figure}
-%
-
-\fxnote{If we achieve a contraction towards our minimum, the
-function necessarily has to be convex, cf. https://youtu.be/6WeyTUnbwQQ?t=1020}
-
+To make our loss function strongly convex we have to add a regularization term
+...
+\fxwarning{finish up}
 
 \section{Heuristics}
 
