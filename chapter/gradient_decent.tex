@@ -656,6 +656,16 @@ function which is difficult to optimize?
 function taken from \textcite[Section 2.1.2]{nesterovLecturesConvexOptimization2018}
 which I will try to reproduce here.
 
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_coloring_problem.pdf_tex}
+	\caption{Even after \(\dimension\) steps (when all tiles have a non-zero value)
+	gradient decent is still far off from the solution even using the optimal
+	learning rate \(1/\ubound\)}
+	\label{fig: visualize coloring problem}
+\end{figure}
+%
 Consider an empty elongated swimming pool with a running tap on one side. Then
 the second meter of the swimming pool will only start to get wet once the first
 meter of it contains water. Similarly the \(n\)-th meter will only get wet
@@ -727,6 +737,30 @@ this argument results in the following theorem.
 	\end{remark}
 
 \section{Strong Convexity}\label{sec: Strong Convexity}
+
+To get convergence of the iterate we need to reintroduce a lower bound on
+the second derivative. As you might recall from Lemma~\ref{lem: Lipschitz
+Gradient implies taylor inequality}, a Lipschitz continuous gradient implies
+a quadratic function provides an upper bound for our loss function
+%
+\begin{align*}
+	L(y) \le L(x) + \langle \nabla L(x), y-x\rangle + \frac\ubound{2}\|y-x\|^2.
+\end{align*}
+%
+And convexity was defined as a lower bound
+%
+\begin{align*}
+	L(x) + \langle \nabla L(x), y-x\rangle \le L(y)
+\end{align*}
+%
+which we will now sharpen this to a quadratic lower bound as well.
+%
+\begin{definition}
+	A function \(L\) is \emph{strongly convex}, if for all \(x,y\)
+	\begin{align*}
+		L(x) + \langle \nabla L(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le L(y)
+	\end{align*}
+\end{definition}
 
 \fxnote{If we achieve a contraction towards our minimum, the
 function necessarily has to be convex, cf. https://youtu.be/6WeyTUnbwQQ?t=1020}
