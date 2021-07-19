@@ -11,7 +11,7 @@
 \newcommand{\dimension}{d}
 \newcommand{\loss}{L}
 \newcommand{\weights}{\theta}
-\newcommand{\lr}{h}
+\newcommand{\lr}{\beta}
 
 \chapter{Gradient Decent (GD)}
 
@@ -460,7 +460,7 @@ while it is not sufficient, the difference between \(\weights_{n+1}\) and
 therefore necessary.
 So let us see if we can get convergence of the discrete gradients as well.
 %
-\begin{lemma}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+\begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
 	\label{lem: Lipschitz Gradient implies taylor inequality}
 	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(K\),
 	then we have
@@ -592,7 +592,7 @@ While we do need lower bounds on the second derivative to achieve convergence
 of \(\weights(t)\) as motivated in the previous section we can get convergence
 of the loss
 
-\begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+\begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
 	Let \(\loss\) be convex, differentiable with Lipschitz gradient, then Gradient
 	Decent with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align*}
@@ -628,9 +628,9 @@ the second derivative. As you might recall from Lemma~\ref{lem: Lipschitz
 Gradient implies taylor inequality}, a Lipschitz continuous gradient implies
 a quadratic function provides an upper bound for our loss function
 %
-\begin{align*}
+\begin{align}\label{eq: upper bound}
 	\loss(y) \le \loss(x) + \langle \nabla \loss(x), y-x\rangle + \frac\ubound{2}\|y-x\|^2.
-\end{align*}
+\end{align}
 %
 And convexity was defined as a lower bound
 %
@@ -675,45 +675,99 @@ Using this new assumption we do get our linear\footnote{
 }
 rate of convergence which we had in Section~\ref{sec: visualize gd} back
 %
-\begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+\begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
 	If \(\loss\) is strongly convex, differentiable with Lipschitz gradient, then
 	for learning rate
-	\[0 < \lr < \frac{2}{\lbound + \ubound}\]
+	\[0 \le \lr \le \frac{2}{\ubound+\lbound}\]
 	Gradient Decent generates a sequence \(\weights_n\) satisfying
 	\begin{subequations}
 	\begin{align}
+		\label{eq: gd strong convexity convergence rate 1}
 		\|\weights_n - \weights^*\|
 		&\le \left(
-			1- \frac{2\lr\lbound\ubound}{\lbound+ \ubound}
+			1- 2\lr\frac{\ubound\lbound}{\ubound+\lbound}
 		\right)^{n/2}
 		\|\weights_0 - \weights^*\| \\
+		\label{eq: gd strong convexity convergence rate 2}
 		\loss(\weights_n) - \loss(\weights^*)
 		&\le \frac\ubound{2} \left(
-			1- \frac{2\lr\lbound\ubound}{\lbound+ \ubound}
+			1- 2\lr\frac{\ubound\lbound}{\ubound+\lbound}
 		\right)^{n}
 		\|\weights_0 - \weights^*\|^2
 	\end{align}
 	\end{subequations}
-	In particular for \(\lr=\tfrac2{\lbound +\ubound}\) we achieve the optimal
+	In particular for \(\lr=\tfrac2{\ubound+\lbound}\) we achieve the optimal
 	rate of convergence
-	\begin{subequations}
+	\begin{subequations}\label{eq: gd strong convexity optimal rate}
 	\begin{align}
 		\|\weights_n - \weights^*\|
 		&\le \left(
-			1- \frac{2}{\kappa +1}
+			1- \frac{2}{1+\kappa}
 		\right)^n
 		\|\weights_0 - \weights^*\| \\
 		\loss(\weights_n) - \loss(\weights^*)
 		&\le \frac\ubound{2} \left(
-			1- \frac{2}{\kappa +1}
+			1- \frac{2}{1+\kappa}
 		\right)^{2n}
 		\|\weights_0 - \weights^*\|^2
 	\end{align}
 	\end{subequations}
 \end{theorem}
-\begin{proof}
-
-\end{proof}
+\begin{proof}[Proof {\parencite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}}]
+	\begin{align*}
+		\|\weights_{n+1} - \weights^*\|^2
+		&= \| \weights_n -\weights^* - \lr\nabla\loss(\weights_n)\|^2\\
+		&= \| \weights_n - \weights^*\|^2
+		- 2\lr\langle \nabla\loss(\weights_n), \weights_n - \weights^*\rangle
+		+ \lr^2 \| \nabla\loss(\weights_n)\|^2
+	\end{align*}
+	Using \(\nabla\loss(\weights^*)=0\) and \fxwarning{appendix!}{\ref{??}}
+	\begin{align*}
+		&\langle \nabla\loss(\weights_n) -\nabla\loss(\weights^*), \weights_n - \weights^*\rangle	\\
+		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \weights^*\|^2
+		+ \tfrac{1}{\ubound+\lbound}
+		\|\nabla\loss(\weights_n) - \nabla\loss(\weights^*)\|^2
+	\end{align*}
+	we get
+	\begin{align*}
+		\|\weights_{n+1} - \weights^*\|^2
+		\le \left(1- 2\lr \tfrac{\ubound\lbound}{\ubound+\lbound}\right)
+		\|\weights_n - \weights^*\|^2
+		+ \underbrace{\lr}_{\ge 0}
+		\underbrace{\left(\lr-\tfrac{2}{\ubound+\lbound}\right)}_{\le0}
+		\|\nabla\loss(\weights_n)\|^2
+	\end{align*}
+	which using induction proves (\ref{eq: gd strong convexity convergence rate
+	1}). (\ref{eq: gd strong convexity convergence rate 2}) follows from our
+	upper bound (\ref{eq: upper bound}), i.e. Lipschitz continuity of the gradient:
+	\begin{align*}
+		\loss(\weights_n) - \loss(\weights^*)
+		\le \langle \underbrace{\nabla\loss(\weights^*)}_{=0}, \weights_n - \weights^*\rangle
+		+ \tfrac\ubound{2} \| \weights_n - \weights^*\|^2
+	\end{align*}
+	To get (\ref{eq: gd strong convexity optimal rate}) we simply have to plug
+	in the presumed optimal learning rate \(\lr=2/(\ubound+\lbound)\) into
+	our general rate and show that the rate is still positive which means that
+	we have not overshot zero, which means that the upper bound on our learning
+	rate which we presume to be optimal is binding.
+	\begin{align*}
+		\left(1- 4 \frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)
+		= \frac{(\ubound^2 + 2\ubound\lbound + \lbound^2) - 4 \ubound\lbound}{(\ubound+\lbound)^2}
+		= \frac{(\ubound-\lbound)^2}{(\ubound+\lbound)^2}
+	\end{align*}
+	So we now we picked the optimal rate. Now we simply add and subtract one
+	\begin{align*}
+		\left(
+			1- \frac{\ubound+\lbound}{\ubound+\lbound}
+			+ \frac{\ubound-\lbound}{\ubound+\lbound}
+		\right)^2
+		= \left(
+			1 - \frac{2\ubound}{\ubound+\lbound}
+		\right)^2
+	\end{align*}
+	and finally divide denominator and enumerator by \(\ubound\) to get (\ref{eq:
+	gd strong convexity optimal rate}).
+ \end{proof}
 
 
 \section{Complexity Bounds}
@@ -805,7 +859,7 @@ step \(n\), because the linear span of all the gradients so far is still
 contained in the subspace \(\reals^n\) of \(\reals^\dimension\). Formalizing
 this argument results in the following theorem.
 
-\begin{theorem}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+\begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
 	For any \(\weights_0\in\reals^d\), any \(k\) such that \(0\le k\le \tfrac12 (d-1)\),
 	there exists a convex, smooth function \(f\) with Lipschitz continuous
 	derivative such that for any first order method \(\firstOrderMethod\)

@@ -51,8 +51,7 @@
 		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{K}2 \|y-x\|^2
 	\end{align*}
 \end{lemma}
-\begin{proof}
-	From \textcite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}
+\begin{proof}[Proof {\parencite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}}]
 	\begin{align*}
 		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
 	\end{align*}
