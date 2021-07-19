@@ -63,7 +63,12 @@ $(@bind time_steps Slider(2:max_time_steps, default=tiles, show_value=true))
 "
 
 # ╔═╡ 9736727f-0c5b-41c0-bb04-efcb87169c12
-plot((0:tiles), vcat(1,states[time_steps]), linetype=:steppre, xlim=[0,tiles], ylim=[0,1], fillrange=zeros(tiles), fillalpha=0.4)
+plot(
+	0:tiles, vcat(1,states[time_steps]), 
+	linetype=:steppre,
+	xlim=[0,tiles], ylim=[0,1], 
+	fillrange=zeros(tiles), fillalpha=0.4
+)
 
 # ╔═╡ 01dfe578-cd63-4670-87b6-aff2da59369b
 begin
@@ -73,7 +78,8 @@ begin
 		xlim=[0,tiles], ylim=[0,1], 
 		fillrange=vcat(1,states[5*tiles]), 
 		fillalpha=0.5,
-		label="t=10·tiles"
+		label="t=10·tiles",
+		fontfamily="Computer Modern"
 	)
 	plot!(plt,
 		0:tiles, vcat(1,states[5*tiles]), 

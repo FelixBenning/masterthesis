@@ -39,7 +39,13 @@ $(@bind tangent_pos Slider(x, default=3, show_value=true))
 
 # ╔═╡ 74a2da17-048a-4b2e-8a0b-37c752313875
 begin
-	plt = plot(x, f, ylim=(-10,40), linewidth=2.5, label=missing)
+	plt = plot(
+		x, f, 
+		ylim=(-10,40), 
+		linewidth=2.5, 
+		label=missing, 
+		fontfamily="Computer Modern"
+	)
 	plot!(
 		plt, 
 		x, y->(f(tangent_pos) + gradient(f,tangent_pos)[1]*(y-tangent_pos)),
@@ -83,7 +89,8 @@ $(@bind approx_loc Slider(foo_domain, default=1, show_value=true))
 begin
 	sc_viz = plot(
 		foo_domain, foo, 
-		label=missing, 
+		label=missing,
+		fontfamily="Computer Modern",
 		ylim=[minimum(foo.(foo_domain)),maximum(foo.(foo_domain))],
 		linewidth=2.5
 	)
