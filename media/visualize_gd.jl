@@ -15,7 +15,7 @@ end
 
 # ╔═╡ 47e61ea1-5bf5-4ff0-81a1-f9471ac933f1
 begin
-	using PlutoUI: Slider, Select
+	using PlutoUI: PlutoUI, Slider, Select
 	using LinearAlgebra: Diagonal
 	using Plots: savefig, plot, plot!, cgrad, grid
 	using Zygote: gradient
@@ -24,14 +24,14 @@ end
 # ╔═╡ f709e1de-aaac-4eb0-a2e0-a2bfa6ae6370
 md"# Visualize Paraboloid"
 
-# ╔═╡ 3d9d041e-5d53-410f-a1ce-e63b264ea924
-# savefig("contour.svg")
-
 # ╔═╡ 491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
 md"# Visualize Gradient Decent"
 
 # ╔═╡ 5993f2a2-dd65-49a5-8777-83ea02194f89
-@bind viz_type Select(["normal"=>:Normal, "saddlepoint"=>:Saddlepoint, "bad_conditioning"=>:BadConditioning])
+md"""Problem type
+$(@bind viz_type Select(["normal"=>:Normal, "saddlepoint"=>:Saddlepoint, "bad_conditioning"=>:BadConditioning]))
+Show Momentum $(@bind show_momentum PlutoUI.CheckBox(default=true))
+"""
 
 # ╔═╡ e771e800-f72c-46db-b80d-598c309f9743
 default_ev = [
@@ -76,9 +76,12 @@ end
 
 # ╔═╡ dc609f58-f607-4772-bdb0-f2db25475e18
 begin
-	plot(-5:0.1:5, -5:0.1:5, f, levels=-30:2:60, st=:contour)
+	eigen_contour = plot(-5:0.1:5, -5:0.1:5, f, levels=-30:2:60, st=:contour)
 	plot!([0,0], [0,0], quiver=(eigen[1,:], eigen[2,:]), st=:quiver)
 end
+
+# ╔═╡ 3d9d041e-5d53-410f-a1ce-e63b264ea924
+savefig(eigen_contour, "contour.svg")
 
 # ╔═╡ f76998fa-a01e-4f5f-b714-2440a2f8dd50
 start = Dict(
@@ -147,7 +150,7 @@ $(@bind mom_lr Slider(
 
 # ╔═╡ dfee7634-b6d4-4079-bb09-7e36618e1297
 md"##### Friction
-$(@bind friction Slider(0:0.01:1, default=0.1, show_value=true))
+$(@bind friction Slider(0:0.01:1, default=0.5, show_value=true))
 "
 
 # ╔═╡ cfa64e47-814b-48b5-ada4-9f5ced3bc66a
@@ -180,14 +183,7 @@ begin
 		decent_steps[2,:],
 		markershape=:circle,
 		label="Gradient Decent",
-		# aspect_ratio=1
-	)
-	plot!(
-		losssurface,
-		momentum_steps[1,:], 
-		momentum_steps[2,:],
-		markershape=:circle,
-		label="Momentum",
+		color=2,
 		# aspect_ratio=1
 	)
 	gd_loss = mapslices(f, decent_steps; dims=(1))'
@@ -198,19 +194,32 @@ begin
 		title="Loss", 
 		xlabel="Iteration",
 		xlim=(0, max_steps+1),
+		color=2,
 		# ylim=(minimum(gd_loss)-0.2, maximum(gd_loss)+0.2)
 	)
-	mom_loss = mapslices(f, momentum_steps; dims=(1))'
-	plot!(
-		lossplot,
-		mom_loss, 
-		st=:scatter, 
-		label="Momentum", 
-		title="Loss", 
-		xlabel="Iteration",
-		xlim=(0, max_steps+1),
-		# ylim=(minimum(mom_loss)-0.2, maximum(mom_loss)+0.2)
-	)
+	if show_momentum
+		plot!(
+			losssurface,
+			momentum_steps[1,:], 
+			momentum_steps[2,:],
+			markershape=:circle,
+			label="Momentum",
+			color=3,
+			# aspect_ratio=1
+		)
+		mom_loss = mapslices(f, momentum_steps; dims=(1))'
+		plot!(
+			lossplot,
+			mom_loss, 
+			st=:scatter, 
+			label="Momentum", 
+			title="Loss", 
+			xlabel="Iteration",
+			xlim=(0, max_steps+1),
+			color=3,
+			# ylim=(minimum(mom_loss)-0.2, maximum(mom_loss)+0.2)
+		)
+	end
 	gd_viz = plot(
 		losssurface, lossplot, 
 		layout=grid(1,2, widths=[0.7,0.3]), 
@@ -1143,11 +1152,11 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╟─f709e1de-aaac-4eb0-a2e0-a2bfa6ae6370
-# ╟─e771e800-f72c-46db-b80d-598c309f9743
+# ╟─dc609f58-f607-4772-bdb0-f2db25475e18
 # ╟─9e5a1fdd-30de-436e-9090-6142494617b8
 # ╟─6ed6aa03-88e1-4e8a-9bfc-60e3d22058e5
-# ╟─c3e4e730-d97d-11eb-0340-1d1e2fd0167a
-# ╟─dc609f58-f607-4772-bdb0-f2db25475e18
+# ╠═c3e4e730-d97d-11eb-0340-1d1e2fd0167a
+# ╟─e771e800-f72c-46db-b80d-598c309f9743
 # ╠═3d9d041e-5d53-410f-a1ce-e63b264ea924
 # ╟─491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
 # ╟─5993f2a2-dd65-49a5-8777-83ea02194f89
