@@ -749,34 +749,27 @@ rate of convergence which we had in Section~\ref{sec: visualize gd} back
 	in the presumed optimal learning rate \(\lr=2/(\ubound+\lbound)\) into
 	our general rate and show that the rate is still positive which means that
 	we have not overshot zero, which means that the upper bound on our learning
-	rate which we presume to be optimal is binding.
+	rate which we presume to be optimal is binding:
 	\begin{align*}
 		\left(1- 4 \frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)
 		= \frac{(\ubound^2 + 2\ubound\lbound + \lbound^2) - 4 \ubound\lbound}{(\ubound+\lbound)^2}
-		= \frac{(\ubound-\lbound)^2}{(\ubound+\lbound)^2}
+		= \left(\frac{\ubound-\lbound}{\ubound+\lbound}\right)^2
 	\end{align*}
-	So we now we picked the optimal rate. Now we simply add and subtract one
-	\begin{align*}
-		\left(
-			1- \frac{\ubound+\lbound}{\ubound+\lbound}
-			+ \frac{\ubound-\lbound}{\ubound+\lbound}
-		\right)^2
-		= \left(
-			1 - \frac{2\ubound}{\ubound+\lbound}
-		\right)^2
-	\end{align*}
-	and finally divide denominator and enumerator by \(\ubound\) to get (\ref{eq:
-	gd strong convexity optimal rate}).
- \end{proof}
+	To get the representation in (\ref{eq: gd strong convexity optimal rate}) we
+	only have to add and subtract one inside the bracket and cancel out
+	\(\lbound\) from enumerator and denominator.
+\end{proof}
 
+While it is not too surprising that we got our back the learning rate from
+Section~\ref{sec: visualize gd} as we simply provided lower and upper bounds on
+the eigenvalues, it is still reassuring that this actually works out that way.
 
 \section{Complexity Bounds}
 
 Now that we found convergence rates for gradient decent on (strongly) convex
-problems, can we find a lower bound for the complexity of the problem? I.e. how
-fast could an algorithm we could possibly think of be? To tackle this problem
-let us first make an assumption about what this algorithm can do.
-
+problems, the question is can we do better? I.e. how fast could an algorithm we
+could possibly think of be? To tackle this problem let us first make an
+assumption about what this algorithm can do.
 Unrolling our gradient decent algorithm
 %
 \begin{align*}
@@ -790,7 +783,9 @@ we can see that even if we allowed custom learning rates for every iteration
 \end{align*}
 %
 we would still end up in the linear span of all gradients, shifted by \(\weights_0\).
-An obvious assumption for a class of optimization methods would thus be
+And since we are in the class of first order optimization methods where we are
+only provided with the function evaluation itself and the gradient, an obvious
+assumption for a class of optimization methods would be
 %
 \begin{assumption}[\citeauthor{nesterovLecturesConvexOptimization2018}]
 	\label{assmpt: parameter in linear hull of gradients}
@@ -800,13 +795,12 @@ An obvious assumption for a class of optimization methods would thus be
 		\weights_n \in \linSpan\{\nabla \loss(\weights_k) : 0\le k \le n-1\} + \weights_0
 	\end{align*}
 \end{assumption}
-
+%
 Now the question becomes: How can we utilize this assumption to construct a
 function which is difficult to optimize?
-
 \textcite{gohWhyMomentumReally2017} provides an intuitive interpretation for a loss
 function taken from \textcite[Section 2.1.2]{nesterovLecturesConvexOptimization2018}
-which I will try to reproduce here.
+which I further modify into the following example.
 
 \begin{figure}[h]
 	\centering
@@ -860,15 +854,16 @@ contained in the subspace \(\reals^n\) of \(\reals^\dimension\). Formalizing
 this argument results in the following theorem.
 
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
-	For any \(\weights_0\in\reals^d\), any \(k\) such that \(0\le k\le \tfrac12 (d-1)\),
+	For any \(\weights_0\in\reals^d\), any \(n\) such that 
+	\[0\le n\le \tfrac12 (d-1),\]
 	there exists a convex, smooth function \(f\) with Lipschitz continuous
 	derivative such that for any first order method \(\firstOrderMethod\)
 	satisfying Assumption~\ref{assmpt: parameter in linear hull of gradients}
 	we have
 	\begin{subequations}
 	\begin{align}
-		f(\weights_k) - \inf_\weights f(\weights)
-		&\ge \frac{3\ubound \|\weights_0 - \weights^*\|^2}{32(k+1)^2} \\
+		f(\weights_n) - \inf_\weights f(\weights)
+		&\ge \frac{3\ubound \|\weights_0 - \weights^*\|^2}{32(n+1)^2} \\
 		\|\weights_k -\weights^*\|^2 
 		&\ge \frac18 \|\weights_0 - \weights^*\|^2
 	\end{align}
