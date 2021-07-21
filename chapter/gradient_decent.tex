@@ -1,17 +1,22 @@
 % !TEX root = ../Masterthesis.tex
 
 \newcommand{\identity}{\mathbb{I}}
-\newcommand{\lbound}{\mu_l}
-\newcommand{\ubound}{\mu_u}
+\newcommand{\lbound}{\mu}
+\newcommand{\ubound}{L}
 \newcommand{\diag}{\text{diag}}
 \newcommand{\rate}{\text{rate}}
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\firstOrderMethod}{\mathcal{M}}
 \newcommand{\linSpan}{\text{span}}
 \newcommand{\dimension}{d}
-\newcommand{\loss}{L}
+\newcommand{\loss}{\mathcal{L}}
 \newcommand{\weights}{\theta}
-\newcommand{\lr}{\beta}
+\newcommand{\lr}{\text{lr}}
+\newcommand{\stdBasis}{e}
+\newcommand{\graph}{G}
+\newcommand{\graphLaplacian}{A_\graph}
+\newcommand{\edges}{E}
+\newcommand{\vertices}{V}
 
 \chapter{Gradient Decent (GD)}
 
@@ -93,8 +98,11 @@ but also the original taylor approximation
 \begin{align*}
 	T_2\loss(\weights+v)
 	&= \loss(\weights) - v^T \nabla^2 \loss(\weights) \hat{v} + \tfrac12 v^T \nabla^2 \loss(\weights) v \\
-	&= \underbrace{\loss(\weights) - \tfrac12 \hat{v} \nabla^2 \loss(\weights) \hat{v}}_{=: c(\weights) \text{ (const.)}}
-	+ \tfrac12 (v-\hat{v})^T \nabla^2 \loss(\weights)(v-\hat{v}).
+	&= \underbrace{
+		\loss(\weights) - \tfrac12 \hat{v} \nabla^2 \loss(\weights) \hat{v}
+	}_{
+		=: c(\weights) \text{ (const.)}
+	} + \tfrac12 (v-\hat{v})^T \nabla^2 \loss(\weights)(v-\hat{v}).
 \end{align*}
 %
 To get absolute instead of relative coordinates to \(\weights\) we set
@@ -106,7 +114,9 @@ To get absolute instead of relative coordinates to \(\weights\) we set
 and obtain the notion of a paraboloid centered around \(\hat{\weights}\)
 %
 \begin{align}\label{paraboloid approximation of L}
-	\loss(y) = \tfrac12 (y- \hat{\weights}) \nabla^2 \loss(\weights) (y-\hat{\weights}) + c(\weights) + o(\|y-\weights\|^2)
+	\loss(y)
+	= \tfrac12 (y- \hat{\weights}) \nabla^2 \loss(\weights) (y-\hat{\weights})
+	+ c(\weights) + o(\|y-\weights\|^2)
 \end{align}
 %
 \begin{wrapfigure}{O}{0.65\textwidth}
@@ -193,7 +203,7 @@ This is beautifully illustrated with interactive graphs in
 
 \subsection{Negative Eigenvalues}\label{subsec: Negative Eigenvalues}
 
-Now if \(\lambda_i<0\), then \(1-h\lambda_i\) would be greater
+Now if \(\lambda_i<0\), then \(1-\lr\lambda_i\) would be greater
 than one which would repel this component \(\langle \weights_0 - \weights^*,
 v_i\rangle\) away from \(\weights^*\). This is a good thing, since \(\weights^*\)
 is a maximum in this component. This means we will walk down local minima and
@@ -655,7 +665,7 @@ which we will now sharpen this to a quadratic lower bound as well.
 	\label{fig: visualize strong convexity}
 \end{figure}
 %
-Using this new assumption we do get our linear\footnote{
+Using this new assumption we get our linear\footnote{
 	In the Numerical Analysis, exponential rate of
 	convergence is called "linear convergence" because the relationship
 	\[
@@ -673,7 +683,7 @@ Using this new assumption we do get our linear\footnote{
 	The convergence rate we obtained in Section~\ref{sec: convex convergence theorems}
 	is therefore referred to as "sub-linear" convergence.
 }
-rate of convergence which we had in Section~\ref{sec: visualize gd} back
+rate of convergence back, which we had motivated in Section~\ref{sec: visualize gd}. 
 %
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
 	If \(\loss\) is strongly convex, differentiable with Lipschitz gradient, then
@@ -760,9 +770,9 @@ rate of convergence which we had in Section~\ref{sec: visualize gd} back
 	\(\lbound\) from enumerator and denominator.
 \end{proof}
 
-While it is not too surprising that we got our back the learning rate from
+While it is not too surprising that we recovered the learning rate from
 Section~\ref{sec: visualize gd} as we simply provided lower and upper bounds on
-the eigenvalues, it is still reassuring that this actually works out that way.
+the eigenvalues, it is still reassuring. 
 
 \section{Complexity Bounds}
 
@@ -817,8 +827,11 @@ the second meter of the swimming pool will only start to get wet once the first
 meter of it contains water. Similarly the \(n\)-th meter will only get wet
 once the \((n-1)\)-th meter contains water. If the flow rate would only depend
 on the current water level difference, one could thus express a simplified
-water level recursion as follows\footnote{In the limit this would become the
-well known differential equation for heat.}: 
+water level recursion as follows\footnote{
+	In the limit (first taking the learning rate to zero, then the
+	discretization) this would become the well known differential equation for
+	heat.
+}: 
 %
 \begin{align*}
 	\weights_{n+1}^{(i)}
@@ -837,7 +850,9 @@ well known differential equation for heat.}:
 For the \fxnote{appendix?}{(convex)} loss function
 %
 \begin{align*}
-	\loss(\weights) = \frac12 (\weights^{(1)}-1)^2  + \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
+	\loss(\weights)
+	= \frac12 (\weights^{(1)}-1)^2
+	+ \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 \end{align*}
 %
 this is just the gradient decent recursion. Now here is the crucial insight:
@@ -872,6 +887,64 @@ this argument results in the following theorem.
 \end{theorem}
 \begin{proof}
 	See \textcite[Theorem 2.1.7]{nesterovLecturesConvexOptimization2018}
+	First we want to make sure that our loss function is actually convex. To
+	see this notice that we can write the gradient as
+	%
+	\begin{align*}
+		\nabla \loss(\weights) = \graphLaplacian\weights + (\weights^{(1)} -1) e_1
+	\end{align*}
+	%
+	where \(\stdBasis_i\) are standard basis vectors and \(\graphLaplacian\) 
+	is the "Graph Laplacian" for the 
+	\fxnote{tikz graph}{undirected graph} \(\graph=(\vertices, \edges)\) with 
+	\begin{align*}
+		\vertices = \{1,\dots, \dimension\}
+		\qquad
+		\edges = \{(i, i+1) : 1\le i \le \dimension-1\}
+	\end{align*}
+	%
+	\begin{align*}
+		\graphLaplacian^{(i,j)} 
+		&= 
+		\begin{cases}
+			[\text{degree of vertex i}] & i=j\\
+			-1 & (i,j)\in\edges \text{ or } (j,i)\in\edges\\
+			0 & \text{ else}
+		\end{cases}
+		\\
+		&=
+		\begin{pmatrix*}[r]
+			1 & -1 & 0  & \cdots & \cdots & 0 \\
+			-1 & 2 & -1 & \ddots &  &  \vdots \\ 
+			0 & -1 & 2 & \ddots & \ddots & \vdots \\
+			\vdots & \ddots & \ddots & \ddots & -1 & 0 \\
+			\vdots &  & \ddots & -1 & 2 & -1 \\
+			0 & \cdots & \cdots & 0  & -1 & 1
+		\end{pmatrix*}
+	\end{align*}
+	%
+	This means our loss function is quadratic which means that our
+	hesse matrix \(\nabla L(\weights)\) is a constant \(H\). And it is
+	positive definite because
+	%
+	\begin{align*}
+		\langle \weights , H \weights\rangle
+		&= \langle \weights, A_G\weights + \weights^{(1)}e_1 \rangle
+		= \langle \weights, A_G \weights\rangle + \weights^{(1)}\langle \weights, e_1\rangle
+		\\
+		&= \sum_{k=1}^{\dimension-1}(\weights^{(k)}-\weights^{(k+1)})^2
+		+ (\weights^{(1)})^2
+		\ge 0.
+	\end{align*}
+	%
+	The last equality can be verified by taking the derivative of both and
+	realizing they are the same, which is sufficient because they are both zero	
+	in the origin. We essentially used the fact that our original loss function
+	was essentially already a quadratic function except for the constant influx
+	at the first tile. And since that is a constant in the derivative it has
+	no bearing on the hesse matrix.
+
+
 \end{proof}
 
 \begin{remark}
@@ -884,7 +957,16 @@ this argument results in the following theorem.
 \end{remark}
 
 To make our loss function strongly convex we have to add a regularization term
-...
+%
+\begin{align*}
+	\loss(\weights)
+	= \frac{\lbound (\kappa -1)}{8} \left[
+		(\weights^{(1)}-1)^2
+		+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
+	\right]
+	+ \frac\lbound{2} \| \weights \|^2
+\end{align*}
+
 \fxwarning{finish up}
 
 \section{Heuristics}
