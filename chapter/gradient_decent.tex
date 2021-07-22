@@ -12,6 +12,7 @@
 \newcommand{\loss}{\mathcal{L}}
 \newcommand{\weights}{\theta}
 \newcommand{\lr}{\text{lr}}
+\newcommand{\condition}{\kappa}
 \newcommand{\stdBasis}{e}
 \newcommand{\graph}{G}
 \newcommand{\graphLaplacian}{A_\graph}
@@ -285,11 +286,11 @@ at the upper end of the interval in (\ref{eq: learning rate restriction
 \begin{align*}
 	\rate(\lr^*)
 	% &= 1-\lr^* \lambda_1
-	= 1 - \frac{2}{1+\kappa}
-	\qquad \kappa:=\lambda_d/\lambda_1 \ge 1
+	= 1 - \frac{2}{1+\condition}
+	\qquad \condition:=\lambda_d/\lambda_1 \ge 1
 \end{align*}
 %
-becomes close to one if the condition number \(\kappa\) is large.
+becomes close to one if the condition number \(\condition\) is large.
 If all the eigenvalues are the same on the other hand, the condition number
 becomes one and the rate is zero, implying instant convergence. This is not
 surprising if we recall our visualization in Figure~\ref{fig: 2d paraboloid}.
@@ -393,7 +394,7 @@ does not require the second derivative is
 %
 \begin{remark}
 	Now if you recall how the rate of convergence was related to the condition number
-	\(\lambda_d/\lambda_1 =\kappa\), then you will not be surprised to see us 
+	\(\lambda_d/\lambda_1 =\condition\), then you will not be surprised to see us 
 	struggle to get a convergence rate with only non-negative eigenvalues in 
 	the remaining section. Because eigenvalues close or equal to zero will blow up this
 	condition number. We will therefore strengthen these assumptions in
@@ -720,12 +721,12 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 	\begin{align}
 		\|\weights_n - \weights^*\|
 		&\le \left(
-			1- \frac{2}{1+\kappa}
+			1- \frac{2}{1+\condition}
 		\right)^n
 		\|\weights_0 - \weights^*\| \\
 		\loss(\weights_n) - \loss(\weights^*)
 		&\le \frac\ubound{2} \left(
-			1- \frac{2}{1+\kappa}
+			1- \frac{2}{1+\condition}
 		\right)^{2n}
 		\|\weights_0 - \weights^*\|^2
 	\end{align}
@@ -830,7 +831,6 @@ which I further modify into the following example.
 	\label{fig: visualize coloring problem}
 \end{figure}
 %
-\fxwarning{switch entirely to heat motivation}
 Consider a cold, zero temperature, 1-dimensional rod which is heated from one side
 by an infinite heat source at temperature one. Then the second segment of the rod
 will only start to get hot once the first segment of it has heated up. Similarly
@@ -857,13 +857,13 @@ recursion as follows\footnote{
 	\end{cases}
 \end{align*}
 %
-For the \fxnote{appendix?}{(convex)} loss function
+For the loss function
 %
-\begin{align*}
+\begin{align}\label{eq: naive complexity counterexample loss}
 	\tilde{\loss}(\weights)
 	= \frac12 (\weights^{(1)}-1)^2
 	+ \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
-\end{align*}
+\end{align}
 %
 this is just the gradient decent recursion. Now here is the crucial insight:
 
@@ -879,10 +879,10 @@ contained in the subspace \(\reals^n\) of \(\reals^\dimension\). Formalizing
 this argument results in the following theorem inspired by \textcite[Theorem
 2.1.7]{nesterovLecturesConvexOptimization2018} and \textcite{gohWhyMomentumReally2017}.
 
-\begin{theorem}
+\begin{theorem}\label{thm: convex function complexity bound}
 	For any \(\weights_0\in\reals^d\), any \(n\) such that 
 	\[0\le n\le \tfrac12 (d-1),\]
-	there exists \(\loss\in\lipGradientSet{\ubound}\)
+	there exists \(\loss\in\lipGradientSet[\infty,1]{\ubound}\)
 	s.t. for any first order method \(\firstOrderMethod\)
 	satisfying Assumption~\ref{assmpt: parameter in linear hull of gradients}
 	we have
@@ -915,12 +915,14 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	Third, we want to make sure that our loss function is actually convex. To
 	see this notice that we can write the gradient as
 	%
-	\begin{align*}
-		\nabla \tilde{\loss}(\weights) = \graphLaplacian\weights + (\weights^{(1)} -1) e_1
-	\end{align*}
+	\begin{align}\label{eq: naive complexity example loss gradient}
+		\nabla \tilde{\loss}(\weights)
+		= \graphLaplacian\weights + (\weights^{(1)} -1) \stdBasis_1
+		= (\graphLaplacian + \stdBasis_1 \stdBasis_1^T)\weights - \stdBasis_1
+	\end{align}
 	%
-	where \(\stdBasis_i\) are standard basis vectors and \(\graphLaplacian\) 
-	is the "Graph Laplacian" for the 
+	where \(\stdBasis_1=(1,0,\dots,0)^T\) is the first standard basis
+	vector and \(\graphLaplacian\) is the "Graph Laplacian" for the 
 	\fxnote{tikz graph}{undirected graph} \(\graph=(\vertices, \edges)\) with 
 	\begin{align*}
 		\vertices = \{1,\dots, \dimension\}
@@ -954,8 +956,8 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	%
 	\begin{align*}
 		\langle \weights , H \weights\rangle
-		&= \langle \weights, A_G\weights + \weights^{(1)}e_1 \rangle
-		= \weights^{(1)}\langle \weights, e_1\rangle 
+		&= \langle \weights, (A_G + \stdBasis_1 \stdBasis_1^T) \weights \rangle
+		= \langle \weights, \stdBasis_1\rangle^2
 		+ \langle \weights, A_G \weights\rangle
 		\\
 		&= (\weights^{(1)})^2
@@ -1090,8 +1092,8 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		\frac{L\|\weights_0 - \weights^*\|^2}{16(n+1)^2}
 		\qedhere
 	\end{align*}
- \end{proof}
-
+\end{proof}
+\fxnote{difference to nesterov, hint at deeper graph theory}
 \begin{remark}
 	This type of loss function is not unlikely to be encountered in real
 	problems. E.g. in reinforcement learning with sparse rewards the estimation
@@ -1107,12 +1109,70 @@ To make our loss function strongly convex we have to add a regularization term
 %
 \begin{align*}
 	\loss(\weights)
-	= \frac{\lbound (\kappa -1)}{8} \left[
+	&= \frac{\ubound -\lbound}{8} \left[
 		(\weights^{(1)}-1)^2
 		+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 	\right]
-	+ \frac\lbound{2} \| \weights \|^2
+	+ \frac\lbound{2} \| \weights \|^2\\
+	&= \frac{\ubound - \lbound}{4} \tilde{\loss}(\weights)
+	+ \frac{\lbound}{2}\| \weights \|^2
 \end{align*}
+%
+From the proof of Theorem~\ref{thm: convex function complexity bound} we know
+about \(\tilde{\loss}\) that
+%
+\begin{align*}
+	0 \precsim \nabla^2\tilde{\loss} \precsim 4\identity.
+\end{align*}
+%
+Therefore we know that \(\loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) because
+%
+\begin{align*}
+	\lbound\identity
+	\precsim \nabla^2\loss
+	&= \frac{\ubound - \lbound}{4} \nabla^2 \tilde{\loss} + \lbound\identity\\
+	&\precsim (\ubound - \lbound + \lbound)\identity = \ubound \identity.
+\end{align*}
+%
+Using \(\lbound(\condition -1)=\ubound-\lbound\) and (\ref{eq: naive complexity
+example loss gradient}) we can set the gradient to zero
+\begin{align*}
+	0 &\lxeq{!} \nabla \loss(\weights)
+	=  \frac{\lbound(\condition -1)}{4} \nabla\tilde{\loss}(\weights) - \lbound \weights\\
+	&= \left[
+		\frac{\lbound(\condition-1)}{4}(A_G + \stdBasis_1\stdBasis_1^T) - \lbound\identity
+	\right]\weights - \frac{\lbound(\condition-1)}{4}\stdBasis_1.
+\end{align*}
+%
+This condition can be rewritten as
+%
+\begin{align*}
+	\stdBasis_1 =  \left[
+		A_G + \stdBasis_1\stdBasis_1^T + \frac{4}{\condition-1}\identity
+	\right]
+	\weights
+\end{align*}
+%
+%
+\begin{theorem}[{\cite[Theorem 2.1.13]{nesterovLecturesConvexOptimization2018}}]
+	For any \(\weights_0\in\reals^\infty\) there exists
+	\(\loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) such that for any
+	first order method \(\firstOrderMethod\) satisfying Assumption~\ref{assmpt:
+	parameter in linear hull of gradients}, we have
+	\begin{subequations}
+	\begin{align}
+		\|\weights_n - \weights^*\|
+		&\ge \left(1-\frac2{1+\condition}\right)^n \|\weights_0 - \weights^*\| \\
+		\loss(\weights_n) - \loss(\weights^*)
+		&\ge \tfrac{\lbound}{2}
+		\left(1-\frac2{1+\condition}\right)^{2n} \|\weights_0 - \weights^*\|^2
+	\end{align}
+	\end{subequations}
+	where \(\weights^*\) is the unique minimum of \(\loss\).
+\end{theorem}
+\begin{proof}
+	
+\end{proof}
 
 \fxwarning{finish up}
 
