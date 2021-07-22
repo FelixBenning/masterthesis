@@ -17,6 +17,8 @@
 \newcommand{\graphLaplacian}{A_\graph}
 \newcommand{\edges}{E}
 \newcommand{\vertices}{V}
+\newcommand*{\lipGradientSet}[2][1,1]{\mathcal{F}^{#1}_{#2}}
+\newcommand*{\strongConvex}[3][1,1]{\mathcal{S}^{#1}_{{#2},{#3}}}
 
 \chapter{Gradient Decent (GD)}
 
@@ -600,10 +602,15 @@ which decreases towards zero, stalling the movement towards the minimum.
 
 While we do need lower bounds on the second derivative to achieve convergence
 of \(\weights(t)\) as motivated in the previous section we can get convergence
-of the loss
+of the loss.
+
+Borrowing \citeauthor{nesterovLecturesConvexOptimization2018}'s notation
+we are going to denote  the set of \(q\) times differentiable convex functions
+with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
+\(\lipGradientSet[q,p]{\ubound}\).
 
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
-	Let \(\loss\) be convex, differentiable with Lipschitz gradient, then Gradient
+	Let \(\loss\in\lipGradientSet{\ubound}\), then Gradient
 	Decent with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align*}
 		\loss(\weights_n) - \inf_\weights \loss(\weights)
@@ -655,6 +662,8 @@ which we will now sharpen this to a quadratic lower bound as well.
 	\begin{align*}
 		\loss(x) + \langle \nabla \loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \loss(y)
 	\end{align*}
+	And let \(\strongConvex{\lbound}{\ubound}\) denote the \(\lbound\)-strongly convex
+	functions form \(\lipGradientSet{\ubound}\).
 \end{definition}
 %
 \begin{figure}[h]
@@ -686,8 +695,7 @@ Using this new assumption we get our linear\footnote{
 rate of convergence back, which we had motivated in Section~\ref{sec: visualize gd}. 
 %
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
-	If \(\loss\) is strongly convex, differentiable with Lipschitz gradient, then
-	for learning rate
+	If \(\loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
 	\[0 \le \lr \le \frac{2}{\ubound+\lbound}\]
 	Gradient Decent generates a sequence \(\weights_n\) satisfying
 	\begin{subequations}
@@ -822,15 +830,17 @@ which I further modify into the following example.
 	\label{fig: visualize coloring problem}
 \end{figure}
 %
-Consider an empty elongated swimming pool with a running tap on one side. Then
-the second meter of the swimming pool will only start to get wet once the first
-meter of it contains water. Similarly the \(n\)-th meter will only get wet
-once the \((n-1)\)-th meter contains water. If the flow rate would only depend
-on the current water level difference, one could thus express a simplified
-water level recursion as follows\footnote{
-	In the limit (first taking the learning rate to zero, then the
-	discretization) this would become the well known differential equation for
-	heat.
+\fxwarning{switch entirely to heat motivation}
+Consider a cold, zero temperature, 1-dimensional rod which is heated from one side
+by an infinite heat source at temperature one. Then the second segment of the rod
+will only start to get hot once the first segment of it has heated up. Similarly
+the \(n\)-th segment will only increase in temperature once the \((n-1)\)-th segment
+is no longer at zero temperature. If the heat transfer would only depend on the
+current heat level difference, one could thus express a simplified heat level
+recursion as follows\footnote{
+	Taking first the learning rate to zero and afterwards the space discretization, would
+	result in the well known differential equation for heat with boundary
+	conditions.
 }: 
 %
 \begin{align*}
@@ -850,7 +860,7 @@ water level recursion as follows\footnote{
 For the \fxnote{appendix?}{(convex)} loss function
 %
 \begin{align*}
-	\loss(\weights)
+	\tilde{\loss}(\weights)
 	= \frac12 (\weights^{(1)}-1)^2
 	+ \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 \end{align*}
@@ -859,39 +869,54 @@ this is just the gradient decent recursion. Now here is the crucial insight:
 
 Since any weight (parameter component) is only affected once its neighbors are
 affected, the second weight can not be affected before the second step since
-the first weight is only filled in the first step. And since the second weight
+the first weight is only heated in the first step. And since the second weight
 will be unaffected until the second step, the third weight will be unaffected
 until the third step, etc.
 
 Therefore the \(\dimension - n\) last components will still be zero in
 step \(n\), because the linear span of all the gradients so far is still
 contained in the subspace \(\reals^n\) of \(\reals^\dimension\). Formalizing
-this argument results in the following theorem.
+this argument results in the following theorem inspired by \textcite[Theorem
+2.1.7]{nesterovLecturesConvexOptimization2018} and \textcite{gohWhyMomentumReally2017}.
 
-\begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
+\begin{theorem}
 	For any \(\weights_0\in\reals^d\), any \(n\) such that 
 	\[0\le n\le \tfrac12 (d-1),\]
-	there exists a convex, smooth function \(f\) with Lipschitz continuous
-	derivative such that for any first order method \(\firstOrderMethod\)
+	there exists \(\loss\in\lipGradientSet{\ubound}\)
+	s.t. for any first order method \(\firstOrderMethod\)
 	satisfying Assumption~\ref{assmpt: parameter in linear hull of gradients}
 	we have
 	\begin{subequations}
 	\begin{align}
-		f(\weights_n) - \inf_\weights f(\weights)
-		&\ge \frac{3\ubound \|\weights_0 - \weights^*\|^2}{32(n+1)^2} \\
+		\loss(\weights_n) - \inf_\weights \loss(\weights)
+		&\ge \frac{\ubound \|\weights_0 - \weights^*\|^2}{16(n+1)^2} \\
 		\|\weights_k -\weights^*\|^2 
-		&\ge \frac18 \|\weights_0 - \weights^*\|^2
+		&\ge \frac13 \|\weights_0 - \weights^*\|^2
 	\end{align}
 	\end{subequations}
-	where \(\weights^* = \arg\min_\weights f(\weights)\).
+	where \(\weights^* = \arg\min_\weights \loss(\weights)\).
 \end{theorem}
 \begin{proof}
-	See \textcite[Theorem 2.1.7]{nesterovLecturesConvexOptimization2018}
-	First we want to make sure that our loss function is actually convex. To
+	First, since we could always define
+	\(\loss(\weights):=\tilde{\loss}(\weights-\weights_0)\)
+	we can assume without loss of generality that \(\weights_0=\mathbf{0}\). 
+	
+	Second, we can define \(\tilde{\dimension} := 2n +1 \le \dimension	\)	
+	and interpret \(\weights_0 = \mathbf{0} \in\reals^\dimension\) as an element of
+	\(\reals^{\tilde{\dimension}}\). If our constructed loss simply
+	ignores the dimensions between \(\tilde{\dimension}\) and \(\dimension\) then
+	this part of the gradients will then be zero keeping all \(\weights_n\) in
+	\(\reals^{\tilde{\dimension}}\). We can therefore assume without loss of
+	generality that 
+	\begin{align}\label{eq: w.l.o.g dim=2n+1}
+		\dimension=2n+1.
+	\end{align}
+
+	Third, we want to make sure that our loss function is actually convex. To
 	see this notice that we can write the gradient as
 	%
 	\begin{align*}
-		\nabla \loss(\weights) = \graphLaplacian\weights + (\weights^{(1)} -1) e_1
+		\nabla \tilde{\loss}(\weights) = \graphLaplacian\weights + (\weights^{(1)} -1) e_1
 	\end{align*}
 	%
 	where \(\stdBasis_i\) are standard basis vectors and \(\graphLaplacian\) 
@@ -924,28 +949,148 @@ this argument results in the following theorem.
 	\end{align*}
 	%
 	This means our loss function is quadratic which means that our
-	hesse matrix \(\nabla L(\weights)\) is a constant \(H\). And it is
+	hesse matrix \(\nabla \tilde{\loss}(\weights)\) is a constant \(H\). And it is
 	positive definite because
 	%
 	\begin{align*}
 		\langle \weights , H \weights\rangle
 		&= \langle \weights, A_G\weights + \weights^{(1)}e_1 \rangle
-		= \langle \weights, A_G \weights\rangle + \weights^{(1)}\langle \weights, e_1\rangle
+		= \weights^{(1)}\langle \weights, e_1\rangle 
+		+ \langle \weights, A_G \weights\rangle
 		\\
-		&= \sum_{k=1}^{\dimension-1}(\weights^{(k)}-\weights^{(k+1)})^2
-		+ (\weights^{(1)})^2
+		&= (\weights^{(1)})^2
+		+ \sum_{k=1}^{\dimension-1}(\weights^{(k)}-\weights^{(k+1)})^2
 		\ge 0.
 	\end{align*}
 	%
 	The last equality can be verified by taking the derivative of both and
 	realizing they are the same, which is sufficient because they are both zero	
-	in the origin. We essentially used the fact that our original loss function
+	in the origin. We simply used the fact that our original loss function
 	was essentially already a quadratic function except for the constant influx
-	at the first tile. And since that is a constant in the derivative it has
-	no bearing on the hesse matrix.
+	at the first tile. And that constant in the derivative has no bearing on the
+	hesse matrix.
 
 
-\end{proof}
+	To calculate the operator norm of \(H\) we can use the equality above and	
+	\((a-b)^2 \le 2(a^2 + b^2)\) to get
+	\begin{align*}
+		\langle \weights, H\weights\rangle
+		\le (\weights^{(1)})^2 + 2\sum_{k=1}^{d-1}(\weights^{(k)})^2 + (\weights^{(k+1)})^2 
+		\le 4 \sum_{k=1}^{d-1} (\weights^{(k)})^2
+		= 4 \|\weights\|^2
+	\end{align*}
+	Which immediately implies that the largest eigenvalue is smaller than 4. To
+	obtain a convex function with a Lipschitz continuos gradient with constant
+	\(\ubound\), we can now simply define
+	\begin{align*}
+		\loss(\weights):= \frac{\ubound}{4}\tilde{\loss}(\weights)
+		= \frac\ubound{8}\left[
+			(\weights^{(1)}-1)^2
+			+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
+		\right].
+	\end{align*}
+	Now we know that \(\weights^* = (1,\dots,1)^T\) achieves a loss of zero which is
+	the unique minimum as the loss function is positive and convex. Since we
+	assumed w.l.o.g. that \(\weights_0=\mathbf{0}\) we get
+	%
+	\begin{align}\label{eq: initial distance}
+		\|\weights^* - \weights_0\|^2 = \dimension
+	\end{align}
+	%
+	We also know
+	that Assumption~\ref{assmpt: parameter in linear hull of gradients} implies
+	%
+	\begin{align*}
+		\weights_n \in \linSpan\{\nabla\loss(\weights_k): 0 \le k \le n-1\}
+		\subseteq \reals^n \subseteq \reals^\dimension
+	\end{align*}
+	%
+	which immediately results in the second claim of the theorem
+	\begin{align*}
+		\|\weights^* - \weights_n\|^2
+		&\ge \sum_{k=n+1}^d ((\weights^*)^{(k)}- \weights_n^{(k)})^2
+		= d-(n+1) \\
+		&= n = \tfrac{n}{2n+1} d
+		\ge \tfrac13 \|\weights^* - \weights_0\|^2. 
+	\end{align*}
+	Where we have assumed without loss of generality that \(n\ge1\) in the last
+	inequality. The case \(n=0\) is obvious.
+
+	To get the first bound on the loss function we have to be a bit more subtle.
+	On \(\reals^n\subseteq \reals^\dimension\) the modified loss function
+	%
+	\begin{align}\label{eq: sink loss}
+		\loss_n(\weights) := \frac\ubound{8}\left[
+			(\weights^{(1)} -1)^2
+			+ (\weights^{(n)} - 0)^2
+			+ \sum_{k=1}^{n-1} (\weights^{(k)} - \weights^{(k+1)})^2
+		\right]
+	\end{align}
+	%
+	is equal to \(\loss(\weights)\) because \(\weights^{(i)}=0\) for \(i>n\).
+	Therefore
+	%
+	\begin{align*}
+		\loss(\weights_n) - \inf_{\weights}\loss(\weights)
+		\ge \loss\restriction_{\reals^n}(\weights_n) = \loss_n(\weights_n)
+		\ge \inf_{\weights}\loss_n(\weights).
+	\end{align*}
+	%
+	Having a closer look at \(\loss_n\) will therefore give us a lower bound
+	without having to know anything about \(\firstOrderMethod\). Since \(\loss_n\)
+	is similarly convex, setting its derivative equal to zero will actually provide us
+	with its minimum. And similarly to \(\loss\) itself, \(\loss_n\) is a
+	quadratic function, so the gradient is just an affine function with a
+	constant hesse matrix. Therefore finding the minimum only requires solving
+	a linear equation. One can just go through the same motions as we did
+	before to obtain the equation:
+	%
+	\begin{align}\label{eq: optimality condition for sink loss}
+		A_n \weights - \stdBasis_1 \xeq{!} 0 \qquad 
+		A_n =\begin{cases}
+			2 & i=j\le n \\
+			-1 & i=j+1\le n \text{ or } j=i+1\le n \\
+			0 & \text{else}
+		\end{cases} 
+	\end{align}
+	%
+	But at least for solving it, it helps to have an intuition what \(\loss_n\)
+	actually represents. Recall \(\loss\) represents just
+	a single heat source at interval \(\weights^{(1)}\) at constant
+	temperature one which slowly heats up our rod to this level. Now
+	\(\loss_n\) not only has a source, it also has a sink with constant
+	temperature zero at \(n\) which cools down the rod from this other side.
+
+	It is therefore quite intuitive that the equilibrium solution
+	\(\hat{\weights}_n\) (optimal solution for \(\loss_n\)) should be a linearly
+	decreasing slope
+	%
+	\begin{align*}
+		\hat{\weights}_n^{(i)} = \begin{cases}
+			1 - \tfrac{i}{n+1} & i \le n+1\\
+			0	& i \ge n+1
+		\end{cases}
+	\end{align*}	
+	%
+	And this is in fact the solution of our linear equation (\ref{eq: optimality
+	condition for sink loss}) as can be verified by calculation. Now we just
+	have to plug this into our loss function
+	%
+	\begin{align*}
+		&\loss(\weights_n)-\inf_\weights\loss(\weights)
+		\ge \loss(\hat{\weights}_n)\\
+		&= \frac{\ubound}{8}\left[
+			\left(-\tfrac1{n+1}\right)^2 + \left(1-\tfrac{n}{n+1}\right)^2
+			+ \sum_{k=1}^{n-1}\left(\tfrac{k+1}{n+1}-\tfrac{k}{n+1}\right)^2
+		\right]\\
+		&= \frac{\ubound}{8}\sum_{k=0}^n \tfrac{1}{(n+1)^2}
+		=\frac{\ubound}{8(n+1)}
+		\xeq{(\ref{eq: initial distance})} \frac{L\|\weights_0 - \weights^*\|^2}{8(n+1)d}\\
+		&\lxge{(\ref{eq: w.l.o.g dim=2n+1})}
+		\frac{L\|\weights_0 - \weights^*\|^2}{16(n+1)^2}
+		\qedhere
+	\end{align*}
+ \end{proof}
 
 \begin{remark}
 	This type of loss function is not unlikely to be encountered in real
@@ -955,6 +1100,8 @@ this argument results in the following theorem.
 	\parencite[Chapter 12]{suttonReinforcementLearningIntroduction2018}
 	are an attempt to speed this process up.
 \end{remark}
+
+\subsection{Complexity Bounds for Strongly Convex Losses}
 
 To make our loss function strongly convex we have to add a regularization term
 %
