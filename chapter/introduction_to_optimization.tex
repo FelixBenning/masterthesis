@@ -1,35 +1,40 @@
 % !TEX root = ../Masterthesis.tex
+\newcommand{\loss}{\mathcal{L}}
+\newcommand{\weights}{\theta}
 \newcommand{\dist}{\mathcal{D}}
 \newcommand{\E}{\mathbb{E}}
+\newcommand{\lipConst}{L}
+\newcommand{\dimension}{d}
+\newcommand{\lossError}{\epsilon}
 
 \chapter{Introduction to Optimization}
 
 
-Let \(f_\theta(X)\) be a (parametrized) prediction for \(Y\), where \(Z=(X,Y)\)
+Let \(f_\weights(X)\) be a (parametrized) prediction for \(Y\), where \(Z=(X,Y)\)
 is drawn from a distribution \(\dist\) of real world examples. The prediction
-error of our parameter \(\theta\) is a loss function \(l(\theta, X, Y)\), e.g. 
+error of our parameter \(\weights\) is a loss function \(l(\weights, X, Y)\), e.g. 
 %
 \begin{align*}
-	l(\theta, x, y) := (f_\theta(x) - y)^2.
+	l(\weights, x, y) := (f_\weights(x) - y)^2.
 \end{align*}
 %
 And we \emph{want} to minimize the theoretical loss over all examples (risk)
 %
 \begin{align*}
-	L(\theta) := \E_{X,Y\sim \dist} [l(\theta, X, Y)].
+	\loss(\weights) := \E_{X,Y\sim \dist} [l(\weights, X, Y)].
 \end{align*}
 
 \section{Zero Order Optimization}
 
 Let us set aside the stochasticity of the problem for a moment and assume we
-could evaluate \(L\) at any point \(\theta\). In other words: we have a "zero
-order oracle" which can tell us \(L(\theta)\) for any \(\theta\) for a fixed
+could evaluate \(L\) at any point \(\weights\). In other words: we have a "zero
+order oracle" which can tell us \(\loss(\weights)\) for any \(\weights\) for a fixed
 computational cost.
 
-If we assume an infinite number of possible inputs \(\theta\), it does not matter
-how much and where we sample \(L\) there is always a different \(\theta\) where
-\(L\) might be arbitrarily lower. This notion is formalized in various "No-Free-Lunch
-Theorems". We must therefore start making assumptions about \(L\) to make this
+If we assume an infinite number of possible inputs \(\weights\), it does not matter
+how much and where we sample \(\loss\) there is always a different \(\weights\) where
+\(\loss\) might be arbitrarily lower. This notion is formalized in various "No-Free-Lunch
+Theorems". We must therefore start making assumptions about \(\loss\) to make this
 problem tractable.
 
 \subsection{Grid Search}
@@ -38,33 +43,33 @@ problem tractable.
 While Lipschitz continuity 
 %
 \begin{align*}
-	| L(\theta_1) - L(\theta_2) | < K_0 | \theta_1 - \theta_2 |
+	| \loss(\weights_1) - \loss(\weights_2) | < \lipConst | \weights_1 - \weights_2 |
 \end{align*}
 %
-is sufficient to find an \(\epsilon\)-solution \(\hat{\theta}\) inside a unit
+is sufficient to find an \(\lossError\)-solution \(\hat{\weights}\) inside a unit
 (hyper-)cube
 %
 \begin{align*}
-	L(\hat{\theta}) \le \inf_{\theta: 0\le\theta_i\le 1} L(\theta) + \epsilon
+	\loss(\hat{\weights}) \le \inf_{ 0\le\weights_i\le 1} \loss(\weights) + \lossError
 \end{align*}
 %
 in finite time, it still requires a full \emph{grid search} with time complexity
 %
 \begin{align*}
-	\left(\left\lfloor \frac{K_0}{2\epsilon}\right\rfloor + 1\right)^n
+	\left(\left\lfloor \frac{\lipConst}{2\lossError}\right\rfloor + 1\right)^\dimension
 \end{align*}
 %
-where \(n\) is the dimension of \(\theta\). The fact that grid search is
+where \(\dimension\) is the dimension of \(\weights\). The fact that grid search is
 sufficient can be seen by tiling the space into a grid and asking the oracle
 for the value of the loss function at each center. If the minimum is placed in
-some tile, the Lipschitz continuity forces the center of the tile to be \(\epsilon\)
+some tile, the Lipschitz continuity forces the center of the tile to be \(\lossError\)
 close to it \parencite[cf.][p. 11]{nesterovLecturesConvexOptimization2018}.
 
 The fact that this is necessary can easily be seen by imagining a "resisting
 oracle" which places the minimum in just the last grid element where we look
 \parencite[cf.][p. 13]{nesterovLecturesConvexOptimization2018}. The exponential
 increase of complexity in the dimension makes the problem intractable for even
-mild dimensions and precisions (e.g. \(n=11\), \(\epsilon=0.01\), \(K_0=2\)
+mild dimensions and precisions (e.g. \(\dimension=11\), \(\lossError=0.01\), \(\lipConst=2\)
 implies millions of years of computation). So we have to make further
 assumptions. 
 
