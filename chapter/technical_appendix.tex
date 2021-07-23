@@ -7,15 +7,15 @@
 
 \begin{lemma}\label{Appdx-lem: lipschitz and bounded derivative}
 	If \(f\) is differentiable, then the derivative \(\nabla f\) is
-	bounded (w.r.t. the operator norm) by constant \(K\) if and only if the function
-	\(f\) is Lipschitz continuous with Lipschitz constant \(K\).
+	bounded (w.r.t. the operator norm) by constant \(\lipConst\) if and only if the function
+	\(f\) is \(\lipConst\)-Lipschitz continuous.
 \end{lemma}
 \begin{proof}
 	Lipschitz continuity is implied by the mean value theorem
 	\begin{align*}
 		\|f(x_1) - f(x_0)\|
 		&\le \|\nabla f(x_0 + \xi(x_1-x_0))\| \|x_1- x_0\|\\
-		&\le K \|x_1-x_0\|.
+		&\le \lipConst \|x_1-x_0\|.
 	\end{align*}
 	%
 	The opposite direction is implied by
@@ -29,7 +29,7 @@
 			\underbrace{
 				\tfrac{\|f(x_0 + v) - f(x_0) \|}{\|v\|}
 			}_{
-				\le K
+				\le \lipConst 
 			}
 			+ \underbrace{
 				\tfrac{\|\nabla f(x_0)v + f(x_0) - f(x_0 +v)\|}{\|v\|}
@@ -44,14 +44,15 @@
 	the limit.
 \end{proof}
 
-\begin{lemma}[\citeauthor{nesterovLecturesConvexOptimization2018}]\label{Appdx-lem: Lipschitz Gradient implies taylor inequality}
-	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(K\),
+\begin{lemma}[{\cite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}}]
+	\label{Appdx-lem: Lipschitz Gradient implies taylor inequality}
+	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(\lipConst\),
 	then we have
 	\begin{align*}
-		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{K}2 \|y-x\|^2
+		|f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{\lipConst}2 \|y-x\|^2
 	\end{align*}
 \end{lemma}
-\begin{proof}[Proof {\parencite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}}]
+\begin{proof}
 	\begin{align*}
 		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
 	\end{align*}
@@ -61,9 +62,24 @@
 		&\le \int_0^1 | \langle\nabla f(x+\tau(y-x))-\nabla f(x), y-x\rangle | d\tau \\
 		&\lxle{\text{C.S.}}
 		\int_0^1 \|\langle\nabla f(x+\tau(y-x))-\nabla f(x)\| \cdot \|y-x\| d\tau\\
-		&\le \int_0^1 K \|\tau(y-x)\|\cdot\|y-x\| d\tau = \tfrac{K}2 \|y-x\|^2.
+		&\le \int_0^1 \lipConst \|\tau(y-x)\|\cdot\|y-x\| d\tau
+		= \tfrac{\lipConst}2 \|y-x\|^2.
 		\qedhere
 	\end{align*}
+\end{proof}
+
+\begin{theorem}[{\cite[Theorem 2.1.12]{nesterovLecturesConvexOptimization2018}}]
+	\label{appdx-thm: technical strong convexity convergence proof component}
+	If \(f\in\strongConvex{\lbound}{\ubound}\), then for any
+	\(x,y\in\reals^\dimension\) we have
+	\begin{align*}
+		\langle \nabla f(x) - \nabla f(y), x-y\rangle 
+		\ge \tfrac{\lbound\ubound}{\lbound+\ubound} \| x-y\|^2
+		+ \tfrac{1}{\lbound+\ubound}\|\nabla f(x) -\nabla f(y)\|^2
+	\end{align*}
+\end{theorem}
+\begin{proof}
+
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

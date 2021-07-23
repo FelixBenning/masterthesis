@@ -1,29 +1,5 @@
 % !TEX root = ../Masterthesis.tex
 
-\newcommand{\identity}{\mathbb{I}}
-\newcommand{\lbound}{\mu}
-\newcommand{\ubound}{L}
-\newcommand{\diag}{\text{diag}}
-\newcommand{\rate}{\text{rate}}
-\newcommand{\reals}{\mathbb{R}}
-\newcommand{\naturals}{\mathbb{N}}
-\newcommand{\firstOrderMethod}{\mathcal{M}}
-\newcommand{\linSpan}{\text{span}}
-\newcommand{\dimension}{d}
-\newcommand{\loss}{\mathcal{L}}
-\newcommand{\weights}{\theta}
-\newcommand{\minimum}{\weights_*}
-\newcommand{\lr}{\text{h}}
-\newcommand{\condition}{\kappa}
-\newcommand{\stdBasis}{e}
-\newcommand{\graph}{G}
-\newcommand{\graphLaplacian}{A_\graph}
-\newcommand{\edges}{E}
-\newcommand{\vertices}{V}
-\newcommand*{\lipGradientSet}[2][1,1]{\mathcal{F}^{#1}_{#2}}
-\newcommand*{\strongConvex}[3][1,1]{\mathcal{S}^{#1}_{{#2},{#3}}}
-\newcommand*{\sequenceSpace}[1][2]{\ell^{#1}}
-
 \chapter{Gradient Decent (GD)}
 
 A step up from zero order methods (such as grid search) are first order methods
@@ -430,14 +406,14 @@ derivative for the upper bound entirely
 %
 \begin{lemma}\label{lem: lipschitz and bounded derivative}
 	If \(f\) is differentiable, then the derivative \(\nabla f\) is
-	bounded (w.r.t. the operator norm) by constant \(K\)
+	bounded (w.r.t. the operator norm) by constant \(\lipConst\)
 	\begin{align*}
-		\|\nabla f\| \le K
+		\|\nabla f\| \le\lipConst 
 	\end{align*}	
 	if and only if the function
-	\(f\) is Lipschitz continuous (Lip. constant \(K\))
+	\(f\) is \(\lipConst\)-Lipschitz continuous
 	\begin{align*}
-		\|f(x) - f(y)\| \le K \|x-y\|.
+		\|f(x) - f(y)\| \le \lipConst \|x-y\|.
 	\end{align*}
 \end{lemma}
 \begin{proof}
@@ -743,8 +719,9 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 		- 2\lr\langle \nabla\loss(\weights_n), \weights_n - \minimum\rangle
 		+ \lr^2 \| \nabla\loss(\weights_n)\|^2
 	\end{align*}
-	Using \(\nabla\loss(\minimum)=0\) and \fxwarning{appendix!}{\ref{??}}
-	\begin{align*}
+	Using \(\nabla\loss(\minimum)=0\) and Theorem~\ref{appdx-thm: technical
+	strong convexity convergence proof component}, i.e.
+ 	\begin{align*}
 		&\langle \nabla\loss(\weights_n) -\nabla\loss(\minimum), \weights_n - \minimum\rangle	\\
 		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \minimum\|^2
 		+ \tfrac{1}{\ubound+\lbound}
