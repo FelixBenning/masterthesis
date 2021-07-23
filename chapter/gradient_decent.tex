@@ -6,11 +6,13 @@
 \newcommand{\diag}{\text{diag}}
 \newcommand{\rate}{\text{rate}}
 \newcommand{\reals}{\mathbb{R}}
+\newcommand{\naturals}{\mathbb{N}}
 \newcommand{\firstOrderMethod}{\mathcal{M}}
 \newcommand{\linSpan}{\text{span}}
 \newcommand{\dimension}{d}
 \newcommand{\loss}{\mathcal{L}}
 \newcommand{\weights}{\theta}
+\newcommand{\minimum}{\weights_*}
 \newcommand{\lr}{\text{lr}}
 \newcommand{\condition}{\kappa}
 \newcommand{\stdBasis}{e}
@@ -20,6 +22,7 @@
 \newcommand{\vertices}{V}
 \newcommand*{\lipGradientSet}[2][1,1]{\mathcal{F}^{#1}_{#2}}
 \newcommand*{\strongConvex}[3][1,1]{\mathcal{S}^{#1}_{{#2},{#3}}}
+\newcommand*{\sequenceSpace}[1][2]{\ell^{#1}}
 
 \chapter{Gradient Decent (GD)}
 
@@ -186,19 +189,19 @@ diagnalization of the Hesse matrix}) to see
 %
 Now if we assume like \textcite{gohWhyMomentumReally2017}, that the second
 taylor approximation is accurate and thus that \(\nabla^2 \loss(\weights)=H\) is a
-constant, then \(\hat{\weights}_n = \weights^*\) is the real minimum and we get
+constant, then \(\hat{\weights}_n = \minimum\) is the real minimum and we get
 %
 \begin{align}
-	\weights_n - \weights^*
-	= V\cdot\diag[(1-\lr\lambda_1)^n,\dots,(1-\lr\lambda_d)^n] V^T (\weights_0 - \weights^*)
+	\weights_n - \minimum
+	= V\cdot\diag[(1-\lr\lambda_1)^n,\dots,(1-\lr\lambda_d)^n] V^T (\weights_0 - \minimum)
 \end{align}
 %
 by induction. Decomposing the difference into the eigenspaces of \(H\) we can 
 see that each component scales exponentially on its own 
 %
 \begin{align*}
-	\langle \weights_n -\weights^*, v_i\rangle
-	= (1-\lr\lambda_i)^n \langle \weights_0 - \weights^*, v_i\rangle
+	\langle \weights_n -\minimum, v_i\rangle
+	= (1-\lr\lambda_i)^n \langle \weights_0 - \minimum, v_i\rangle
 \end{align*}
 %
 This is beautifully illustrated with interactive graphs in
@@ -207,8 +210,8 @@ This is beautifully illustrated with interactive graphs in
 \subsection{Negative Eigenvalues}\label{subsec: Negative Eigenvalues}
 
 Now if \(\lambda_i<0\), then \(1-\lr\lambda_i\) would be greater
-than one which would repel this component \(\langle \weights_0 - \weights^*,
-v_i\rangle\) away from \(\weights^*\). This is a good thing, since \(\weights^*\)
+than one which would repel this component \(\langle \weights_0 - \minimum,
+v_i\rangle\) away from \(\minimum\). This is a good thing, since \(\minimum\)
 is a maximum in this component. This means we will walk down local minima and
 saddle points no matter the learning rate assuming  this component  was not
 zero to begin with. In case of a maximum this would mean that we would start
@@ -611,11 +614,11 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 \(\lipGradientSet[q,p]{\ubound}\).
 
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
-	Let \(\loss\in\lipGradientSet{\ubound}\), then Gradient
-	Decent with learning rate \(0 < \lr < 2/\ubound\) results in
+	Let \(\loss\in\lipGradientSet{\ubound}\), \(\minimum\) the unique minimum,
+	then Gradient Decent with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align*}
-		\loss(\weights_n) - \inf_\weights \loss(\weights)
-		\le \frac{2\ubound\|\weights_0 - \weights^*\|}{4 + n\ubound\lr(2-\ubound\lr)}
+		\loss(\weights_n) - \loss(\minimum)
+		\le \frac{2\ubound\|\weights_0 - \minimum\|}{4 + n\ubound\lr(2-\ubound\lr)}
 		\in O(1/n)
 	\end{align*}
 	with the optimal rate of convergence being achieved for \(\lr=1/\ubound\).
@@ -658,7 +661,7 @@ And convexity was defined as a lower bound
 %
 which we will now sharpen this to a quadratic lower bound as well.
 %
-\begin{definition}
+\begin{definition}\label{def: strong convexity}
 	A function \(\loss\) is \emph{strongly convex}, if for all \(x,y\)
 	\begin{align*}
 		\loss(x) + \langle \nabla \loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \loss(y)
@@ -679,12 +682,12 @@ Using this new assumption we get our linear\footnote{
 	In the Numerical Analysis, exponential rate of
 	convergence is called "linear convergence" because the relationship
 	\[
-		\|\weights_{n+1} - \weights^*\| \le c \|\weights_n - \weights^*\|
+		\|\weights_{n+1} - \minimum\| \le c \|\weights_n - \minimum\|
 	\]
 	is linear. In
 	general convergence order \(q\) implies 
 	\[
-		\|\weights_{n+1} -\weights^*\| \le c\|\weights_n - \weights^*\|^q.
+		\|\weights_{n+1} -\minimum\| \le c\|\weights_n - \minimum\|^q.
 	\]
 	This is because quadratic convergence (\(q=2\)) already results in an actual
 	rate of convergence of \(c^{\left(2^n\right)}\) which is double exponential and
@@ -697,61 +700,61 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 %
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
 	If \(\loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
-	\[0 \le \lr \le \frac{2}{\ubound+\lbound}\]
+	\[0 \le \lr \le \tfrac{2}{\ubound+\lbound}\]
 	Gradient Decent generates a sequence \(\weights_n\) satisfying
 	\begin{subequations}
 	\begin{align}
 		\label{eq: gd strong convexity convergence rate 1}
-		\|\weights_n - \weights^*\|
+		\|\weights_n - \minimum\|
 		&\le \left(
 			1- 2\lr\frac{\ubound\lbound}{\ubound+\lbound}
 		\right)^{n/2}
-		\|\weights_0 - \weights^*\| \\
+		\|\weights_0 - \minimum\| \\
 		\label{eq: gd strong convexity convergence rate 2}
-		\loss(\weights_n) - \loss(\weights^*)
+		\loss(\weights_n) - \loss(\minimum)
 		&\le \frac\ubound{2} \left(
 			1- 2\lr\frac{\ubound\lbound}{\ubound+\lbound}
 		\right)^{n}
-		\|\weights_0 - \weights^*\|^2
+		\|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
 	In particular for \(\lr=\tfrac2{\ubound+\lbound}\) we achieve the optimal
 	rate of convergence
 	\begin{subequations}\label{eq: gd strong convexity optimal rate}
 	\begin{align}
-		\|\weights_n - \weights^*\|
+		\|\weights_n - \minimum\|
 		&\le \left(
 			1- \frac{2}{1+\condition}
 		\right)^n
-		\|\weights_0 - \weights^*\| \\
-		\loss(\weights_n) - \loss(\weights^*)
+		\|\weights_0 - \minimum\| \\
+		\loss(\weights_n) - \loss(\minimum)
 		&\le \frac\ubound{2} \left(
 			1- \frac{2}{1+\condition}
 		\right)^{2n}
-		\|\weights_0 - \weights^*\|^2
+		\|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
 \end{theorem}
 \begin{proof}[Proof {\parencite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}}]
 	\begin{align*}
-		\|\weights_{n+1} - \weights^*\|^2
-		&= \| \weights_n -\weights^* - \lr\nabla\loss(\weights_n)\|^2\\
-		&= \| \weights_n - \weights^*\|^2
-		- 2\lr\langle \nabla\loss(\weights_n), \weights_n - \weights^*\rangle
+		\|\weights_{n+1} - \minimum\|^2
+		&= \| \weights_n -\minimum - \lr\nabla\loss(\weights_n)\|^2\\
+		&= \| \weights_n - \minimum\|^2
+		- 2\lr\langle \nabla\loss(\weights_n), \weights_n - \minimum\rangle
 		+ \lr^2 \| \nabla\loss(\weights_n)\|^2
 	\end{align*}
-	Using \(\nabla\loss(\weights^*)=0\) and \fxwarning{appendix!}{\ref{??}}
+	Using \(\nabla\loss(\minimum)=0\) and \fxwarning{appendix!}{\ref{??}}
 	\begin{align*}
-		&\langle \nabla\loss(\weights_n) -\nabla\loss(\weights^*), \weights_n - \weights^*\rangle	\\
-		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \weights^*\|^2
+		&\langle \nabla\loss(\weights_n) -\nabla\loss(\minimum), \weights_n - \minimum\rangle	\\
+		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \minimum\|^2
 		+ \tfrac{1}{\ubound+\lbound}
-		\|\nabla\loss(\weights_n) - \nabla\loss(\weights^*)\|^2
+		\|\nabla\loss(\weights_n) - \nabla\loss(\minimum)\|^2
 	\end{align*}
 	we get
 	\begin{align*}
-		\|\weights_{n+1} - \weights^*\|^2
+		\|\weights_{n+1} - \minimum\|^2
 		\le \left(1- 2\lr \tfrac{\ubound\lbound}{\ubound+\lbound}\right)
-		\|\weights_n - \weights^*\|^2
+		\|\weights_n - \minimum\|^2
 		+ \underbrace{\lr}_{\ge 0}
 		\underbrace{\left(\lr-\tfrac{2}{\ubound+\lbound}\right)}_{\le0}
 		\|\nabla\loss(\weights_n)\|^2
@@ -760,9 +763,9 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 	1}). (\ref{eq: gd strong convexity convergence rate 2}) follows from our
 	upper bound (\ref{eq: upper bound}), i.e. Lipschitz continuity of the gradient:
 	\begin{align*}
-		\loss(\weights_n) - \loss(\weights^*)
-		\le \langle \underbrace{\nabla\loss(\weights^*)}_{=0}, \weights_n - \weights^*\rangle
-		+ \tfrac\ubound{2} \| \weights_n - \weights^*\|^2
+		\loss(\weights_n) - \loss(\minimum)
+		\le \langle \underbrace{\nabla\loss(\minimum)}_{=0}, \weights_n - \minimum\rangle
+		+ \tfrac\ubound{2} \| \weights_n - \minimum\|^2
 	\end{align*}
 	To get (\ref{eq: gd strong convexity optimal rate}) we simply have to plug
 	in the presumed optimal learning rate \(\lr=2/(\ubound+\lbound)\) into
@@ -888,13 +891,13 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	we have
 	\begin{subequations}
 	\begin{align}
-		\loss(\weights_n) - \inf_\weights \loss(\weights)
-		&\ge \frac{\ubound \|\weights_0 - \weights^*\|^2}{16(n+1)^2} \\
-		\|\weights_k -\weights^*\|^2 
-		&\ge \frac13 \|\weights_0 - \weights^*\|^2
+		\loss(\weights_n) - \loss(\minimum)
+		&\ge \frac{\ubound \|\weights_0 - \minimum\|^2}{16(n+1)^2} \\
+		\|\weights_k -\minimum\|^2 
+		&\ge \frac13 \|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
-	where \(\weights^* = \arg\min_\weights \loss(\weights)\).
+	where \(\minimum = \arg\min_\weights \loss(\weights)\) is the unique minimum.
 \end{theorem}
 \begin{proof}
 	First, since we could always define
@@ -991,12 +994,12 @@ this argument results in the following theorem inspired by \textcite[Theorem
 			+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 		\right].
 	\end{align*}
-	Now we know that \(\weights^* = (1,\dots,1)^T\) achieves a loss of zero which is
+	Now we know that \(\minimum = (1,\dots,1)^T\) achieves a loss of zero which is
 	the unique minimum as the loss function is positive and convex. Since we
 	assumed w.l.o.g. that \(\weights_0=\mathbf{0}\) we get
 	%
 	\begin{align}\label{eq: initial distance}
-		\|\weights^* - \weights_0\|^2 = \dimension
+		\|\minimum - \weights_0\|^2 = \dimension
 	\end{align}
 	%
 	We also know
@@ -1009,11 +1012,11 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	%
 	which immediately results in the second claim of the theorem
 	\begin{align*}
-		\|\weights^* - \weights_n\|^2
-		&\ge \sum_{k=n+1}^d ((\weights^*)^{(k)}- \weights_n^{(k)})^2
+		\|\minimum - \weights_n\|^2
+		&\ge \sum_{k=n+1}^d (\minimum^{(k)}- \weights_n^{(k)})^2
 		= d-(n+1) \\
 		&= n = \tfrac{n}{2n+1} d
-		\ge \tfrac13 \|\weights^* - \weights_0\|^2. 
+		\ge \tfrac13 \|\minimum - \weights_0\|^2. 
 	\end{align*}
 	Where we have assumed without loss of generality that \(n\ge1\) in the last
 	inequality. The case \(n=0\) is obvious.
@@ -1087,9 +1090,9 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		\right]\\
 		&= \frac{\ubound}{8}\sum_{k=0}^n \tfrac{1}{(n+1)^2}
 		=\frac{\ubound}{8(n+1)}
-		\xeq{(\ref{eq: initial distance})} \frac{L\|\weights_0 - \weights^*\|^2}{8(n+1)d}\\
+		\xeq{(\ref{eq: initial distance})} \frac{L\|\weights_0 - \minimum\|^2}{8(n+1)d}\\
 		&\lxge{(\ref{eq: w.l.o.g dim=2n+1})}
-		\frac{L\|\weights_0 - \weights^*\|^2}{16(n+1)^2}
+		\frac{L\|\weights_0 - \minimum\|^2}{16(n+1)^2}
 		\qedhere
 	\end{align*}
 \end{proof}
@@ -1105,7 +1108,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 
 \subsection{Complexity Bounds for Strongly Convex Losses}
 
-To make our loss function strongly convex we have to add a regularization term
+For a strongly convex loss we simply add a regularization term:
 %
 \begin{align*}
 	\loss(\weights)
@@ -1144,37 +1147,118 @@ example loss gradient}) we can set the gradient to zero
 	\right]\weights - \frac{\lbound(\condition-1)}{4}\stdBasis_1.
 \end{align*}
 %
-This condition can be rewritten as
+Assuming \(\condition>1\) (\(\condition=1\) implies \(\loss=\lbound\|\cdot\|^2\) and
+\(\minimum=\mathbf{0}\)),
+this condition can be rewritten as
 %
 \begin{align*}
-	\stdBasis_1 =  \left[
+	0 =  \left[
 		A_G + \stdBasis_1\stdBasis_1^T + \frac{4}{\condition-1}\identity
-	\right]
-	\weights
+	\right] - \stdBasis_1
+	\weights.
 \end{align*}
 %
+All entries on the diagonal except for the last dimension (which only has one
+connection and no source or sink) are equal to
+%
+\begin{align*}
+	2+\frac{4}{\condition-1} = 2\frac{\condition +1}{\condition-1}
+\end{align*}
+%
+This results in the system of equations
+%
+\begin{subequations}
+\label{eq: solution to the strongly convex coloring problem}
+\begin{align*}
+	0&=2\frac{\condition+1}{\condition -1}\weights^{(1)} - \weights^{(2)} -1 \\
+	0&=2\frac{\condition+1}{\condition -1}\weights^{(i)}
+	- \weights^{(i+1)} - \weights^{(i-1)}  && 2\le i <d \\
+	0&= \left(2\frac{\condition+1}{\condition -1} -1 \right)\weights^{(d)}
+	- \weights^{(d-1)}
+\end{align*}
+\end{subequations}
+Defining \(\weights^{(0)} =1\) we can unify the first two equations (flipping
+the sign)
+\begin{align*}
+	0&= 
+	\tfrac{\weights^{(i+1)}}{\weights^{(i)}}\tfrac{\weights^{(i)}}{\weights^{(i-1)}}
+	- 2\frac{\condition+1}{\condition -1}\tfrac{\weights^{(i)}}{\weights^{(i-1)}}
+	+ 1  && i <d
+\end{align*}
+%
+Which means that for a solution \(q\) of the quadratic equation
+\begin{align}\label{eq: coloring solution quadratic equation}
+	0&= q^2 - 2\frac{\condition+1}{\condition -1}q + 1,
+\end{align}
+%
+\(\weights^{(i)} = q^i\) will be a solution to the first \(d-1\) equations.
+Unfortunately neither of the solutions
+%
+\begin{align*}
+	q_{1/2} &= \frac{\condition+1}{\condition -1} \pm 
+	\sqrt{\left(\tfrac{\condition+1}{\condition-1}\right)^2 -1}
+	=\frac{\condition +1 \pm \sqrt{4\condition}}{\condition -1}
+	= \frac{(\sqrt{\condition}\pm 1)^2}{(\sqrt{\condition}-1)(\sqrt{\condition}+1)}
+\end{align*}
+%
+is a solution to the last equation. Which is why we are going to formulate the
+following theorem only for \(\dimension=\infty\)\footnote{
+	For large dimensions the real solution seems to be almost
+	indistinguishable from the limiting case (e.g. \(\dimension=40,
+	\condition=10\) results in a maximal error of the order \(10^{-11}\). The
+	error in the first 35 dimensions is even of the order \(10^{-13}\))
+}.
+We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
+\begin{align*}
+	\sequenceSpace := \Big\{
+		f:\naturals \to \reals : \| f\|^2 = \sum_{k\in\naturals} f(k)^2< \infty
+	\Big\}.
+\end{align*}
 %
 \begin{theorem}[{\cite[Theorem 2.1.13]{nesterovLecturesConvexOptimization2018}}]
-	For any \(\weights_0\in\reals^\infty\) there exists
+	For any \(\weights_0\in\sequenceSpace\) there exists
 	\(\loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) such that for any
 	first order method \(\firstOrderMethod\) satisfying Assumption~\ref{assmpt:
 	parameter in linear hull of gradients}, we have
 	\begin{subequations}
 	\begin{align}
-		\|\weights_n - \weights^*\|
-		&\ge \left(1-\frac2{1+\condition}\right)^n \|\weights_0 - \weights^*\| \\
-		\loss(\weights_n) - \loss(\weights^*)
+		\|\weights_n - \minimum\|
+		&\ge \left(1-\frac2{1+\condition}\right)^n \|\weights_0 - \minimum\| \\
+		\loss(\weights_n) - \loss(\minimum)
 		&\ge \tfrac{\lbound}{2}
-		\left(1-\frac2{1+\condition}\right)^{2n} \|\weights_0 - \weights^*\|^2
+		\left(1-\frac2{1+\condition}\right)^{2n} \|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
-	where \(\weights^*\) is the unique minimum of \(\loss\).
+	where \(\minimum\) is the unique minimum of \(\loss\).
 \end{theorem}
 \begin{proof}
-	
+	We can again assume without loss of generality that \(\weights_0=\mathbf{0}\).
+	Of the two solutions to the linear equations (\ref{eq: solution to the
+	strongly convex coloring problem}) induced by the two solutions \(q_{1/2}\)
+	of (\ref{eq: coloring solution quadratic equation}) only
+	\begin{align*}
+		\minimum^{(i)} = \left(\frac{\sqrt{\condition}-1}{\sqrt{\condition}+1}\right)^i
+		= \left(1 - \frac{2}{1+\sqrt{\condition}}\right)^i =: q^i
+	\end{align*}
+	is an element of \(\sequenceSpace\) and therefore the unique minimum. Since 
+	\(\weights_n\) stays in the subspace \(\reals^n\) by assumption we know
+	\begin{align*}
+		\|\weights_n -\minimum\|^2
+		\ge \sum_{k=n+1}^\infty (\minimum^{(k)})^2
+		= q^{2n} \sum_{k=0}^\infty q^{2k}
+		= q^{2n} \| \minimum\|^2
+		= q^{2n} \|\weights_0 - \minimum\|^2.
+	\end{align*}
+	Taking the root results in the first claim. The second claim immediately
+	follows from the definition of strong convexity (Def~\ref{def: strong convexity})
+	and \(\nabla\loss(\minimum) = 0\):
+	\begin{align*}
+		\loss(\weights_n) - \loss(\minimum)
+		&\ge \langle \nabla\loss(\minimum), \weights_n -\minimum\rangle
+		+\tfrac\lbound{2} \|\weights_n -\minimum\|^2
+		\qedhere
+	\end{align*}
 \end{proof}
-
-\fxwarning{finish up}
 
 \section{Heuristics}
 
