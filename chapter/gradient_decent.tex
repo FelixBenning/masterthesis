@@ -342,7 +342,7 @@ due to the exponential repulsion from negative eigenvalues.
 In the following we are therefore going to assume convexity. A formulation which
 does not require the second derivative is
 %
-\begin{definition}[Convexity]
+\begin{definition}[Convexity]\label{def: convexity}
 	A function \(f\) is called \emph{convex}, if for all \(x,y\), \(\lambda\in[0,1]\)
 	\begin{align*}
 		f(x + \lambda(y-x)) \le f(x) + \lambda (f(y)-f(x)).
@@ -454,10 +454,10 @@ So let us see if we can get convergence of the discrete gradients as well.
 %
 \begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
 	\label{lem: Lipschitz Gradient implies taylor inequality}
-	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(K\),
+	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(\lipConst\),
 	then we have
 	\begin{align*}
-		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{K}2 \|y-x\|^2
+		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{\lipConst}2 \|y-x\|^2
 	\end{align*}
 \end{lemma}
 \begin{proof}
@@ -473,7 +473,7 @@ Gradient implies taylor inequality} we get
 	&\le \loss(\weights_n) 
 	+ \langle\nabla \loss(\weights_n),\weights_{n+1} - \weights_n\rangle
 	+ \tfrac{\ubound}{2} \| \weights_{n+1} - \weights_n\|^2 
-	\label{bound increment}\\
+	\label{eq: bound increment}\\
 	&= \loss(\weights_n)
 	+ \langle\nabla \loss(\weights_n), -\lr\nabla \loss(\weights_n)\rangle
 	+ \tfrac{\ubound}{2}\lr^2\| \nabla \loss(\weights_n)\|^2
@@ -499,6 +499,12 @@ get
 \end{align*}
 %
 The largest decrease is guaranteed by \(\lr=\tfrac{1}{\ubound}\) (\(\alpha=1/2\)).
+This results in
+%
+\begin{align}\label{eq: optimal loss decrease step}
+	\loss(\weights_{n+1}) - \loss(\weights_n)
+	\le - \tfrac{1}{2\ubound}\|\nabla \loss(\weights_n)\|^2.
+\end{align}
 \begin{remark}
 	Recall that this sets the rate of the largest eigenvalue to zero eliminating
 	the error in that eigenspace immediately, but it is not the optimal
@@ -507,12 +513,6 @@ The largest decrease is guaranteed by \(\lr=\tfrac{1}{\ubound}\) (\(\alpha=1/2\)
 	distance between the losses. And favouring the eigenspace with larger
 	eigenvalues is results in greater reductions in the loss.
 \end{remark}
-This results in
-%
-\begin{align*}
-	\loss(\weights_{n+1}) - \loss(\weights_n)
-	\le - \tfrac{1}{2\ubound}\|\nabla \loss(\weights_n)\|^2.
-\end{align*}
 %
 \subsubsection{Dead End: Convergence of the Gradient}
 
@@ -526,7 +526,7 @@ Summing over these increments results in a very similar equation to
 \end{align*}
 %
 Since \(\tfrac{1}{\ubound}\) is the time increment \(\lr\) between the \(\weights_k\)
-we have only lost the factor \(1/2\) in our estimation (\ref{bound increment})
+we have only lost the factor \(1/2\) in our estimation (\ref{eq: bound increment})
 compared to the precise integral version.
 In particular we get a convergent average of squared gradients
 %
@@ -541,7 +541,7 @@ norms were finite as well, the \(\weights_n\) would be a cauchy sequence
 \begin{align*}
 	\|\weights_n - \weights_m \|
 	\le \sum_{k=m}^{n-1} \|\weights_{k+1} - \weights_k\|
-	\le \lr \sum_{k=m}^{n-1} \|\nabla \loss(\weights_k)\|.
+	= \lr \sum_{k=m}^{n-1} \|\nabla \loss(\weights_k)\|.
 \end{align*}
 %
 This provides us with some intuition how a situation might look like when the
@@ -584,24 +584,208 @@ While we do need lower bounds on the second derivative to achieve convergence
 of \(\weights(t)\) as motivated in the previous section we can get convergence
 of the loss.
 
+To understand the convergence proof it is helpful to take a closer look at
+what we have done in (\ref{eq: bound increment}). First we used the Lipschitz
+continuity of the gradient (i.e. Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality})
+to bound our function
+%
+\begin{align}\label{eq: lin approx + distance penalty notion}
+	\loss(y)
+	\le \underbrace{
+		\loss(\weights_n)+ \langle\nabla\loss(\weights_n), y-\weights_n\rangle 
+	}_{\text{linear approximation}}
+	+ \underbrace{\tfrac\ubound{2} \|y-\weights_n\|^2}_{\text{distance penalty}}.
+\end{align}
+%
+The distance penalty can be understood in view of Lemma~\ref{lem: lipschitz and bounded derivative}
+which states that the change of gradient (third derivative) is bounded by \(\ubound\).
+In other words: The gradient changes at most at rate \(\ubound\) so if we
+add this upper bound as a penalty we can be sure to have a real upper bound.
+
+Gradient Decent with optimal learning rate minimizes this upper bound:
+%
+\begin{lemma}
+	Let \(\nabla f\) be \(\ubound\)-Lipschitz continuous, then for any \(x\in\reals^d\)
+	\begin{subequations}
+	\begin{align}
+		x - \tfrac{2}{\ubound}\nabla f(x) 
+		&= \arg\min_{y}\{
+			f(x)+ \langle\nabla f(x), y-x\rangle + \tfrac{\ubound}{2}\|y-x\|^2 
+		\}\\
+		\label{eq: min approximation}
+		\min_{y} f(y)	
+		&\lxle{\ref{lem: Lipschitz Gradient implies taylor inequality}} \min_{y} \{
+			f(x)+ \langle\nabla f(x), y-x\rangle + \tfrac{\ubound}{2}\|y-x\|^2 
+		\} \\ \nonumber
+		&= f(x) - \tfrac{1}{2\ubound} \|\nabla f(x)\|^2
+	\end{align}
+	\end{subequations}
+\end{lemma}
+\begin{proof}
+	The direction is irrelevant for the distance penalty term \(\|y-x\|^2\), and since
+	\begin{align*}
+		y-x = -\tfrac{r}{\|\nabla f(x)\|}\nabla f(x)
+	\end{align*}	
+	solves
+	\begin{align*}
+		\min_{x,y} \{\langle \nabla f(x), y-x \rangle : \|y-x\|=r \}
+	\end{align*}
+	as can be seen via the Cauchy-Schwarz inequality, we can reformulate our
+	minimization problem into
+	\begin{align*}
+		\min_{r} f(x) + \langle \nabla f(x), -r \nabla f(x)\rangle
+		+ \tfrac{\ubound}{2}\|r\nabla f(x)\|^2
+	\end{align*}
+	which we have already seen in (\ref{eq: bound increment}) and solved
+	by (\ref{eq: optimal loss decrease step}).
+\end{proof}
+
+Now you might have noticed that we have not used convexity in this section yet.
+Well that is not entirely true, we assumed that \(\inf_\weights\loss(\weights)\)
+is a real number which assumes a lower bound and rules out things like
+non-convex polynomials.
+
+But since getting stuck in a local minimum would prevent convergence towards the
+minimum entirely we can not formulate a convergence theorem without that. So
+this changes now. While Lipschitz continuity of the gradient provides an upper
+bound on the distance between the function and its linear approximation,
+convexity can be viewed as a lower bound on this "distance" (called the 
+Bergman divergence)
+%
+\begin{align*}
+	\bergmanDiv{f}(y,x):= f(y)-f(x)-\langle \nabla f(x), y-x\rangle \ge 0
+\end{align*}
+%
+This lower bound can be sharpened using the Lipschitz continuity of
+the gradient.
 Borrowing \citeauthor{nesterovLecturesConvexOptimization2018}'s notation
 we are going to denote  the set of \(q\) times differentiable convex functions
 with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 \(\lipGradientSet[q,p]{\ubound}\).
+%
+\begin{lemma}\label{lem: bermanDiv lower bound}
+	Let \(f\in\lipGradientSet{\ubound}\)
+	\begin{subequations}
+	\begin{align}
+		\bergmanDiv{f}(y,x)
+		&\ge \tfrac{1}{2\ubound}\|\nabla f(x) - \nabla f(y)\|^2\\
+		\langle \nabla f(x) - \nabla f(y), x-y\rangle
+		&\ge \tfrac{1}{\ubound}\|\nabla f(x) - \nabla f(y)\|^2
+	\end{align}	
+	\end{subequations}	
+\end{lemma}
+\begin{proof}
+	Since \(y\mapsto \langle\nabla f(x), y-x\rangle\) is linear, we know that
+	%
+	\begin{align*}
+		\phi(y):=\bergmanDiv{f}(y,x) = f(y)-f(x)-\langle \nabla f(x), y-x\rangle 
+	\end{align*}
+	%
+	still has \(\ubound\)-Lipschitz gradient
+	%
+	\begin{align}\label{eq: bergman divergence gradient}
+		\nabla\phi(y) = \nabla f(y) - \nabla f(x).
+	\end{align}
+	%
+	This gradient is equal to the change of gradient from \(x\) to \(y\) and 
+	therefore represents the error "rate" we are making assuming a constant gradient
+	and linearly approximating \(f\), which is by definition the derivative of the size of
+	\(\bergmanDiv{f}(y,x)\). Now this error "rate" can be translated
+ 	back into a real error using the stickiness of the gradient due to
+	its Lipschitz continuity. I.e. by the previous lemma (\ref{eq: min
+	approximation}) we know that
+	%
+	\begin{align*}
+		0 = \bergmanDiv{f}(x,x)
+		\xeq{f\text{ convex}} \min_z\phi(z) \le \phi(y) - \tfrac{1}{2\ubound}\|\nabla \phi(y)\|^2.
+	\end{align*}
+	%
+	Now (\ref{eq: bergman divergence gradient}) implies our first result
+	%
+	\begin{align*}
+		\tfrac{1}{2\ubound}\|\nabla f(y) - \nabla f(x)\|^2
+		\le \phi(y) =\bergmanDiv{f}(y,x).
+	\end{align*}
+	The second inequality follows by adding \(\bergmanDiv{f}(x,y)\) to
+	\(\bergmanDiv{f}(y,x)\).
+\end{proof}
+\fxnote{
+	Should equivalence of these results to \(f\in\lipGradientSet{\ubound}\)
+	be mentioned?
+}
+
+Now we can state the main convergence result
 
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
-	Let \(\loss\in\lipGradientSet{\ubound}\), \(\minimum\) the unique minimum,
-	then Gradient Decent with learning rate \(0 < \lr < 2/\ubound\) results in
+	Let \(\loss\in\lipGradientSet{\ubound}\), let \(\minimum\) be the unique minimum.
+	Then Gradient Decent with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align*}
 		\loss(\weights_n) - \loss(\minimum)
 		\le \frac{2\ubound\|\weights_0 - \minimum\|}{4 + n\ubound\lr(2-\ubound\lr)}
-		\in O(1/n)
 	\end{align*}
-	with the optimal rate of convergence being achieved for \(\lr=1/\ubound\).
+	The optimal rate of convergence 
+	\begin{align*}
+		\loss(\weights_n) - \loss(\minimum)
+		\le \frac{2\ubound\|\weights_0-\minimum\|}{4+n}
+		\in O\Big(\frac{\ubound\|\weights_0-\minimum\|}{n}\Big)
+	\end{align*}
+	is achieved for \(\lr=1/\ubound\).
 \end{theorem}
 \begin{proof}
-	See \textcite[Theorem 2.1.14, Corollary
-	2.1.2]{nesterovLecturesConvexOptimization2018}
+	While we can not ensure convergence of \(\|\weights_n - \minimum\|\) we can
+	ensure it is decreasing using Lemma~\ref{lem: bermanDiv lower bound} and
+	\(\nabla \loss(\minimum)=0\)
+	\begin{align}
+		\nonumber
+		\|\weights_{n+1} - \minimum\|^2
+		&= \|\weights_n - \minimum\|^2
+		- 2\lr\underbrace{
+			\langle \nabla\loss(\weights_n), \weights_n - \minimum\rangle
+		}_{
+			\ge \tfrac{1}\ubound \|\nabla \loss (\weights_n) - \nabla\loss(\minimum)\|^2
+		} + \lr^2\|\nabla \loss(\weights_n)\|^2
+		\\
+		&\le \|\weights_n - \minimum\|^2 - 
+		\underbrace{\lr}_{>0}\underbrace{(\tfrac{2}{\ubound}-\lr)}_{>0}
+		\|\nabla\loss(\weights_n)\|^2
+		\label{eq: decreasing weight difference}
+	\end{align}
+	Now we can use convexity of the loss function, Cauchy-Schwarz and the
+	decreasing weight difference
+	%
+	\begin{align*}
+		\loss(\weights_n)-\loss(\minimum)
+		\le -\langle \loss(\weights_n), \minimum-\weights_n\rangle
+		\xle{\text{C.S.}} \underbrace{\|\weights_n - \minimum\|}_{\le \|\weights_0 - \minimum\|}
+		\|\nabla\loss(\weights_n)\|
+	\end{align*}
+	%
+	to express our gradient norm in terms of the loss distance
+	\begin{align}\label{eq: lower bound gradient size}
+		\|\nabla\loss(\weights)\|
+		\ge \frac{\loss(\weights_n)-\loss(\minimum)}{\|\weights_0-\minimum\|}.
+	\end{align}
+	%
+	In contrast to (\ref{eq: optimal loss decrease step}) this is a lower bound
+	on the gradient which is going to allow us to force a rate of decrease in
+	the recursion derived in (\ref{eq: bound increment})
+	%
+	\begin{align*}
+		\overbrace{\loss(\weights_{n+1}) - \loss(\minimum)}^{=:\Delta_{n+1}}
+		&\le \overbrace{\loss(\weights_n)-\loss(\minimum)}^{=:\Delta_n}
+		- \overbrace{\lr(1-\lr\ubound/2)}^{=:\omega} \|\nabla \loss(\weights_n)\|^2\\
+		&\le \Delta_n(1 - \tfrac{\omega}{\|\weights_0-\minimum\}}\Delta_n)
+	\end{align*}
+	%
+	Dividing both sides by \(\Delta_n\Delta_{n+1}\) results in
+	%
+	\begin{align*}
+		\frac{1}{\Delta_{n+1}}
+		&\ge \frac{1}{\Delta_n}
+		+ \frac{\omega}{\|\weights_0-\minimum\|}\overbrace{\frac{\Delta_n}{\Delta_{n+1}}}^{\ge 1} \\
+		&\lxge{\text{Induction}} \frac{1}{\Delta_0}
+		+ \tfrac{\omega}{\|\weights_0-\minimum\|}(n+1)\\
+	\end{align*}
 \end{proof}
 
 \fxnote{More extensive treatment?}{

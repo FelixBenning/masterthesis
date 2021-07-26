@@ -56,7 +56,7 @@
 	\begin{align*}
 		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
 	\end{align*}
-	implies
+	implies (using the  Cauchy-Schwarz inequality)
 	\begin{align*}
 		&| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \\
 		&\le \int_0^1 | \langle\nabla f(x+\tau(y-x))-\nabla f(x), y-x\rangle | d\tau \\
@@ -79,7 +79,27 @@
 	\end{align*}
 \end{theorem}
 \begin{proof}
-
+	Define 
+	\begin{align*}
+		\phi(x) := f(x) - \frac{\lbound}{2}\|x\|^2.
+	\end{align*}
+	Then
+	\begin{align*}
+		\nabla \phi(x) = \nabla f(x) - \lbound x
+	\end{align*}
+	implies \(\phi\) is convex using \fxnote{x}{x}
+	\begin{align*}
+		\langle \nabla \phi(x) - \nabla\phi(y), x-y\rangle
+		= \overbrace{
+			\underbrace{\langle \nabla f(x) - \nabla f(y), x-y\rangle}_{
+				\ge \lbound \|x-y\|^2
+			}
+		}^{
+			\le \ubound \|x-y\|^2
+		} - \lbound \|x-y\|^2 \ge 0
+	\end{align*}
+	And 
+	which means \(\phi\in\lipGradientSet{\ubound-\lbound}\)
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
