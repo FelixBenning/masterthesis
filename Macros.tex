@@ -1,3 +1,5 @@
+% !TEX root = Masterthesis.tex
+
 %% AMS Theorem Environments
 \theoremstyle{plain}% default
 \newtheorem{prop}{Proposition}[section]
@@ -21,6 +23,7 @@
 %    &\implies ...
 %  \end{align}
 
+\makeatletter
 %(https://tex.stackexchange.com/questions/467779/alignment-of-implication-arrows-with-text-on-top)
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 \newcommand*{\sm@shstack}[3][lr]{
@@ -33,7 +36,7 @@
 }% use when aligning to the left
 \newcommand*{\x@rrow}[2]{%uses no smashoperator, but adds back stretchability of \implies to the result contrary to \stackrel
 	\;\mkern-\thickmuskip\mathop{#2}\limits^{#1}\;\mkern-\thickmuskip
-}% use in \(\) and as individul operator without aligning neccessities
+}% use in \(\) and as individual operator without aligning neccessities
 
 
 \newcommand*{\lximplies}[1]{\lx@rrow{#1}{\implies}} %%%%% =>
@@ -48,6 +51,8 @@
 \newcommand*{\xiff}[1]{\x@rrow{#1}{\iff}} %%%%%%%%%%%%% <=>
 \newcommand*{\xeq}[1]{\x@rrow{#1}{=}} %%%%%%% =
 \newcommand*{\xle}[1]{\x@rrow{#1}{\le}} %%%%%%%
+\newcommand*{\xge}[1]{\x@rrow{#1}{\ge}} %%%%%%%
+\makeatother
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -78,6 +83,6 @@
 \newcommand{\friction}{\mu}
 \newcommand{\dist}{\mathcal{D}}
 \newcommand{\E}{\mathbb{E}}
-\newcommand{\lipConst}{L}
+\newcommand{\lipConst}{K}
 \newcommand{\lossError}{\epsilon}
 \newcommand{\bergmanDiv}[1]{D^{(B)}_{#1}}

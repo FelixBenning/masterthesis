@@ -454,10 +454,10 @@ So let us see if we can get convergence of the discrete gradients as well.
 %
 \begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
 	\label{lem: Lipschitz Gradient implies taylor inequality}
-	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(\lipConst\),
-	then we have
+	\(\nabla f\) is \(\ubound\)-Lipschitz continuous iff
 	\begin{align*}
-		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{\lipConst}2 \|y-x\|^2
+		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle |
+		\le \tfrac{\ubound}2 \|y-x\|^2
 	\end{align*}
 \end{lemma}
 \begin{proof}
@@ -578,11 +578,11 @@ Since our example is one dimensional we can also immediately see the "eigenvalue
 %
 which decreases towards zero, stalling the movement towards the minimum.
 
-\subsection{Convergence Theorems}\label{sec: convex convergence theorems}
+\section{Convergence with Convexity}\label{sec: convex convergence theorems}
 
 While we do need lower bounds on the second derivative to achieve convergence
-of \(\weights(t)\) as motivated in the previous section we can get convergence
-of the loss.
+of \(\weights(t)\) as motivated in Section~\ref{sec: visualize gd} we can get
+convergence of the loss without them.
 
 To understand the convergence proof it is helpful to take a closer look at
 what we have done in (\ref{eq: bound increment}). First we used the Lipschitz
@@ -622,7 +622,7 @@ Gradient Decent with optimal learning rate minimizes this upper bound:
 	\end{subequations}
 \end{lemma}
 \begin{proof}
-	The direction is irrelevant for the distance penalty term \(\|y-x\|^2\), and since
+	The direction is irrelevant for the distance penalty term \(\|y-x\|^2\), and
 	\begin{align*}
 		y-x = -\tfrac{r}{\|\nabla f(x)\|}\nabla f(x)
 	\end{align*}	
@@ -630,11 +630,11 @@ Gradient Decent with optimal learning rate minimizes this upper bound:
 	\begin{align*}
 		\min_{x,y} \{\langle \nabla f(x), y-x \rangle : \|y-x\|=r \}
 	\end{align*}
-	as can be seen via the Cauchy-Schwarz inequality, we can reformulate our
-	minimization problem into
+	as can be seen via the Cauchy-Schwarz inequality. We can  therefore
+	reformulate our minimization problem into
 	\begin{align*}
-		\min_{r} f(x) + \langle \nabla f(x), -r \nabla f(x)\rangle
-		+ \tfrac{\ubound}{2}\|r\nabla f(x)\|^2
+		\min_{r} \{ f(x) + \langle \nabla f(x), -r \nabla f(x)\rangle
+		+ \tfrac{\ubound}{2}\|r\nabla f(x)\|^2\}
 	\end{align*}
 	which we have already seen in (\ref{eq: bound increment}) and solved
 	by (\ref{eq: optimal loss decrease step}).
@@ -647,8 +647,11 @@ non-convex polynomials.
 
 But since getting stuck in a local minimum would prevent convergence towards the
 minimum entirely we can not formulate a convergence theorem without that. So
-this changes now. While Lipschitz continuity of the gradient provides an upper
-bound on the distance between the function and its linear approximation,
+this changes now.
+
+While Lipschitz continuity of the gradient provides an upper
+bound  on the distance between the function and its linear approximation
+(Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality}),
 convexity can be viewed as a lower bound on this "distance" (called the 
 Bergman divergence)
 %
@@ -669,6 +672,7 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 	\begin{align}
 		\bergmanDiv{f}(y,x)
 		&\ge \tfrac{1}{2\ubound}\|\nabla f(x) - \nabla f(y)\|^2\\
+		\label{eq: bergmanDiv lower bound b}
 		\langle \nabla f(x) - \nabla f(y), x-y\rangle
 		&\ge \tfrac{1}{\ubound}\|\nabla f(x) - \nabla f(y)\|^2
 	\end{align}	
@@ -692,12 +696,12 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 	and linearly approximating \(f\), which is by definition the derivative of the size of
 	\(\bergmanDiv{f}(y,x)\). Now this error "rate" can be translated
  	back into a real error using the stickiness of the gradient due to
-	its Lipschitz continuity. I.e. by the previous lemma (\ref{eq: min
-	approximation}) we know that
+	its Lipschitz continuity. I.e. by the previous lemma we know that
 	%
 	\begin{align*}
 		0 = \bergmanDiv{f}(x,x)
-		\xeq{f\text{ convex}} \min_z\phi(z) \le \phi(y) - \tfrac{1}{2\ubound}\|\nabla \phi(y)\|^2.
+		\xeq{f\text{ convex}} \min_z\phi(z)
+		\xle{(\ref{eq: min approximation})} \phi(y) - \tfrac{1}{2\ubound}\|\nabla \phi(y)\|^2.
 	\end{align*}
 	%
 	Now (\ref{eq: bergman divergence gradient}) implies our first result
@@ -706,7 +710,7 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 		\tfrac{1}{2\ubound}\|\nabla f(y) - \nabla f(x)\|^2
 		\le \phi(y) =\bergmanDiv{f}(y,x).
 	\end{align*}
-	The second inequality follows by adding \(\bergmanDiv{f}(x,y)\) to
+	The second inequality follows from adding \(\bergmanDiv{f}(x,y)\) to
 	\(\bergmanDiv{f}(y,x)\).
 \end{proof}
 \fxnote{
@@ -719,10 +723,10 @@ Now we can state the main convergence result
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
 	Let \(\loss\in\lipGradientSet{\ubound}\), let \(\minimum\) be the unique minimum.
 	Then Gradient Decent with learning rate \(0 < \lr < 2/\ubound\) results in
-	\begin{align*}
+	\begin{align}\label{eq: convex function loss upper bound}
 		\loss(\weights_n) - \loss(\minimum)
 		\le \frac{2\ubound\|\weights_0 - \minimum\|}{4 + n\ubound\lr(2-\ubound\lr)}
-	\end{align*}
+	\end{align}
 	The optimal rate of convergence 
 	\begin{align*}
 		\loss(\weights_n) - \loss(\minimum)
@@ -743,6 +747,7 @@ Now we can state the main convergence result
 			\langle \nabla\loss(\weights_n), \weights_n - \minimum\rangle
 		}_{
 			\ge \tfrac{1}\ubound \|\nabla \loss (\weights_n) - \nabla\loss(\minimum)\|^2
+			\mathrlap{\quad \text{using (\ref{eq: bergmanDiv lower bound b})}}
 		} + \lr^2\|\nabla \loss(\weights_n)\|^2
 		\\
 		&\le \|\weights_n - \minimum\|^2 - 
@@ -774,32 +779,78 @@ Now we can state the main convergence result
 		\overbrace{\loss(\weights_{n+1}) - \loss(\minimum)}^{=:\Delta_{n+1}}
 		&\le \overbrace{\loss(\weights_n)-\loss(\minimum)}^{=:\Delta_n}
 		- \overbrace{\lr(1-\lr\ubound/2)}^{=:\omega} \|\nabla \loss(\weights_n)\|^2\\
-		&\le \Delta_n(1 - \tfrac{\omega}{\|\weights_0-\minimum\}}\Delta_n)
+		&\lxle{(\ref{eq: lower bound gradient size})} \Delta_n - \tfrac{\omega}{\|\weights_0-\minimum\|^2}\Delta_n^2
 	\end{align*}
 	%
-	Dividing both sides by \(\Delta_n\Delta_{n+1}\) results in
+	To get a simpler recursion we are going to use the fact that the loss delta
+	decreases, by dividing both sides by \(\Delta_n\Delta_{n+1}\) which results in
 	%
 	\begin{align*}
 		\frac{1}{\Delta_{n+1}}
 		&\ge \frac{1}{\Delta_n}
-		+ \frac{\omega}{\|\weights_0-\minimum\|}\overbrace{\frac{\Delta_n}{\Delta_{n+1}}}^{\ge 1} \\
-		&\lxge{\text{Induction}} \frac{1}{\Delta_0}
-		+ \tfrac{\omega}{\|\weights_0-\minimum\|}(n+1)\\
+		+ \frac{\omega}{\|\weights_0-\minimum\|^2}\overbrace{\frac{\Delta_n}{\Delta_{n+1}}}^{\ge 1}
+		\xge{\text{Induction}} \frac{1}{\Delta_0}
+		+ \tfrac{\omega}{\|\weights_0-\minimum\|^2}(n+1)
+	\end{align*}
+	%
+	This can now be transformed into an upper bound
+	%
+	\begin{align*}
+		\Delta_n
+		&\le \frac{1}{
+			\frac{1}{\Delta_0} + \tfrac{\omega}{\|\weights_0-\minimum\|^2}n
+		}
+		= \frac{\Delta_0\|\weights_0-\minimum\|^2}{\|\weights_0-\minimum\|^2 + n\omega\Delta_0 }.
+	\end{align*}
+	%
+	The first representation shows that our upper bound is increasing in \(\Delta_0\)
+	so an upper bound on \(\Delta_0\)
+	%
+	\begin{align*}
+		\Delta_0 + \loss(\minimum) = \loss(\weights_0)
+		&\xle{\ref{lem: Lipschitz Gradient implies taylor inequality}}
+		\loss(\minimum) + \langle\nabla\loss(\minimum), \weights_0 - \minimum\rangle
+		+\frac{\ubound}{2}\|\weights_0-\minimum\|^2 \\
+		&= \loss(\minimum) + \tfrac{\ubound}{2}\|\weights_0-\minimum\|^2
+	\end{align*}
+	%
+	immediately yields the upper bound (\ref{eq: convex function loss upper bound}) using the
+	definition of \(\omega\)
+	%
+	\begin{align*}
+		\Delta_n
+		&\le \frac{\tfrac\ubound{2} \|\weights_0-\minimum\|^4}{
+			\|\weights_0-\minimum\|^2
+			+ n\omega\tfrac\ubound{2} \|\weights_0-\minimum\|^2
+		}
+		= \frac{2\ubound \|\weights_0-\minimum\|^2}{
+			4 +   n 2\ubound\omega
+		}.
+		\qedhere
 	\end{align*}
 \end{proof}
 
+\subsubsection{Subgradient "Decent"}
 \fxnote{More extensive treatment?}{
-And if we can not have convergence of the parameters \(\weights\) we might not
+If we can not have convergence of the parameters \(\weights\) we might not
 care as much about the convergence of the gradient either. In that case it
 turns out that we can even get convergence of the loss if we only assume
-Lipschitz continuity of \(\loss\) itself. But this form of "Subgradient Decent"
-requires a bounded, convex parameter set we project back into if we leave and
+convexity and \(\lipConst\)-Lipschitz continuity of \(\loss\) itself, i.e.
+\begin{align*}
+	\loss \in \lipGradientSet[0,0]{\lipConst}
+\end{align*}
+%
+But this form of "Subgradient Decent"
+requires a bounded, convex parameter set we project back into if we leave, and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
 with subgradients, the name "decent" is generally avoided and we have to keep
 a running minimum. See \textcite[Section 3.2.3]{nesterovLecturesConvexOptimization2018}
 or \textcite[Section 3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
 treatment. The convergence rate is not only dependent on the size of the
-parameter set \(B\) but it also decreases to \(O(B/\sqrt{n})\).
+parameter set \(B\) but it also decreases to
+\begin{align*}
+	O\Big(\frac{B\lipConst}{\sqrt{n}}\Big).
+\end{align*}
 }
 
 \section{Strong Convexity}\label{sec: Strong Convexity}
@@ -896,23 +947,31 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 	\end{subequations}
 \end{theorem}
 \begin{proof}[Proof {\parencite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}}]
-	\begin{align*}
+	This proof starts like the proof for convex functions, cf. (\ref{eq:
+	decreasing weight difference}):
+ \begin{align*}
 		\|\weights_{n+1} - \minimum\|^2
 		&= \| \weights_n -\minimum - \lr\nabla\loss(\weights_n)\|^2\\
 		&= \| \weights_n - \minimum\|^2
 		- 2\lr\langle \nabla\loss(\weights_n), \weights_n - \minimum\rangle
 		+ \lr^2 \| \nabla\loss(\weights_n)\|^2
 	\end{align*}
-	Using \(\nabla\loss(\minimum)=0\) and Theorem~\ref{appdx-thm: technical
-	strong convexity convergence proof component}, i.e.
+	But now we need to find a better lower bound for the scalar product in the
+	middle to obtain a significant decrease. Previously we used the lower bound
+	on the Bergman Divergence from Lemma~\ref{lem: bermanDiv lower bound}, now
+	we have a lower bound from the strong convexity property. But just as using
+	convexity directly in the previous theorem was too weak and had to be
+	improved with Lemma~\ref{lem: bermanDiv lower bound}, we are going to use
+	an improved lower bound again:
  	\begin{align*}
 		&\langle \nabla\loss(\weights_n) -\nabla\loss(\minimum), \weights_n - \minimum\rangle	\\
 		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \minimum\|^2
 		+ \tfrac{1}{\ubound+\lbound}
 		\|\nabla\loss(\weights_n) - \nabla\loss(\minimum)\|^2
 	\end{align*}
-	we get
-	\begin{align*}
+	Using this lower bound, which we will prove in Lemma~\ref{lem: bermanDiv
+	lower bound (strongly convex)}, we get
+ \begin{align*}
 		\|\weights_{n+1} - \minimum\|^2
 		\le \left(1- 2\lr \tfrac{\ubound\lbound}{\ubound+\lbound}\right)
 		\|\weights_n - \minimum\|^2
@@ -920,8 +979,8 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 		\underbrace{\left(\lr-\tfrac{2}{\ubound+\lbound}\right)}_{\le0}
 		\|\nabla\loss(\weights_n)\|^2
 	\end{align*}
-	which using induction proves (\ref{eq: gd strong convexity convergence rate
-	1}). (\ref{eq: gd strong convexity convergence rate 2}) follows from our
+	which immediately proves (\ref{eq: gd strong convexity convergence rate
+	1}) using induction. (\ref{eq: gd strong convexity convergence rate 2}) follows from our
 	upper bound (\ref{eq: upper bound}), i.e. Lipschitz continuity of the gradient:
 	\begin{align*}
 		\loss(\weights_n) - \loss(\minimum)
@@ -942,6 +1001,116 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 	only have to add and subtract one inside the bracket and cancel out
 	\(\lbound\) from enumerator and denominator.
 \end{proof}
+
+Now as promised we still have to show the improved lower bound.
+
+\begin{lemma}
+	\label{lem: bermanDiv lower bound (strongly convex)}
+	If \(f\in\strongConvex{\lbound}{\ubound}\), then for any
+	\(x,y\in\reals^\dimension\) we have
+	\begin{align*}
+		\langle \nabla f(x) - \nabla f(y), x-y\rangle 
+		\ge \tfrac{\lbound\ubound}{\lbound+\ubound} \| x-y\|^2
+		+ \tfrac{1}{\lbound+\ubound}\|\nabla f(x) -\nabla f(y)\|^2
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	Similarly to Lemma~\ref{lem: bermanDiv lower bound} we want to
+	add \(\bergmanDiv{f}(x,y)\) and \(\bergmanDiv{f}(y,x)\) together to
+	get a lower bound for the scalar product equal to this sum. But since we
+	already have a lower bound due to strong convexity
+	\begin{align}\label{eq: strong convexity implies bergmanDiv lower bound}
+		\bergmanDiv{f}(y,x) = f(y) - f(x) -\langle\nabla f(x), y-x\rangle
+		\ge \tfrac{\lbound}2 \|y-x\|^2,
+	\end{align}
+	we first have to "remove" this lower bound from \(f\) to apply our other
+	lower bound. So we define
+	\begin{align*}
+		g_x(y) := f(y) - \tfrac{\lbound}2\|y-x\|^2 \qquad
+		\nabla g_x(y) = \nabla f(y) - \lbound(y-x)
+	\end{align*}
+	which still has positive Bergman Convergence, i.e. is convex
+	\begin{align*}
+		\bergmanDiv{g_x}(y,z)
+		&= g_x(y) - g_x(z) - \langle\nabla g_x(z), y-z\rangle \\
+		&= 
+		\begin{aligned}[t]
+			& f(y) - f(z) -\langle\nabla f(z), y-z\rangle \\
+			&- \tfrac\lbound{2}\underbrace{\|y-x\|^2}_{
+				=\|y-z\|^2 + \mathrlap{2\langle y-z, z-x\rangle + \|z-x\|^2}
+			}
+			+ \tfrac\lbound{2}\|z-x\|^2
+			+ \lbound\langle z-x, y-z\rangle
+		\end{aligned}\\
+		&= \bergmanDiv{f}(y,z) - \tfrac{\lbound}2\|y-z\|^2
+		\xge{(\ref{eq: strong convexity implies bergmanDiv lower bound})} 0
+	\end{align*}
+	and has \((\ubound-\lbound)\)-Lipschitz continuous gradient by
+	Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality} and 
+	\begin{align}
+		\label{eq: bergmanDiv upper bound}
+		\bergmanDiv{f}(y,z) \le \tfrac{\ubound}2\|y-z\|^2.
+	\end{align}
+	The inequality above also follows from Lemma~\ref{lem: Lipschitz Gradient
+	implies taylor inequality}. Therefore
+	\(g_x\in\lipGradientSet{\ubound-\lbound}\) and if \(\ubound -\lbound>0\) we
+	can now apply Lemma~\ref{lem: bermanDiv lower bound} to get
+	\begin{align}
+		\bergmanDiv{f}(y,x)
+		&= \bergmanDiv{g_x}(y,x) + \tfrac{\lbound}2 \|y-x\|^2
+		\nonumber \\
+		&\ge \tfrac{1}{2(\ubound-\lbound)} \|\nabla g_x(x) - \nabla g_x(y)\|^2
+		+ \tfrac{\lbound}2 \|y-x\|^2 
+		\nonumber \\
+		\label{eq: improved lower bound strong convex bergman Divergence}
+		&\ge \tfrac{1}{2(\ubound-\lbound)}
+		\|\nabla f(x) - \lbound x - (\nabla f(y)-\lbound y)\|^2
+		+ \tfrac{\lbound}2 \|y-x\|^2.
+	\end{align}
+	Since the \(\|y-x\|^2\) lower bound improves the convergence rate in
+	our convergence theorem, it is helpful to view it as the "good" part of
+	our lower bound and view the application of the gradient lower bound as
+	a fallback.
+
+	The case \(\ubound=\lbound\) which we have to cover separately offers some
+	more insight into that. In this case our lower bound  (\ref{eq:
+	strong convexity implies bergmanDiv lower bound}) makes (\ref{eq: bergmanDiv
+	upper bound}) an equality. This means we could get
+	\begin{align*}
+		\langle \nabla f(x) - \nabla f(y), x-y\rangle
+		= \bergmanDiv{f}(x,y) + \bergmanDiv{f}(y,x) = \lbound \|y-x\|^2.
+	\end{align*}
+	but instead we apply Lemma~\ref{lem: bermanDiv lower bound} to half of it
+	which results in the statement of this lemma.
+
+	Now we just have to finish the case \(\ubound>\lbound\). In equation
+	(\ref{eq: improved lower bound strong convex bergman Divergence}) we have
+	already removed the dependence on our helper function \(g_x\) and will now
+	use its symmetry to add together the mirrored Bergman Divergences to get
+	\begin{align*}
+		&\langle \nabla f(x) - \nabla f(y), x-y\rangle
+		= \bergmanDiv{f}(x,y) + \bergmanDiv{f}(y,x) \\
+		&\ge \tfrac{1}{\ubound-\lbound}
+		\underbrace{\|\nabla f(x) - \lbound x - (\nabla f(y)-\lbound y)\|^2}_{
+			=\|\nabla f(x) - \nabla f(y)\|^2
+			- 2\lbound \langle \nabla f(x) - \nabla f(y), x-y\rangle
+			\mathrlap{+ \lbound^2 \| x-y\|^2}
+		}
+		+ \lbound \|y-x\|^2.
+	\end{align*}
+	Moving the scalar product to the left we get
+	\begin{align*}
+		&\overbrace{(1+\tfrac{2\lbound}{\ubound+\lbound})}^{
+			=(\ubound+\lbound)/(\ubound-\lbound)
+		}
+		\langle \nabla f(x) - \nabla f(y), x-y\rangle \\
+		&\ge \tfrac{1}{\ubound-\lbound}\|\nabla f(x) - \nabla f(y)\|^2
+		+ \underbrace{(\tfrac{\lbound^2}{\ubound-\lbound}-\lbound)}_{
+			=\ubound\lbound/(\ubound-\lbound)
+		} \|y-x\|^2.
+	\end{align*}
+	Dividing by the factor on the left finishes this proof.
+ \end{proof}
 
 While it is not too surprising that we recovered the learning rate from
 Section~\ref{sec: visualize gd} as we simply provided lower and upper bounds on

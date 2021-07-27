@@ -46,13 +46,13 @@
 
 \begin{lemma}[{\cite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}}]
 	\label{Appdx-lem: Lipschitz Gradient implies taylor inequality}
-	Assume \(\nabla f\) is Lipschitz continuous with Lipschitz constant \(\lipConst\),
-	then we have
+	\(\nabla f\) is \(\ubound\)-Lipschitz continuous iff
 	\begin{align*}
-		|f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{\lipConst}2 \|y-x\|^2
+		|f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{\ubound}2 \|y-x\|^2
 	\end{align*}
 \end{lemma}
 \begin{proof}
+	\fxwarning{other direction!}
 	\begin{align*}
 		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
 	\end{align*}
@@ -62,44 +62,10 @@
 		&\le \int_0^1 | \langle\nabla f(x+\tau(y-x))-\nabla f(x), y-x\rangle | d\tau \\
 		&\lxle{\text{C.S.}}
 		\int_0^1 \|\langle\nabla f(x+\tau(y-x))-\nabla f(x)\| \cdot \|y-x\| d\tau\\
-		&\le \int_0^1 \lipConst \|\tau(y-x)\|\cdot\|y-x\| d\tau
-		= \tfrac{\lipConst}2 \|y-x\|^2.
+		&\le \int_0^1 \ubound \|\tau(y-x)\|\cdot\|y-x\| d\tau
+		= \tfrac{\ubound}2 \|y-x\|^2.
 		\qedhere
 	\end{align*}
-\end{proof}
-
-\begin{theorem}[{\cite[Theorem 2.1.12]{nesterovLecturesConvexOptimization2018}}]
-	\label{appdx-thm: technical strong convexity convergence proof component}
-	If \(f\in\strongConvex{\lbound}{\ubound}\), then for any
-	\(x,y\in\reals^\dimension\) we have
-	\begin{align*}
-		\langle \nabla f(x) - \nabla f(y), x-y\rangle 
-		\ge \tfrac{\lbound\ubound}{\lbound+\ubound} \| x-y\|^2
-		+ \tfrac{1}{\lbound+\ubound}\|\nabla f(x) -\nabla f(y)\|^2
-	\end{align*}
-\end{theorem}
-\begin{proof}
-	Define 
-	\begin{align*}
-		\phi(x) := f(x) - \frac{\lbound}{2}\|x\|^2.
-	\end{align*}
-	Then
-	\begin{align*}
-		\nabla \phi(x) = \nabla f(x) - \lbound x
-	\end{align*}
-	implies \(\phi\) is convex using \fxnote{x}{x}
-	\begin{align*}
-		\langle \nabla \phi(x) - \nabla\phi(y), x-y\rangle
-		= \overbrace{
-			\underbrace{\langle \nabla f(x) - \nabla f(y), x-y\rangle}_{
-				\ge \lbound \|x-y\|^2
-			}
-		}^{
-			\le \ubound \|x-y\|^2
-		} - \lbound \|x-y\|^2 \ge 0
-	\end{align*}
-	And 
-	which means \(\phi\in\lipGradientSet{\ubound-\lbound}\)
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
