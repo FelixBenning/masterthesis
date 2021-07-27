@@ -44,16 +44,18 @@
 	the limit.
 \end{proof}
 
-\begin{lemma}[{\cite[Lemma 1.2.3]{nesterovLecturesConvexOptimization2018}}]
+\begin{lemma}
 	\label{Appdx-lem: Lipschitz Gradient implies taylor inequality}
-	\(\nabla f\) is \(\ubound\)-Lipschitz continuous iff
+	If \(\nabla f\) is \(\ubound\)-Lipschitz continuous, then
 	\begin{align*}
 		|f(y) - f(x) - \langle \nabla f(x), y-x\rangle | \le \tfrac{\ubound}2 \|y-x\|^2
 	\end{align*}
+	If \(f\) is convex, then the opposite direction is also true.
 \end{lemma}
 \begin{proof}
-	\fxwarning{other direction!}
-	\begin{align*}
+	The first direction is taken from \textcite[Lemma
+	1.2.3]{nesterovLecturesConvexOptimization2018}
+ \begin{align*}
 		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
 	\end{align*}
 	implies (using the  Cauchy-Schwarz inequality)
@@ -66,7 +68,25 @@
 		= \tfrac{\ubound}2 \|y-x\|^2.
 		\qedhere
 	\end{align*}
-\end{proof}
+	The opposite direction is taken from \textcite[Lemma
+	2.1.5]{nesterovLecturesConvexOptimization2018}.
+	As we have only used
+	\begin{align*}
+		0\xle{\text{Convexity}} f(y) - f(x) - \langle \nabla f(x), y-x\rangle
+		\le \tfrac{\ubound}2 \|y-x\|^2
+	\end{align*}	
+	in Lemma~\ref{lem: bermanDiv lower bound} (and Lemma~\ref{lem: smallest upper
+	bound} which was used in the proof), we know that equation (\ref{eq:
+	bergmanDiv lower bound b}) follows from it and after applying Cauchy-Schwarz
+	to this equation
+	\begin{align*}
+		\tfrac{1}\ubound \|\nabla f(x)-\nabla f(y)\|^2
+		&\le \langle \nabla f(x) - \nabla f(y), x-y\rangle \\
+		&\lxle{\text{C.S.}} \|\nabla f(x) - \nabla f(y)\| \|x-y\|
+	\end{align*}
+	we only have to divide both sides by \(\tfrac{1}\ubound \|\nabla f(x)-\nabla
+	f(y)\|\) to get \(\ubound\)-Lipschitz continuity back.
+ \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -454,11 +454,12 @@ So let us see if we can get convergence of the discrete gradients as well.
 %
 \begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
 	\label{lem: Lipschitz Gradient implies taylor inequality}
-	\(\nabla f\) is \(\ubound\)-Lipschitz continuous iff
+	If \(\nabla f\) is \(\ubound\)-Lipschitz continuous, then
 	\begin{align*}
 		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle |
 		\le \tfrac{\ubound}2 \|y-x\|^2
 	\end{align*}
+	If \(f\) is convex, then the opposite direction is also true.
 \end{lemma}
 \begin{proof}
 	See Appendix \ref{Appdx-lem: Lipschitz Gradient implies taylor inequality}.
@@ -604,7 +605,7 @@ add this upper bound as a penalty we can be sure to have a real upper bound.
 
 Gradient Decent with optimal learning rate minimizes this upper bound:
 %
-\begin{lemma}
+\begin{lemma}\label{lem: smallest upper bound}
 	Let \(\nabla f\) be \(\ubound\)-Lipschitz continuous, then for any \(x\in\reals^d\)
 	\begin{subequations}
 	\begin{align}
@@ -649,11 +650,11 @@ But since getting stuck in a local minimum would prevent convergence towards the
 minimum entirely we can not formulate a convergence theorem without that. So
 this changes now.
 
-While Lipschitz continuity of the gradient provides an upper
-bound  on the distance between the function and its linear approximation
+While Lipschitz continuity of the gradient can be viewed as an upper
+bound on the distance between the function and its linear approximation
 (Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality}),
-convexity can be viewed as a lower bound on this "distance" (called the 
-Bergman divergence)
+convexity can be viewed as a lower bound on this "distance", called the 
+the Bergman divergence
 %
 \begin{align*}
 	\bergmanDiv{f}(y,x):= f(y)-f(x)-\langle \nabla f(x), y-x\rangle \ge 0
@@ -788,7 +789,8 @@ Now we can state the main convergence result
 	\begin{align*}
 		\frac{1}{\Delta_{n+1}}
 		&\ge \frac{1}{\Delta_n}
-		+ \frac{\omega}{\|\weights_0-\minimum\|^2}\overbrace{\frac{\Delta_n}{\Delta_{n+1}}}^{\ge 1}
+		+ \frac{\omega}{\|\weights_0-\minimum\|^2}
+		\underbrace{\frac{\Delta_n}{\Delta_{n+1}}}_{\ge 1}
 		\xge{\text{Induction}} \frac{1}{\Delta_0}
 		+ \tfrac{\omega}{\|\weights_0-\minimum\|^2}(n+1)
 	\end{align*}
@@ -840,7 +842,7 @@ convexity and \(\lipConst\)-Lipschitz continuity of \(\loss\) itself, i.e.
 	\loss \in \lipGradientSet[0,0]{\lipConst}
 \end{align*}
 %
-But this form of "Subgradient Decent"
+But this form of Subgradient "Decent"
 requires a bounded, convex parameter set we project back into if we leave, and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
 with subgradients, the name "decent" is generally avoided and we have to keep
