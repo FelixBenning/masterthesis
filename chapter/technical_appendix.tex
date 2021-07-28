@@ -54,7 +54,7 @@
 \end{lemma}
 \begin{proof}
 	The first direction is taken from \textcite[Lemma
-	1.2.3]{nesterovLecturesConvexOptimization2018}
+	1.2.3]{nesterovLecturesConvexOptimization2018}.
  \begin{align*}
 		f(y) = f(x) + \int_0^1\langle\nabla f(x+\tau(y-x)), y-x \rangle d\tau
 	\end{align*}
@@ -82,7 +82,7 @@
 	\begin{align*}
 		\tfrac{1}\ubound \|\nabla f(x)-\nabla f(y)\|^2
 		&\le \langle \nabla f(x) - \nabla f(y), x-y\rangle \\
-		&\lxle{\text{C.S.}} \|\nabla f(x) - \nabla f(y)\| \|x-y\|
+		&\lxle{\text{C.S.}} \|\nabla f(x) - \nabla f(y)\| \|x-y\|,
 	\end{align*}
 	we only have to divide both sides by \(\tfrac{1}\ubound \|\nabla f(x)-\nabla
 	f(y)\|\) to get \(\ubound\)-Lipschitz continuity back.

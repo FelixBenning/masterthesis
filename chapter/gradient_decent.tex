@@ -1214,6 +1214,14 @@ contained in the subspace \(\reals^n\) of \(\reals^\dimension\). Formalizing
 this argument results in the following theorem inspired by \textcite[Theorem
 2.1.7]{nesterovLecturesConvexOptimization2018} and \textcite{gohWhyMomentumReally2017}.
 
+\begin{remark}
+	This type of loss function is not unlikely to be encountered in real
+	problems. E.g. in reinforcement learning with sparse rewards the estimation
+	of the value function over states requires the back-propagation of this
+	reward through the states that lead up to it. "Eligibility traces"
+	\parencite[Chapter 12]{suttonReinforcementLearningIntroduction2018}
+	are an attempt to speed this process up.
+\end{remark}
 \begin{theorem}\label{thm: convex function complexity bound}
 	For any \(\weights_0\in\reals^d\), any \(n\) such that 
 	\[0\le n\le \tfrac12 (d-1),\]
@@ -1257,7 +1265,15 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\end{align}
 	%
 	where \(\stdBasis_1=(1,0,\dots,0)^T\) is the first standard basis
-	vector and \(\graphLaplacian\) is the "Graph Laplacian" for the 
+	vector and \(\graphLaplacian\) is the "Graph Laplacian"\footnote{
+		It might seem a bit excessive to introduce the concept of graphs when
+		we could have simply calculated the derivative by hand to get the same
+		result. But this graph view is very suggestive how one would generalize
+		this "heat spread" problem to more complicated structures than a
+		1-dimensional rod. In particular the connectedness of graphs is related
+		to its condition number \parencite{gohWhyMomentumReally2017}. And this
+		provides some more intuition for how "worst case problems" look like.
+	} for the 
 	\fxnote{tikz graph}{undirected graph} \(\graph=(\vertices, \edges)\) with 
 	\begin{align*}
 		\vertices = \{1,\dots, \dimension\}
@@ -1428,15 +1444,6 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		\qedhere
 	\end{align*}
 \end{proof}
-\fxnote{difference to nesterov, hint at deeper graph theory}
-\begin{remark}
-	This type of loss function is not unlikely to be encountered in real
-	problems. E.g. in reinforcement learning with sparse rewards the estimation
-	of the value function over states requires the back-propagation of this
-	reward through the states that lead up to it. "Eligibility traces"
-	\parencite[Chapter 12]{suttonReinforcementLearningIntroduction2018}
-	are an attempt to speed this process up.
-\end{remark}
 
 \subsection{Complexity Bounds for Strongly Convex Losses}
 
@@ -1591,6 +1598,54 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 		\qedhere
 	\end{align*}
 \end{proof}
+
+In view of Lemma~\ref{lem: smallest upper bound} which states that gradient
+decent is in some sense optimal (minimizes the upper bound induced by
+Lipschitz continuity of the gradient), it might be surprising how far away
+Gradient Decent is from these lower bounds. Maybe these lower bounds are not
+tight enough? This is not the case. In the next chapter we will get to know
+a family of methods which do achieve these rates of convergence.
+
+So can we
+explain the Lemma? Well, first of all it is of course just an upper bound we
+are minimizing. But the more important issue is that we are taking a very
+local perspective. We only care about minimizing the next loss, using 
+nothing but the current gradient. In Assumption~\ref{assmpt: parameter in
+linear hull of gradients} on the other hand, we consider the linear span of all
+gradients so far. This distinction is important as it will make the
+"momentum method" we will discuss next seem much more obvious.
+
+Lastly since this generalization of assumptions improved our rate of convergence
+we might ask if we could generalize our assumption further. Heuristics like
+the well known Adagrad, Adadelta and RMSProp use different learning rates for
+different components of the gradients for example. Their iterates can thus
+be expressed by
+%
+\begin{align*}
+	\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\loss(\weights_k)
+\end{align*}
+%
+where \(H_k\) are diagonal matrices. But at least upper triangle matrices do
+not change the fact that \(\weights_n\) is contained in subspace \(\reals^n\).
+Since we only use this fact, one could thus generalize Assumption~\ref{assmpt:
+parameter in linear hull of gradients} to
+%
+\begin{assumption}
+	The \(n\)-th iterate of the optimization method can be expressed as
+	\begin{align*}
+		\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\loss(\weights_k)
+	\end{align*}
+	where \(H_k\) are upper triangular matrices.
+\end{assumption}
+
+Both Complexity Bounds continue to hold with this Assumption in place of
+Assumption~\ref{assmpt: parameter in linear hull of gradients}. And since one
+could just switch the relation \((\weights_n-\weights_{n+1})^2\) to
+\((\weights_n+\weights_{n+1})^2\) to force a flip from positive to negative
+at this point, it is unclear how one should extrapolate to components not
+available in any gradient. But making further assumptions like continuity of
+the underlying function \(\model\) inducing \(\loss(\weights)\) it might
+be possible to find better bounds.
 
 \section{Heuristics}
 

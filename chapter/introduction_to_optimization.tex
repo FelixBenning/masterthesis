@@ -3,12 +3,12 @@
 \chapter{Introduction to Optimization}
 
 
-Let \(f_\weights(X)\) be a (parametrized) prediction for \(Y\), where \(Z=(X,Y)\)
+Let \(\model(X)\) be a (parametrized) prediction for \(Y\), where \(Z=(X,Y)\)
 is drawn from a distribution \(\dist\) of real world examples. The prediction
 error of our parameter \(\weights\) is a loss function \(l(\weights, X, Y)\), e.g. 
 %
 \begin{align*}
-	l(\weights, x, y) := (f_\weights(x) - y)^2.
+	l(\weights, x, y) := (\model(x) - y)^2.
 \end{align*}
 %
 And we \emph{want} to minimize the theoretical loss over all examples (risk)

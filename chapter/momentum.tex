@@ -5,7 +5,7 @@
 To understand why the convergence rate is poor when the condition
 number is high, we can visualize a high ratio of the lowest to the highest
 eigenvalue as a narrow ravine. The gradient points in the direction of the
-strongest decent which is mostly opposite of the ravine and only slightly
+strongest decent which is mostly to the opposite side of the ravine and only slightly
 along its length. This causes our iterate to bounce back and forth between
 the walls of the ravine.
 %
@@ -100,7 +100,8 @@ by \textcite{gohWhyMomentumReally2017}.
 	%
 	\begin{align}
 		\weights_{n+1}
-		&= \weights_n + (1-\lr\friction)(\weights_n - \weights_{n-1}) - \lr^2\nabla \loss(\weights_n)
+		&= \weights_n + \lr(1-\lr\friction)(\weights_n - \weights_{n-1})
+		- \lr^2\nabla \loss(\weights_n)
 	\end{align}
 \end{definition}
 %
@@ -148,7 +149,7 @@ previous position \(\weights_n\).
 %
 \begin{remark}\fxwarning{too informal?}
 	This method is said to date back to \textcite{nesterovMethodSolvingConvex1983}.
-	But not only is the original text in Russian, it also seems to be impossible
+	But not only is the original text in Russian, it also difficult 
 	to find on the internet. Fortunately, \citeauthor{nesterovMethodSolvingConvex1983}
 	wrote textbooks, \citetitle{nesterovLecturesConvexOptimization2018}
 	(\citeyear{nesterovLecturesConvexOptimization2018}) being the most recent.
