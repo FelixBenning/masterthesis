@@ -4,14 +4,14 @@
 
 A step up from zero order methods (such as grid search) are first order methods
 using the first derivative (the gradient). This requires a "first order oracle"
-which can provide us with \(\loss(\weights)\) and \(\nabla \loss(\weights)\) at any point
+which can provide us with \(\Loss(\weights)\) and \(\nabla \Loss(\weights)\) at any point
 \(\weights\).
 
 One immediately obvious way to utilize this information is to
 incrementally move in the direction of steepest decent, i.e.
 %
 \begin{align*}
-	\weights_{n+1} = \weights_n - \lr\nabla \loss(\weights_n).
+	\weights_{n+1} = \weights_n - \lr\nabla \Loss(\weights_n).
 \end{align*}
 %
 A useful way to look at this equation is to notice that it is the
@@ -19,7 +19,7 @@ discretization of an ordinary differential equation (ODE)
 %
 \begin{align*}
 	\dot{\weights}_n \approx \frac{\weights_{n+1} - \weights_n}{\lr}
-	= - \nabla \loss(\weights_n).
+	= - \nabla \Loss(\weights_n).
 \end{align*}
 %
 Here the "learning rate" \(\lr\) is the time delta between discretizations
@@ -27,77 +27,77 @@ Here the "learning rate" \(\lr\) is the time delta between discretizations
 \(\lr\to\infty\), we arrive at the ODE
 %
 \begin{align}\label{eq: velocity is gradient}
-	\dot{\weights}(t) = -\nabla \loss(\weights(t)).
+	\dot{\weights}(t) = -\nabla \Loss(\weights(t)).
 \end{align}
 %
 If you are familiar with Lyapunov functions you will not be surprised by the next
 argument:
 %
 \begin{align}\label{eq: gradient integral}
-	\loss(\weights(t_1)) - \loss(\weights(t_0))
-	&= \int_{t_0}^{t_1} \nabla \loss(\weights(s)) \cdot \dot{\weights}(s) ds
-	= \int_{t_0}^{t_1} -\|\nabla \loss(\weights(s))\|^2 ds
+	\Loss(\weights(t_1)) - \Loss(\weights(t_0))
+	&= \int_{t_0}^{t_1} \nabla \Loss(\weights(s)) \cdot \dot{\weights}(s) ds
+	= \int_{t_0}^{t_1} -\|\nabla \Loss(\weights(s))\|^2 ds
 	\le 0
 \end{align}
 %
 immediately implies
 \begin{align*}
-	\loss(\weights(t_0)) \ge \loss(\weights(t_1)) \ge \dots \ge \inf_\weights \loss(\weights) \ge 0
+	\Loss(\weights(t_0)) \ge \Loss(\weights(t_1)) \ge \dots \ge \inf_\weights \Loss(\weights) \ge 0
 \end{align*}
 which implies convergence. But not necessarily a convergent \(\weights(t)\) and
-not necessarily convergence to \(\inf_\weights \loss(\weights)\).
+not necessarily convergence to \(\inf_\weights \Loss(\weights)\).
 
 \section{Visualizing the 2nd Taylor Approximation}\label{sec: visualize gd}
 
 To build some intuition what leads to convergence of \(\weights(t)\) let us
 consider more simple cases. If we assume our Hesse matrix \(\nabla^2
-\loss(\weights)\) exists and is positive definite (all eigenvalues positive), then for
+\Loss(\weights)\) exists and is positive definite (all eigenvalues positive), then for
 the second order Taylor approximation
 %
 \begin{align*}
-	\loss(\weights+v) \approx T_2\loss(\weights+v)
-	= \loss(\weights) + v^T \nabla \loss(\weights) + \tfrac12 v^T \nabla^2 \loss(\weights) v
+	\Loss(\weights+v) \approx T_2\Loss(\weights+v)
+	= \Loss(\weights) + v^T \nabla \Loss(\weights) + \tfrac12 v^T \nabla^2 \Loss(\weights) v
 \end{align*}
 %
 we can find the minimum 
 \begin{align*}
-	\hat{v} = -(\nabla^2 \loss(\weights))^{-1}\nabla \loss(\weights)
+	\hat{v} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights)
 \end{align*}
 by setting the first derivative to zero
 %
 \begin{align*}
-	\nabla T_2\loss(\weights+v) = \nabla \loss(\weights) + \nabla^2\loss(\weights) v \xeq{!} 0.
+	\nabla T_2\Loss(\weights+v) = \nabla \Loss(\weights) + \nabla^2\Loss(\weights) v \xeq{!} 0.
 \end{align*}
 %
 This minimum allows us not only to rewrite the taylor derivative
 %
 \begin{align*}
-	\nabla T_2\loss(\weights+v) = \nabla^2 \loss(\weights)(v-\hat{v}),
+	\nabla T_2\Loss(\weights+v) = \nabla^2 \Loss(\weights)(v-\hat{v}),
 \end{align*}
 %
 but also the original taylor approximation
 %
 \begin{align*}
-	T_2\loss(\weights+v)
-	&= \loss(\weights) - v^T \nabla^2 \loss(\weights) \hat{v} + \tfrac12 v^T \nabla^2 \loss(\weights) v \\
+	T_2\Loss(\weights+v)
+	&= \Loss(\weights) - v^T \nabla^2 \Loss(\weights) \hat{v} + \tfrac12 v^T \nabla^2 \Loss(\weights) v \\
 	&= \underbrace{
-		\loss(\weights) - \tfrac12 \hat{v} \nabla^2 \loss(\weights) \hat{v}
+		\Loss(\weights) - \tfrac12 \hat{v} \nabla^2 \Loss(\weights) \hat{v}
 	}_{
 		=: c(\weights) \text{ (const.)}
-	} + \tfrac12 (v-\hat{v})^T \nabla^2 \loss(\weights)(v-\hat{v}).
+	} + \tfrac12 (v-\hat{v})^T \nabla^2 \Loss(\weights)(v-\hat{v}).
 \end{align*}
 %
 To get absolute instead of relative coordinates to \(\weights\) we set
 %
 \begin{align*}
-	\hat{\weights} := \weights + \hat{v} = \weights -(\nabla^2 \loss(\weights))^{-1}\nabla \loss(\weights),
+	\hat{\weights} := \weights + \hat{v} = \weights -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
 \end{align*}
 %
 and obtain the notion of a paraboloid centered around \(\hat{\weights}\)
 %
 \begin{align}\label{paraboloid approximation of L}
-	\loss(y)
-	= \tfrac12 (y- \hat{\weights}) \nabla^2 \loss(\weights) (y-\hat{\weights})
+	\Loss(y)
+	= \tfrac12 (y- \hat{\weights}) \nabla^2 \Loss(\weights) (y-\hat{\weights})
 	+ c(\weights) + o(\|y-\weights\|^2)
 \end{align}
 %
@@ -110,10 +110,10 @@ and obtain the notion of a paraboloid centered around \(\hat{\weights}\)
 \end{wrapfigure}
 %
 To fully appreciate Figure~\ref{fig: 2d paraboloid}, we now only need to realize
-that the diagonizability of \(\nabla^2 \loss(\weights)\)
+that the diagonizability of \(\nabla^2 \Loss(\weights)\)
 %
 \begin{align}\label{eq: diagnalization of the Hesse matrix}
-	V \nabla^2 \loss(\weights) V^T
+	V \nabla^2 \Loss(\weights) V^T
 	= \diag(\lambda_1,\dots,\lambda_d), \qquad V=(v_1,\dots, v_d)
 \end{align}
 %
@@ -122,28 +122,28 @@ one eigenspace in two dimensions, the other eigenspace has to be
 orthogonal to the first one which fully determines its direction at this point. 
 
 Before we move on I want to briefly mention that we only really needed the
-positive definiteness of \(\nabla^2 \loss(\weights)\) to make it invertible, so that
+positive definiteness of \(\nabla^2 \Loss(\weights)\) to make it invertible, so that
 \(\hat{v}\) is well defined. If it was not positive definite but still invertible,
 then \(\hat{v}\) would not be a minimum but all the other arguments would still
 hold.
 In that case the eigenvalues might be negative as well as positive, which would
 represent a saddle point, or all negative which would represent a maximum.
 
-Using the representation (\ref{paraboloid approximation of L}) of \(\loss\) we
+Using the representation (\ref{paraboloid approximation of L}) of \(\Loss\) we
 can write the gradient at \(\weights\) as
 %
 \begin{align*}
-	\nabla \loss(\weights)
-	=  \nabla^2 \loss(\weights)(\weights-\hat{\weights})
-	\ (= -\nabla^2 \loss(\weights)\hat{v})
+	\nabla \Loss(\weights)
+	=  \nabla^2 \Loss(\weights)(\weights-\hat{\weights})
+	\ (= -\nabla^2 \Loss(\weights)\hat{v})
 \end{align*}
 %
 But note that \(\hat{\weights}\) depends on \(\weights\), so we need to index both
 by \(n\) to rewrite gradient decent
 %
 \begin{align*}
-	\weights_{n+1} &= \weights_n - \lr\nabla \loss(\weights_n)\\
-	&= \weights_n - \lr\nabla^2 \loss(\weights_n)(\weights_n - \hat{\weights}_n).
+	\weights_{n+1} &= \weights_n - \lr\nabla \Loss(\weights_n)\\
+	&= \weights_n - \lr\nabla^2 \Loss(\weights_n)(\weights_n - \hat{\weights}_n).
 \end{align*}
 %
 Subtracting \(\hat{\weights}_n\) from both sides we obtain the following
@@ -151,20 +151,20 @@ transformation
 %
 \begin{align}\label{eq: Matrix GD Formulation}
 	\weights_{n+1} - \hat{\weights}_n
-	&= (\identity - \lr\nabla^2 \loss(\weights_n) ) (\weights_n - \hat{\weights}_n).
+	&= (\identity - \lr\nabla^2 \Loss(\weights_n) ) (\weights_n - \hat{\weights}_n).
 \end{align}
 %
 Taking a closer look at this transformation matrix we can use (\ref{eq:
 diagnalization of the Hesse matrix}) to see
 %
 \begin{align*}
-	\identity - \lr\nabla^2 \loss(\weights_n)
+	\identity - \lr\nabla^2 \Loss(\weights_n)
 	&= V(\identity - \lr\cdot\diag(\lambda_1,\dots,\lambda_d) )V^T \\
 	&= V\cdot\diag(1-\lr\lambda_1, \dots,1-\lr\lambda_d)V^T.
 \end{align*}
 %
 Now if we assume like \textcite{gohWhyMomentumReally2017}, that the second
-taylor approximation is accurate and thus that \(\nabla^2 \loss(\weights)=H\) is a
+taylor approximation is accurate and thus that \(\nabla^2 \Loss(\weights)=H\) is a
 constant, then \(\hat{\weights}_n = \minimum\) is the real minimum and we get
 %
 \begin{align}
@@ -289,7 +289,7 @@ eigenvalue, it is natural to guess that simply bounding the second derivative
 from above and below should be sufficient:
 %
 \begin{align*}
-	\lbound \identity \precsim \nabla^2 \loss(\weights) \precsim \ubound \identity.
+	\lbound \identity \precsim \nabla^2 \Loss(\weights) \precsim \ubound \identity.
 \end{align*}
 %
 Here \(A \precsim B\) should be read as \(0\precsim B-A\) which we define to mean
@@ -306,12 +306,12 @@ For this reason authors generally assume either global convexity, or local
 convexity together with the assumption that the starting point is in this
 locally convex area. This is a reasonable assumption since the negative
 eigenvalues mentioned above will force us out of regions where this is not
-the case. And if we assume that our loss function \(\loss\) goes to infinity when
+the case. And if we assume that our loss function \(\Loss\) goes to infinity when
 our parameters go to infinity, together with the fact that we are descending
 down the loss, then we immediately get a bounded (compact) area 
 %
 \begin{align*}
-	\{\weights : \loss(\weights) \le \loss(\weights_0)\} = \loss^{-1}([0, \loss(\weights_0)])
+	\{\weights : \Loss(\weights) \le \Loss(\weights_0)\} = \Loss^{-1}([0, \Loss(\weights_0)])
 \end{align*}
 %
 in which we will stay. We can use that boundedness to argue that we will
@@ -319,12 +319,12 @@ eventually end up in a convex region if we are pushed out of the non-convex
 regions.
 
 That such a convex region exists follows from the existence of a minimum of
-\(\loss\) in that compact region which necessitates non-negative
+\(\Loss\) in that compact region which necessitates non-negative
 eigenvalues. And continuity of the second derivative allows us to extend that to 
 a local ball around the minimum. Eigenvalues equal to zero
 are a bit of an issue, but if they become negative in some epsilon ball
 then moving in that direction would lead us further down. Which is a contradiction
-to our assumption that we created a ball around the minimum of \(\loss\).
+to our assumption that we created a ball around the minimum of \(\Loss\).
 
 The statement that we are being pushed out of the non-convex regions is a bit
 dubious as we could start right on top of local maxima or rims of saddle points.
@@ -385,7 +385,7 @@ does not require the second derivative is
 
 We still need a replacement for the upper bound of our second derivative.
 Using the orthonormal basis of eigenvectors of
-\(\nabla^2 \loss(\weights)\) to represent \(x\) in the definition of the operator norm
+\(\nabla^2 \Loss(\weights)\) to represent \(x\) in the definition of the operator norm
 %
 \begin{align*}
 	\|A\| := \sup_{\|x\| =1} \|Ax\|
@@ -397,8 +397,8 @@ absolute eigenvalue. This implies that for positive eigenvalues
 %
 \begin{align}
 	\label{eq: operator norm upper bound relation}
-	\nabla^2 \loss(\weights) \precsim \ubound\identity
-	\iff \|\nabla^2 \loss(\weights)\|\le \ubound,
+	\nabla^2 \Loss(\weights) \precsim \ubound\identity
+	\iff \|\nabla^2 \Loss(\weights)\|\le \ubound,
 \end{align}
 %
 and the following lemma allows us to get rid of the existence of the second
@@ -435,17 +435,17 @@ existence, uniqueness and stability of ODEs. While these properties might not
 be needed for effective optimization, working without them will likely be very
 cumbersome.
 
-Second, we need at least uniform continuity of \(\nabla \loss\) so that the inequality
+Second, we need at least uniform continuity of \(\nabla \Loss\) so that the inequality
 %
 \begin{align}\label{eq: bounded gradient integral}
-	\int_{t_0}^\infty \|\nabla \loss(\weights(s))\|^2 ds
-	&\le \loss(\weights(t_0)) - \liminf_{t\to\infty} \loss(\weights(t)) \\
-	&\le \loss(\weights(t_0)) - \inf_{\weights} \loss(\weights) < \infty \nonumber
+	\int_{t_0}^\infty \|\nabla \Loss(\weights(s))\|^2 ds
+	&\le \Loss(\weights(t_0)) - \liminf_{t\to\infty} \Loss(\weights(t)) \\
+	&\le \Loss(\weights(t_0)) - \inf_{\weights} \Loss(\weights) < \infty \nonumber
 \end{align}
 %
 derived from (\ref{eq: gradient integral}) is sufficient for a convergent
-\(\|\nabla \loss(\weights(t))\|\). That still does not ensure that \(\weights(t)\)
-converges, only that its derivative \(\dot{\weights}(t) = -\nabla \loss(\weights(t))\)
+\(\|\nabla \Loss(\weights(t))\|\). That still does not ensure that \(\weights(t)\)
+converges, only that its derivative \(\dot{\weights}(t) = -\nabla \Loss(\weights(t))\)
 converges. The logarithm is an obvious example where this goes wrong. But
 while it is not sufficient, the difference between \(\weights_{n+1}\) and
 \(\weights_n\) is proportional to the gradient. Convergence of the gradient is
@@ -470,16 +470,16 @@ Using the Lipschitz continuity of the gradient and Lemma~\ref{lem: Lipschitz
 Gradient implies taylor inequality} we get
 %
 \begin{align}
-	\loss(\weights_{n+1})
-	&\le \loss(\weights_n) 
-	+ \langle\nabla \loss(\weights_n),\weights_{n+1} - \weights_n\rangle
+	\Loss(\weights_{n+1})
+	&\le \Loss(\weights_n) 
+	+ \langle\nabla \Loss(\weights_n),\weights_{n+1} - \weights_n\rangle
 	+ \tfrac{\ubound}{2} \| \weights_{n+1} - \weights_n\|^2 
 	\label{eq: bound increment}\\
-	&= \loss(\weights_n)
-	+ \langle\nabla \loss(\weights_n), -\lr\nabla \loss(\weights_n)\rangle
-	+ \tfrac{\ubound}{2}\lr^2\| \nabla \loss(\weights_n)\|^2
+	&= \Loss(\weights_n)
+	+ \langle\nabla \Loss(\weights_n), -\lr\nabla \Loss(\weights_n)\rangle
+	+ \tfrac{\ubound}{2}\lr^2\| \nabla \Loss(\weights_n)\|^2
 	\nonumber\\
-	&=\loss(\weights_n) - \lr(1-\tfrac{\lr \ubound}{2})\|\nabla \loss(\weights_n)\|^2
+	&=\Loss(\weights_n) - \lr(1-\tfrac{\lr \ubound}{2})\|\nabla \Loss(\weights_n)\|^2
 	\nonumber
 \end{align}
 %
@@ -495,16 +495,16 @@ gains to be made. Plugging the parametrization back into the learning rate we
 get
 %
 \begin{align*}
-	\loss(\weights_{n+1}) - \loss(\weights_n)
-	\le - \tfrac{2}{\ubound}\alpha (1-\alpha)\|\nabla \loss(\weights_n)\|^2.
+	\Loss(\weights_{n+1}) - \Loss(\weights_n)
+	\le - \tfrac{2}{\ubound}\alpha (1-\alpha)\|\nabla \Loss(\weights_n)\|^2.
 \end{align*}
 %
 The largest decrease is guaranteed by \(\lr=\tfrac{1}{\ubound}\) (\(\alpha=1/2\)).
 This results in
 %
 \begin{align}\label{eq: optimal loss decrease step}
-	\loss(\weights_{n+1}) - \loss(\weights_n)
-	\le - \tfrac{1}{2\ubound}\|\nabla \loss(\weights_n)\|^2.
+	\Loss(\weights_{n+1}) - \Loss(\weights_n)
+	\le - \tfrac{1}{2\ubound}\|\nabla \Loss(\weights_n)\|^2.
 \end{align}
 \begin{remark}
 	Recall that this sets the rate of the largest eigenvalue to zero eliminating
@@ -521,9 +521,9 @@ Summing over these increments results in a very similar equation to
 (\ref{eq: bounded gradient integral})
 %
 \begin{align*}
-	\frac{1}{2\ubound} \sum_{k=0}^{n-1}\|\nabla \loss(\weights_k)\|^2
-	\le \loss(\weights_0) - \loss(\weights_n)
-	\le \loss(\weights_0) - \inf_{\weights} \loss(\weights)
+	\frac{1}{2\ubound} \sum_{k=0}^{n-1}\|\nabla \Loss(\weights_k)\|^2
+	\le \Loss(\weights_0) - \Loss(\weights_n)
+	\le \Loss(\weights_0) - \inf_{\weights} \Loss(\weights)
 \end{align*}
 %
 Since \(\tfrac{1}{\ubound}\) is the time increment \(\lr\) between the \(\weights_k\)
@@ -532,8 +532,8 @@ compared to the precise integral version.
 In particular we get a convergent average of squared gradients
 %
 \begin{align*}
-	\frac{1}{n} \sum_{k=0}^n \|\nabla \loss(\weights_k)\|^2
-	\le \frac{2 \ubound}{n} (\loss(\weights_0) - \inf_\weights \loss(\weights)) \in O(1/n).
+	\frac{1}{n} \sum_{k=0}^n \|\nabla \Loss(\weights_k)\|^2
+	\le \frac{2 \ubound}{n} (\Loss(\weights_0) - \inf_\weights \Loss(\weights)) \in O(1/n).
 \end{align*}
 %
 It is important to note the "square" part. If the series of unsquared gradient
@@ -542,7 +542,7 @@ norms were finite as well, the \(\weights_n\) would be a cauchy sequence
 \begin{align*}
 	\|\weights_n - \weights_m \|
 	\le \sum_{k=m}^{n-1} \|\weights_{k+1} - \weights_k\|
-	= \lr \sum_{k=m}^{n-1} \|\nabla \loss(\weights_k)\|.
+	= \lr \sum_{k=m}^{n-1} \|\nabla \Loss(\weights_k)\|.
 \end{align*}
 %
 This provides us with some intuition how a situation might look like when the
@@ -554,15 +554,15 @@ behaves like the logarithm in the limit.
 It is difficult to formulate an example in finite space, but
 %
 \begin{align*}
-	\loss(\weights) &= \exp(-\weights) \\
-	\dot{\weights} &= -\nabla \loss(\weights)
+	\Loss(\weights) &= \exp(-\weights) \\
+	\dot{\weights} &= -\nabla \Loss(\weights)
 \end{align*}
 %
 implies
 %
 \begin{align*}
 	\weights(t) &= \log(t)\\
-	\nabla \loss(t) &= -\tfrac1t
+	\nabla \Loss(t) &= -\tfrac1t
 \end{align*}
 %
 which provides intuition how "flat" a minima has to be to cause such behavior.
@@ -574,7 +574,7 @@ to avoid convergence.
 Since our example is one dimensional we can also immediately see the "eigenvalue"
 %
 \begin{align*}
-	\nabla^2 \loss(\weights(t)) = \exp(-\weights(t)) = 1/t
+	\nabla^2 \Loss(\weights(t)) = \exp(-\weights(t)) = 1/t
 \end{align*}
 %
 which decreases towards zero, stalling the movement towards the minimum.
@@ -591,9 +591,9 @@ continuity of the gradient (i.e. Lemma~\ref{lem: Lipschitz Gradient implies tayl
 to bound our function
 %
 \begin{align}\label{eq: lin approx + distance penalty notion}
-	\loss(y)
+	\Loss(y)
 	\le \underbrace{
-		\loss(\weights_n)+ \langle\nabla\loss(\weights_n), y-\weights_n\rangle 
+		\Loss(\weights_n)+ \langle\nabla\Loss(\weights_n), y-\weights_n\rangle 
 	}_{\text{linear approximation}}
 	+ \underbrace{\tfrac\ubound{2} \|y-\weights_n\|^2}_{\text{distance penalty}}.
 \end{align}
@@ -642,7 +642,7 @@ Gradient Decent with optimal learning rate minimizes this upper bound:
 \end{proof}
 
 Now you might have noticed that we have not used convexity in this section yet.
-Well that is not entirely true, we assumed that \(\inf_\weights\loss(\weights)\)
+Well that is not entirely true, we assumed that \(\inf_\weights\Loss(\weights)\)
 is a real number which assumes a lower bound and rules out things like
 non-convex polynomials.
 
@@ -722,15 +722,15 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 Now we can state the main convergence result
 
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
-	Let \(\loss\in\lipGradientSet{\ubound}\), let \(\minimum\) be the unique minimum.
+	Let \(\Loss\in\lipGradientSet{\ubound}\), let \(\minimum\) be the unique minimum.
 	Then Gradient Decent with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align}\label{eq: convex function loss upper bound}
-		\loss(\weights_n) - \loss(\minimum)
+		\Loss(\weights_n) - \Loss(\minimum)
 		\le \frac{2\ubound\|\weights_0 - \minimum\|}{4 + n\ubound\lr(2-\ubound\lr)}
 	\end{align}
 	The optimal rate of convergence 
 	\begin{align*}
-		\loss(\weights_n) - \loss(\minimum)
+		\Loss(\weights_n) - \Loss(\minimum)
 		\le \frac{2\ubound\|\weights_0-\minimum\|}{4+n}
 		\in O\Big(\frac{\ubound\|\weights_0-\minimum\|}{n}\Big)
 	\end{align*}
@@ -739,37 +739,37 @@ Now we can state the main convergence result
 \begin{proof}
 	While we can not ensure convergence of \(\|\weights_n - \minimum\|\) we can
 	ensure it is decreasing using Lemma~\ref{lem: bermanDiv lower bound} and
-	\(\nabla \loss(\minimum)=0\)
+	\(\nabla \Loss(\minimum)=0\)
 	\begin{align}
 		\nonumber
 		\|\weights_{n+1} - \minimum\|^2
 		&= \|\weights_n - \minimum\|^2
 		- 2\lr\underbrace{
-			\langle \nabla\loss(\weights_n), \weights_n - \minimum\rangle
+			\langle \nabla\Loss(\weights_n), \weights_n - \minimum\rangle
 		}_{
-			\ge \tfrac{1}\ubound \|\nabla \loss (\weights_n) - \nabla\loss(\minimum)\|^2
+			\ge \tfrac{1}\ubound \|\nabla \Loss (\weights_n) - \nabla\Loss(\minimum)\|^2
 			\mathrlap{\quad \text{using (\ref{eq: bergmanDiv lower bound b})}}
-		} + \lr^2\|\nabla \loss(\weights_n)\|^2
+		} + \lr^2\|\nabla \Loss(\weights_n)\|^2
 		\\
 		&\le \|\weights_n - \minimum\|^2 - 
 		\underbrace{\lr}_{>0}\underbrace{(\tfrac{2}{\ubound}-\lr)}_{>0}
-		\|\nabla\loss(\weights_n)\|^2
+		\|\nabla\Loss(\weights_n)\|^2
 		\label{eq: decreasing weight difference}
 	\end{align}
 	Now we can use convexity of the loss function, Cauchy-Schwarz and the
 	decreasing weight difference
 	%
 	\begin{align*}
-		\loss(\weights_n)-\loss(\minimum)
-		\le -\langle \loss(\weights_n), \minimum-\weights_n\rangle
+		\Loss(\weights_n)-\Loss(\minimum)
+		\le -\langle \Loss(\weights_n), \minimum-\weights_n\rangle
 		\xle{\text{C.S.}} \underbrace{\|\weights_n - \minimum\|}_{\le \|\weights_0 - \minimum\|}
-		\|\nabla\loss(\weights_n)\|
+		\|\nabla\Loss(\weights_n)\|
 	\end{align*}
 	%
 	to express our gradient norm in terms of the loss distance
 	\begin{align}\label{eq: lower bound gradient size}
-		\|\nabla\loss(\weights)\|
-		\ge \frac{\loss(\weights_n)-\loss(\minimum)}{\|\weights_0-\minimum\|}.
+		\|\nabla\Loss(\weights)\|
+		\ge \frac{\Loss(\weights_n)-\Loss(\minimum)}{\|\weights_0-\minimum\|}.
 	\end{align}
 	%
 	In contrast to (\ref{eq: optimal loss decrease step}) this is a lower bound
@@ -777,9 +777,9 @@ Now we can state the main convergence result
 	the recursion derived in (\ref{eq: bound increment})
 	%
 	\begin{align*}
-		\overbrace{\loss(\weights_{n+1}) - \loss(\minimum)}^{=:\Delta_{n+1}}
-		&\le \overbrace{\loss(\weights_n)-\loss(\minimum)}^{=:\Delta_n}
-		- \overbrace{\lr(1-\lr\ubound/2)}^{=:\omega} \|\nabla \loss(\weights_n)\|^2\\
+		\overbrace{\Loss(\weights_{n+1}) - \Loss(\minimum)}^{=:\Delta_{n+1}}
+		&\le \overbrace{\Loss(\weights_n)-\Loss(\minimum)}^{=:\Delta_n}
+		- \overbrace{\lr(1-\lr\ubound/2)}^{=:\omega} \|\nabla \Loss(\weights_n)\|^2\\
 		&\lxle{(\ref{eq: lower bound gradient size})} \Delta_n - \tfrac{\omega}{\|\weights_0-\minimum\|^2}\Delta_n^2
 	\end{align*}
 	%
@@ -809,11 +809,11 @@ Now we can state the main convergence result
 	so an upper bound on \(\Delta_0\)
 	%
 	\begin{align*}
-		\Delta_0 + \loss(\minimum) = \loss(\weights_0)
+		\Delta_0 + \Loss(\minimum) = \Loss(\weights_0)
 		&\xle{\ref{lem: Lipschitz Gradient implies taylor inequality}}
-		\loss(\minimum) + \langle\nabla\loss(\minimum), \weights_0 - \minimum\rangle
+		\Loss(\minimum) + \langle\nabla\Loss(\minimum), \weights_0 - \minimum\rangle
 		+\frac{\ubound}{2}\|\weights_0-\minimum\|^2 \\
-		&= \loss(\minimum) + \tfrac{\ubound}{2}\|\weights_0-\minimum\|^2
+		&= \Loss(\minimum) + \tfrac{\ubound}{2}\|\weights_0-\minimum\|^2
 	\end{align*}
 	%
 	immediately yields the upper bound (\ref{eq: convex function loss upper bound}) using the
@@ -837,9 +837,9 @@ Now we can state the main convergence result
 If we can not have convergence of the parameters \(\weights\) we might not
 care as much about the convergence of the gradient either. In that case it
 turns out that we can even get convergence of the loss if we only assume
-convexity and \(\lipConst\)-Lipschitz continuity of \(\loss\) itself, i.e.
+convexity and \(\lipConst\)-Lipschitz continuity of \(\Loss\) itself, i.e.
 \begin{align*}
-	\loss \in \lipGradientSet[0,0]{\lipConst}
+	\Loss \in \lipGradientSet[0,0]{\lipConst}
 \end{align*}
 %
 But this form of Subgradient "Decent"
@@ -863,21 +863,21 @@ Gradient implies taylor inequality}, a Lipschitz continuous gradient implies
 a quadratic function provides an upper bound for our loss function
 %
 \begin{align}\label{eq: upper bound}
-	\loss(y) \le \loss(x) + \langle \nabla \loss(x), y-x\rangle + \frac\ubound{2}\|y-x\|^2.
+	\Loss(y) \le \Loss(x) + \langle \nabla \Loss(x), y-x\rangle + \frac\ubound{2}\|y-x\|^2.
 \end{align}
 %
 And convexity was defined as a lower bound
 %
 \begin{align*}
-	\loss(x) + \langle \nabla \loss(x), y-x\rangle \le \loss(y)
+	\Loss(x) + \langle \nabla \Loss(x), y-x\rangle \le \Loss(y)
 \end{align*}
 %
 which we will now sharpen this to a quadratic lower bound as well.
 %
 \begin{definition}\label{def: strong convexity}
-	A function \(\loss\) is \emph{strongly convex}, if for all \(x,y\)
+	A function \(\Loss\) is \emph{strongly convex}, if for all \(x,y\)
 	\begin{align*}
-		\loss(x) + \langle \nabla \loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \loss(y)
+		\Loss(x) + \langle \nabla \Loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \Loss(y)
 	\end{align*}
 	And let \(\strongConvex{\lbound}{\ubound}\) denote the \(\lbound\)-strongly convex
 	functions form \(\lipGradientSet{\ubound}\).
@@ -912,7 +912,7 @@ Using this new assumption we get our linear\footnote{
 rate of convergence back, which we had motivated in Section~\ref{sec: visualize gd}. 
 %
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
-	If \(\loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
+	If \(\Loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
 	\[0 \le \lr \le \tfrac{2}{\ubound+\lbound}\]
 	Gradient Decent generates a sequence \(\weights_n\) satisfying
 	\begin{subequations}
@@ -924,7 +924,7 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 		\right)^{n/2}
 		\|\weights_0 - \minimum\| \\
 		\label{eq: gd strong convexity convergence rate 2}
-		\loss(\weights_n) - \loss(\minimum)
+		\Loss(\weights_n) - \Loss(\minimum)
 		&\le \frac\ubound{2} \left(
 			1- 2\lr\frac{\ubound\lbound}{\ubound+\lbound}
 		\right)^{n}
@@ -940,7 +940,7 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 			1- \frac{2}{1+\condition}
 		\right)^n
 		\|\weights_0 - \minimum\| \\
-		\loss(\weights_n) - \loss(\minimum)
+		\Loss(\weights_n) - \Loss(\minimum)
 		&\le \frac\ubound{2} \left(
 			1- \frac{2}{1+\condition}
 		\right)^{2n}
@@ -953,10 +953,10 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 	decreasing weight difference}):
  \begin{align*}
 		\|\weights_{n+1} - \minimum\|^2
-		&= \| \weights_n -\minimum - \lr\nabla\loss(\weights_n)\|^2\\
+		&= \| \weights_n -\minimum - \lr\nabla\Loss(\weights_n)\|^2\\
 		&= \| \weights_n - \minimum\|^2
-		- 2\lr\langle \nabla\loss(\weights_n), \weights_n - \minimum\rangle
-		+ \lr^2 \| \nabla\loss(\weights_n)\|^2
+		- 2\lr\langle \nabla\Loss(\weights_n), \weights_n - \minimum\rangle
+		+ \lr^2 \| \nabla\Loss(\weights_n)\|^2
 	\end{align*}
 	But now we need to find a better lower bound for the scalar product in the
 	middle to obtain a significant decrease. Previously we used the lower bound
@@ -966,10 +966,10 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 	improved with Lemma~\ref{lem: bermanDiv lower bound}, we are going to use
 	an improved lower bound again:
  	\begin{align*}
-		&\langle \nabla\loss(\weights_n) -\nabla\loss(\minimum), \weights_n - \minimum\rangle	\\
+		&\langle \nabla\Loss(\weights_n) -\nabla\Loss(\minimum), \weights_n - \minimum\rangle	\\
 		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \minimum\|^2
 		+ \tfrac{1}{\ubound+\lbound}
-		\|\nabla\loss(\weights_n) - \nabla\loss(\minimum)\|^2
+		\|\nabla\Loss(\weights_n) - \nabla\Loss(\minimum)\|^2
 	\end{align*}
 	Using this lower bound, which we will prove in Lemma~\ref{lem: bermanDiv
 	lower bound (strongly convex)}, we get
@@ -979,14 +979,14 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 		\|\weights_n - \minimum\|^2
 		+ \underbrace{\lr}_{\ge 0}
 		\underbrace{\left(\lr-\tfrac{2}{\ubound+\lbound}\right)}_{\le0}
-		\|\nabla\loss(\weights_n)\|^2
+		\|\nabla\Loss(\weights_n)\|^2
 	\end{align*}
 	which immediately proves (\ref{eq: gd strong convexity convergence rate
 	1}) using induction. (\ref{eq: gd strong convexity convergence rate 2}) follows from our
 	upper bound (\ref{eq: upper bound}), i.e. Lipschitz continuity of the gradient:
 	\begin{align*}
-		\loss(\weights_n) - \loss(\minimum)
-		\le \langle \underbrace{\nabla\loss(\minimum)}_{=0}, \weights_n - \minimum\rangle
+		\Loss(\weights_n) - \Loss(\minimum)
+		\le \langle \underbrace{\nabla\Loss(\minimum)}_{=0}, \weights_n - \minimum\rangle
 		+ \tfrac\ubound{2} \| \weights_n - \minimum\|^2
 	\end{align*}
 	To get (\ref{eq: gd strong convexity optimal rate}) we simply have to plug
@@ -1127,13 +1127,13 @@ assumption about what this algorithm can do.
 Unrolling our gradient decent algorithm
 %
 \begin{align*}
-	\weights_n = \weights_0 - \lr\sum_{k=0}^{n-1} \nabla \loss(\weights_k)
+	\weights_n = \weights_0 - \lr\sum_{k=0}^{n-1} \nabla \Loss(\weights_k)
 \end{align*}
 %
 we can see that even if we allowed custom learning rates for every iteration
 %
 \begin{align*}
-	\weights_n = \weights_0 - \sum_{k=0}^{n-1} \lr_k \nabla \loss(\weights_k)
+	\weights_n = \weights_0 - \sum_{k=0}^{n-1} \lr_k \nabla \Loss(\weights_k)
 \end{align*}
 %
 we would still end up in the linear span of all gradients, shifted by \(\weights_0\).
@@ -1146,7 +1146,7 @@ assumption for a class of optimization methods would be
 	The \(n\)-th iterate of the optimization method is contained in the span of all
 	previous gradients shifted by the initial starting point
 	\begin{align*}
-		\weights_n \in \linSpan\{\nabla \loss(\weights_k) : 0\le k \le n-1\} + \weights_0
+		\weights_n \in \linSpan\{\nabla \Loss(\weights_k) : 0\le k \le n-1\} + \weights_0
 	\end{align*}
 \end{assumption}
 %
@@ -1195,7 +1195,7 @@ recursion as follows\footnote{
 For the loss function
 %
 \begin{align}\label{eq: naive complexity counterexample loss}
-	\tilde{\loss}(\weights)
+	\tilde{\Loss}(\weights)
 	= \frac12 (\weights^{(1)}-1)^2
 	+ \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 \end{align}
@@ -1225,23 +1225,23 @@ this argument results in the following theorem inspired by \textcite[Theorem
 \begin{theorem}\label{thm: convex function complexity bound}
 	For any \(\weights_0\in\reals^d\), any \(n\) such that 
 	\[0\le n\le \tfrac12 (d-1),\]
-	there exists \(\loss\in\lipGradientSet[\infty,1]{\ubound}\)
+	there exists \(\Loss\in\lipGradientSet[\infty,1]{\ubound}\)
 	s.t. for any first order method \(\firstOrderMethod\)
 	satisfying Assumption~\ref{assmpt: parameter in linear hull of gradients}
 	we have
 	\begin{subequations}
 	\begin{align}
-		\loss(\weights_n) - \loss(\minimum)
+		\Loss(\weights_n) - \Loss(\minimum)
 		&\ge \frac{\ubound \|\weights_0 - \minimum\|^2}{16(n+1)^2} \\
 		\|\weights_k -\minimum\|^2 
 		&\ge \frac13 \|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
-	where \(\minimum = \arg\min_\weights \loss(\weights)\) is the unique minimum.
+	where \(\minimum = \arg\min_\weights \Loss(\weights)\) is the unique minimum.
 \end{theorem}
 \begin{proof}
 	First, since we could always define
-	\(\loss(\weights):=\tilde{\loss}(\weights-\weights_0)\)
+	\(\Loss(\weights):=\tilde{\Loss}(\weights-\weights_0)\)
 	we can assume without loss of generality that \(\weights_0=\mathbf{0}\). 
 	
 	Second, we can define \(\tilde{\dimension} := 2n +1 \le \dimension	\)	
@@ -1259,7 +1259,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	see this notice that we can write the gradient as
 	%
 	\begin{align}\label{eq: naive complexity example loss gradient}
-		\nabla \tilde{\loss}(\weights)
+		\nabla \tilde{\Loss}(\weights)
 		= \graphLaplacian\weights + (\weights^{(1)} -1) \stdBasis_1
 		= (\graphLaplacian + \stdBasis_1 \stdBasis_1^T)\weights - \stdBasis_1
 	\end{align}
@@ -1302,7 +1302,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\end{align*}
 	%
 	This means our loss function is quadratic which means that our
-	hesse matrix \(\nabla \tilde{\loss}(\weights)\) is a constant \(H\). And it is
+	hesse matrix \(\nabla \tilde{\Loss}(\weights)\) is a constant \(H\). And it is
 	positive definite because
 	%
 	\begin{align*}
@@ -1336,7 +1336,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	obtain a convex function with a Lipschitz continuos gradient with constant
 	\(\ubound\), we can now simply define
 	\begin{align*}
-		\loss(\weights):= \frac{\ubound}{4}\tilde{\loss}(\weights)
+		\Loss(\weights):= \frac{\ubound}{4}\tilde{\Loss}(\weights)
 		= \frac\ubound{8}\left[
 			(\weights^{(1)}-1)^2
 			+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
@@ -1354,7 +1354,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	that Assumption~\ref{assmpt: parameter in linear hull of gradients} implies
 	%
 	\begin{align*}
-		\weights_n \in \linSpan\{\nabla\loss(\weights_k): 0 \le k \le n-1\}
+		\weights_n \in \linSpan\{\nabla\Loss(\weights_k): 0 \le k \le n-1\}
 		\subseteq \reals^n \subseteq \reals^\dimension
 	\end{align*}
 	%
@@ -1373,26 +1373,26 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	On \(\reals^n\subseteq \reals^\dimension\) the modified loss function
 	%
 	\begin{align}\label{eq: sink loss}
-		\loss_n(\weights) := \frac\ubound{8}\left[
+		\Loss_n(\weights) := \frac\ubound{8}\left[
 			(\weights^{(1)} -1)^2
 			+ (\weights^{(n)} - 0)^2
 			+ \sum_{k=1}^{n-1} (\weights^{(k)} - \weights^{(k+1)})^2
 		\right]
 	\end{align}
 	%
-	is equal to \(\loss(\weights)\) because \(\weights^{(i)}=0\) for \(i>n\).
+	is equal to \(\Loss(\weights)\) because \(\weights^{(i)}=0\) for \(i>n\).
 	Therefore
 	%
 	\begin{align*}
-		\loss(\weights_n) - \inf_{\weights}\loss(\weights)
-		\ge \loss\restriction_{\reals^n}(\weights_n) = \loss_n(\weights_n)
-		\ge \inf_{\weights}\loss_n(\weights).
+		\Loss(\weights_n) - \inf_{\weights}\Loss(\weights)
+		\ge \Loss\restriction_{\reals^n}(\weights_n) = \Loss_n(\weights_n)
+		\ge \inf_{\weights}\Loss_n(\weights).
 	\end{align*}
 	%
-	Having a closer look at \(\loss_n\) will therefore give us a lower bound
-	without having to know anything about \(\firstOrderMethod\). Since \(\loss_n\)
+	Having a closer look at \(\Loss_n\) will therefore give us a lower bound
+	without having to know anything about \(\firstOrderMethod\). Since \(\Loss_n\)
 	is similarly convex, setting its derivative equal to zero will actually provide us
-	with its minimum. And similarly to \(\loss\) itself, \(\loss_n\) is a
+	with its minimum. And similarly to \(\Loss\) itself, \(\Loss_n\) is a
 	quadratic function, so the gradient is just an affine function with a
 	constant hesse matrix. Therefore finding the minimum only requires solving
 	a linear equation. One can just go through the same motions as we did
@@ -1407,15 +1407,15 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		\end{cases} 
 	\end{align}
 	%
-	But at least for solving it, it helps to have an intuition what \(\loss_n\)
-	actually represents. Recall \(\loss\) represents just
+	But at least for solving it, it helps to have an intuition what \(\Loss_n\)
+	actually represents. Recall \(\Loss\) represents just
 	a single heat source at interval \(\weights^{(1)}\) at constant
 	temperature one which slowly heats up our rod to this level. Now
-	\(\loss_n\) not only has a source, it also has a sink with constant
+	\(\Loss_n\) not only has a source, it also has a sink with constant
 	temperature zero at \(n\) which cools down the rod from this other side.
 
 	It is therefore quite intuitive that the equilibrium solution
-	\(\hat{\weights}_n\) (optimal solution for \(\loss_n\)) should be a linearly
+	\(\hat{\weights}_n\) (optimal solution for \(\Loss_n\)) should be a linearly
 	decreasing slope
 	%
 	\begin{align*}
@@ -1430,8 +1430,8 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	have to plug this into our loss function
 	%
 	\begin{align*}
-		&\loss(\weights_n)-\inf_\weights\loss(\weights)
-		\ge \loss(\hat{\weights}_n)\\
+		&\Loss(\weights_n)-\inf_\weights\Loss(\weights)
+		\ge \Loss(\hat{\weights}_n)\\
 		&= \frac{\ubound}{8}\left[
 			\left(-\tfrac1{n+1}\right)^2 + \left(1-\tfrac{n}{n+1}\right)^2
 			+ \sum_{k=1}^{n-1}\left(\tfrac{k+1}{n+1}-\tfrac{k}{n+1}\right)^2
@@ -1450,43 +1450,43 @@ this argument results in the following theorem inspired by \textcite[Theorem
 For a strongly convex loss we simply add a regularization term:
 %
 \begin{align*}
-	\loss(\weights)
+	\Loss(\weights)
 	&= \frac{\ubound -\lbound}{8} \left[
 		(\weights^{(1)}-1)^2
 		+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 	\right]
 	+ \frac\lbound{2} \| \weights \|^2\\
-	&= \frac{\ubound - \lbound}{4} \tilde{\loss}(\weights)
+	&= \frac{\ubound - \lbound}{4} \tilde{\Loss}(\weights)
 	+ \frac{\lbound}{2}\| \weights \|^2
 \end{align*}
 %
 From the proof of Theorem~\ref{thm: convex function complexity bound} we know
-about \(\tilde{\loss}\) that
+about \(\tilde{\Loss}\) that
 %
 \begin{align*}
-	0 \precsim \nabla^2\tilde{\loss} \precsim 4\identity.
+	0 \precsim \nabla^2\tilde{\Loss} \precsim 4\identity.
 \end{align*}
 %
-Therefore we know that \(\loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) because
+Therefore we know that \(\Loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) because
 %
 \begin{align*}
 	\lbound\identity
-	\precsim \nabla^2\loss
-	&= \frac{\ubound - \lbound}{4} \nabla^2 \tilde{\loss} + \lbound\identity\\
+	\precsim \nabla^2\Loss
+	&= \frac{\ubound - \lbound}{4} \nabla^2 \tilde{\Loss} + \lbound\identity\\
 	&\precsim (\ubound - \lbound + \lbound)\identity = \ubound \identity.
 \end{align*}
 %
 Using \(\lbound(\condition -1)=\ubound-\lbound\) and (\ref{eq: naive complexity
 example loss gradient}) we can set the gradient to zero
 \begin{align*}
-	0 &\lxeq{!} \nabla \loss(\weights)
-	=  \frac{\lbound(\condition -1)}{4} \nabla\tilde{\loss}(\weights) - \lbound \weights\\
+	0 &\lxeq{!} \nabla \Loss(\weights)
+	=  \frac{\lbound(\condition -1)}{4} \nabla\tilde{\Loss}(\weights) - \lbound \weights\\
 	&= \left[
 		\frac{\lbound(\condition-1)}{4}(A_G + \stdBasis_1\stdBasis_1^T) - \lbound\identity
 	\right]\weights - \frac{\lbound(\condition-1)}{4}\stdBasis_1.
 \end{align*}
 %
-Assuming \(\condition>1\) (\(\condition=1\) implies \(\loss=\lbound\|\cdot\|^2\) and
+Assuming \(\condition>1\) (\(\condition=1\) implies \(\Loss=\lbound\|\cdot\|^2\) and
 \(\minimum=\mathbf{0}\)),
 this condition can be rewritten as
 %
@@ -1556,19 +1556,19 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 %
 \begin{theorem}[{\cite[Theorem 2.1.13]{nesterovLecturesConvexOptimization2018}}]
 	For any \(\weights_0\in\sequenceSpace\) there exists
-	\(\loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) such that for any
+	\(\Loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) such that for any
 	first order method \(\firstOrderMethod\) satisfying Assumption~\ref{assmpt:
 	parameter in linear hull of gradients}, we have
 	\begin{subequations}
 	\begin{align}
 		\|\weights_n - \minimum\|
 		&\ge \left(1-\frac2{1+\condition}\right)^n \|\weights_0 - \minimum\| \\
-		\loss(\weights_n) - \loss(\minimum)
+		\Loss(\weights_n) - \Loss(\minimum)
 		&\ge \tfrac{\lbound}{2}
 		\left(1-\frac2{1+\condition}\right)^{2n} \|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
-	where \(\minimum\) is the unique minimum of \(\loss\).
+	where \(\minimum\) is the unique minimum of \(\Loss\).
 \end{theorem}
 \begin{proof}
 	We can again assume without loss of generality that \(\weights_0=\mathbf{0}\).
@@ -1590,10 +1590,10 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 	\end{align*}
 	Taking the root results in the first claim. The second claim immediately
 	follows from the definition of strong convexity (Def~\ref{def: strong convexity})
-	and \(\nabla\loss(\minimum) = 0\):
+	and \(\nabla\Loss(\minimum) = 0\):
 	\begin{align*}
-		\loss(\weights_n) - \loss(\minimum)
-		&\ge \langle \nabla\loss(\minimum), \weights_n -\minimum\rangle
+		\Loss(\weights_n) - \Loss(\minimum)
+		&\ge \langle \nabla\Loss(\minimum), \weights_n -\minimum\rangle
 		+\tfrac\lbound{2} \|\weights_n -\minimum\|^2
 		\qedhere
 	\end{align*}
@@ -1622,7 +1622,7 @@ different components of the gradients for example. Their iterates can thus
 be expressed by
 %
 \begin{align*}
-	\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\loss(\weights_k)
+	\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k)
 \end{align*}
 %
 where \(H_k\) are diagonal matrices. But at least upper triangle matrices do
@@ -1633,7 +1633,7 @@ parameter in linear hull of gradients} to
 \begin{assumption}
 	The \(n\)-th iterate of the optimization method can be expressed as
 	\begin{align*}
-		\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\loss(\weights_k)
+		\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k)
 	\end{align*}
 	where \(H_k\) are upper triangular matrices.
 \end{assumption}
@@ -1644,7 +1644,7 @@ could just switch the relation \((\weights_n-\weights_{n+1})^2\) to
 \((\weights_n+\weights_{n+1})^2\) to force a flip from positive to negative
 at this point, it is unclear how one should extrapolate to components not
 available in any gradient. But making further assumptions like continuity of
-the underlying function \(\model\) inducing \(\loss(\weights)\) it might
+the underlying function \(\model\) inducing \(\Loss(\weights)\) it might
 be possible to find better bounds.
 
 \section{Heuristics}
