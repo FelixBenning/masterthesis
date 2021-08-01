@@ -31,27 +31,27 @@
 		\smashoperator[#1]{\mathop{#2}^{#3}}}
 }
 
-\newcommand*{\lx@rrow}[2]{ %uses leftsides smashoperator thus ignoring overlap towards the left
+\newcommand*{\lstackrel}[2]{ %uses leftsides smashoperator thus ignoring overlap towards the left
 	\sm@shstack[l]{#2}{#1}
 }% use when aligning to the left
-\newcommand*{\x@rrow}[2]{%uses no smashoperator, but adds back stretchability of \implies to the result contrary to \stackrel
+\renewcommand*{\stackrel}[2]{%uses no smashoperator, but adds back stretchability of \implies to the result contrary to \stackrel
 	\;\mkern-\thickmuskip\mathop{#2}\limits^{#1}\;\mkern-\thickmuskip
 }% use in \(\) and as individual operator without aligning neccessities
 
 
-\newcommand*{\lximplies}[1]{\lx@rrow{#1}{\implies}} %%%%% =>
-\newcommand*{\lximpliedby}[1]{\lx@rrow{#1}{\impliedby}} %%%%%% <=
-\newcommand*{\lxiff}[1]{\lx@rrow{#1}{\iff}} %%%%%%%%%%%%% <=>
-\newcommand*{\lxeq}[1]{\lx@rrow{#1}{=}} %%%%%%%%%% =
-\newcommand*{\lxle}[1]{\lx@rrow{#1}{\le}}
-\newcommand*{\lxge}[1]{\lx@rrow{#1}{\ge}}
+\newcommand*{\lximplies}[1]{\lstackrel{#1}{\implies}} %%%%% =>
+\newcommand*{\lximpliedby}[1]{\lstackrel{#1}{\impliedby}} %%%%%% <=
+\newcommand*{\lxiff}[1]{\lstackrel{#1}{\iff}} %%%%%%%%%%%%% <=>
+\newcommand*{\lxeq}[1]{\lstackrel{#1}{=}} %%%%%%%%%% =
+\newcommand*{\lxle}[1]{\lstackrel{#1}{\le}}
+\newcommand*{\lxge}[1]{\lstackrel{#1}{\ge}}
 
-\newcommand*{\ximplies}[1]{\x@rrow{#1}{\implies}} %%%%% =>
-\newcommand*{\ximpliedby}[1]{\x@rrow{#1}{\impliedby}} %%%%%% <=
-\newcommand*{\xiff}[1]{\x@rrow{#1}{\iff}} %%%%%%%%%%%%% <=>
-\newcommand*{\xeq}[1]{\x@rrow{#1}{=}} %%%%%%% =
-\newcommand*{\xle}[1]{\x@rrow{#1}{\le}} %%%%%%%
-\newcommand*{\xge}[1]{\x@rrow{#1}{\ge}} %%%%%%%
+\newcommand*{\ximplies}[1]{\stackrel{#1}{\implies}} %%%%% =>
+\newcommand*{\ximpliedby}[1]{\stackrel{#1}{\impliedby}} %%%%%% <=
+\newcommand*{\xiff}[1]{\stackrel{#1}{\iff}} %%%%%%%%%%%%% <=>
+\newcommand*{\xeq}[1]{\stackrel{#1}{=}} %%%%%%% =
+\newcommand*{\xle}[1]{\stackrel{#1}{\le}} %%%%%%%
+\newcommand*{\xge}[1]{\stackrel{#1}{\ge}} %%%%%%%
 \makeatother
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

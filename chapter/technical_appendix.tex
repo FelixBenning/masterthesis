@@ -86,7 +86,154 @@
 	\end{align*}
 	we only have to divide both sides by \(\tfrac{1}\ubound \|\nabla f(x)-\nabla
 	f(y)\|\) to get \(\ubound\)-Lipschitz continuity back.
- \end{proof}
+\end{proof}
+
+\section{Momentum Convergence}
+
+\begin{lemma}[\cite{qianMomentumTermGradient1999}]
+	Let
+	\begin{align*}
+		\sigma_{1/2}
+		= \tfrac12 \left(
+			1+\beta-\alpha\lambda \pm \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
+		\right)
+	\end{align*}
+	then \(\max\{|\sigma_1|,|\sigma_2|\}<1\) if and only if
+	\begin{align*}
+		0<\alpha\lambda < 2(1+\beta) \qquad \text{and} \qquad |\beta|<1
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	Define
+	\begin{align*}
+		\Delta(\beta)
+		&:= (1+\beta-\alpha\lambda)^2 - 4\beta\\
+		&= \beta^2 - 2(1+\alpha\lambda)\beta + (1-\alpha\lambda)^2
+	\end{align*}
+	then \(\sigma_{1/2}\) is complex iff \(\Delta(\beta)<0\). Since it is a
+	convex parabola this implies that \(\beta\) needs to be between the roots
+	\begin{align*}
+		\beta_{1/2}
+		= (1+\alpha\lambda) \pm 
+		\underbrace{
+			\sqrt{(1+\alpha\lambda)^2 - (1-\alpha\lambda)^2}
+		}_{=\sqrt{4\alpha\lambda}=\mathrlap{2\sqrt{\alpha\lambda}}}
+		= (1\pm \sqrt{\alpha\lambda})^2	
+	\end{align*}
+	of \(\Delta\). Assuming those roots are real which requires \(\alpha\lambda>0\).
+	But if \(\alpha\lambda\le0\) then we would have
+	\begin{align*}
+		\sigma_1
+		= \tfrac12 \Big(
+			\underbrace{1+\beta+|\alpha\lambda|}_{\ge 1+\beta}
+			+ \sqrt{\underbrace{(1+\beta+|\alpha\lambda|)^2 - 4\beta}_{\smash{\ge (1-\beta)^2}}}
+		\Big)
+		\ge \frac{1+\beta + |1-\beta|}2 \ge 1
+	\end{align*}
+	which means that \(\max\{|\sigma_1|,|\sigma_2|\}<1\) implies \(\alpha\lambda>0\).
+	The roots \(\beta_{1/2}\) are therefore real no matter the direction we
+	wish to prove.
+	\begin{description}[wide, labelindent=0pt]
+	\item[Complex Case:]
+		\(\sigma_{1/2}\) are complex iff	
+		\begin{align}\label{eq: complex case}
+			0 < (1-\sqrt{\alpha\lambda})^2 < \beta < (1+\sqrt{\alpha\lambda})^2.
+		\end{align}
+		In that case we have
+		\begin{align*}
+			|\sigma_1| = |\sigma_2|
+			&= \sqrt{|\Re(\sigma_1)|^2 + |\Im(\sigma_1)|^2}\\
+			&= \tfrac12 \sqrt{(1+\beta-\alpha\lambda)^2 + 4\beta - (1+\beta-\alpha\lambda)^2}
+			= \sqrt{\beta}.
+		\end{align*}
+		So in this complex case the condition
+		\(\beta<1\) is necessary and sufficient for \(\max\{|\sigma_1|,|\sigma_2|\}<1\).
+		And since we have seen that \(\alpha\lambda>0\) is necessary and \(0<\beta\)
+		from (\ref{eq: complex case}) implies the condition \(|\beta|<1\), we only
+		need to show that \(\alpha\lambda <2(1+\beta)\) is necessary in the complex
+		case to have this case covered. Using \((\sqrt{\alpha\lambda}-1)^2 < \beta\)
+		from (\ref{eq: complex case}) and \(ab \le a^2 + b^2\) we get
+		\begin{align*}
+			\sqrt{\alpha\lambda} - 1
+			< \beta \implies \alpha\lambda < (1+\sqrt{\beta})^2
+			\le 2(1+\beta)
+		\end{align*}
+		and therefore have covered this case.
+		\item[Real Case:] Since we have \(\sigma_2 \le \sigma_1\),
+		\(\max\{|\sigma_1|,|\sigma_2|\}<1\) is equivalent to
+		\begin{align*}
+			-1 < \sigma_2 \qquad \text{and} \qquad \sigma_1 < 1
+		\end{align*}
+		By subtracting the part before the "\(\pm\)" from the equation \(\sigma_1<1\)
+		we get
+		\begin{align}\label{eq: sigma1 condition}
+			0\xle{\text{Real Case}} \sqrt{(1+\beta-\alpha\lambda)^2 -4\beta} < 1-\beta +\alpha\lambda.
+		\end{align}
+		And since \((1+\sqrt{\alpha\lambda})^2 \le \beta\) leads to a contradiction:
+		\begin{align*}
+			0 \le 1-\beta+\alpha\lambda \le 1-(1+\sqrt{\alpha\lambda})^2 +\alpha\lambda
+			= -2\sqrt{\alpha\lambda} < 0
+		\end{align*}
+		the real case is restricted to the case \(\beta < (1-\sqrt{\alpha\lambda})^2\)
+		as we are otherwise in the complex case (\ref{eq: complex case}).
+		This means that due to
+		\begin{align*}
+			1-\beta+\alpha\lambda
+			> 1 - (1-\sqrt{\alpha\lambda})^2 + \alpha\lambda
+			= 2\sqrt{\alpha\lambda}>0
+		\end{align*}
+		the inequality (\ref{eq: sigma1 condition}) is (in the real case) equivalent to
+		\begin{align*}
+			&(1+\beta-\alpha\lambda)^2 - 4\beta < (1-\beta+\alpha\lambda)^2\\
+			&\iff \cancel{1^2} + 2(\beta-\alpha\lambda) + 
+			\cancel{(\beta-\alpha\lambda)^2} - 4\beta
+			< \cancel{1^2} - 2(\beta-\alpha\lambda) + 
+			\cancel{(\beta-\alpha\lambda)^2}\\
+			&\iff 0 < 4\alpha\beta.
+		\end{align*}
+		In other words it is a given for positive learning rates in the convex	
+		case which is not surprising if one remembers the proof from gradient
+		decent. The real issue is not overshooting \(-1\) with large learning
+		rates. So multiplying \(-1<\sigma_2\) by two, adding 2 and moving the
+		root to the other side we get
+		\begin{align*}
+			0 \xle{\text{Real Case}} \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
+			< 3+\beta-\alpha\lambda
+		\end{align*}
+		Now if we assume \(\alpha\lambda < 3+\beta\), then this condition is
+		equivalent to 
+		\begin{align}
+			\nonumber
+			&(1+\beta-\alpha\lambda)^2 - 4\beta < (3+\beta-\alpha\lambda)\\
+			\nonumber
+			&\iff 1^2 + 2(\beta-\alpha\lambda) + \cancel{(\beta-\alpha\lambda)^2} - 4\beta
+			< 3^2 + 6(\beta-\alpha\lambda) + \cancel{(\beta-\alpha\lambda)^2}\\
+			\label{eq: momentum upper bound derivation}
+			&\iff 4\alpha\lambda < 8 + 8\beta
+			\iff \alpha\lambda < 2(1+\beta)
+		\end{align}
+		which is the important requirement on the learning rate we are looking for.
+		Now for \(\beta<1\) this requirement is actually stronger than
+		\(\alpha\lambda <3+\beta\) which means that we have proven that our
+		requirements are sufficient for \(\max\{|\sigma_1|,|\sigma_2|\}<1\).
+		What is left to show is that \(|\beta|<1\) is also necessary in the real
+		case. Now from (\ref{eq: momentum upper bound derivation}) we immediately
+		get
+		\begin{align*}
+			0 \le \tfrac{\alpha\lambda}2 < 1+\beta
+		\end{align*}
+		which implies \(-1 < \beta\). And first glance it might look like
+		\(\beta<(1-\sqrt{\alpha\lambda})^2\) is already sufficient for the upper
+		bound, but for \(\alpha\lambda>4\) this bound is greater than one again.
+		So let us assume \(\alpha\lambda>4\) and \(\beta>1\), then
+		\(\beta<(1-\sqrt{\alpha\lambda})^2\) implies
+		\begin{align*}
+			\sqrt{\beta} < \sqrt{\alpha\beta} -1
+			\implies \underbrace{(1+\sqrt{\beta})^2}_{1+2\sqrt{\beta} + \beta} < \alpha\lambda
+			\stackrel{(\ref{eq: momentum upper bound derivation})}{<} 2(1+\beta) < 4\beta
+		\end{align*}
+ \end{description}
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
