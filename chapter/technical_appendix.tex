@@ -196,10 +196,10 @@
 		decent. The real issue is not overshooting \(-1\) with large learning
 		rates. So multiplying \(-1<\sigma_2\) by two, adding 2 and moving the
 		root to the other side we get
-		\begin{align*}
+		\begin{align}\label{eq: from -1<sigma_2 followed}
 			0 \xle{\text{Real Case}} \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
 			< 3+\beta-\alpha\lambda
-		\end{align*}
+		\end{align}
 		Now if we assume \(\alpha\lambda < 3+\beta\), then this condition is
 		equivalent to 
 		\begin{align}
@@ -222,15 +222,19 @@
 		\begin{align*}
 			0 \le \tfrac{\alpha\lambda}2 < 1+\beta
 		\end{align*}
-		which implies \(-1 < \beta\). And first glance it might look like
+		which implies \(-1 < \beta\). At first glance it might look like
 		\(\beta<(1-\sqrt{\alpha\lambda})^2\) is already sufficient for the upper
 		bound, but for \(\alpha\lambda>4\) this bound is greater than one again.
-		So let us assume \(\alpha\lambda>4\) and \(\beta>1\), then
+		So let us assume \(\alpha\lambda>2\) and \(\beta>0\), then
 		\(\beta<(1-\sqrt{\alpha\lambda})^2\) implies
 		\begin{align*}
 			\sqrt{\beta} < \sqrt{\alpha\beta} -1
-			\implies \underbrace{(1+\sqrt{\beta})^2}_{1+2\sqrt{\beta} + \beta} < \alpha\lambda
-			\stackrel{(\ref{eq: momentum upper bound derivation})}{<} 2(1+\beta) < 4\beta
+			&\implies \smash{\overbrace{(1+\sqrt{\beta})^2}^{1+2\sqrt{\beta} + \beta}}
+			< \alpha\lambda
+			\stackrel{(\ref{eq: from -1<sigma_2 followed})}{<} 3+\beta \\
+			&\implies -2 +2\sqrt{\beta} < 0
+			\implies \sqrt{\beta} < 1
+			\qedhere
 		\end{align*}
  \end{description}
 \end{proof}
