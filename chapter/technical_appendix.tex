@@ -90,7 +90,7 @@
 
 \section{Momentum Convergence}
 
-\begin{lemma}[\cite{qianMomentumTermGradient1999}]
+\begin{theorem}[\cite{qianMomentumTermGradient1999}]
 	Let
 	\begin{align*}
 		\sigma_{1/2}
@@ -98,11 +98,35 @@
 			1+\beta-\alpha\lambda \pm \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
 		\right)
 	\end{align*}
-	then \(\max\{|\sigma_1|,|\sigma_2|\}<1\) if and only if
-	\begin{align*}
-		0<\alpha\lambda < 2(1+\beta) \qquad \text{and} \qquad |\beta|<1
-	\end{align*}
-\end{lemma}
+	then 
+	\begin{enumerate}
+		\item \(\max\{|\sigma_1|,|\sigma_2|\}<1\) if and only if
+		\begin{align*}
+			0<\alpha\lambda < 2(1+\beta) \qquad \text{and} \qquad |\beta|<1
+		\end{align*}
+		\item The complex case can be characterized by either
+		\begin{align*}
+			0<(1-\sqrt{\alpha\lambda})^2 < \beta < 1
+		\end{align*}		
+		or alternatively
+		\begin{align*}
+			(1-\sqrt{\beta})^2 < \alpha\lambda < (1+\sqrt{\beta})^2,
+		\end{align*}
+		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\beta}\) ("Ripples").
+		\item The real case restricted to \(1>\beta>0\) results in two different	
+		behaviors. For
+		\begin{align*}
+			0<\alpha\lambda \le (1-\sqrt{\beta})^2 < 1+\beta
+		\end{align*}
+		we have \(1>\sigma_1 > \sigma_2 > 0\) which results in a monotonic
+		linear convergence ("Monotonic" case). For
+		\begin{align*}
+			1+\beta < (1+\sqrt{\beta})^2\le \alpha\lambda < 2(1+\beta)
+		\end{align*}
+		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
+		an oscillating convergence ("Oscillations").
+	\end{enumerate}
+\end{theorem}
 \begin{proof}
 	Define
 	\begin{align*}
@@ -159,6 +183,9 @@
 			\le 2(1+\beta)
 		\end{align*}
 		and therefore have covered this case.
+
+		The characterization of the complex case follows from restricting
+		(\ref{eq: complex case}) to \(\beta<1\) and reordering.
 		\item[Real Case:] Since we have \(\sigma_2 \le \sigma_1\),
 		\(\max\{|\sigma_1|,|\sigma_2|\}<1\) is equivalent to
 		\begin{align*}
@@ -234,10 +261,27 @@
 			\stackrel{(\ref{eq: from -1<sigma_2 followed})}{<} 3+\beta \\
 			&\implies -2 +2\sqrt{\beta} < 0
 			\implies \sqrt{\beta} < 1
-			\qedhere
 		\end{align*}
+
+		For the characterization of the real case one only needs to keep in mind that for
+		\(\beta>0\) and \(\alpha\lambda < (1+\sqrt{\beta})^2 <1+\beta\)
+		\begin{align*}
+			1+\beta-\alpha\lambda = \sqrt{(1+\beta-\alpha\lambda)^2}
+			> \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta} > 0
+		\end{align*}
+		ensures that \(\sigma_2 >0\). On the other hand for \(\beta>0\)
+		and \(\alpha\lambda > (1-\sqrt{\beta})^2> 1+\beta\)
+		\begin{align*}
+			- (1+\beta-\alpha\lambda) = \sqrt{(1+\beta-\alpha\lambda)^2}
+			> \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
+		\end{align*}
+		implies \(\sigma_1 < 0\). \qedhere
  \end{description}
 \end{proof}
+
+\begin{corollary}
+	Optimal \(\alpha\) and \(\beta\)
+\end{corollary}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
