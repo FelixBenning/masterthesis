@@ -1,4 +1,3 @@
-
 % !TEX root = ../Masterthesis.tex
 
 \chapter{Technical Proofs}
@@ -96,33 +95,33 @@
 	\begin{align*}
 		\sigma_{1/2}
 		= \tfrac12 \left(
-			1+\beta-\alpha\lambda \pm \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
+			1+\momCoeff-\lrSq\hesseEV \pm \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
 		\right)
 	\end{align*}
 	then 
 	\begin{enumerate}
 		\item \(\max\{|\sigma_1|,|\sigma_2|\}<1\) if and only if
 		\begin{align*}
-			0<\alpha\lambda < 2(1+\beta) \qquad \text{and} \qquad |\beta|<1
+			0<\lrSq\hesseEV < 2(1+\momCoeff) \qquad \text{and} \qquad |\momCoeff|<1
 		\end{align*}
 		\item The complex case can be characterized by either
 		\begin{align*}
-			0<(1-\sqrt{\alpha\lambda})^2 < \beta < 1
+			0<(1-\sqrt{\lrSq\hesseEV})^2 < \momCoeff < 1
 		\end{align*}		
 		or alternatively
 		\begin{align*}
-			(1-\sqrt{\beta})^2 < \alpha\lambda < (1+\sqrt{\beta})^2,
+			(1-\sqrt{\momCoeff})^2 < \lrSq\hesseEV < (1+\sqrt{\momCoeff})^2,
 		\end{align*}
-		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\beta}\) ("Ripples").
-		\item The real case restricted to \(1>\beta>0\) results in two different	
+		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\momCoeff}\) ("Ripples").
+		\item The real case restricted to \(1>\momCoeff>0\) results in two different	
 		behaviors. For
 		\begin{align*}
-			0<\alpha\lambda \le (1-\sqrt{\beta})^2 < 1+\beta
+			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
 		\end{align*}
 		we have \(1>\sigma_1 > \sigma_2 > 0\) which results in a monotonic
 		linear convergence ("Monotonic" case). For
 		\begin{align*}
-			1+\beta < (1+\sqrt{\beta})^2\le \alpha\lambda < 2(1+\beta)
+			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
 		\end{align*}
 		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
 		an oscillating convergence ("Oscillations").
@@ -131,62 +130,62 @@
 \begin{proof}
 	Define
 	\begin{align*}
-		\Delta(\beta)
-		&:= (1+\beta-\alpha\lambda)^2 - 4\beta\\
-		&= \beta^2 - 2(1+\alpha\lambda)\beta + (1-\alpha\lambda)^2
+		\Delta(\momCoeff)
+		&:= (1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff\\
+		&= \momCoeff^2 - 2(1+\lrSq\hesseEV)\momCoeff + (1-\lrSq\hesseEV)^2
 	\end{align*}
-	then \(\sigma_{1/2}\) is complex iff \(\Delta(\beta)<0\). Since it is a
-	convex parabola this implies that \(\beta\) needs to be between the roots
+	then \(\sigma_{1/2}\) is complex iff \(\Delta(\momCoeff)<0\). Since it is a
+	convex parabola this implies that \(\momCoeff\) needs to be between the roots
 	\begin{align*}
-		\beta_{1/2}
-		= (1+\alpha\lambda) \pm 
+		\momCoeff_{1/2}
+		= (1+\lrSq\hesseEV) \pm 
 		\underbrace{
-			\sqrt{(1+\alpha\lambda)^2 - (1-\alpha\lambda)^2}
-		}_{=\sqrt{4\alpha\lambda}=\mathrlap{2\sqrt{\alpha\lambda}}}
-		= (1\pm \sqrt{\alpha\lambda})^2	
+			\sqrt{(1+\lrSq\hesseEV)^2 - (1-\lrSq\hesseEV)^2}
+		}_{=\sqrt{4\lrSq\hesseEV}=\mathrlap{2\sqrt{\lrSq\hesseEV}}}
+		= (1\pm \sqrt{\lrSq\hesseEV})^2	
 	\end{align*}
-	of \(\Delta\). Assuming those roots are real which requires \(\alpha\lambda>0\).
-	But if \(\alpha\lambda\le0\) then we would have
+	of \(\Delta\). Assuming those roots are real which requires \(\lrSq\hesseEV>0\).
+	But if \(\lrSq\hesseEV\le0\) then we would have
 	\begin{align*}
 		\sigma_1
 		= \tfrac12 \Big(
-			\underbrace{1+\beta+|\alpha\lambda|}_{\ge 1+\beta}
-			+ \sqrt{\underbrace{(1+\beta+|\alpha\lambda|)^2 - 4\beta}_{\smash{\ge (1-\beta)^2}}}
+			\underbrace{1+\momCoeff+|\lrSq\hesseEV|}_{\ge 1+\momCoeff}
+			+ \sqrt{\underbrace{(1+\momCoeff+|\lrSq\hesseEV|)^2 - 4\momCoeff}_{\smash{\ge (1-\momCoeff)^2}}}
 		\Big)
-		\ge \frac{1+\beta + |1-\beta|}2 \ge 1
+		\ge \frac{1+\momCoeff + |1-\momCoeff|}2 \ge 1
 	\end{align*}
-	which means that \(\max\{|\sigma_1|,|\sigma_2|\}<1\) implies \(\alpha\lambda>0\).
-	The roots \(\beta_{1/2}\) are therefore real no matter the direction we
+	which means that \(\max\{|\sigma_1|,|\sigma_2|\}<1\) implies \(\lrSq\hesseEV>0\).
+	The roots \(\momCoeff_{1/2}\) are therefore real no matter the direction we
 	wish to prove.
 	\begin{description}[wide, labelindent=0pt]
 	\item[Complex Case:]
 		\(\sigma_{1/2}\) are complex iff	
 		\begin{align}\label{eq: complex case}
-			0 < (1-\sqrt{\alpha\lambda})^2 < \beta < (1+\sqrt{\alpha\lambda})^2.
+			0 < (1-\sqrt{\lrSq\hesseEV})^2 < \momCoeff < (1+\sqrt{\lrSq\hesseEV})^2.
 		\end{align}
 		In that case we have
 		\begin{align*}
 			|\sigma_1| = |\sigma_2|
 			&= \sqrt{|\Re(\sigma_1)|^2 + |\Im(\sigma_1)|^2}\\
-			&= \tfrac12 \sqrt{(1+\beta-\alpha\lambda)^2 + 4\beta - (1+\beta-\alpha\lambda)^2}
-			= \sqrt{\beta}.
+			&= \tfrac12 \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 + 4\momCoeff - (1+\momCoeff-\lrSq\hesseEV)^2}
+			= \sqrt{\momCoeff}.
 		\end{align*}
 		So in this complex case the condition
-		\(\beta<1\) is necessary and sufficient for \(\max\{|\sigma_1|,|\sigma_2|\}<1\).
-		And since we have seen that \(\alpha\lambda>0\) is necessary and \(0<\beta\)
-		from (\ref{eq: complex case}) implies the condition \(|\beta|<1\), we only
-		need to show that \(\alpha\lambda <2(1+\beta)\) is necessary in the complex
-		case to have this case covered. Using \((\sqrt{\alpha\lambda}-1)^2 < \beta\)
+		\(\momCoeff<1\) is necessary and sufficient for \(\max\{|\sigma_1|,|\sigma_2|\}<1\).
+		And since we have seen that \(\lrSq\hesseEV>0\) is necessary and \(0<\momCoeff\)
+		from (\ref{eq: complex case}) implies the condition \(|\momCoeff|<1\), we only
+		need to show that \(\lrSq\hesseEV <2(1+\momCoeff)\) is necessary in the complex
+		case to have this case covered. Using \((\sqrt{\lrSq\hesseEV}-1)^2 < \momCoeff\)
 		from (\ref{eq: complex case}) and \(ab \le a^2 + b^2\) we get
 		\begin{align*}
-			\sqrt{\alpha\lambda} - 1
-			< \beta \implies \alpha\lambda < (1+\sqrt{\beta})^2
-			\le 2(1+\beta)
+			\sqrt{\lrSq\hesseEV} - 1
+			< \momCoeff \implies \lrSq\hesseEV < (1+\sqrt{\momCoeff})^2
+			\le 2(1+\momCoeff)
 		\end{align*}
 		and therefore have covered this case.
 
 		The characterization of the complex case follows from restricting
-		(\ref{eq: complex case}) to \(\beta<1\) and reordering.
+		(\ref{eq: complex case}) to \(\momCoeff<1\) and reordering.
 		\item[Real Case:] Since we have \(\sigma_2 \le \sigma_1\),
 		\(\max\{|\sigma_1|,|\sigma_2|\}<1\) is equivalent to
 		\begin{align*}
@@ -195,29 +194,29 @@
 		By subtracting the part before the "\(\pm\)" from the equation \(\sigma_1<1\)
 		we get
 		\begin{align}\label{eq: sigma1 condition}
-			0\xle{\text{Real Case}} \sqrt{(1+\beta-\alpha\lambda)^2 -4\beta} < 1-\beta +\alpha\lambda.
+			0\xle{\text{Real Case}} \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 -4\momCoeff} < 1-\momCoeff +\lrSq\hesseEV.
 		\end{align}
-		And since \((1+\sqrt{\alpha\lambda})^2 \le \beta\) leads to a contradiction:
+		And since \((1+\sqrt{\lrSq\hesseEV})^2 \le \momCoeff\) leads to a contradiction:
 		\begin{align*}
-			0 \le 1-\beta+\alpha\lambda \le 1-(1+\sqrt{\alpha\lambda})^2 +\alpha\lambda
-			= -2\sqrt{\alpha\lambda} < 0
+			0 \le 1-\momCoeff+\lrSq\hesseEV \le 1-(1+\sqrt{\lrSq\hesseEV})^2 +\lrSq\hesseEV
+			= -2\sqrt{\lrSq\hesseEV} < 0
 		\end{align*}
-		the real case is restricted to the case \(\beta < (1-\sqrt{\alpha\lambda})^2\)
+		the real case is restricted to the case \(\momCoeff < (1-\sqrt{\lrSq\hesseEV})^2\)
 		as we are otherwise in the complex case (\ref{eq: complex case}).
 		This means that due to
 		\begin{align*}
-			1-\beta+\alpha\lambda
-			> 1 - (1-\sqrt{\alpha\lambda})^2 + \alpha\lambda
-			= 2\sqrt{\alpha\lambda}>0
+			1-\momCoeff+\lrSq\hesseEV
+			> 1 - (1-\sqrt{\lrSq\hesseEV})^2 + \lrSq\hesseEV
+			= 2\sqrt{\lrSq\hesseEV}>0
 		\end{align*}
 		the inequality (\ref{eq: sigma1 condition}) is (in the real case) equivalent to
 		\begin{align*}
-			&(1+\beta-\alpha\lambda)^2 - 4\beta < (1-\beta+\alpha\lambda)^2\\
-			&\iff \cancel{1^2} + 2(\beta-\alpha\lambda) + 
-			\cancel{(\beta-\alpha\lambda)^2} - 4\beta
-			< \cancel{1^2} - 2(\beta-\alpha\lambda) + 
-			\cancel{(\beta-\alpha\lambda)^2}\\
-			&\iff 0 < 4\alpha\beta.
+			&(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff < (1-\momCoeff+\lrSq\hesseEV)^2\\
+			&\iff \cancel{1^2} + 2(\momCoeff-\lrSq\hesseEV) + 
+			\cancel{(\momCoeff-\lrSq\hesseEV)^2} - 4\momCoeff
+			< \cancel{1^2} - 2(\momCoeff-\lrSq\hesseEV) + 
+			\cancel{(\momCoeff-\lrSq\hesseEV)^2}\\
+			&\iff 0 < 4\lrSq\momCoeff.
 		\end{align*}
 		In other words it is a given for positive learning rates in the convex	
 		case which is not surprising if one remembers the proof from gradient
@@ -225,56 +224,56 @@
 		rates. So multiplying \(-1<\sigma_2\) by two, adding 2 and moving the
 		root to the other side we get
 		\begin{align}\label{eq: from -1<sigma_2 followed}
-			0 \xle{\text{Real Case}} \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
-			< 3+\beta-\alpha\lambda
+			0 \xle{\text{Real Case}} \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
+			< 3+\momCoeff-\lrSq\hesseEV
 		\end{align}
-		Now if we assume \(\alpha\lambda < 3+\beta\), then this condition is
+		Now if we assume \(\lrSq\hesseEV < 3+\momCoeff\), then this condition is
 		equivalent to 
 		\begin{align}
 			\nonumber
-			&(1+\beta-\alpha\lambda)^2 - 4\beta < (3+\beta-\alpha\lambda)\\
+			&(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff < (3+\momCoeff-\lrSq\hesseEV)\\
 			\nonumber
-			&\iff 1^2 + 2(\beta-\alpha\lambda) + \cancel{(\beta-\alpha\lambda)^2} - 4\beta
-			< 3^2 + 6(\beta-\alpha\lambda) + \cancel{(\beta-\alpha\lambda)^2}\\
+			&\iff 1^2 + 2(\momCoeff-\lrSq\hesseEV) + \cancel{(\momCoeff-\lrSq\hesseEV)^2} - 4\momCoeff
+			< 3^2 + 6(\momCoeff-\lrSq\hesseEV) + \cancel{(\momCoeff-\lrSq\hesseEV)^2}\\
 			\label{eq: momentum upper bound derivation}
-			&\iff 4\alpha\lambda < 8 + 8\beta
-			\iff \alpha\lambda < 2(1+\beta)
+			&\iff 4\lrSq\hesseEV < 8 + 8\momCoeff
+			\iff \lrSq\hesseEV < 2(1+\momCoeff)
 		\end{align}
 		which is the important requirement on the learning rate we are looking for.
-		Now for \(\beta<1\) this requirement is actually stronger than
-		\(\alpha\lambda <3+\beta\) which means that we have proven that our
+		Now for \(\momCoeff<1\) this requirement is actually stronger than
+		\(\lrSq\hesseEV <3+\momCoeff\) which means that we have proven that our
 		requirements are sufficient for \(\max\{|\sigma_1|,|\sigma_2|\}<1\).
-		What is left to show is that \(|\beta|<1\) is also necessary in the real
+		What is left to show is that \(|\momCoeff|<1\) is also necessary in the real
 		case. Now from (\ref{eq: momentum upper bound derivation}) we immediately
 		get
 		\begin{align*}
-			0 \le \tfrac{\alpha\lambda}2 < 1+\beta
+			0 \le \tfrac{\lrSq\hesseEV}2 < 1+\momCoeff
 		\end{align*}
-		which implies \(-1 < \beta\). At first glance it might look like
-		\(\beta<(1-\sqrt{\alpha\lambda})^2\) is already sufficient for the upper
-		bound, but for \(\alpha\lambda>4\) this bound is greater than one again.
-		So let us assume \(\alpha\lambda>2\) and \(\beta>0\), then
-		\(\beta<(1-\sqrt{\alpha\lambda})^2\) implies
+		which implies \(-1 < \momCoeff\). At first glance it might look like
+		\(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) is already sufficient for the upper
+		bound, but for \(\lrSq\hesseEV>4\) this bound is greater than one again.
+		So let us assume \(\lrSq\hesseEV>2\) and \(\momCoeff>0\), then
+		\(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) implies
 		\begin{align*}
-			\sqrt{\beta} < \sqrt{\alpha\beta} -1
-			&\implies \smash{\overbrace{(1+\sqrt{\beta})^2}^{1+2\sqrt{\beta} + \beta}}
-			< \alpha\lambda
-			\stackrel{(\ref{eq: from -1<sigma_2 followed})}{<} 3+\beta \\
-			&\implies -2 +2\sqrt{\beta} < 0
-			\implies \sqrt{\beta} < 1
+			\sqrt{\momCoeff} < \sqrt{\lrSq\momCoeff} -1
+			&\implies \smash{\overbrace{(1+\sqrt{\momCoeff})^2}^{1+2\sqrt{\momCoeff} + \momCoeff}}
+			< \lrSq\hesseEV
+			\stackrel{(\ref{eq: from -1<sigma_2 followed})}{<} 3+\momCoeff \\
+			&\implies -2 +2\sqrt{\momCoeff} < 0
+			\implies \sqrt{\momCoeff} < 1
 		\end{align*}
 
 		For the characterization of the real case one only needs to keep in mind that for
-		\(\beta>0\) and \(\alpha\lambda < (1+\sqrt{\beta})^2 <1+\beta\)
+		\(\momCoeff>0\) and \(\lrSq\hesseEV < (1+\sqrt{\momCoeff})^2 <1+\momCoeff\)
 		\begin{align*}
-			1+\beta-\alpha\lambda = \sqrt{(1+\beta-\alpha\lambda)^2}
-			> \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta} > 0
+			1+\momCoeff-\lrSq\hesseEV = \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2}
+			> \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff} > 0
 		\end{align*}
-		ensures that \(\sigma_2 >0\). On the other hand for \(\beta>0\)
-		and \(\alpha\lambda > (1-\sqrt{\beta})^2> 1+\beta\)
+		ensures that \(\sigma_2 >0\). On the other hand for \(\momCoeff>0\)
+		and \(\lrSq\hesseEV > (1-\sqrt{\momCoeff})^2> 1+\momCoeff\)
 		\begin{align*}
-			- (1+\beta-\alpha\lambda) = \sqrt{(1+\beta-\alpha\lambda)^2}
-			> \sqrt{(1+\beta-\alpha\lambda)^2 - 4\beta}
+			- (1+\momCoeff-\lrSq\hesseEV) = \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2}
+			> \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
 		\end{align*}
 		implies \(\sigma_1 < 0\). \qedhere
  \end{description}
@@ -282,61 +281,61 @@
 
 \begin{lemma}
 	\begin{align*}
-		\frac{d}{d\beta}\max\{|\sigma_1|,|\sigma_2|\} < 0 \qquad
-		\forall 0<\beta <(1-\sqrt{\alpha\lambda})^2
+		\frac{d}{d\momCoeff}\max\{|\sigma_1|,|\sigma_2|\} < 0 \qquad
+		\forall 0<\momCoeff <(1-\sqrt{\lrSq\hesseEV})^2
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	Using the characterizations of the real case restricted to \(\beta>0\)
+	Using the characterizations of the real case restricted to \(\momCoeff>0\)
 	from Theorem~\ref{thm: momentum - stable set of parameters} we get
 	\begin{align*}
-		\frac{d}{d\beta}\max\{|\sigma_1|,|\sigma_2|\}
+		\frac{d}{d\momCoeff}\max\{|\sigma_1|,|\sigma_2|\}
 		= \begin{cases}
-			\frac{d\sigma_1}{d\beta} & \sigma_1 > \sigma_2 > 0 \iff \alpha\lambda\le (1-\sqrt{\beta})^2\\
-			-\frac{d\sigma_2}{d\beta} & \sigma_2 < \sigma_1 < 0 \iff \alpha\lambda \ge (1+\sqrt{\beta})^2
+			\frac{d\sigma_1}{d\momCoeff} & \sigma_1 > \sigma_2 > 0 \iff \lrSq\hesseEV\le (1-\sqrt{\momCoeff})^2\\
+			-\frac{d\sigma_2}{d\momCoeff} & \sigma_2 < \sigma_1 < 0 \iff \lrSq\hesseEV \ge (1+\sqrt{\momCoeff})^2
 		\end{cases}
 	\end{align*}
 	This allows us to treat those cases separately. For the first case we use
 	the same definition for \(\Delta\) as in Theorem~\ref{thm: momentum - stable
 	set of parameters}. Calculating its derivative
 	\begin{align*}
-		\Delta'(\beta) = 2(1+\beta-\alpha\lambda)	-4
+		\Delta'(\momCoeff) = 2(1+\momCoeff-\lrSq\hesseEV)	-4
 	\end{align*}
 	allows us to represent \(\sigma_1\) as
 	\begin{align*}
 		1>\sigma_1
-		= 1 + \frac{\Delta'(\beta)}{4} + \tfrac12 \sqrt{\Delta(\beta)},
+		= 1 + \frac{\Delta'(\momCoeff)}{4} + \tfrac12 \sqrt{\Delta(\momCoeff)},
 	\end{align*}
 	which results in the inequality
 	\begin{align*}
-		0 > \tfrac14\Delta'(\beta) + \tfrac12\sqrt{\Delta(\beta)}
-		\implies -\tfrac12 > \tfrac14\frac{\Delta'(\beta)}{\sqrt{\Delta{\beta}}}
+		0 > \tfrac14\Delta'(\momCoeff) + \tfrac12\sqrt{\Delta(\momCoeff)}
+		\implies -\tfrac12 > \tfrac14\frac{\Delta'(\momCoeff)}{\sqrt{\Delta{\momCoeff}}}
 	\end{align*}
 	We can now use this inequality to show that\footnote{
 		I want to apologize for the lack of insight in this proof upon which I
-		stumbled by accident playing around with the \(\Delta(\beta)\)
+		stumbled by accident playing around with the \(\Delta(\momCoeff)\)
 		representation of \(\sigma_{1/2}\). Its only redeeming merit is its brevity.
 	}
 	\begin{align*}
-		\frac{d\sigma_1}{d\beta}
-		= \frac12 + \frac14 \frac{\Delta'(\beta)}{\sqrt{\Delta(\beta)}} < 0.
+		\frac{d\sigma_1}{d\momCoeff}
+		= \frac12 + \frac14 \frac{\Delta'(\momCoeff)}{\sqrt{\Delta(\momCoeff)}} < 0.
 	\end{align*}
 	The second case on the other hand requires us to show that
 	\begin{align*}
-		\frac{d\sigma_2}{d\beta}
-		= \frac12 - \frac14 \frac{\Delta'(\beta)}{\sqrt{\Delta(\beta)}} > 0
-		\iff 2 > \frac{\Delta'(\beta)}{\sqrt{\Delta(\beta)}}.
+		\frac{d\sigma_2}{d\momCoeff}
+		= \frac12 - \frac14 \frac{\Delta'(\momCoeff)}{\sqrt{\Delta(\momCoeff)}} > 0
+		\iff 2 > \frac{\Delta'(\momCoeff)}{\sqrt{\Delta(\momCoeff)}}.
 	\end{align*}
 	Which is true due to
 	\begin{align*}
-		2\sqrt{\Delta(\beta)} > 0 > -4\sqrt{\alpha\lambda}
+		2\sqrt{\Delta(\momCoeff)} > 0 > -4\sqrt{\lrSq\hesseEV}
 		&= 2\overbrace{
-			(1-\alpha\lambda + (1-\sqrt{\alpha\lambda})^2)
-		}^{\smash{=2-2\sqrt{\alpha\lambda}}} -4\\
-		&= \Delta'((1-\sqrt{\alpha\lambda})^2) > \Delta'(\beta),
+			(1-\lrSq\hesseEV + (1-\sqrt{\lrSq\hesseEV})^2)
+		}^{\smash{=2-2\sqrt{\lrSq\hesseEV}}} -4\\
+		&= \Delta'((1-\sqrt{\lrSq\hesseEV})^2) > \Delta'(\momCoeff),
 	\end{align*}
-	since \(\beta<(1-\sqrt{\alpha\lambda})^2\) and \(\Delta'\) is monotonously
-	increasing in \(\beta\).
+	since \(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) and \(\Delta'\) is monotonously
+	increasing in \(\momCoeff\).
  \end{proof}
 
 
