@@ -19,6 +19,7 @@ begin
 	using SparseArrays: sparse
 	using Plots: plot, plot!, savefig
 	using LaTeXStrings
+	using LinearAlgebra: I
 end
 
 # ╔═╡ 0e3af38d-75a6-45e1-b051-8d3eb49bde94
@@ -40,13 +41,31 @@ end
 # ╔═╡ ab08220d-85b7-4e6d-aa23-d547b41cde3d
 gradient(x) = laplacian * x - vcat(1, zeros(tiles-1)) 
 
+# ╔═╡ bf68c7c0-0315-4a06-8c84-3fa45c029574
+@bind condition Slider(1:0.1:10, show_value=true)
+
+# ╔═╡ 4c8166e1-8723-4727-aadd-d0364110e096
+q=(sqrt(condition)-1)/(sqrt(condition)+1)
+
+# ╔═╡ 1250f09c-cb23-4b38-9d44-9750216bcbb1
+A=laplacian + sparse((4/(condition-1)).*I, tiles, tiles)
+
+# ╔═╡ 6d077ed6-9d69-4c3b-a198-44642f8cbfa8
+sol=A\vcat(1,zeros(tiles-1))
+
+# ╔═╡ bf90e795-35ab-4adc-aec9-468a6354da3e
+begin
+	plot(1:tiles, n->sol[n] - q^n)
+	# plot!(1:tiles, n->q^n)
+end
+
 # ╔═╡ f6373f3e-ddc9-4c6c-a82e-3b65cad7b14f
 md"#### Learning Rate
 $(@bind learning_rate Slider(0:0.01:0.5, default=0.5, show_value=true))
 "
 
 # ╔═╡ 3d67a2e4-695b-428c-b2c9-b9b7e30f009d
-max_time_steps = 20*tiles
+max_time_steps = 30*tiles
 
 # ╔═╡ 5a3c1ee7-d58e-4838-a839-78504f4e5c85
 states = accumulate((w, _)->(w-learning_rate*gradient(w)), 1:max_time_steps, init=zeros(tiles))
@@ -72,7 +91,7 @@ begin
 		xlim=[0,tiles], ylim=[0,1], 
 		fillrange=vcat(1,states[5*tiles]), 
 		fillalpha=0.5,
-		label="t=10·tiles",
+		label="t=10·segments",
 		fontfamily="Computer Modern"
 	)
 	plot!(plt,
@@ -81,7 +100,7 @@ begin
 		xlim=[0,tiles], ylim=[0,1], 
 		fillrange=vcat(1,states[tiles]), 
 		fillalpha=0.5,
-		label="t=5·tiles"
+		label="t=5·segments"
 	)
 	plot!(plt,
 		0:tiles, vcat(1,states[tiles]), 
@@ -89,9 +108,12 @@ begin
 		xlim=[0,tiles], ylim=[0,1], 
 		fillrange=zeros(tiles), 
 		fillalpha=0.5,
-		label="t=tiles"
+		label="t=segments"
 	)
 end
+
+# ╔═╡ 5cd2e677-70dd-4848-87e3-d06788875ccc
+plot(1:tiles, 1:max_time_steps, hcat(states...)', seriestype=:heatmap, xlabel="space", ylabel="time", fontfamily="Computer Modern")
 
 # ╔═╡ 8c5a0bd4-d3e4-49d4-a449-7074250f0b94
 savefig(plt, "visualize_coloring_problem.svg")
@@ -103,6 +125,7 @@ md"# Appendix"
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
@@ -928,14 +951,20 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╟─0e3af38d-75a6-45e1-b051-8d3eb49bde94
+# ╠═bf90e795-35ab-4adc-aec9-468a6354da3e
 # ╟─2632f25f-1939-4a31-8423-7ef817c1205b
 # ╠═ab08220d-85b7-4e6d-aa23-d547b41cde3d
+# ╠═bf68c7c0-0315-4a06-8c84-3fa45c029574
+# ╟─4c8166e1-8723-4727-aadd-d0364110e096
+# ╠═1250f09c-cb23-4b38-9d44-9750216bcbb1
+# ╠═6d077ed6-9d69-4c3b-a198-44642f8cbfa8
 # ╟─f6373f3e-ddc9-4c6c-a82e-3b65cad7b14f
 # ╟─5a3c1ee7-d58e-4838-a839-78504f4e5c85
-# ╟─3d67a2e4-695b-428c-b2c9-b9b7e30f009d
+# ╠═3d67a2e4-695b-428c-b2c9-b9b7e30f009d
 # ╟─370d6464-e28d-4c6f-9d9f-ed537935eebf
 # ╟─9736727f-0c5b-41c0-bb04-efcb87169c12
 # ╟─01dfe578-cd63-4670-87b6-aff2da59369b
+# ╟─5cd2e677-70dd-4848-87e3-d06788875ccc
 # ╠═8c5a0bd4-d3e4-49d4-a449-7074250f0b94
 # ╟─8aa1962e-facb-46f7-ae34-404b28212c2e
 # ╠═058bfa8c-4d22-470e-b532-756948040f4e
