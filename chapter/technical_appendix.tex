@@ -125,6 +125,7 @@
 		\end{align*}
 		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
 		an oscillating convergence ("Oscillations").
+		\fxwarning{add case \(\momCoeff<0\)}
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -253,7 +254,7 @@
 		\(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) is already sufficient for the upper
 		bound, but for \(\lrSq\hesseEV>4\) this bound is greater than one again.
 		So let us assume \(\lrSq\hesseEV>2\) and \(\momCoeff>0\), then
-		\(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) implies
+		\(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) implies a contradiction:
 		\begin{align*}
 			\sqrt{\momCoeff} < \sqrt{\lrSq\momCoeff} -1
 			&\implies \smash{\overbrace{(1+\sqrt{\momCoeff})^2}^{1+2\sqrt{\momCoeff} + \momCoeff}}
@@ -282,17 +283,17 @@
 \begin{lemma}
 	\begin{align*}
 		\frac{d}{d\momCoeff}\max\{|\sigma_1|,|\sigma_2|\} < 0 \qquad
-		\forall 0<\momCoeff <(1-\sqrt{\lrSq\hesseEV})^2
+		\forall -1<\momCoeff <(1-\sqrt{\lrSq\hesseEV})^2
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	Using the characterizations of the real case restricted to \(\momCoeff>0\)
+	Using the characterizations of the real case
 	from Theorem~\ref{thm: momentum - stable set of parameters} we get
 	\begin{align*}
 		\frac{d}{d\momCoeff}\max\{|\sigma_1|,|\sigma_2|\}
 		= \begin{cases}
-			\frac{d\sigma_1}{d\momCoeff} & \sigma_1 > \sigma_2 > 0 \iff \lrSq\hesseEV\le (1-\sqrt{\momCoeff})^2\\
-			-\frac{d\sigma_2}{d\momCoeff} & \sigma_2 < \sigma_1 < 0 \iff \lrSq\hesseEV \ge (1+\sqrt{\momCoeff})^2
+			\frac{d\sigma_1}{d\momCoeff} & \momCoeff \ge \lrSq\hesseEV -1 \\
+			-\frac{d\sigma_2}{d\momCoeff} & \momCoeff \le \lrSq\hesseEV -1 
 		\end{cases}
 	\end{align*}
 	This allows us to treat those cases separately. For the first case we use
