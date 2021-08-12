@@ -38,20 +38,30 @@ begin
 	laplacian
 end
 
+# ╔═╡ b512b464-ac16-40d2-885b-b3f0031e68f4
+md"#### Lipschitz Constant
+$(@bind lip_const Slider(1:10, default=4, show_value=true))
+"
+
+# ╔═╡ 8d0be1a9-a990-40c5-9121-50dbc7ff013f
+md"#### Strong Convexity Param
+$(@bind st_conv Slider(0:0.1:lip_const, default=0, show_value=true))
+"
+
 # ╔═╡ ab08220d-85b7-4e6d-aa23-d547b41cde3d
-gradient(x) = laplacian * x - vcat(1, zeros(tiles-1)) 
+gradient(x) = (lip_const-st_conv)/4 * laplacian * x - vcat(1, zeros(tiles-1)) + st_conv*x
 
 # ╔═╡ bf68c7c0-0315-4a06-8c84-3fa45c029574
-@bind condition Slider(1:0.1:10, show_value=true)
-
-# ╔═╡ 4c8166e1-8723-4727-aadd-d0364110e096
-q=(sqrt(condition)-1)/(sqrt(condition)+1)
+@bind condition Slider(1:0.1:10, default=2, show_value=true)
 
 # ╔═╡ 1250f09c-cb23-4b38-9d44-9750216bcbb1
 A=laplacian + sparse((4/(condition-1)).*I, tiles, tiles)
 
 # ╔═╡ 6d077ed6-9d69-4c3b-a198-44642f8cbfa8
 sol=A\vcat(1,zeros(tiles-1))
+
+# ╔═╡ 4c8166e1-8723-4727-aadd-d0364110e096
+q=(sqrt(condition)-1)/(sqrt(condition)+1)
 
 # ╔═╡ bf90e795-35ab-4adc-aec9-468a6354da3e
 begin
@@ -61,14 +71,44 @@ end
 
 # ╔═╡ f6373f3e-ddc9-4c6c-a82e-3b65cad7b14f
 md"#### Learning Rate
-$(@bind learning_rate Slider(0:0.01:0.5, default=0.5, show_value=true))
+$(@bind learning_rate Slider(0:0.01:2/lip_const, default=1/lip_const, show_value=true))
 "
+
+# ╔═╡ 4f37bfc3-2360-4bbf-930a-bbdb43fb6cf0
+struct State
+	position
+	velocity
+end
+
+# ╔═╡ 088194cc-54d7-49f9-b7bd-2303d2927acf
+@bind mom_coeff Slider(0:0.1:1, default=0.5, show_value=true)
+
+# ╔═╡ 8ca547e3-2e47-4df7-a09e-8d08498b395f
+@bind mom_lr Slider(0:0.1:(2/(sqrt(lip_const)+sqrt(st_conv)))^2, default=(1/sqrt(lip_const))^2, show_value=true)
+
+# ╔═╡ b1c4c62a-42c2-4434-bdd6-cd09cb9750bf
+function mom_update(state::State)
+	velocity = mom_coeff * state.velocity - gradient(state.position)
+	position = state.position + mom_lr * velocity
+	return State(position, velocity)
+end
 
 # ╔═╡ 3d67a2e4-695b-428c-b2c9-b9b7e30f009d
 max_time_steps = 30*tiles
 
 # ╔═╡ 5a3c1ee7-d58e-4838-a839-78504f4e5c85
-states = accumulate((w, _)->(w-learning_rate*gradient(w)), 1:max_time_steps, init=zeros(tiles))
+gd_states = accumulate(
+	(w, _)->(w-learning_rate*gradient(w)), 
+	1:max_time_steps, 
+	init=zeros(tiles)
+)
+
+# ╔═╡ efc0d0e6-fd7a-421d-a5d1-0dc39679ddb3
+mom_states = accumulate(
+	(state, _)->mom_update(state),
+	1:max_time_steps,
+	init=State(zeros(tiles), zeros(tiles))
+)
 
 # ╔═╡ 370d6464-e28d-4c6f-9d9f-ed537935eebf
 md"#### Timesteps
@@ -76,34 +116,42 @@ $(@bind time_steps Slider(2:max_time_steps, default=tiles, show_value=true))
 "
 
 # ╔═╡ 9736727f-0c5b-41c0-bb04-efcb87169c12
-plot(
-	0:tiles, vcat(1,states[time_steps]), 
-	linetype=:steppre,
-	xlim=[0,tiles], ylim=[0,1], 
-	fillrange=zeros(tiles), fillalpha=0.4
-)
+begin
+	plot(
+		0:tiles, vcat(1,gd_states[time_steps]), 
+		linetype=:steppre,
+		xlim=[0,tiles], #ylim=[0,1], 
+		fillrange=zeros(tiles), fillalpha=0.4
+	)
+	plot!(
+		0:tiles, vcat(1,mom_states[time_steps].position), 
+		linetype=:steppre,
+		xlim=[0,tiles], #ylim=[0,1], 
+		fillrange=zeros(tiles), fillalpha=0.4
+	)
+end
 
 # ╔═╡ 01dfe578-cd63-4670-87b6-aff2da59369b
 begin
 	plt = plot(
-		0:tiles, vcat(1,states[10*tiles]), 
+		0:tiles, vcat(1,gd_states[10*tiles]), 
 		linetype=:steppre, 
 		xlim=[0,tiles], ylim=[0,1], 
-		fillrange=vcat(1,states[5*tiles]), 
+		fillrange=vcat(1,gd_states[5*tiles]), 
 		fillalpha=0.5,
 		label="t=10·segments",
 		fontfamily="Computer Modern"
 	)
 	plot!(plt,
-		0:tiles, vcat(1,states[5*tiles]), 
+		0:tiles, vcat(1,gd_states[5*tiles]), 
 		linetype=:steppre, 
 		xlim=[0,tiles], ylim=[0,1], 
-		fillrange=vcat(1,states[tiles]), 
+		fillrange=vcat(1,gd_states[tiles]), 
 		fillalpha=0.5,
 		label="t=5·segments"
 	)
 	plot!(plt,
-		0:tiles, vcat(1,states[tiles]), 
+		0:tiles, vcat(1,gd_states[tiles]), 
 		linetype=:steppre, 
 		xlim=[0,tiles], ylim=[0,1], 
 		fillrange=zeros(tiles), 
@@ -113,7 +161,7 @@ begin
 end
 
 # ╔═╡ 5cd2e677-70dd-4848-87e3-d06788875ccc
-plot(1:tiles, 1:max_time_steps, hcat(states...)', seriestype=:heatmap, xlabel="space", ylabel="time", fontfamily="Computer Modern")
+plot(1:tiles, 1:max_time_steps, hcat(gd_states...)', seriestype=:heatmap, xlabel="space", ylabel="time", fontfamily="Computer Modern")
 
 # ╔═╡ 8c5a0bd4-d3e4-49d4-a449-7074250f0b94
 savefig(plt, "visualize_coloring_problem.svg")
@@ -952,17 +1000,24 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╟─0e3af38d-75a6-45e1-b051-8d3eb49bde94
 # ╠═bf90e795-35ab-4adc-aec9-468a6354da3e
-# ╟─2632f25f-1939-4a31-8423-7ef817c1205b
-# ╠═ab08220d-85b7-4e6d-aa23-d547b41cde3d
-# ╠═bf68c7c0-0315-4a06-8c84-3fa45c029574
-# ╟─4c8166e1-8723-4727-aadd-d0364110e096
-# ╠═1250f09c-cb23-4b38-9d44-9750216bcbb1
+# ╠═2632f25f-1939-4a31-8423-7ef817c1205b
+# ╟─1250f09c-cb23-4b38-9d44-9750216bcbb1
 # ╠═6d077ed6-9d69-4c3b-a198-44642f8cbfa8
+# ╟─b512b464-ac16-40d2-885b-b3f0031e68f4
+# ╟─8d0be1a9-a990-40c5-9121-50dbc7ff013f
+# ╟─ab08220d-85b7-4e6d-aa23-d547b41cde3d
+# ╟─bf68c7c0-0315-4a06-8c84-3fa45c029574
+# ╟─4c8166e1-8723-4727-aadd-d0364110e096
 # ╟─f6373f3e-ddc9-4c6c-a82e-3b65cad7b14f
 # ╟─5a3c1ee7-d58e-4838-a839-78504f4e5c85
+# ╟─4f37bfc3-2360-4bbf-930a-bbdb43fb6cf0
+# ╠═088194cc-54d7-49f9-b7bd-2303d2927acf
+# ╠═8ca547e3-2e47-4df7-a09e-8d08498b395f
+# ╟─b1c4c62a-42c2-4434-bdd6-cd09cb9750bf
+# ╟─efc0d0e6-fd7a-421d-a5d1-0dc39679ddb3
 # ╠═3d67a2e4-695b-428c-b2c9-b9b7e30f009d
 # ╟─370d6464-e28d-4c6f-9d9f-ed537935eebf
-# ╟─9736727f-0c5b-41c0-bb04-efcb87169c12
+# ╠═9736727f-0c5b-41c0-bb04-efcb87169c12
 # ╟─01dfe578-cd63-4670-87b6-aff2da59369b
 # ╟─5cd2e677-70dd-4848-87e3-d06788875ccc
 # ╠═8c5a0bd4-d3e4-49d4-a449-7074250f0b94

@@ -140,7 +140,7 @@ md"### GD with Momentum Steps"
 
 # ╔═╡ 2bbae54e-6d87-4464-b502-a59ea66e7c5d
 md"
-##### Momentum Learning Rate (Optimal: $(mom_opt_lr=round(2/(abs(lambda_1)+abs(lambda_2)), digits=2)))
+##### Momentum Learning Rate (Optimal: $(mom_opt_lr=round((2/(sqrt(abs(lambda_1))+sqrt(abs(lambda_2))))^2, digits=2)))
 $(@bind mom_lr Slider(
 	0.01:0.01:round(2/max(abs(lambda_1),abs(lambda_2)), digits=2), 
 	default=mom_opt_lr, 
@@ -149,8 +149,13 @@ $(@bind mom_lr Slider(
 "
 
 # ╔═╡ dfee7634-b6d4-4079-bb09-7e36618e1297
-md"##### Friction
-$(@bind friction Slider(0:0.01:1, default=0.5, show_value=true))
+md"
+##### Momentum (Optimal: $(mom_opt_mom=round((abs(sqrt(abs(lambda_1))-sqrt(abs(lambda_2)))/(sqrt(abs(lambda_1))+sqrt(abs(lambda_2))))^2, digits=2)))
+$(@bind mom_coeff Slider(
+	0:0.01:1, 
+	default=mom_opt_mom, 
+	show_value=true
+))
 "
 
 # ╔═╡ cfa64e47-814b-48b5-ada4-9f5ced3bc66a
@@ -166,7 +171,7 @@ begin
 	momentum[:,1] = [0,0]
 	for step in 2:mom_steps
 		momentum[:,step]= (
-			(1- friction)*momentum[:, step-1] 
+			mom_coeff*momentum[:, step-1] 
 			- gradient(f, momentum_steps[:, step-1])[1]
 		)
 		momentum_steps[:,step] = momentum_steps[:,step-1] + mom_lr * momentum[:,step]

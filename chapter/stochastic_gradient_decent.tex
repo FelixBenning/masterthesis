@@ -27,32 +27,33 @@ Its expected value is the theoretical loss again\footnote{
 	dominated convergence.
 }. To shorten notation we will assume that the gradient is always meant
 with respect to \(\weights\) unless otherwise stated.
-This results in \emph{Stochastic Gradient Decent}
+Sampling an independent sequence \(((X_k,Y_k), k\ge 1)\) from the 
+distribution \(\dist\) results in \emph{Stochastic Gradient Decent}
 %
 \begin{align*}
-	\weights_{n+1}
-	&= \weights_n - \lr\nabla\loss(\weights_n, X_n,Y_n)\\
-	&= \weights_n - \lr\nabla\Loss(\weights_n)
+	\weights_n
+	&= \weights_{n-1} - \lr\nabla\loss(\weights_{n-1}, X_n,Y_n)\\
+	&= \weights_{n-1} - \lr\nabla\Loss(\weights_{n-1})
 	+ \lr\underbrace{
-		[\nabla\Loss(\weights_n) - \nabla\loss(\weights_n, X_n, Y_n)]
+		[\nabla\Loss(\weights_{n-1}) - \nabla\loss(\weights_{n-1}, X_n, Y_n)]
 	}_{=:\martIncr_n}
 \end{align*}
 Where
 \begin{align*}
-	\martingale_{n+1} := \martingale_n + \martIncr_n \qquad \martingale_0:=0
+	\martingale_n := \martingale_{n-1} + \martIncr_n \qquad \martingale_0:=0
 \end{align*}
 is a martingale for the filtration
 \begin{align*}
-	\filtration_n :=\sigma((X_k, Y_k): k\le n-1 )
-	\qquad (X_k,Y_k)\stackrel{\text{iid}}{\sim}\dist
+	\filtration_n :=\sigma((X_k, Y_k): k\le n )
+	\qquad (X_k,Y_k)\stackrel{\text{iid}}{\sim}\dist,
 \end{align*}
 since \(\weights_n\) is \(\filtration_n\)-measurable and thus
 \begin{align*}
 	\E[\martingale_{n+1}\mid \filtration_n]
-	= \underbrace{\E[\nabla\Loss(\weights_n) - \nabla\loss(\weights_n, X_n, Y_n)\mid \filtration_n]}_{
-		=0 \quad (X_n,Y_n) \indep \filtration_n
+	= \underbrace{\E[\nabla\Loss(\weights_n) - \nabla\loss(\weights_n, X_{n+1}, Y_{n+1})\mid \filtration_n]}_{
+		=0 \quad (X_{n+1},Y_{n+1}) \indep \filtration_n
 	} + \martingale_n
-	= \martingale_n
+	= \martingale_n.
 \end{align*}
 %
 So if we view our recursion as an ODE discretization again
@@ -60,16 +61,14 @@ So if we view our recursion as an ODE discretization again
 \begin{align*}
 	\weights^{(\lr)}(t) &:= \weights_{\lfloor t/\lr\rfloor}
 	= \weights_0 - \lr\sum_{k=0}^{\lfloor t/\lr\rfloor-1}\nabla\Loss(\weights_k)
-	+ \lr\sum_{k=0}^{\lfloor t/\lr\rfloor-1}\martIncr_k
+	+ \lr\sum_{k=1}^{\lfloor t/\lr\rfloor}\martIncr_k
 \end{align*}
 %
 then for \(\lr_n := t/n\) we have
 \begin{align*}
 	\weights^{(\lr_n)}(t) &:= \weights_n
 	= \weights_0 - \lr_n\sum_{k=0}^{n-1}\nabla\Loss(\weights_k)
-	+ \underbrace{\lr_n\sum_{k=0}^{n-1}\martIncr_k}_{
-		=\frac{t}{n}\martingale_n
-	}
+	+\frac{t}{n}\martingale_n
 \end{align*}
 Now if we have some form of law of large numbers for martingales we get
 \(t\martingale_n/n\to 0\) for \(n\to\infty\) which means that in the limit we
