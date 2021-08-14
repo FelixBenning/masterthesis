@@ -254,9 +254,9 @@ This is minimized when
 %
 implying
 %
-\begin{align*}
+\begin{align}\label{eq: optimal SGD lr eigenvalue representation}
 	\lr^* = \frac{2}{\lambda_1 + \lambda_d}.
-\end{align*}
+\end{align}
 %
 If \(\lambda_1\) is much smaller than \(\lambda_d\), this leaves \(\lr\)
 at the upper end of the interval in (\ref{eq: learning rate restriction
@@ -1555,6 +1555,7 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 \end{align*}
 %
 \begin{theorem}[{\cite[Theorem 2.1.13]{nesterovLecturesConvexOptimization2018}}]
+	\label{thm: strong convexity complexity bound}
 	For any \(\weights_0\in\sequenceSpace\) there exists
 	\(\Loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) such that for any
 	first order method \(\firstOrderMethod\) satisfying Assumption~\ref{assmpt:
@@ -1630,7 +1631,7 @@ not change the fact that \(\weights_n\) is contained in subspace \(\reals^n\).
 Since we only use this fact, one could thus generalize Assumption~\ref{assmpt:
 parameter in linear hull of gradients} to
 %
-\begin{assumption}
+\begin{assumption}\label{assmpt: parameter in generalized linear hull of gradients}
 	The \(n\)-th iterate of the optimization method can be expressed as
 	\begin{align*}
 		\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k)

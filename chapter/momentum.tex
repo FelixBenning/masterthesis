@@ -196,8 +196,9 @@ method as
 	\end{pmatrix}\\
 	&=
 	\begin{pmatrix}
-		0\identity_d & \identity_d \\
-		-\momCoeff\identity_d & (1+\momCoeff)\identity_d -\lrSq \nabla^2\Loss(\weights_n)
+		0\identity_\dimension & \identity_\dimension \\
+		-\momCoeff\identity_\dimension
+		& (1+\momCoeff)\identity_\dimension -\lrSq \nabla^2\Loss(\weights_n)
 	\end{pmatrix}
 	\begin{pmatrix}
 		\weights_{n-1} - \hat{\weights}_n \\
@@ -223,7 +224,8 @@ Hesse matrix}) again, we get
 	\begin{pmatrix}
 		0 & 1 \\
 		-\momCoeff &
-		\diag(1+\momCoeff -\lrSq\hesseEV_1, \dots, 1+\momCoeff -\lrSq\hesseEV_d)
+		\diag(1+\momCoeff -\lrSq\hesseEV_1, \dots, 
+		1+\momCoeff -\lrSq\hesseEV_\dimension)
 	\end{pmatrix}
 	\begin{pmatrix}
 		V & 0 \\
@@ -235,8 +237,8 @@ Reordering the eigenvalues to
 %
 \begin{align*}
 	\begin{pmatrix}
-		v_1 & 0 & \cdots & v_d & 0 \\
-		0 & v_1 & \cdots & 0 & v_d
+		v_1 & 0 & \cdots & v_\dimension & 0 \\
+		0 & v_1 & \cdots & 0 & v_\dimension
 	\end{pmatrix}
 \end{align*}
 %
@@ -248,12 +250,12 @@ reorders the transformation matrix of the eigenspace to
 		-\momCoeff & 1+\momCoeff - \lrSq\hesseEV_1 & \\
 		& & \ddots & \\
 		& & & 0 & 1 \\
-		& & & -\momCoeff & 1+\momCoeff - \lrSq\hesseEV_d \\
+		& & & -\momCoeff & 1+\momCoeff - \lrSq\hesseEV_\dimension \\
 	\end{pmatrix}
 	= \begin{pmatrix}
 		\Sigma_1 \\
 		& \ddots\\
-		&& \Sigma_d
+		&& \Sigma_\dimension
 	\end{pmatrix}
 \end{align*}
 %
@@ -262,7 +264,7 @@ matrix immediately. To achieve a similar eigenvalue analysis as in
 Section~\ref{sec: visualize gd} we first have to determine the eigenvalues
 \(\sigma_{i1},\sigma_{i2}\) of each \(\Sigma_i\) and then ensure that
 \begin{align}
-	\max_{i=1,\dots, d} \max\{|\sigma_{i1}|,|\sigma_{i2}|\} < 1.
+	\max_{i=1,\dots, \dimension} \max\{|\sigma_{i1}|,|\sigma_{i2}|\} < 1.
 \end{align}
 Using the p-q formula on the characteristic polynomial of \(\Sigma_i\)
 results in 
@@ -282,11 +284,12 @@ appendix. We will only cover the result here.
 	\def\svgwidth{1\textwidth}
 	\input{media/annotated_heavy_ball_rates.pdf_tex}
 	\caption{
-		A heat plot of the absolute value of \(\max\{|\sigma_1|,|\sigma_2|\}\).
+		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\).
 		Strictly speaking the "Monotonic" and "Oscillation" area should not
-		extend into the area of negative \(\momCoeff\) since \(\sigma_{1/2}\)
+		extend into negative \(\momCoeff\) since \(\sigma_{1/2}\)
 		have opposite signs there, but it still describes the behavior of the
-		dominating eigenvalue.
+		dominating eigenvalue. Also recall that \(\momCoeff=0\) represents SGD
+		without momentum.
 	}
 	\label{fig: annotated heavy ball rates}
 \end{figure}
@@ -323,7 +326,7 @@ appendix. We will only cover the result here.
 		minimum. Looking at the distance to the minimum only, we will therefore
 		observe a sinus wave ("Ripples").
 		\item In the real case we have \(\sigma_1>\sigma_2\) and
-		\begin{align}\label{eq: when does sigma_1 or sigma_2 dominate?}
+		\begin{align}
 			\max\{|\sigma_1|, |\sigma_2|\} = \begin{cases}
 				|\sigma_1|=\sigma_1 & \lrSq\hesseEV < 1+\momCoeff \\
 				|\sigma_2|=-\sigma_2 & \lrSq\hesseEV \ge 1+\momCoeff.
@@ -347,6 +350,91 @@ appendix. We will only cover the result here.
 \begin{proof}
 	Appendix Theorem~\ref{thm-appdx: momentum - stable set of parameters}
 \end{proof}
+
+In particular (positive) momentum extends the available range for convergent
+learning rate/eigenvalue products which allows for larger learning rates. As
+can be seen very well in Figure~\ref{fig: annotated heavy ball rates}, the
+wider attraction area allows for moving out the largest eigenvalues to the
+right with larger eigenvalues shifting the smaller eigenvalues towards the
+right as well into more acceptable convergence rates. If the smallest and
+largest eigenvalue are far apart (i.e. the condition number \(\condition\) is
+high) this should be very useful.
+
+So how much do we gain? In other words what are the optimal rates of
+convergence? Since the plot looks quite symmetric it is quite intuitive that
+we only have to consider the largest and smallest eigenvalue. For now we
+can consider it as a lower bound:
+\begin{align}\label{eq: lower bound best heavy ball rates}
+	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	\ge \min_{\lrSq}\min_{\momCoeff}
+	\max_{i=1,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+\end{align}
+Now let us consider the inner minimum first. Let us inspect the claim
+\begin{align}
+	\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}
+\end{align}\label{eq: optimal heavy ball momentum - ev representation}
+In that case we are still (barely) in the complex case, therefore the rate
+of convergence is equal to \(\sqrt{\momCoeff}\), i.e.
+\begin{align*}
+	\min_{\momCoeff}\max_{i=1,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}
+\end{align*}
+Now let us wiggle around \(\momCoeff\) a bit. If we would increase it, then
+we are obviously increasing our rate since it is then still equal to
+\(\sqrt{\momCoeff}\) as we just expanded the size of the complex case. Now the
+question is what happens if we decrease it. Now by our selection of \(\momCoeff\)
+either the smallest or largest eigenvalue sits right at the edge of the real 
+case. If we can show that our absolute eigenvalue maximum is increasing if
+we move further into the real case (decrease \(\momCoeff\)), we would have
+proven that we can only become worse off doing so. This is annoyingly technical
+so it is covered in Lemma~\ref{lem-appdx: just at the border of complex case is
+best beta} in the appendix.
+
+Now since both the largest and smallest eigenvalue are included in the complex
+case, we know that all eigenvalues in between must also be in the complex case
+which means that (\ref{eq: lower bound best heavy ball rates}) is an equality
+and
+\begin{align*}
+	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	= \min_{\lrSq}\max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}.
+\end{align*}
+Now we are just doing our balancing act  again, only with 
+\(\sqrt{\hesseEV_1},\sqrt{\hesseEV_\dimension}\) instead of
+\(\hesseEV_1,\hesseEV_\dimension\). But we know the solution to that already
+from (\ref{eq: optimal SGD lr eigenvalue representation}),
+which is
+\begin{align*}
+	\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}}
+\end{align*}
+%
+Since this makes both of them equally bad, we can plug this learning rate into
+either equation from (\ref{eq: optimal heavy ball momentum - ev representation})
+to get
+%
+\begin{align*}
+	\momCoeff_*=\left(1-\frac{2}{1+\sqrt{\kappa}}\right)^2
+\end{align*}
+%
+which results in the optimal rate of convergence of
+%
+\begin{align*}
+	\sqrt{\momCoeff_*} = 1-\frac{2}{1+\sqrt{\kappa}}.
+\end{align*}
+%
+And this is in fact \emph{equal} to our lower bound (not even up to a constant!) in
+Theorem~\ref{thm: strong convexity complexity bound}. So on quadratic functions
+we can not do any better without violating our assumptions about possible
+optimizing algorithms (Assumption~ \ref{assmpt: parameter in generalized linear
+hull of gradients}).
+
+Now while Nesterov's Momentum breaks this assumption as it uses gradients at a
+different point than the iterates, it does not break it fundamentally. The
+assumption applies to the intermediate states \(y_n\) which are not too far
+from our actual iterates and would thus allow us to make similar statements
+about them with a bit of work.
+
+So why are we even considering Nesterov's Momentum then?
 
 \section{Complexity Bounds}
 
