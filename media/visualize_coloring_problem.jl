@@ -49,7 +49,7 @@ $(@bind st_conv Slider(0:0.1:lip_const, default=0, show_value=true))
 "
 
 # ╔═╡ ab08220d-85b7-4e6d-aa23-d547b41cde3d
-gradient(x) = (lip_const-st_conv)/4 * laplacian * x - vcat(1, zeros(tiles-1)) + st_conv*x
+gradient(x) = (lip_const-st_conv)/4 * (laplacian * x - vcat(1, zeros(tiles-1))) + st_conv*x
 
 # ╔═╡ bf68c7c0-0315-4a06-8c84-3fa45c029574
 @bind condition Slider(1:0.1:10, default=2, show_value=true)
@@ -1004,8 +1004,8 @@ version = "0.9.1+5"
 # ╟─1250f09c-cb23-4b38-9d44-9750216bcbb1
 # ╠═6d077ed6-9d69-4c3b-a198-44642f8cbfa8
 # ╟─b512b464-ac16-40d2-885b-b3f0031e68f4
-# ╟─8d0be1a9-a990-40c5-9121-50dbc7ff013f
-# ╟─ab08220d-85b7-4e6d-aa23-d547b41cde3d
+# ╠═8d0be1a9-a990-40c5-9121-50dbc7ff013f
+# ╠═ab08220d-85b7-4e6d-aa23-d547b41cde3d
 # ╟─bf68c7c0-0315-4a06-8c84-3fa45c029574
 # ╟─4c8166e1-8723-4727-aadd-d0364110e096
 # ╟─f6373f3e-ddc9-4c6c-a82e-3b65cad7b14f
@@ -1017,7 +1017,7 @@ version = "0.9.1+5"
 # ╟─efc0d0e6-fd7a-421d-a5d1-0dc39679ddb3
 # ╠═3d67a2e4-695b-428c-b2c9-b9b7e30f009d
 # ╟─370d6464-e28d-4c6f-9d9f-ed537935eebf
-# ╠═9736727f-0c5b-41c0-bb04-efcb87169c12
+# ╟─9736727f-0c5b-41c0-bb04-efcb87169c12
 # ╟─01dfe578-cd63-4670-87b6-aff2da59369b
 # ╟─5cd2e677-70dd-4848-87e3-d06788875ccc
 # ╠═8c5a0bd4-d3e4-49d4-a449-7074250f0b94
