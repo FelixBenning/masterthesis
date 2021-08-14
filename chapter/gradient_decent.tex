@@ -61,36 +61,36 @@ the second order Taylor approximation
 %
 we can find the minimum 
 \begin{align*}
-	\hat{v} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights)
+	\hat{x} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights)
 \end{align*}
 by setting the first derivative to zero
 %
 \begin{align*}
-	\nabla T_2\Loss(\weights+v) = \nabla \Loss(\weights) + \nabla^2\Loss(\weights) v \xeq{!} 0.
+	\nabla T_2\Loss(\weights+x) = \nabla \Loss(\weights) + \nabla^2\Loss(\weights) x \xeq{!} 0.
 \end{align*}
 %
 This minimum allows us not only to rewrite the taylor derivative
 %
 \begin{align*}
-	\nabla T_2\Loss(\weights+v) = \nabla^2 \Loss(\weights)(v-\hat{v}),
+	\nabla T_2\Loss(\weights+x) = \nabla^2 \Loss(\weights)(x-\hat{x}),
 \end{align*}
 %
 but also the original taylor approximation
 %
 \begin{align*}
-	T_2\Loss(\weights+v)
-	&= \Loss(\weights) - v^T \nabla^2 \Loss(\weights) \hat{v} + \tfrac12 v^T \nabla^2 \Loss(\weights) v \\
+	T_2\Loss(\weights+x)
+	&= \Loss(\weights) - x^T \nabla^2 \Loss(\weights) \hat{x} + \tfrac12 x^T \nabla^2 \Loss(\weights) x \\
 	&= \underbrace{
-		\Loss(\weights) - \tfrac12 \hat{v} \nabla^2 \Loss(\weights) \hat{v}
+		\Loss(\weights) - \tfrac12 \hat{x} \nabla^2 \Loss(\weights) \hat{x}
 	}_{
 		=: c(\weights) \text{ (const.)}
-	} + \tfrac12 (v-\hat{v})^T \nabla^2 \Loss(\weights)(v-\hat{v}).
+	} + \tfrac12 (x-\hat{x})^T \nabla^2 \Loss(\weights)(x-\hat{x}).
 \end{align*}
 %
 To get absolute instead of relative coordinates to \(\weights\) we set
 %
 \begin{align*}
-	\hat{\weights} := \weights + \hat{v} = \weights -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
+	\hat{\weights} := \weights + \hat{x} = \weights -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
 \end{align*}
 %
 and obtain the notion of a paraboloid centered around \(\hat{\weights}\)
@@ -123,8 +123,8 @@ orthogonal to the first one which fully determines its direction at this point.
 
 Before we move on I want to briefly mention that we only really needed the
 positive definiteness of \(\nabla^2 \Loss(\weights)\) to make it invertible, so that
-\(\hat{v}\) is well defined. If it was not positive definite but still invertible,
-then \(\hat{v}\) would not be a minimum but all the other arguments would still
+\(\hat{x}\) is well defined. If it was not positive definite but still invertible,
+then \(\hat{x}\) would not be a minimum but all the other arguments would still
 hold.
 In that case the eigenvalues might be negative as well as positive, which would
 represent a saddle point, or all negative which would represent a maximum.
@@ -132,11 +132,11 @@ represent a saddle point, or all negative which would represent a maximum.
 Using the representation (\ref{paraboloid approximation of L}) of \(\Loss\) we
 can write the gradient at \(\weights\) as
 %
-\begin{align*}
+\begin{align}\label{eq: hesse representation of gradient}
 	\nabla \Loss(\weights)
 	=  \nabla^2 \Loss(\weights)(\weights-\hat{\weights})
-	\ (= -\nabla^2 \Loss(\weights)\hat{v})
-\end{align*}
+	\ (= -\nabla^2 \Loss(\weights)\hat{x})
+\end{align}
 %
 But note that \(\hat{\weights}\) depends on \(\weights\), so we need to index both
 by \(n\) to rewrite gradient decent
