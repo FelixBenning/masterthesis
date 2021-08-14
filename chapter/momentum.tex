@@ -99,7 +99,7 @@ by \textcite{gohWhyMomentumReally2017}.
 	(\ref{eq: momentum move}) but using (\ref{eq: momentum move}) for
 	\(\momentum_n\) is
 	%
-	\begin{align}
+	\begin{align}\label{eq: flat momentum}
 		\weights_{n+1}
 		&= \weights_n
 		+ \underbrace{(1-\lr\friction)}_{
@@ -155,13 +155,20 @@ previous position \(\weights_n\).
 		y_{n+1}&= \weights_n + \momCoeff(\weights_n - \weights_{n-1})
 	\end{align}
 	\end{subequations}
+	dropping the intermediate position as well results in the analog to (\ref{eq:
+	flat momentum})
+	\begin{align}
+		\weights_{n+1} &= \weights_n + \momCoeff(\weights_n - \weights_{n-1})
+		- \lrSq \nabla \Loss(\weights_n + \momCoeff(\weights_n - \weights_{n-1}))
+	\end{align}
 \end{definition}
 %
 \begin{remark}\fxwarning{too informal?}
-	This method is said to date back to \textcite{nesterovMethodSolvingConvex1983}.
-	But not only is the original text in Russian, it also difficult 
-	to find on the internet. Fortunately, \citeauthor{nesterovMethodSolvingConvex1983}
-	wrote textbooks, \citetitle{nesterovLecturesConvexOptimization2018}
+	This method also known as "Nesterov's Accelerated Momentmum" is said to date
+	back to \textcite{nesterovMethodSolvingConvex1983}.  But not only is the
+	original text in Russian, it also difficult to find on the internet.
+	Fortunately, \citeauthor{nesterovMethodSolvingConvex1983} wrote textbooks,
+	\citetitle{nesterovLecturesConvexOptimization2018}
 	(\citeyear{nesterovLecturesConvexOptimization2018}) being the most recent.
 	Unfortunately, the chapter 2.2 on optimal methods provides barely any
 	intuition at all and it is advisable to consult other sources (e.g.
@@ -173,7 +180,173 @@ previous position \(\weights_n\).
 
 \section{Convergence Rate}
 
+Following the arguments from Section~\ref{sec: visualize gd} in particular
+(\ref{eq: hesse representation of gradient}) we can rewrite the momentum
+method as
+\begin{align*}
+	\begin{pmatrix}
+		\weights_n - \hat{\weights}_n \\
+		\weights_{n+1} - \hat{\weights}_n
+	\end{pmatrix}
+	&=
+	\begin{pmatrix}
+		\weights_n - \hat{\weights}_n \\
+		\weights_n - \hat{\weights}_n + \momCoeff (\weights_n - \weights_{n-1})
+		- \lrSq \nabla\Loss^2(\weights_n)(\weights_n -\hat{\weights}_n)
+	\end{pmatrix}\\
+	&=
+	\begin{pmatrix}
+		0\identity_d & \identity_d \\
+		-\momCoeff\identity_d & (1+\momCoeff)\identity_d -\lrSq \nabla^2\Loss(\weights_n)
+	\end{pmatrix}
+	\begin{pmatrix}
+		\weights_{n-1} - \hat{\weights}_n \\
+		\weights_n - \hat{\weights}_n
+	\end{pmatrix}
+\end{align*}
+%
+For readability I will now omit the identity matrix \(\identity\) from the
+block matrices which are just a constant multiplied by an identity matrix.
+Using the digitalization of the hesse matrix (\ref{eq: diagnalization of the
+Hesse matrix}) again, we get
+%
+\begin{align*}
+	&\begin{pmatrix}
+		0 & 1 \\
+		-\momCoeff & 1+\momCoeff -\lrSq \nabla^2\Loss(\weights_n)
+	\end{pmatrix}\\
+	&=
+	\begin{pmatrix}
+		V & 0 \\
+		0 & V
+	\end{pmatrix}	
+	\begin{pmatrix}
+		0 & 1 \\
+		-\momCoeff &
+		\diag(1+\momCoeff -\lrSq\hesseEV_1, \dots, 1+\momCoeff -\lrSq\hesseEV_d)
+	\end{pmatrix}
+	\begin{pmatrix}
+		V & 0 \\
+		0 & V
+	\end{pmatrix}^T
+\end{align*}
+%
+Reordering the eigenvalues to
+%
+\begin{align*}
+	\begin{pmatrix}
+		v_1 & 0 & \cdots & v_d & 0 \\
+		0 & v_1 & \cdots & 0 & v_d
+	\end{pmatrix}
+\end{align*}
+%
+reorders the transformation matrix of the eigenspace to
+%
+\begin{align*}
+	\Sigma := \begin{pmatrix}
+		0 & 1 \\
+		-\momCoeff & 1+\momCoeff - \lrSq\hesseEV_1 & \\
+		& & \ddots & \\
+		& & & 0 & 1 \\
+		& & & -\momCoeff & 1+\momCoeff - \lrSq\hesseEV_d \\
+	\end{pmatrix}
+	= \begin{pmatrix}
+		\Sigma_1 \\
+		& \ddots\\
+		&& \Sigma_d
+	\end{pmatrix}
+\end{align*}
+%
+So in contrast to Section~\ref{sec: visualize gd} we do not get a diagonal
+matrix immediately. To achieve a similar eigenvalue analysis as in
+Section~\ref{sec: visualize gd} we first have to determine the eigenvalues
+\(\sigma_{i1},\sigma_{i2}\) of each \(\Sigma_i\) and then ensure that
+\begin{align}
+	\max_{i=1,\dots, d} \max\{|\sigma_{i1}|,|\sigma_{i2}|\} < 1.
+\end{align}
+Using the p-q formula on the characteristic polynomial of \(\Sigma_i\)
+results in 
+\begin{align*}
+	\sigma_{i1/2}
+	= \tfrac12 \left(
+		1+\momCoeff-\lrSq\hesseEV_i
+		\pm \sqrt{(1+\momCoeff-\lrSq\hesseEV_i)^2 - 4\momCoeff}
+	\right).
+\end{align*}
+%
+The analysis of these eigenvalues is very technical and can be found in the
+appendix. We will only cover the result here.
 
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/annotated_heavy_ball_rates.pdf_tex}
+	\caption{
+		A heat plot of the absolute value of \(\max\{|\sigma_1|,|\sigma_2|\}\).
+		Strictly speaking the "Monotonic" and "Oscillation" area should not
+		extend into the area of negative \(\momCoeff\) since \(\sigma_{1/2}\)
+		have opposite signs there, but it still describes the behavior of the
+		dominating eigenvalue.
+	}
+	\label{fig: annotated heavy ball rates}
+\end{figure}
+
+\begin{theorem}[\cite{qianMomentumTermGradient1999}]
+	\label{thm: momentum - stable set of parameters}
+	Let
+	\begin{align*}
+		\sigma_{1/2}
+		= \tfrac12 \left(
+			1+\momCoeff-\lrSq\hesseEV \pm \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
+		\right)
+	\end{align*}
+	then 
+	\begin{enumerate}
+		\item \(\max\{|\sigma_1|,|\sigma_2|\}<1\) if and only if
+		\begin{align*}
+			0<\lrSq\hesseEV < 2(1+\momCoeff) \qquad \text{and} \qquad |\momCoeff|<1
+		\end{align*}
+		\item The complex case can be characterized by either
+		\begin{align*}
+			0<(1-\sqrt{\lrSq\hesseEV})^2 < \momCoeff < 1
+		\end{align*}		
+		or alternatively \(\momCoeff>0\) and
+		\begin{align*}
+			(1-\sqrt{\momCoeff})^2 < \lrSq\hesseEV < (1+\sqrt{\momCoeff})^2,
+		\end{align*}
+		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\momCoeff}\).
+		
+		As complex
+		eigenvalues imply a rotation, this can be viewed as rotating the distance
+		to the minimum of the quadratic function into the momentum and back like 
+		a pendulum where the friction causes it to eventually end up in the
+		minimum. Looking at the distance to the minimum only, we will therefore
+		observe a sinus wave ("Ripples").
+		\item In the real case we have \(\sigma_1>\sigma_2\) and
+		\begin{align}\label{eq: when does sigma_1 or sigma_2 dominate?}
+			\max\{|\sigma_1|, |\sigma_2|\} = \begin{cases}
+				|\sigma_1|=\sigma_1 & \lrSq\hesseEV < 1+\momCoeff \\
+				|\sigma_2|=-\sigma_2 & \lrSq\hesseEV \ge 1+\momCoeff.
+			\end{cases}
+		\end{align}
+		Restricted to \(1>\momCoeff>0\) this results in two different	
+		behaviors. For
+		\begin{align*}
+			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
+		\end{align*}
+		we have \(1>\sigma_1 > \sigma_2 > 0\) which results in a monotonic
+		linear convergence ("Monotonic" case). For
+		\begin{align*}
+			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
+		\end{align*}
+		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
+		an oscillating convergence ("Oscillation"). In contrast to the "Ripples"
+		we switch the side of the distance to the minimum in every iteration.
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	Appendix Theorem~\ref{thm-appdx: momentum - stable set of parameters}
+\end{proof}
 
 \section{Complexity Bounds}
 

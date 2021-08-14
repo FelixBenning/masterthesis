@@ -90,7 +90,7 @@
 \section{Momentum Convergence}
 
 \begin{theorem}[\cite{qianMomentumTermGradient1999}]
-	\label{thm: momentum - stable set of parameters}
+	\label{thm-appdx: momentum - stable set of parameters}
 	Let
 	\begin{align*}
 		\sigma_{1/2}
@@ -108,24 +108,29 @@
 		\begin{align*}
 			0<(1-\sqrt{\lrSq\hesseEV})^2 < \momCoeff < 1
 		\end{align*}		
-		or alternatively
+		or alternatively \(\momCoeff>0\) and
 		\begin{align*}
 			(1-\sqrt{\momCoeff})^2 < \lrSq\hesseEV < (1+\sqrt{\momCoeff})^2,
 		\end{align*}
-		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\momCoeff}\) ("Ripples").
-		\item The real case restricted to \(1>\momCoeff>0\) results in two different	
+		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\momCoeff}\).
+		
+		\item In the real case we have \(\sigma_1>\sigma_2\) and
+		\begin{align}\label{eq: when does sigma_1 or sigma_2 dominate?}
+			\max\{|\sigma_1|, |\sigma_2|\} = \begin{cases}
+				|\sigma_1|=\sigma_1 & \lrSq\hesseEV < 1+\momCoeff \\
+				|\sigma_2|=-\sigma_2 & \lrSq\hesseEV \ge 1+\momCoeff.
+			\end{cases}
+		\end{align}
+		Restricted to \(1>\momCoeff>0\) this results in two different	
 		behaviors. For
 		\begin{align*}
 			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
 		\end{align*}
-		we have \(1>\sigma_1 > \sigma_2 > 0\) which results in a monotonic
-		linear convergence ("Monotonic" case). For
+		we have \(1>\sigma_1 > \sigma_2 > 0\). For
 		\begin{align*}
 			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
 		\end{align*}
-		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
-		an oscillating convergence ("Oscillations").
-		\fxwarning{add case \(\momCoeff<0\)}
+		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\).
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -181,26 +186,25 @@
 		\begin{align*}
 			\sqrt{\lrSq\hesseEV} - 1
 			< \momCoeff \implies \lrSq\hesseEV < (1+\sqrt{\momCoeff})^2
-			\le 2(1+\momCoeff)
+			\le 2(1+\momCoeff).
 		\end{align*}
-		and therefore have covered this case.
 
-		The characterization of the complex case follows from restricting
-		(\ref{eq: complex case}) to \(\momCoeff<1\) and reordering.
+		The remaining characterization of the complex case follows from
+		restricting (\ref{eq: complex case}) to \(\momCoeff<1\) and reordering.
 		\item[Real Case:] Since we have \(\sigma_2 \le \sigma_1\),
 		\(\max\{|\sigma_1|,|\sigma_2|\}<1\) is equivalent to
 		\begin{align*}
 			-1 < \sigma_2 \qquad \text{and} \qquad \sigma_1 < 1
 		\end{align*}
 		By subtracting the part before the "\(\pm\)" from the equation \(\sigma_1<1\)
-		we get
+		after multiplying it by two, we get
 		\begin{align}\label{eq: sigma1 condition}
 			0\xle{\text{Real Case}} \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 -4\momCoeff} < 1-\momCoeff +\lrSq\hesseEV.
 		\end{align}
 		And since \((1+\sqrt{\lrSq\hesseEV})^2 \le \momCoeff\) leads to a contradiction:
 		\begin{align*}
 			0 \le 1-\momCoeff+\lrSq\hesseEV \le 1-(1+\sqrt{\lrSq\hesseEV})^2 +\lrSq\hesseEV
-			= -2\sqrt{\lrSq\hesseEV} < 0
+			= -2\sqrt{\lrSq\hesseEV} \ge 0
 		\end{align*}
 		the real case is restricted to the case \(\momCoeff < (1-\sqrt{\lrSq\hesseEV})^2\)
 		as we are otherwise in the complex case (\ref{eq: complex case}).
@@ -219,8 +223,8 @@
 			\cancel{(\momCoeff-\lrSq\hesseEV)^2}\\
 			&\iff 0 < 4\lrSq\momCoeff.
 		\end{align*}
-		In other words it is a given for positive learning rates in the convex	
-		case which is not surprising if one remembers the proof from gradient
+		Which is a given for positive learning rates in the convex	
+		case. This is not surprising if one remembers the proof from gradient
 		decent. The real issue is not overshooting \(-1\) with large learning
 		rates. So multiplying \(-1<\sigma_2\) by two, adding 2 and moving the
 		root to the other side we get
@@ -264,11 +268,23 @@
 			\implies \sqrt{\momCoeff} < 1
 		\end{align*}
 
-		For the characterization of the real case one only needs to keep in mind that for
-		\(\momCoeff>0\) and \(\lrSq\hesseEV < (1+\sqrt{\momCoeff})^2 <1+\momCoeff\)
+		For the \emph{characterization of the real case} one only needs to observe
+		that for any \(b>0\)
+		\begin{align}
+			\max|a\pm b| = \begin{cases}
+				a + b & a \ge 0\\
+				-(a-b) & a < 0
+			\end{cases}.
+		\end{align}
+		In our case \(b\) is a square root in the real case, so by definition
+		positive and \(a>0\) is equivalent to \(1+\momCoeff - \lrSq\hesseEV >0\)
+		and thus implies (\ref{eq: when does sigma_1 or sigma_2 dominate?}).
+		
+		For \(\momCoeff>0\) one only needs to keep in mind that for
+		 \(\lrSq\hesseEV < (1+\sqrt{\momCoeff})^2 <1+\momCoeff\)
 		\begin{align*}
 			1+\momCoeff-\lrSq\hesseEV = \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2}
-			> \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff} > 0
+			> \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
 		\end{align*}
 		ensures that \(\sigma_2 >0\). On the other hand for \(\momCoeff>0\)
 		and \(\lrSq\hesseEV > (1-\sqrt{\momCoeff})^2> 1+\momCoeff\)
