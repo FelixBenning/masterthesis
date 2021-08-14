@@ -436,6 +436,25 @@ about them with a bit of work.
 
 So why are we even considering Nesterov's Momentum then?
 
+\begin{figure}[h]
+	\centering
+	\begin{minipage}{1\textwidth}
+		\centering
+		\def\svgwidth{1\textwidth}
+		\input{media/heavy_ball_rates.pdf_tex}
+	\end{minipage}
+	\begin{minipage}{1\textwidth}
+		\centering
+		\def\svgwidth{1\textwidth}
+		\input{media/nesterov_rates.pdf_tex}
+	\end{minipage}
+	\caption{
+		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) of the Heavy Ball
+		Momentum and Nesterov's Momentum in direct comparison.
+	}
+	\label{fig: compare rates}
+\end{figure}
+
 \section{Complexity Bounds}
 
 \section{Adam \& Nadam}
