@@ -19,6 +19,9 @@ begin
 	using PlutoUI: PlutoUI
 end
 
+# ╔═╡ 25908fd4-b147-4c21-a0e4-93b8d84ef7bb
+md"# Momentum Eigenvalues"
+
 # ╔═╡ 22fbf92c-597b-4e96-ac21-8ac76aa8c32a
 σ_1(αλ, β) = 0.5*(1+β-αλ + sqrt((1+β-αλ)^2 - 4*β))
 
@@ -49,11 +52,16 @@ Precision
 $(@bind precision PlutoUI.Slider(1.5:0.1:3.5, default=3, show_value=true))
 "
 
-# ╔═╡ 3475af91-11c9-42cc-8399-082c0f5724ed
-exp(log(0.1)*precision)
+# ╔═╡ b4d7e7d8-9fee-41cd-b28f-301d7f16392b
+md"### Lower limit for beta 
+$(@bind beta_min PlutoUI.Slider(-1:0.1:0, default=-1,show_value=true))
+"
 
-# ╔═╡ 73b1c2f0-61a0-4762-9119-4bd808bd6446
-round(5*exp(log(0.1)*precision), digits=ceil(Int32, precision))
+# ╔═╡ 5ba587be-a645-4c95-acd7-90c1941acc70
+md"## Nesterov Momentum"
+
+# ╔═╡ abbca286-0b2b-4447-89b5-40ad1ef3ab46
+md"# Appendix"
 
 # ╔═╡ 90436c48-9cc0-4c77-9f73-5fc379db8754
 αλ_range = 0:round(5*exp(log(0.1)*precision), digits=ceil(Int32, precision)):4
@@ -61,19 +69,11 @@ round(5*exp(log(0.1)*precision), digits=ceil(Int32, precision))
 # ╔═╡ 0e2decd6-50dd-40fb-b757-6a4f1fc75799
 β_range = -1:round(exp(log(0.1)*precision), digits=ceil(Int32, precision)):1
 
-# ╔═╡ 1f0367de-4500-4f7b-86da-012ff516668f
-rate = max_abs_sigma.(Iterators.product(αλ_range, β_range))'
-
-# ╔═╡ 7f9dcf54-03b4-45b2-b835-62f68206c3e0
-n_rate = n_max_abs_sigma.(Iterators.product(αλ_range, β_range))'
-
-# ╔═╡ b4d7e7d8-9fee-41cd-b28f-301d7f16392b
-md"### Lower limit for beta 
-$(@bind beta_min PlutoUI.Slider(-1:0.1:0, default=-1,show_value=true))
-"
-
 # ╔═╡ f8240440-c224-418a-b950-0a19d8099594
 β_indices = findall(x->x>beta_min, β_range)
+
+# ╔═╡ 1f0367de-4500-4f7b-86da-012ff516668f
+rate = max_abs_sigma.(Iterators.product(αλ_range, β_range))'
 
 # ╔═╡ 192c0bfa-bef1-4e6a-aed2-4c92167be475
 begin
@@ -120,8 +120,8 @@ begin
 	annotated_hb
 end
 
-# ╔═╡ 5ba587be-a645-4c95-acd7-90c1941acc70
-md"## Nesterov Momentum"
+# ╔═╡ 7f9dcf54-03b4-45b2-b835-62f68206c3e0
+n_rate = n_max_abs_sigma.(Iterators.product(αλ_range, β_range))'
 
 # ╔═╡ 7c1a6761-62e1-40e1-abe2-1d48d4bf3046
 	nesterov_momentum = plot(
@@ -135,9 +135,6 @@ md"## Nesterov Momentum"
 
 # ╔═╡ 5dfdd60b-0ed5-41db-a2cd-97aa356755ce
 Plots.savefig(nesterov_momentum, "nesterov_rates.svg")
-
-# ╔═╡ abbca286-0b2b-4447-89b5-40ad1ef3ab46
-md"### Appendix"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -964,20 +961,16 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
+# ╟─25908fd4-b147-4c21-a0e4-93b8d84ef7bb
 # ╠═22fbf92c-597b-4e96-ac21-8ac76aa8c32a
 # ╠═219b7233-8b3d-437a-af27-b37a78a3edc1
 # ╠═6ad1f3c9-3fcb-4644-860f-8b3d40f0c89e
 # ╟─f425ff9f-5ed9-4c0b-a9a7-a43b56a74534
-# ╟─3475af91-11c9-42cc-8399-082c0f5724ed
-# ╠═73b1c2f0-61a0-4762-9119-4bd808bd6446
-# ╠═90436c48-9cc0-4c77-9f73-5fc379db8754
-# ╠═0e2decd6-50dd-40fb-b757-6a4f1fc75799
-# ╟─1f0367de-4500-4f7b-86da-012ff516668f
 # ╠═15306a8d-5491-4a7a-924d-db8484e5baa8
-# ╠═b511a60d-9f59-4686-af3d-34e4a5da6951
-# ╟─7f9dcf54-03b4-45b2-b835-62f68206c3e0
-# ╟─f8240440-c224-418a-b950-0a19d8099594
+# ╟─b511a60d-9f59-4686-af3d-34e4a5da6951
 # ╟─1e7559dc-caab-4529-b8e5-d97121406314
+# ╟─90436c48-9cc0-4c77-9f73-5fc379db8754
+# ╟─0e2decd6-50dd-40fb-b757-6a4f1fc75799
 # ╟─192c0bfa-bef1-4e6a-aed2-4c92167be475
 # ╟─39181ac5-76a3-4049-8775-3177b88ee83f
 # ╟─b4d7e7d8-9fee-41cd-b28f-301d7f16392b
@@ -986,5 +979,8 @@ version = "0.9.1+5"
 # ╠═5dfdd60b-0ed5-41db-a2cd-97aa356755ce
 # ╟─abbca286-0b2b-4447-89b5-40ad1ef3ab46
 # ╠═cc3650a0-fcf9-11eb-0e02-65cd42617729
+# ╟─f8240440-c224-418a-b950-0a19d8099594
+# ╟─1f0367de-4500-4f7b-86da-012ff516668f
+# ╟─7f9dcf54-03b4-45b2-b835-62f68206c3e0
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
