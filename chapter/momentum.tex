@@ -434,7 +434,12 @@ assumption applies to the intermediate states \(y_n\) which are not too far
 from our actual iterates and would thus allow us to make similar statements
 about them with a bit of work.
 
-So why are we even considering Nesterov's Momentum then?
+So why are we even considering Nesterov's Momentum then? While
+\textcite[pp. 65-67]{polyakIntroductionOptimization1987} used the eigenvalue
+analysis of \(\nabla\Loss^2(\weights_*)\) to extend this rate of convergence
+to a local area around \(\weights_*\), \textcite[pp. 78-79, 93-94]{lessardAnalysisDesignOptimization2016}
+gave an example of an \(\strongConvex{\lbound}{\ubound}\) function where
+the heavy ball method is trapped in an attractive cycle instead of converging.
 
 \begin{figure}[h]
 	\centering
