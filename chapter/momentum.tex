@@ -246,7 +246,7 @@ Reordering the eigenvalues to
 %
 reorders the transformation matrix of the eigenspace to
 %
-\begin{align*}
+\begin{align}\label{eq: eigenspace momentum transformation}
 	\Sigma := \begin{pmatrix}
 		0 & 1 \\
 		-\momCoeff & 1+\momCoeff - \lrSq\hesseEV_1 & \\
@@ -259,7 +259,7 @@ reorders the transformation matrix of the eigenspace to
 		& \ddots\\
 		&& \Sigma_\dimension
 	\end{pmatrix}
-\end{align*}
+\end{align}
 %
 So in contrast to Section~\ref{sec: visualize gd} we do not get a diagonal
 matrix immediately. To achieve a similar eigenvalue analysis as in
@@ -525,6 +525,24 @@ Theorem~\ref{thm: convex function GD loss upper bound} for gradient decent
 without momentum \(\momCoeff=0\), but is actually harmed by momentum.
 \fxnote{Check out improvements by \cite{sunNonErgodicConvergenceAnalysis2019}}
 
+\subsection{Nesterov's Momentum}
+
+The Eigenvalue analysis of Nesterov's Momentum starts out very similar and we
+easily obtain the analog eigenspace transformation to (\ref{eq: eigenspace
+momentum transformation})
+%
+\begin{align*}
+	\Sigma_i = \begin{pmatrix}
+		0 & 1\\
+		-\momCoeff(1-\lrSq\hesseEV_i) & (1+\momCoeff)(1-\lrSq\hesseEV_i).
+	\end{pmatrix}	
+\end{align*}
+%
+which curiously reduces to the heavy ball version if we use
+\begin{align*}
+	\tilde{\momCoeff}_i = \momCoeff(1-\lrSq\hesseEV_i)
+\end{align*}
+
 \begin{figure}[h]
 	\centering
 	\begin{minipage}{1\textwidth}
@@ -543,6 +561,7 @@ without momentum \(\momCoeff=0\), but is actually harmed by momentum.
 	}
 	\label{fig: compare rates}
 \end{figure}
+
 
 \section{Complexity Bounds}
 
