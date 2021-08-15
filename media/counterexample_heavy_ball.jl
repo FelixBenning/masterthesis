@@ -13,17 +13,8 @@ f_1(x) = 12.5*x^2
 # ╔═╡ 0477b326-6e19-4ae9-9fe8-5d7f3eedaf12
 f_2(x) = (x^2)/2 + 24*x - 12
 
-# ╔═╡ 7c87036b-a4f0-42e2-aadc-1380bbe260c2
-f_1(1) == f_2(1)
-
-# ╔═╡ ee397d71-08a6-462a-8518-3159764d48c6
-f_2(2)
-
 # ╔═╡ 6840d59f-6941-4bc4-89c8-75879752a1cf
 f_3(x) = 12.5*x^2 - 24*x + 36
-
-# ╔═╡ d8ee9b1e-bd05-45d7-95d9-077f90f96ccb
-f_3(2)
 
 # ╔═╡ 0093c976-4d48-4196-95f4-71491948ea1d
 domain = -2:0.1:4
@@ -49,7 +40,7 @@ p3 = 2.12
 
 # ╔═╡ 258e7b7a-2f74-4a7c-9fd1-951c0f7ead5d
 begin
-	plot(
+	counterexample = plot(
 		domain, f_1, linewidth=2, 
 		fontfamily="Computer Modern", legend=:topleft, 
 		label="\$\\nabla f(x) = 25x\\quad (x<1)\$"
@@ -61,10 +52,13 @@ begin
 		label="\$f\\in\\mathcal{S}_{1,25}^{1,1}\$"
 	)
 	plot!([1,2], f, color=:black, seriestype=:scatter, label=missing)
-	plot!([p1, p2], f, color=:black, linewidth=0.7, arrow=true, label=missing)
-	plot!([p2, p3], f, color=:black, linewidth=0.7, arrow=true, label=missing)
-	plot!([p3, p1], f, color=:black, linewidth=0.7, arrow=true, label=missing)
+	plot!([p1, p2], f, color=:grey, linewidth=1.7, arrow=true, label=missing)
+	plot!([p2, p3], f, color=:grey, linewidth=1.7, arrow=true, label=missing)
+	plot!([p3, p1], f, color=:grey, linewidth=1.7, arrow=true, label=missing)
 end
+
+# ╔═╡ 724679a8-ca89-4003-901f-408a34201023
+Plots.savefig(counterexample, "hb_counterexample.svg")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -879,17 +873,15 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═1ead2e75-b9d3-4ca8-aec4-7d9674c05c67
-# ╠═7c87036b-a4f0-42e2-aadc-1380bbe260c2
-# ╠═ee397d71-08a6-462a-8518-3159764d48c6
-# ╠═d8ee9b1e-bd05-45d7-95d9-077f90f96ccb
 # ╠═0477b326-6e19-4ae9-9fe8-5d7f3eedaf12
 # ╠═6840d59f-6941-4bc4-89c8-75879752a1cf
-# ╠═0093c976-4d48-4196-95f4-71491948ea1d
 # ╠═aa758bf7-7a35-4495-8efb-55e5fc5d4ed2
-# ╠═d1b17669-d518-43ef-ad51-0c3859214e1c
-# ╠═c8ea873f-250e-4b8c-9669-ff5bb9424c23
-# ╠═7b3f9f8f-a9bb-4c35-9d8c-81bac168564f
+# ╟─0093c976-4d48-4196-95f4-71491948ea1d
+# ╟─d1b17669-d518-43ef-ad51-0c3859214e1c
+# ╟─c8ea873f-250e-4b8c-9669-ff5bb9424c23
+# ╟─7b3f9f8f-a9bb-4c35-9d8c-81bac168564f
 # ╟─258e7b7a-2f74-4a7c-9fd1-951c0f7ead5d
+# ╠═724679a8-ca89-4003-901f-408a34201023
 # ╠═188a9dd0-fda9-11eb-048c-e9d03dc39f16
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
