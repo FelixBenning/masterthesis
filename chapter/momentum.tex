@@ -437,9 +437,39 @@ about them with a bit of work.
 So why are we even considering Nesterov's Momentum then? While
 \textcite[pp. 65-67]{polyakIntroductionOptimization1987} used the eigenvalue
 analysis of \(\nabla\Loss^2(\weights_*)\) to extend this rate of convergence
-to a local area around \(\weights_*\), \textcite[pp. 78-79, 93-94]{lessardAnalysisDesignOptimization2016}
+to a local area around \(\weights_*\), \textcite[pp. 78-79]{lessardAnalysisDesignOptimization2016}
 gave an example of an \(\strongConvex{\lbound}{\ubound}\) function where
-the heavy ball method is trapped in an attractive cycle instead of converging.
+the heavy ball method with these "optimal" parameters is trapped in an attractive
+cycle instead of converging. 
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/hb_counterexample.pdf_tex}
+	\caption{
+		\citeauthor{lessardAnalysisDesignOptimization2016}'s counterexample.
+		Notice that the y-axis is much coarser than the x-axis and gradients are
+		therefore much steeper than apparent. At point \(-1.8\) the gradient is
+		quite steep and the next parameter is flung across the minimum to
+		\(2.12\). Due to the less convex segment on this side, the gradient is
+		not quite as steep here, so the iterate does not make it to the other
+		side again which would then cause a bouncing back and forth to the
+		minimum. Instead it stays on this side, which causes the next gradient
+		at \(0.65\) together with the built momentum in this direction to move the
+		iterate back out to our first point.
+	}
+	\label{fig: heavy ball counterexample}
+\end{figure}
+
+Since we know \(\lbound\) and \(\ubound\) of their counterexample function from
+Figure~\ref{fig: heavy ball counterexample}, we know the parameters \(\lrSq_*\)
+and \(\momCoeff_*\) which they used to explicitly write out or momentum recursion
+with \(\weights_{n+1}, \weights_{n}, \weights_{n-1}\) assuming a three-cycle,
+this left them with just three linear equations which results in the three-cycle
+displayed in the Figure. Since we start with zero momentum, one now just has to
+find a point to enter this cycle. Additional to solving this initialization
+problem, \textcite[pp. 93-94]{lessardAnalysisDesignOptimization2016} also show
+that this cycle is stable under noise (attractive).
 
 \begin{figure}[h]
 	\centering
