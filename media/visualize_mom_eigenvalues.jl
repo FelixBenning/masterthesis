@@ -52,6 +52,12 @@ Precision
 $(@bind precision PlutoUI.Slider(1.5:0.1:3.5, default=3, show_value=true))
 "
 
+# ╔═╡ 90436c48-9cc0-4c77-9f73-5fc379db8754
+αλ_range = 0:round(5*exp(log(0.1)*precision), digits=ceil(Int32, precision)):4
+
+# ╔═╡ 0e2decd6-50dd-40fb-b757-6a4f1fc75799
+β_range = -1:round(exp(log(0.1)*precision), digits=ceil(Int32, precision)):1
+
 # ╔═╡ b4d7e7d8-9fee-41cd-b28f-301d7f16392b
 md"### Lower limit for beta 
 $(@bind beta_min PlutoUI.Slider(-1:0.1:0, default=-1,show_value=true))
@@ -62,12 +68,6 @@ md"## Nesterov Momentum"
 
 # ╔═╡ abbca286-0b2b-4447-89b5-40ad1ef3ab46
 md"# Appendix"
-
-# ╔═╡ 90436c48-9cc0-4c77-9f73-5fc379db8754
-αλ_range = 0:round(5*exp(log(0.1)*precision), digits=ceil(Int32, precision)):4
-
-# ╔═╡ 0e2decd6-50dd-40fb-b757-6a4f1fc75799
-β_range = -1:round(exp(log(0.1)*precision), digits=ceil(Int32, precision)):1
 
 # ╔═╡ f8240440-c224-418a-b950-0a19d8099594
 β_indices = findall(x->x>beta_min, β_range)
@@ -100,9 +100,9 @@ begin
 			legend=:bottomright
 		)
 		plot!(
-			annotated_hb, [2(1+beta_min), 4], x->x/2-1, 
+			annotated_hb, [2(1+beta_min), 4], x->1-x/2, 
 			color=:black, linewidth=2, linestyle=:dash, 
-			label="\$\\alpha\\lambda=2(1+\\beta)\$"
+			label="\$\\alpha\\lambda=2(1-\\beta)\$"
 		)
 		plot!(
 			annotated_hb, 

@@ -86,7 +86,7 @@ we get the well known \emph{heavy ball method} (momentum method) first proposed
 by \textcite{polyakMethodsSpeedingConvergence1964} and wonderfully illustrated
 by \textcite{gohWhyMomentumReally2017}.
 
-\begin{definition}[Momentum Method]
+\begin{definition}[Heavy Ball Method]
 	\begin{subequations}
 	\begin{align}
 		\weights_{n+1} &= \weights_n + \lr \momentum_{n+1} \label{eq: momentum move}\\
@@ -178,7 +178,9 @@ previous position \(\weights_n\).
 	Constant Step Scheme III (2.2.22).
  \end{remark}
 
-\section{Convergence Rate}
+\section{Convergence Rates}
+
+\subsection{Heavy Ball Convergence on Quadratic Functions}
 
 Following the arguments from Section~\ref{sec: visualize gd} in particular
 (\ref{eq: hesse representation of gradient}) we can rewrite the momentum
@@ -428,13 +430,31 @@ we can not do any better without violating our assumptions about possible
 optimizing algorithms (Assumption~ \ref{assmpt: parameter in generalized linear
 hull of gradients}).
 
+\subsection{Why Consider Alternatives?}
+
 Now while Nesterov's Momentum breaks this assumption as it uses gradients at a
 different point than the iterates, it does not break it fundamentally. The
 assumption applies to the intermediate states \(y_n\) which are not too far
 from our actual iterates and would thus allow us to make similar statements
 about them with a bit of work.
 
-So why are we even considering Nesterov's Momentum then? While
+So why should we even considering Nesterov's Momentum then?
+
+\subsubsection{Weakest Link Contraction Factor}
+
+The first issue you
+might have noticed is: Since \emph{all eigenspaces} are in the complex case,
+all of them have the worst contraction factor \(\sqrt{\momCoeff_*}\). In stochastic
+gradient decent on the other hand the contraction factor is \(|1-\lr_*\hesseEV_i|\)
+for the eigenspace \(i\), which can be considerably better than the worst
+contraction factor 
+\[|1-\lr_*\hesseEV_\dimension|=|1-\lr_*\hesseEV_1|.\]
+To improve the convergence rate of the worst eigenspaces we have therefore
+sacrificed the (possibly excellent) convergence rate of all other eigenspaces.
+
+\subsubsection{No General Convergence at these Rates}
+
+While
 \textcite[pp. 65-67]{polyakIntroductionOptimization1987} used the eigenvalue
 analysis of \(\nabla\Loss^2(\weights_*)\) to extend this rate of convergence
 to a local area around \(\weights_*\), \textcite[pp. 78-79]{lessardAnalysisDesignOptimization2016}
@@ -463,13 +483,47 @@ cycle instead of converging.
 
 Since we know \(\lbound\) and \(\ubound\) of their counterexample function from
 Figure~\ref{fig: heavy ball counterexample}, we know the parameters \(\lrSq_*\)
-and \(\momCoeff_*\) which they used to explicitly write out or momentum recursion
-with \(\weights_{n+1}, \weights_{n}, \weights_{n-1}\) assuming a three-cycle,
+and \(\momCoeff_*\) which they used to explicitly write out the momentum recursion
+with \(\weights_{n+1}, \weights_{n}, \weights_{n-1}\). Assuming a three-cycle
 this left them with just three linear equations which results in the three-cycle
 displayed in the Figure. Since we start with zero momentum, one now just has to
 find a point to enter this cycle. Additional to solving this initialization
 problem, \textcite[pp. 93-94]{lessardAnalysisDesignOptimization2016} also show
 that this cycle is stable under noise (attractive).
+
+\textcite{ghadimiGlobalConvergenceHeavyball2015} salvages some of this wreckage
+by proving general convergence results with tighter restrictions on hyper
+parameters. In particular for \(\Loss\in\strongConvex{\lbound}{\ubound}\) and
+\begin{align*}
+	\momCoeff\in[0,1),
+	\qquad \lrSq\in \left(0, \frac{2(1-\momCoeff)}{\ubound+\lbound}\right)
+\end{align*}
+they can guarantee linear convergence with an explicit, but complicated
+\fxnote{take a closer look?}{contraction factor}. Notice that this is
+considerably weaker than the condition
+\begin{align*}
+	0<\lrSq\lbound \le \dots \le \lrSq\ubound < 2(1+\momCoeff)
+\end{align*}
+from Theorem~\ref{thm: momentum - stable set of parameters}. In particular
+momentum stops increasing the selection space for learning rates, just like
+\(\lbound\) which rules out our optimal parameters immediately. 
+
+Similarly they prove that for \(\Loss\in\lipGradientSet{\ubound}\) and
+\begin{align*}
+	\momCoeff\in[0,1),
+	\qquad \lrSq\in \left(0, \frac{(1-\momCoeff)}{\ubound}\right]
+\end{align*}
+that the running minimum of loss evaluation converges to the minimal loss,
+with their best guarantee achieved for \(\lrSq =(1-\momCoeff)/\ubound\)
+resulting in
+\begin{align*}
+	\min_{k=0,\dots,n}\Loss(\weights_k) -\Loss(\weights_*)
+	\le \frac{1}{1-\momCoeff}\frac{\ubound\|\weights_0-\weights_*\|^2}{2(n+1)}
+\end{align*}
+which provides a tighter convergence bound than 
+Theorem~\ref{thm: convex function GD loss upper bound} for gradient decent 
+without momentum \(\momCoeff=0\), but is actually harmed by momentum.
+\fxnote{Check out improvements by \cite{sunNonErgodicConvergenceAnalysis2019}}
 
 \begin{figure}[h]
 	\centering
