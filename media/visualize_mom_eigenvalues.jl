@@ -100,9 +100,9 @@ begin
 			legend=:bottomright
 		)
 		plot!(
-			annotated_hb, [2(1+beta_min), 4], x->1-x/2, 
+			annotated_hb, [2(1+beta_min), 4], x->x/2-1, 
 			color=:black, linewidth=2, linestyle=:dash, 
-			label="\$\\alpha\\lambda=2(1-\\beta)\$"
+			label="\$\\alpha\\lambda=2(1+\\beta)\$"
 		)
 		plot!(
 			annotated_hb, 
