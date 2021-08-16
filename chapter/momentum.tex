@@ -31,7 +31,7 @@ velocity is gradient}), we want to set the acceleration equal to our gradient
 \end{align*}
 %
 But without friction we are going to massively overshoot the minimum, so we are
-also going to add a "friction force" inversely proportional to our current
+also going to add a ``friction force" inversely proportional to our current
 velocity
 %
 \begin{align}\label{eq: acceleration is gradient + friction}
@@ -107,7 +107,7 @@ by \textcite{gohWhyMomentumReally2017}.
 		}(\weights_n - \weights_{n-1})
 		- \underbrace{\lr^2}_{=:\lrSq}\nabla \Loss(\weights_n)
 	\end{align}
-	In particular we can set "the momentum coefficient" \(\momCoeff\) to zero to
+	In particular we can set ``the momentum coefficient" \(\momCoeff\) to zero to
 	obtain gradient decent again. This is of course an artifact of our
 	discretization since \(\lr\to0\) would never allow \(\momCoeff\) to be zero
 	in the limit. But actual implementations often use this
@@ -116,7 +116,7 @@ by \textcite{gohWhyMomentumReally2017}.
 \end{definition}
 %
 Nesterov's momentum is even more aggressive: Instead of using \(p_{n+1}\) for
-the \(\weights_{n+1}\) update, it considers the certain "momentum move"
+the \(\weights_{n+1}\) update, it considers the certain ``momentum move"
 to calculate an intermediate position \(y_{n+1}\)
 %
 \begin{align*}
@@ -164,7 +164,7 @@ previous position \(\weights_n\).
 \end{definition}
 %
 \begin{remark}\fxwarning{too informal?}
-	This method also known as "Nesterov's Accelerated Momentmum" is said to date
+	This method also known as ``Nesterov's Accelerated Momentmum" is said to date
 	back to \textcite{nesterovMethodSolvingConvex1983}.  But not only is the
 	original text in Russian, it also difficult to find on the internet.
 	Fortunately, \citeauthor{nesterovMethodSolvingConvex1983} wrote textbooks,
@@ -285,11 +285,11 @@ appendix. We will only cover the result here.
 	\input{media/annotated_heavy_ball_rates.pdf_tex}
 	\caption{
 		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Heavy Ball Momentum.
-		Strictly speaking the "Monotonic" (M) and "Oscillation" (O) area should not
+		Strictly speaking the ``Monotonic" (M) and ``Oscillation" (O) areas should not
 		extend into negative \(\momCoeff\) since \(\sigma_{1/2}\)
 		have opposite signs there, but it still describes the behavior of the
 		dominating eigenvalue. The third label in the legend corresponds to the
-		remarkably sharp border of the "Ripples" area which I did not want to
+		remarkably sharp border of the ``Ripples" area which I did not want to
 		draw over. Also recall that \(\momCoeff=0\) represents SGD
 		without momentum.
 	}
@@ -326,7 +326,7 @@ appendix. We will only cover the result here.
 		to the minimum of the quadratic function into the momentum and back like 
 		a pendulum where the friction causes it to eventually end up in the
 		minimum. Looking at the distance to the minimum only, we will therefore
-		observe a sinus wave ("Ripples").
+		observe a sinus wave (``Ripples").
 		\item In the real case we have \(\sigma_1>\sigma_2\) and
 		\begin{align}
 			\max\{|\sigma_1|, |\sigma_2|\} = \begin{cases}
@@ -340,12 +340,12 @@ appendix. We will only cover the result here.
 			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
 		\end{align*}
 		we have \(1>\sigma_1 > \sigma_2 > 0\) which results in a monotonic
-		linear convergence ("Monotonic" case). For
+		linear convergence (``Monotonic" case). For
 		\begin{align*}
 			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
 		\end{align*}
 		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
-		an oscillating convergence ("Oscillation"). In contrast to the "Ripples"
+		an oscillating convergence (``Oscillation"). In contrast to the ``Ripples"
 		we switch the side of the distance to the minimum in every iteration.
 	\end{enumerate}
 \end{theorem}
@@ -459,7 +459,7 @@ While
 analysis of \(\nabla\Loss^2(\weights_*)\) to extend this rate of convergence
 to a local area around \(\weights_*\), \textcite[pp. 78-79]{lessardAnalysisDesignOptimization2016}
 gave an example of an \(\strongConvex{\lbound}{\ubound}\) function where
-the heavy ball method with these "optimal" parameters is trapped in an attractive
+the heavy ball method with these ``optimal" parameters is trapped in an attractive
 cycle instead of converging. 
 %
 \begin{figure}[h]
@@ -563,7 +563,7 @@ which after some transformations is itself equivalent to
 	\input{media/annotated_nesterov_rates.pdf_tex}
 	\caption{
 		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Nesterov Momentum.
-		"M" and "O" stand for the "Monotonic" and "Oscillating" types of 
+		``M" and ``O" stand for the ``Monotonic" and ``Oscillating" types of 
 		real eigenvalues. Note that the separating line of these cases
 		\(\lrSq\hesseEV=1+\tilde{\momCoeff}=1+\momCoeff(1-\lrSq\hesseEV)\)
 		reduces to \(\lrSq\hesseEV=1\) but since we divide by \(1+\momCoeff\)
@@ -572,25 +572,6 @@ which after some transformations is itself equivalent to
 	}
 	\label{fig: annotated nesterov rates}
 \end{figure}
-%
-% \begin{figure}[h]
-% 	\centering
-% 	\begin{minipage}{1\textwidth}
-% 		\centering
-% 		\def\svgwidth{1\textwidth}
-% 		\input{media/heavy_ball_rates.pdf_tex}
-% 	\end{minipage}
-% 	\begin{minipage}{1\textwidth}
-% 		\centering
-% 		\def\svgwidth{1\textwidth}
-% 		\input{media/nesterov_rates.pdf_tex}
-% 	\end{minipage}
-% 	\caption{
-% 		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) of the Heavy Ball
-% 		Momentum and Nesterov's Momentum in direct comparison.
-% 	}
-% 	\label{fig: compare rates}
-% \end{figure}
 
 
 
