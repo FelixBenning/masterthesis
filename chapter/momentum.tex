@@ -178,9 +178,7 @@ previous position \(\weights_n\).
 	Constant Step Scheme III (2.2.22).
  \end{remark}
 
-\section{Convergence Rates}
-
-\subsection{Heavy Ball Convergence on Quadratic Functions}
+\section{Heavy Ball Convergence}
 
 Following the arguments from Section~\ref{sec: visualize gd} in particular
 (\ref{eq: hesse representation of gradient}) we can rewrite the momentum
@@ -286,11 +284,13 @@ appendix. We will only cover the result here.
 	\def\svgwidth{1\textwidth}
 	\input{media/annotated_heavy_ball_rates.pdf_tex}
 	\caption{
-		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\).
-		Strictly speaking the "Monotonic" and "Oscillation" area should not
+		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Heavy Ball Momentum.
+		Strictly speaking the "Monotonic" (M) and "Oscillation" (O) area should not
 		extend into negative \(\momCoeff\) since \(\sigma_{1/2}\)
 		have opposite signs there, but it still describes the behavior of the
-		dominating eigenvalue. Also recall that \(\momCoeff=0\) represents SGD
+		dominating eigenvalue. The third label in the legend corresponds to the
+		remarkably sharp border of the "Ripples" area which I did not want to
+		draw over. Also recall that \(\momCoeff=0\) represents SGD
 		without momentum.
 	}
 	\label{fig: annotated heavy ball rates}
@@ -525,7 +525,7 @@ Theorem~\ref{thm: convex function GD loss upper bound} for gradient decent
 without momentum \(\momCoeff=0\), but is actually harmed by momentum.
 \fxnote{Check out improvements by \cite{sunNonErgodicConvergenceAnalysis2019}}
 
-\subsection{Nesterov's Momentum}
+\section{Nesterov's Momentum Convergence}
 
 The Eigenvalue analysis of Nesterov's Momentum starts out very similar and we
 easily obtain the analog eigenspace transformation to (\ref{eq: eigenspace
@@ -542,25 +542,56 @@ which curiously reduces to the heavy ball version if we use
 \begin{align*}
 	\tilde{\momCoeff}_i = \momCoeff(1-\lrSq\hesseEV_i)
 \end{align*}
-
+We therefore immediately get from Theorem~\ref{thm: momentum - stable set of
+parameters} that \(\max\{|\sigma_{i1}|,|\sigma_{i2}|\}<1\) if and only if
+\begin{align*}
+	0<\lrSq\hesseEV_i < 2(1+\momCoeff(1-\lrSq\hesseEV_i))
+	\quad \text{and} \quad
+	|\momCoeff(1-\lrSq\hesseEV_i)|<1
+\end{align*}
+%
+which after some transformations is itself equivalent to
+\begin{align*}
+	0<\lrSq\hesseEV_i < 1+\frac{1}{1+2\momCoeff}
+	\quad \text{and} \quad
+	|1-\lrSq\hesseEV_i|<\frac{1}{|\momCoeff|}.
+\end{align*}
+%
 \begin{figure}[h]
 	\centering
-	\begin{minipage}{1\textwidth}
-		\centering
-		\def\svgwidth{1\textwidth}
-		\input{media/heavy_ball_rates.pdf_tex}
-	\end{minipage}
-	\begin{minipage}{1\textwidth}
-		\centering
-		\def\svgwidth{1\textwidth}
-		\input{media/nesterov_rates.pdf_tex}
-	\end{minipage}
+	\def\svgwidth{1\textwidth}
+	\input{media/annotated_nesterov_rates.pdf_tex}
 	\caption{
-		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) of the Heavy Ball
-		Momentum and Nesterov's Momentum in direct comparison.
+		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Nesterov Momentum.
+		"M" and "O" stand for the "Monotonic" and "Oscillating" types of 
+		real eigenvalues. Note that the separating line of these cases
+		\(\lrSq\hesseEV=1+\tilde{\momCoeff}=1+\momCoeff(1-\lrSq\hesseEV)\)
+		reduces to \(\lrSq\hesseEV=1\) but since we divide by \(1+\momCoeff\)
+		the sides flip at \(\momCoeff=-1\). Again the third label is omitted to
+		keep the remarkably sharp border unobstructed.
 	}
-	\label{fig: compare rates}
+	\label{fig: annotated nesterov rates}
 \end{figure}
+%
+% \begin{figure}[h]
+% 	\centering
+% 	\begin{minipage}{1\textwidth}
+% 		\centering
+% 		\def\svgwidth{1\textwidth}
+% 		\input{media/heavy_ball_rates.pdf_tex}
+% 	\end{minipage}
+% 	\begin{minipage}{1\textwidth}
+% 		\centering
+% 		\def\svgwidth{1\textwidth}
+% 		\input{media/nesterov_rates.pdf_tex}
+% 	\end{minipage}
+% 	\caption{
+% 		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) of the Heavy Ball
+% 		Momentum and Nesterov's Momentum in direct comparison.
+% 	}
+% 	\label{fig: compare rates}
+% \end{figure}
+
 
 
 \section{Complexity Bounds}

@@ -60,11 +60,11 @@ $(@bind precision PlutoUI.Slider(1.5:0.1:3.5, default=3, show_value=true))
 
 # ╔═╡ b4d7e7d8-9fee-41cd-b28f-301d7f16392b
 md"### Lower limit for beta 
-$(@bind beta_min PlutoUI.Slider(-1:0.1:0, default=-1,show_value=true))
+$(@bind beta_min PlutoUI.Slider(minimum(β_range):0.1:0, default=-1,show_value=true))
 "
 
-# ╔═╡ 5ba587be-a645-4c95-acd7-90c1941acc70
-md"## Nesterov Momentum"
+# ╔═╡ 66c9ed20-7414-4a4d-be1e-11f8ceb9a5b9
+nβ_range = -1.5:round(exp(log(0.1)*precision), digits=ceil(Int32, precision)):1.5
 
 # ╔═╡ abbca286-0b2b-4447-89b5-40ad1ef3ab46
 md"# Appendix"
@@ -101,40 +101,99 @@ begin
 		)
 		plot!(
 			annotated_hb, [2(1+beta_min), 4], x->x/2-1, 
-			color=:black, linewidth=2, linestyle=:dash, 
+			color=:black, linestyle=:dash, 
 			label="\$\\alpha\\lambda=2(1+\\beta)\$"
 		)
 		plot!(
 			annotated_hb, 
 			αλ_range,
 			x->(1-sqrt(x))^2, 
-			color=:black, linewidth=2, 
+			color=:white, linewidth=0, 
 			label="\$\\beta=(1-\\sqrt{\\alpha\\lambda})^2\$"
 		)
 		Plots.annotate!(annotated_hb, 1, 0.5, "Ripples")
-		Plots.annotate!(annotated_hb, 1.44, -0.1, "Oscillation")
-		Plots.annotate!(annotated_hb, 0.35, -0.15, "Monotonic")
-		Plots.annotate!(annotated_hb, 3, 0, "Divergence")
+		Plots.annotate!(annotated_hb, 1.35, -0.15, "O")
+		Plots.annotate!(annotated_hb, 0.35, -0.15, "M")
+		Plots.annotate!(annotated_hb, 3, -0.15, "Divergence")
 		Plots.savefig(annotated_hb, "annotated_heavy_ball_rates.svg")
 	end
 	annotated_hb
 end
 
 # ╔═╡ 7f9dcf54-03b4-45b2-b835-62f68206c3e0
-n_rate = n_max_abs_sigma.(Iterators.product(αλ_range, β_range))'
+n_rate = n_max_abs_sigma.(Iterators.product(αλ_range, nβ_range))'
 
 # ╔═╡ 7c1a6761-62e1-40e1-abe2-1d48d4bf3046
+begin	
 	nesterov_momentum = plot(
 		αλ_range, 
-		β_range[β_indices], 
-		n_rate[β_indices, :],
+		nβ_range, 
+		n_rate,
 		seriestype=:heatmap, clim=(0,1), 
 		xlabel="\$\\alpha\\lambda\$",ylabel="\$\\beta\$", 
-		fontfamily="Computer Modern"
+		fontfamily="Computer Modern", fmt=:svg
 	)
+	Plots.savefig(nesterov_momentum, "nesterov_rates.svg")
+	md"## Nesterov Momentum"
+end
 
-# ╔═╡ 5dfdd60b-0ed5-41db-a2cd-97aa356755ce
-Plots.savefig(nesterov_momentum, "nesterov_rates.svg")
+# ╔═╡ f287d638-f54c-4107-b19a-8797baab18ca
+begin
+	annotated_nm = deepcopy(nesterov_momentum)
+	if show_labels
+		# old |β|<1 condition
+		plot!(
+			annotated_nm, filter(x->x>=1+1/abs(minimum(nβ_range)), αλ_range),
+			x->-1/(x-1), 
+			color=:black, label="\$|\\tilde{\\beta}\\ |=1\$",
+			linestyle=:dot, linewidth=2,
+			fmt=:svg, ytick=(
+				[-1, -1/3, 0, 1],
+				["-1", "-1/3", "0", "1"]
+			), 
+		)
+		plot!(
+			annotated_nm, filter(x->x>=1+1/maximum(nβ_range), αλ_range), x->1/(x-1), 
+			color=:black, label=missing, linestyle=:dot, linewidth=2
+		)
+		plot!(
+			annotated_nm, filter(x->x<=1-1/maximum(nβ_range), αλ_range), x->1/(1-x), 
+			color=:black, label=missing, linestyle=:dot, linewidth=2
+		)
+		plot!(
+			annotated_nm, filter(x->x<=1-1/abs(minimum((nβ_range))), αλ_range),
+			x->-1/(1-x),
+			color=:black, label=missing, linestyle=:dot, linewidth=2
+		)
+		# old |1-αλ|<2(1+β) condition
+		plot!(
+			annotated_nm, filter(x->x>=1+1/(1+2*maximum(nβ_range)), αλ_range), 
+			x->0.5*(1/(x-1)-1), 
+			color=:black, linestyle=:dash,
+			label="\$\\alpha\\lambda=1+\\frac{1}{1+2\\beta}\$"
+		)
+		plot!(
+			annotated_nm, filter(x->x<=1+1/(1+2*minimum(nβ_range)), αλ_range), 
+			x->0.5*(1/(x-1)-1), 
+			color=:black, linestyle=:dash,
+			label=missing
+		)
+		# complex case
+		plot!(
+			annotated_nm, αλ_range, x->(1-sqrt(x))^2/(1-x), 
+			color=:white, linewidth=0, 
+			label="\$\\tilde{\\beta}=(1-\\sqrt{\\alpha\\lambda})^2\$"
+		)
+		# annotations
+		Plots.annotate!(annotated_nm, 0.5, 0.7, "Ripples")
+		Plots.annotate!(annotated_nm, 1.5, -0.5, "Ripples")
+		Plots.annotate!(annotated_nm, 1.3, 0.3, "O")
+		Plots.annotate!(annotated_nm, 0.7, -1.3, "O")
+		Plots.annotate!(annotated_nm, 0.5, -0.5, "M")
+		Plots.savefig(annotated_nm, "annotated_nesterov_rates.svg")
+	end
+	annotated_nm
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -143,7 +202,7 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
-Plots = "~1.20.0"
+Plots = "~1.20.1"
 PlutoUI = "~0.7.9"
 """
 
@@ -198,9 +257,9 @@ version = "0.12.8"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "344f143fa0ec67e47917848795ab19c6a455f32c"
+git-tree-sha1 = "79b9563ef3f2cc5fc6d3046a5ee1a57c9de52495"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.32.0"
+version = "3.33.0"
 
 [[CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -590,9 +649,9 @@ version = "1.0.11"
 
 [[Plots]]
 deps = ["Base64", "Contour", "Dates", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs"]
-git-tree-sha1 = "e39bea10478c6aff5495ab522517fae5134b40e3"
+git-tree-sha1 = "8365fa7758e2e8e4443ce866d6106d8ecbb4474e"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.20.0"
+version = "1.20.1"
 
 [[PlutoUI]]
 deps = ["Base64", "Dates", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "Suppressor"]
@@ -970,13 +1029,13 @@ version = "0.9.1+5"
 # ╟─b511a60d-9f59-4686-af3d-34e4a5da6951
 # ╟─1e7559dc-caab-4529-b8e5-d97121406314
 # ╟─90436c48-9cc0-4c77-9f73-5fc379db8754
-# ╟─0e2decd6-50dd-40fb-b757-6a4f1fc75799
 # ╟─192c0bfa-bef1-4e6a-aed2-4c92167be475
-# ╟─39181ac5-76a3-4049-8775-3177b88ee83f
+# ╟─0e2decd6-50dd-40fb-b757-6a4f1fc75799
 # ╟─b4d7e7d8-9fee-41cd-b28f-301d7f16392b
-# ╟─5ba587be-a645-4c95-acd7-90c1941acc70
+# ╟─39181ac5-76a3-4049-8775-3177b88ee83f
 # ╟─7c1a6761-62e1-40e1-abe2-1d48d4bf3046
-# ╠═5dfdd60b-0ed5-41db-a2cd-97aa356755ce
+# ╟─66c9ed20-7414-4a4d-be1e-11f8ceb9a5b9
+# ╟─f287d638-f54c-4107-b19a-8797baab18ca
 # ╟─abbca286-0b2b-4447-89b5-40ad1ef3ab46
 # ╠═cc3650a0-fcf9-11eb-0e02-65cd42617729
 # ╟─f8240440-c224-418a-b950-0a19d8099594
