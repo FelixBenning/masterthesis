@@ -539,15 +539,15 @@ momentum transformation})
 \end{align*}
 %
 which curiously reduces to the heavy ball version if we use
-\begin{align*}
+\begin{align}\label{eq: tilde momentum}
 	\tilde{\momCoeff}_i = \momCoeff(1-\lrSq\hesseEV_i)
-\end{align*}
+\end{align}
 We therefore immediately get from Theorem~\ref{thm: momentum - stable set of
 parameters} that \(\max\{|\sigma_{i1}|,|\sigma_{i2}|\}<1\) if and only if
 \begin{align*}
-	0<\lrSq\hesseEV_i < 2(1+\momCoeff(1-\lrSq\hesseEV_i))
+	0<\lrSq\hesseEV_i < 2(1+\tilde{\momCoeff}_i)
 	\quad \text{and} \quad
-	|\momCoeff(1-\lrSq\hesseEV_i)|<1
+	|\tilde{\momCoeff}_i|<1
 \end{align*}
 %
 which after some transformations is itself equivalent to
@@ -572,6 +572,64 @@ which after some transformations is itself equivalent to
 	}
 	\label{fig: annotated nesterov rates}
 \end{figure}
+
+In a sense Nesterov's Momentum provides every eigenspace with its own
+heavy ball momentum \(\tilde{\momCoeff}_i\) which is a good sign if we want
+to avoid the ``Weakest Link Contraction Factor'' issue we had in heavy ball
+momentum. And if we are in the complex case the convergence rate is
+\(\sqrt{\momCoeff(1-\lrSq\hesseEV_i)}\) which looks like the root of the gradient
+decent convergence rate multiplied by a factor we could make smaller than one.
+
+To ensure all eigenspaces are in the complex case, we first need to ensure that
+all \(\tilde{\momCoeff}_i\) are positive which requires
+\begin{align*}
+	1-\lrSq\hesseEV_i >= 0
+\end{align*}
+So let us select \(\lrSq= 1/\hesseEV_\dimension\). Now we just need to ensure
+that the smallest eigenvalue is in the complex case, for that set it to be
+right on the border \(\tilde{\momCoeff}_1=(1-\sqrt{\lrSq\hesseEV_1})^2\),
+which then results in
+\begin{align*}
+	\momCoeff = \frac{(1-\sqrt{\lrSq\hesseEV_1})^2}{1-\lrSq\hesseEV_1}
+	=\frac{1-\sqrt{\lrSq\hesseEV_1}}{1+\sqrt{\lrSq\hesseEV_1}}
+	=\frac{1-\sqrt{1/\condition}}{1+\sqrt{1/\condition}} (< 1).
+\end{align*}
+Since
+\begin{align*}
+	\tilde{\momCoeff}_1 >= \dots >=\tilde{\momCoeff}_\dimension=0
+\end{align*}
+the worst rate convergence is exhibited by the first eigenspace and is equal to
+\begin{align*}
+	\sqrt{\tilde{\momCoeff}_1} = \sqrt{(1-\sqrt{\lrSq\hesseEV_1})^2}
+	= 1-\sqrt{1/\condition} = 1- \frac{1}{\sqrt{\condition}}.
+\end{align*}
+%
+This rate of convergence is a tiny bit worse than the optimal heavy ball
+convergence rate \(1-2/(1+\sqrt{\condition})\), which is also the complexity
+bound, but it is quite similar.
+
+Now if you had a look at Figure~\ref{fig:
+annotated nesterov rates} you might have noticed that for a fixed learning
+rate the \(\lrSq\hesseEV_i\) are \(\dimension\) vertical lines. We made sure
+that the rightmost line was right on top of the black line and then moved up
+our momentum term until all our rates where in the ripples area. From the
+plot you might get the intuition that we can improve convergence if we
+increase the learning rate to move the largest eigenvalue into the oscillating
+range just like in the gradient decent. And this is in fact not the optimal
+selection of learning rates. \textcite{lessardAnalysisDesignOptimization2016}
+claim\footnote{The proof is left to the reader} that optimal tuning results in
+\begin{align*}
+	\lrSq = \frac{4}{3\ubound + \lbound}
+	\quad \text{and} \quad
+	\momCoeff = \frac{\sqrt{3\condition+1}-2}{\sqrt{3\condition+1}+2}
+\end{align*}
+with learning rate
+\begin{align*}
+	1-\frac{2}{\sqrt{3\condition+1}}.
+\end{align*}
+But as we have learned with
+Heavy Ball Momentum, optimal learning rates are no use if we can not generalize
+them.
 
 
 
