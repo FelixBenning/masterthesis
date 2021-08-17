@@ -1105,7 +1105,7 @@ Now as promised we still have to show the improved lower bound.
 		\langle \nabla f(x) - \nabla f(y), x-y\rangle
 		= \bergmanDiv{f}(x,y) + \bergmanDiv{f}(y,x) = \lbound \|y-x\|^2.
 	\end{align*}
-	but instead we apply Lemma~\ref{lem: bermanDiv lower bound} to half of it
+	But instead we apply Lemma~\ref{lem: bermanDiv lower bound} to half of it
 	which results in the statement of this lemma.
 
 	Now we just have to finish the case \(\ubound>\lbound\). In equation
@@ -1125,10 +1125,10 @@ Now as promised we still have to show the improved lower bound.
 	\end{align*}
 	Moving the scalar product to the left we get
 	\begin{align*}
-		&\overbrace{(1+\tfrac{2\lbound}{\ubound+\lbound})}^{
-			=(\ubound+\lbound)/(\ubound-\lbound)
+		\overbrace{(\ubound+\lbound)/(\ubound-\lbound)}^{
+			= (1+\tfrac{2\lbound}{\ubound-\lbound})
 		}
-		\langle \nabla f(x) - \nabla f(y), x-y\rangle \\
+		&\langle \nabla f(x) - \nabla f(y), x-y\rangle \\
 		&\ge \tfrac{1}{\ubound-\lbound}\|\nabla f(x) - \nabla f(y)\|^2
 		+ \underbrace{(\tfrac{\lbound^2}{\ubound-\lbound}-\lbound)}_{
 			=\ubound\lbound/(\ubound-\lbound)
