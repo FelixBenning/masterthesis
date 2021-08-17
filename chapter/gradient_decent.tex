@@ -833,7 +833,7 @@ Now we can state the main convergence result
 	\end{align*}
 \end{proof}
 
-\subsubsection{Subgradient "Decent"}
+\subsection{Subgradient "Decent"}
 \fxnote{More extensive treatment?}{
 If we can not have convergence of the parameters \(\weights\) we might not
 care as much about the convergence of the gradient either. In that case it
@@ -855,6 +855,28 @@ parameter set \(B\) but it also decreases to
 	O\Big(\frac{B\lipConst}{\sqrt{n}}\Big).
 \end{align*}
 }
+
+\subsection{Mirror Decent}
+
+Lipschitz continuity represents an upper bound on the Bergman divergence
+\begin{align*}
+	\bergmanDiv{f}(y,x)
+	= f(y) - f(x) - \langle\nabla f(x), y-x\rangle
+	\lxle{\ref{lem: Lipschitz Gradient implies taylor inequality}}
+	\tfrac{\ubound}{2} \|y-x\|^2.
+\end{align*}
+In order to get close to the minimum we use this bound in
+(\ref{eq: min approximation}) to get an upper bound
+\begin{align*}
+	\min_y f(y)
+	&= \min_y \{f(x) + \langle f(x), y-x\rangle +\bergmanDiv{f}(y,x)\} \\
+	&\le \min_y\{f(x) + \langle f(x), y-x\rangle +\tfrac{\ubound}{2} \|y-x\|^2\}
+\end{align*}
+As we have shown in Lemma~\ref{lem: smallest upper bound}, gradient decent
+minimizes this upper bound. The basic idea of ``Mirror Decent'' is: If we had a
+better upper bound on the Bergman divergence, then we could also improve on
+gradient decent by taking the minimum of this improved upper bound.
+
 
 \section{Strong Convexity}\label{sec: Strong Convexity}
 
