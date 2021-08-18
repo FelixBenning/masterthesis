@@ -676,7 +676,7 @@ as we can simply select \(\weights_0=z_0\) to get
 Now the idea is to morph our upper bound \(\Phi_0\) via \(\Phi_n\) slowly into
 a lower bound while keeping 
 \begin{align}\label{eq: staying ahead of the estimates}
-	\Loss(\weights_n) \le \min_{\weights}\Phi_n(\weights).
+	\Loss(\weights_n) \le \min_{\weights}\Phi_n(\weights)=:\underline{\Phi}_n.
 \end{align}
 This would force \(\weights_n\) towards the minimum as it needs to stay smaller
 than \(\Phi_n\) which changes into a lower bound of \(\Loss\). By controlling
@@ -684,7 +684,8 @@ the speed of morphing we will be able to bound the convergence speed. But we
 can not morph too fast otherwise we will not be able to stay ahead of it, i.e.
 fulfill (\ref{eq: staying ahead of the estimates}). Okay now that we have set
 up the gameplan let us make this more concrete.
-The obvious lower bounds we want to utilize are
+The obvious lower bounds we want to utilize are made up of all the gradients we
+collect along the way
 \begin{align*}
 	\phi_n(\weights)
 	:= \Loss(y_n) + \langle\nabla\Loss(y_n), \weights-y_n\rangle
@@ -718,7 +719,7 @@ minimum is also equal to \(\weights_*\). If we have
 \end{align*}
 we get a bit more wiggle room but if we want to slowly remove our upper bound
 we run into a similar problem. Therefore we also need to slowly remove the old
-\(\phi_k\) upper bounds constructed with \(y_k\) far away from the minimum
+\(\phi_k\) upper bounds, constructed with \(y_k\) far away from the minimum
 \(\weights_*\). This motivates why we might wish to select
 \begin{align}\label{eq: estimating sequence recursion}
 	\Phi_{n+1}(x) = \gamma_n \phi_n(x) + (1-\gamma_n)\Phi_n(x)
@@ -730,11 +731,71 @@ our previous lower bounds. For
 \end{align*}
 one can inductively convert the recursion (\ref{eq: estimating sequence
 recursion}) into
-\begin{align*}
+\begin{align}
+	\nonumber
 	\Phi_{n+1}(\weights)
 	&= \sum_{k=0}^n \Gamma_{k+1}^n\gamma_k \phi_k(\weights)
 	+ \Gamma_0^n\Phi_0(\weights) \\
+	\label{eq: estimating sequence explicit}
 	&\le (1-\Gamma_0^n)\Loss(\weights) + \Gamma_0^n\Phi_0(\weights)
+\end{align}
+
+\begin{lemma}
+	If the \(\weights_n\) satisfy (\ref{eq: staying ahead of the estimates}),
+	then we have
+	\begin{align*}
+		\Loss(\weights_{n+1}) - \Loss(\weights_*)
+		\le \Gamma_0^n (\Phi_0(\weights_*)-\Loss(\weights_*))
+	\end{align*}
+	and
+	\begin{align*}
+		\sum_{k=0}^\infty \gamma_k = \infty
+	\end{align*}
+	is sufficient for \(\Gamma_0^n\to 0\).
+\end{lemma}
+\begin{proof}
+	Both statements are fairly easy to prove:
+	\begin{align*}
+		\Loss(\weights_{n+1})
+		\xle{(\ref{eq: staying ahead of the estimates})}
+		\min_{\weights}\Phi_{n+1}(\weights)
+		&\xle{(\ref{eq: estimating sequence explicit})} \min_{\weights} \{
+		(1-\Gamma_0^n) \Loss(\weights) + \Gamma_0^n\Phi_n(\weights) \}\\ 
+		&\le (1-\Gamma_0^n) \Loss(\weights_*) + \Gamma_0^n\Phi_n(\weights_*)
+	\end{align*}
+	Subtracting \(\Loss(\weights_*)\) from both sides lets us move on to the
+	second statement:
+	\begin{align*}
+		\Gamma_0^n &= \prod_{i=0}^n (1-\gamma_i)
+		\le\prod_{i=0}^n \exp(-\gamma_i)
+		= \exp\left(-\sum_{i=0}^n\gamma_i\right) \to 0
+		\qedhere
+	\end{align*}
+\end{proof}
+
+Now we just need to make sure that we can actually satisfy (\ref{eq: staying
+ahead of the estimates}) while making \(\gamma_k\) as large as possible.
+For that we want an explicit representation of \(\underline{\Phi}_{n}\).
+Fortunately we are only adding up quadratic functions therefore the function
+\(\Phi_{n}\) is quadratic too and can thus be written in the form
+\begin{align*}
+	\Phi_{n}(\weights) = \underline{\Phi}_{n} + \tfrac{\mu_{n}}{2}\|\weights - z_n\|^2
+\end{align*}
+where our convexity parameter \(\lbound_n\) morphs from \(\lbound_0\) to
+\(\lbound\)
+\begin{align*}
+	\lbound_{n+1} =(1-\Gamma_0^n)\lbound + \Gamma_0^n \lbound_0
+	= \gamma_n \lbound_n + (1-\gamma_n)\lbound_0
+\end{align*}
+and \(z_n\) is the minimum. We can therefore write our minimal value as
+\begin{align*}
+	\underline{\Phi}_{n+1}
+	&= \Phi_{n+1}(y_n) - \tfrac{\mu_{n}}{2}\|y_n - z_{n+1}\|^2 \\
+	&= (1-\gamma_n)\underbrace{\Phi_n(y_n)}_{
+		=\underline{\Phi}_{n} + \tfrac{\mu_{n}}{2}\|y_n - z_n\|^2
+	} + \gamma_n \underbrace{\phi_n(y_n)}_{
+		=\Loss(y_n)
+	} -  \tfrac{\mu_{n}}{2}\|y_n - z_n\|^2
 \end{align*}
 
 % \section{Complexity Bounds}
