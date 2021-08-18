@@ -89,9 +89,9 @@ but also the original taylor approximation
 %
 To get absolute instead of relative coordinates to \(\weights\) we set
 %
-\begin{align*}
+\begin{align}\label{eq: newton minimum approx}
 	\hat{\weights} := \weights + \hat{x} = \weights -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
-\end{align*}
+\end{align}
 %
 and obtain the notion of a paraboloid centered around \(\hat{\weights}\)
 %

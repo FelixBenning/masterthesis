@@ -631,9 +631,113 @@ But as we have learned with
 Heavy Ball Momentum, optimal learning rates are no use if we can not generalize
 them.
 
+\subsection{Estimating Sequences}
 
+To prove convergence for gradient decent we proved that gradient decent
+minimizes a "local" upper bound (Lemma~\ref{lem: smallest upper bound}). Local
+in the sense that we only use the gradient information at our current position
+and discard all previous gradient information. To prove better convergence rates
+we need to utilize the previous gradients too.
 
-\section{Complexity Bounds}
+Let us start with an upper bound of the form
+%
+\begin{align}\label{eq: Phi_0 (upper bound - kinda)}
+	\Phi_0(\weights) = \underline{\Phi}_0 + \tfrac{\lbound_0}{2}\|\weights-z_0\|^2.
+\end{align}
+%
+One example for such an upper bound is
+%
+\begin{align*}
+	\weights \mapsto
+	\Loss(y_0)
+	+ \langle\nabla\Loss(y_0), \weights - y_0\rangle
+	+ \tfrac{\ubound}{2}\|\weights -y_0\|^2.
+\end{align*}
+%
+Which can be written as in (\ref{eq: Phi_0 (upper bound - kinda)}) with
+\(\lbound_0=\ubound\) by selecting
+%
+\begin{align*}
+	z_0 = y_0 - \ubound^{-1}\nabla\Loss(y_0).
+\end{align*}
+This is the same technique as we used in (\ref{eq: newton minimum approx}). Keep
+in mind that our upper bound is a quadratic function which therefore
+is equal to its second taylor derivative.
+
+Now since we started with an upper bound, it is trivial to find \(\weights_0\)
+such that
+\begin{align*}
+	\Loss(\weights_0) \le \min_{\weights}\Phi_0(\weights)
+\end{align*}
+as we can simply select \(\weights_0=z_0\) to get
+\begin{align*}
+	\Loss(\weights_0) =\Loss(z_0) \le \Phi_0(z_0) = \min_{\weights}\Phi_0(\weights).
+\end{align*}
+Now the idea is to morph our upper bound \(\Phi_0\) via \(\Phi_n\) slowly into
+a lower bound while keeping 
+\begin{align}\label{eq: staying ahead of the estimates}
+	\Loss(\weights_n) \le \min_{\weights}\Phi_n(\weights).
+\end{align}
+This would force \(\weights_n\) towards the minimum as it needs to stay smaller
+than \(\Phi_n\) which changes into a lower bound of \(\Loss\). By controlling
+the speed of morphing we will be able to bound the convergence speed. But we
+can not morph too fast otherwise we will not be able to stay ahead of it, i.e.
+fulfill (\ref{eq: staying ahead of the estimates}). Okay now that we have set
+up the gameplan let us make this more concrete.
+The obvious lower bounds we want to utilize are
+\begin{align*}
+	\phi_n(\weights)
+	:= \Loss(y_n) + \langle\nabla\Loss(y_n), \weights-y_n\rangle
+	+ \tfrac{\lbound}{2}\|\weights-y_n\|^2.
+\end{align*}
+where this includes the non-strongly convex case with \(\lbound=0\). So let
+us consider
+\begin{align*}
+	\Phi_1 = \gamma_0 \phi_0 + (1-\gamma_0)\Phi_0
+\end{align*}
+For \(\gamma_0=1\) we would have a lower bound, but if \(\nabla\Loss(\weights_n)\)
+does not happen to be zero, the tangent point \(y_0\) is sitting on a slope and
+therefore is not smaller than the minimum of \(\phi_0=\Phi_1\) and since \(\phi_0\)
+is a lower bound on \(\Loss\) it will generally be impossible to satisfy
+(\ref{eq: staying ahead of the estimates}) with \(\weights_1\) in that case.
+So the first take-away is, that we can generally not select \(\gamma_0=1\)
+unless we are already in the minimum. But this also hints at another issue:
+A convex combination of lower bounds
+\begin{align*}
+	\sum_{k=0}^n \hat{\gamma}_k \phi_k(x)
+\end{align*}
+is also a lower bound. But since they generally only have one tangent point
+which is equal and are otherwise strictly lower, it is difficult to find
+a \(\weights\) such that \(\Loss(\weights)\) is smaller than its minimum.
+So the \(y_k\) already need to be equal to the minimum
+of \(\Loss\) such that the \(\phi_k\) start out with no slope and their
+minimum is also equal to \(\weights_*\). If we have
+\begin{align*}
+	\sum_{k=0}^n \hat{\gamma}_k \phi_k(x)
+	+ \left(1-\sum_{k=0}^n \hat{\gamma}_k\right) \Phi_0(x)
+\end{align*}
+we get a bit more wiggle room but if we want to slowly remove our upper bound
+we run into a similar problem. Therefore we also need to slowly remove the old
+\(\phi_k\) upper bounds constructed with \(y_k\) far away from the minimum
+\(\weights_*\). This motivates why we might wish to select
+\begin{align}\label{eq: estimating sequence recursion}
+	\Phi_{n+1}(x) = \gamma_n \phi_n(x) + (1-\gamma_n)\Phi_n(x)
+\end{align}
+causing an exponential decay not only for the initial upper bound, but also for
+our previous lower bounds. For
+\begin{align*}
+	\Gamma_k^n = \prod_{i=k}^n (1-\gamma_i)
+\end{align*}
+one can inductively convert the recursion (\ref{eq: estimating sequence
+recursion}) into
+\begin{align*}
+	\Phi_{n+1}(\weights)
+	&= \sum_{k=0}^n \Gamma_{k+1}^n\gamma_k \phi_k(\weights)
+	+ \Gamma_0^n\Phi_0(\weights) \\
+	&\le (1-\Gamma_0^n)\Loss(\weights) + \Gamma_0^n\Phi_0(\weights)
+\end{align*}
+
+% \section{Complexity Bounds}
 
 \section{Adam \& Nadam}
 
