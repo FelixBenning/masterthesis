@@ -600,10 +600,10 @@ Since
 	\tilde{\momCoeff}_1 >= \dots >=\tilde{\momCoeff}_\dimension=0
 \end{align*}
 the worst rate convergence is exhibited by the first eigenspace and is equal to
-\begin{align*}
+\begin{align}\label{eq: nesterov convegence rate eigenvalue derivation}
 	\sqrt{\tilde{\momCoeff}_1} = \sqrt{(1-\sqrt{\lrSq\hesseEV_1})^2}
 	= 1-\sqrt{1/\condition} = 1- \frac{1}{\sqrt{\condition}}.
-\end{align*}
+\end{align}
 %
 This rate of convergence is a tiny bit worse than the optimal heavy ball
 convergence rate \(1-2/(1+\sqrt{\condition})\), which is also the complexity
@@ -742,6 +742,7 @@ recursion}) into
 \end{align}
 
 \begin{lemma}
+	\label{lem: estimating sequence convergence speed}
 	If the \(\weights_n\) satisfy (\ref{eq: staying ahead of the estimates}),
 	then we have
 	\begin{align*}
@@ -789,7 +790,7 @@ where our convexity parameter \(\lbound_n\) morphs from \(\lbound_0\) to
 	= \gamma_{n-1} \lbound + (1-\gamma_{n-1})\lbound_{n-1}
 \end{align*}
 and \(z_n\) is the minimum. Assuming (\ref{eq: staying ahead of the estimates})
-holds for all \(k<n\), we can therefore write our minimal value as
+holds for \(n\) we can write our minimal value as
 \begin{align*}
 	\underline{\Phi}_{n+1}
 	&= \Phi_{n+1}(y_{n+1}) - \tfrac{\lbound_{n+1}}{2}\|y_{n+1} - z_{n+1}\|^2 \\
@@ -798,78 +799,136 @@ holds for all \(k<n\), we can therefore write our minimal value as
 		=\Loss(y_{n+1})
 	}
 	+ (1-\gamma_n)\underbrace{\Phi_n(y_{n+1})}_{
-		= \underbrace{\underline{\Phi}_{n-1}}_{
-			\ge \Loss(\weights_{n-1})
-			\mathrlap{\ge \Loss(y_n) + \langle \Loss(y_n), \weights_{n-1} - y_n\rangle}
-		} +\mathrlap{\tfrac{\lbound_{n-1}}{2}\|y_n - z_{n-1}\|^2}
+		= \underbrace{\underline{\Phi}_n}_{
+			\ge \Loss(\weights_n)
+			\mathrlap{\ge \Loss(y_{n+1}) + \langle \Loss(y_{n+1}), \weights_n - y_{n+1}\rangle}
+		} +\mathrlap{\tfrac{\lbound_n}{2}\|y_{n+1} - z_n\|^2}
 	} - \tfrac{\lbound_n}{2}\|y_n - z_n\|^2 \\
-	&\ge \Loss(y_n) + \text{"junk"}.
+	&\ge \Loss(y_{n+1}) + \text{"junk"}.
 \end{align*}
-Now you might recall that \(y_n\) are our intermediate "information collection"
-points which then define iterate as
+Now you might recall that \(y_{n+1}\) are our intermediate "information
+collection" points which then define the actual iterate as
 \begin{align*}
-	\weights_n = y_n - \lrSq \nabla\Loss(y_n)
+	\weights_{n+1} = y_{n+1} - \lrSq \nabla\Loss(y_{n+1})
 \end{align*}
 in Nesterov's Momentum method (Definition~\ref{def: nesterov's momentum}).
 Now from Lemma~\ref{lem: smallest upper bound} we know that we can achieve
 \begin{align*}
-	\Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2 \ge \Loss(\weights_n)
+	\Loss(y_{n+1}) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2
+	\ge \Loss(\weights_{n+1})
 \end{align*}
 by selecting the learning rate \(\lrSq=1/\ubound\). We can therefore satisfy
 (\ref{eq: staying ahead of the estimates}) if we can lower bound our "junk"
-by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\). Now our "junk" is equal to
+by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2\). Now our "junk" is equal to
 \begin{align*}
-	(1-\gamma_{n-1})\left(
-		\langle \Loss(y_n), \weights_{n-1} - y_n\rangle
-		+ \tfrac{\lbound_{n-1}}{2}\|y_n - z_{n-1}\|^2
+	(1-\gamma_n)\left(
+		\langle \Loss(y_{n+1}), \weights_n - y_{n+1}\rangle
+		+ \tfrac{\lbound_n}{2}\|y_{n+1} - z_n\|^2
 	\right)
-	- \tfrac{\lbound_n}{2}\|y_n - z_n\|^2,
+	- \tfrac{\lbound_{n+1}}{2}\|y_{n+1} - z_{n+1}\|^2,
 \end{align*}
-which tells us we should probably have a closer look at \(z_n\) and maybe
-express it in relation to \(z_{n-1}\). Now we know that \(z_n\) is the unique
-minimum of \(\Phi_n\) so we can find it with
+which tells us we should probably have a closer look at \(z_{n+1}\) and maybe
+express it in relation to \(z_n\).
+
+As we know that \(z_{n+1}\) is the unique
+minimum of \(\Phi_{n+1}\) so we can find it with
 \begin{align*}
-	0\xeq{!}\Phi'_n(z_n)
-	= \gamma_{n-1}\underbrace{\phi_n'(z_n)}_{
-		= \nabla\Loss(y_n) \mathrlap{+ \lbound(z_n-y_n)}
-	} +(1-\gamma_{n-1})
-	\underbrace{\Phi'_{n-1}(z_n)}_{
-		=\lbound_{n-1}\mathrlap{(z_n-z_{n-1})}
+	0\xeq{!}\Phi'_{n+1}(z_{n+1})
+	= \gamma_n\underbrace{\phi_{n+1}'(z_{n+1})}_{
+		= \nabla\Loss(y_{n+1}) \mathrlap{+ \lbound(z_{n+1}-y_{n+1})}
+	} +(1-\gamma_n)
+	\underbrace{\Phi'_n(z_{n+1})}_{
+		=\lbound_n\mathrlap{(z_{n+1}-z_n)}
 	},
 \end{align*}
 where we have used the representation (\ref{eq: centered Phi representation})
-for \(\Phi_{n-1}\). It is also quite reassuring that the gradient at \(y_n\)
+for \(\Phi_n\). It is also quite reassuring that the gradient at \(y_{n+1}\)
 which we ultimately need makes its first appearance here. Collecting all
-the \(z_n\) we get
+the \(z_{n+1}\) we get
 \begin{align*}
-	\overbrace{\lbound_n}^{
-		=\mathrlap{\gamma_{n-1}\lbound + (1-\gamma_{n-1})\lbound_{n-1}}
-	}z_n
-	= \gamma_{n-1}\lbound y_n + (1-\gamma_{n-1})\lbound_{n-1}z_{n-1}
-	- \gamma_{n-1}\nabla\Loss(y_n).
+	\overbrace{\lbound_{n+1}}^{
+		=\mathrlap{\gamma_n\lbound + (1-\gamma_n)\lbound_n}
+	}z_{n+1}
+	= \gamma_n\lbound y_{n+1} + (1-\gamma_n)\lbound_n z_n
+	- \gamma_n\nabla\Loss(y_{n+1}).
 \end{align*}
-Subtracting \(\lbound_n y_n\) results in
+Subtracting \(\lbound_{n+1} y_{n+1}\) results in
 \begin{align*}
-	\lbound_n(z_n-y_n)
-	= (1-\gamma_{n-1})\lbound_{n-1}(z_{n-1}-y_n)
-	- \gamma_{n-1}\nabla\Loss(y_n).
+	\lbound_{n+1}(z_{n+1}-y_{n+1})
+	= (1-\gamma_n)\lbound_n(z_n-y_{n+1})
+	- \gamma_n\nabla\Loss(y_{n+1}).
 \end{align*}
-Therefore
+Plugging this into the last part of our "junk", we get
 \begin{align*}
-	\tfrac{\lbound_n}2\|y_n-z_n\|^2
-	&= \tfrac1{2\lbound_n}
+	\tfrac{\lbound_{n+1}}2\|y_{n+1}-z_{n+1}\|^2
+	&= \tfrac1{2\lbound_{n+1}}
 	\underbrace{
-		\|(1-\gamma_{n-1})\lbound_{n-1}(z_{n-1}-y_n)
-		- \gamma_{n-1}\nabla\Loss(y_n)\|^2
+		\|{\scriptstyle (1-\gamma_n)\lbound_n}(z_n-y_{n+1})
+		- {\scriptstyle \gamma_n}\nabla\Loss(y_{n+1})\|^2
 	}_{
 	\begin{aligned}
-		=&(1-\gamma_{n-1})^2\lbound_{n-1}^2\|z_{n-1}-y_n\| \\
-		&- 2(1-\gamma_{n-1})\lbound_{n-1}\gamma_{n-1}\langle
-		\nabla\Loss(y_n), y_n-z_{n-1}\rangle \\
-		&+ \gamma_{n-1}^2\|\nabla\Loss(y_n)\|^2
+		=&{\scriptstyle (1-\gamma_n)^2\lbound_n^2}\|z_n-y_{n+1}\|^2 \\
+		&- {\scriptstyle 2(1-\gamma_n)\lbound_n\gamma_n}\langle
+		\nabla\Loss(y_{n+1}), z_n-y_{n+1}\rangle \\
+		&+ {\scriptstyle\gamma_n^2}\|\nabla\Loss(y_{n+1})\|^2
 	\end{aligned}
 	}
 \end{align*}
+Therefore our "junk" is equal to
+\begin{align*}
+	-\tfrac{\gamma_n^2}{2\lbound_{n+1}}\|\nabla\Loss(y_{n+1})\|^2
+	\begin{aligned}[t]
+		&+ {\scriptstyle(1-\gamma_n)}\left\langle \Loss(y_{n+1}),
+		(\weights_n -y_{n+1})
+		+ \tfrac{\lbound_n\gamma_n}{\lbound_{n+1}}(z_n - y_{n+1})
+		\right\rangle\\
+		&+\tfrac{(1-\gamma_n)\lbound_n}{2}
+		\underbrace{\left(1-\tfrac{(1-\gamma_n)\lbound_n}{\lbound_{n+1}}\right)}_{
+			= \tfrac{\gamma_n \lbound}{\lbound_{n+1}} \ge 0
+		}
+		\|y_{n+1} - z_n\|^2.
+	\end{aligned}
+\end{align*}
+As the last summand is positive we can discard it and end up with two equations
+to achieve our lower bound
+\begin{subequations}
+\begin{align}
+	\label{eq: morphing speed equation}
+	\frac{1}{\ubound}
+	&= \frac{\gamma_n^2}{\lbound_{n+1}}
+	\iff \ubound \gamma_n^2 = \lbound_{n+1} = \gamma_n \lbound +  (1-\gamma_n)\lbound_n
+	\\
+	0
+	&= (\weights_n -y_{n+1}) + \tfrac{\lbound_n\gamma_n}{\lbound_{n+1}}(z_n - y_{n+1})
+	\xiff{\text{reorder}}
+	y_{n+1}
+	= \tfrac{\lbound_{n+1}\weights_n + \lbound_n\gamma_n z_n}{\gamma_n\lbound + \lbound_n}
+\end{align}
+\end{subequations}
+As we are allowed to select \(\gamma_n\) and \(y_{n+1}\) in iteration \(n\) we
+can ensure that these equations are in fact fulfilled.
+
+Now while \(\Phi_0\) being an upper bound was nice to build intuition, we do
+not actually need it to be an upper bound. The only thing we really need is
+for equation (\ref{eq: staying ahead of the estimates}) and (\ref{eq: centered
+Phi representation}) to hold for \(n=0\) so that we can do our induction. In
+particular picking any \(\weights_0\) and selecting
+\begin{align*}
+	\Phi_0(\weights):= \Loss(\weights_0) + \tfrac{\lbound}{2}\|\weights_0 - \weights\|^2
+\end{align*}
+works as well. And in that case we have \(\lbound_n = \lbound\) for all \(n\)
+which simplifies (\ref{eq: morphing speed equation}) to
+\begin{align*}
+	\gamma_n = \frac1{\sqrt{\condition}} \implies \Gamma_0^n = (1-\tfrac{1}{\sqrt{\condition}})^n
+\end{align*}
+With Lemma~\ref{lem: estimating sequence convergence speed} in mind this implies
+that we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
+we derived with eigenvalues back! But since \(\lbound=0\) implies \(\condition=\infty\)
+which would set our rate of convergence to zero, we are going to continue
+to entertain the general case with general \(\lbound_0\).
+
+\(y_{n+1}\) is currently looking a lot more strange than our simple momentum
+movement in Definition~\ref{def: nesterov's momentum}, we still need to fix that.
 
 % \section{Complexity Bounds}
 
