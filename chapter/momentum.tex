@@ -131,6 +131,7 @@ previous position \(\weights_n\).
 %
 \fxnote{Illustrate Nesterov's Momentum}
 \begin{definition}[Nesterov's Momentum]
+	\label{def: nesterov's momentum}
 	\begin{subequations}
 	\begin{align}
 		\weights_{n+1} &= \weights_n + \lr \momentum_{n+1} \label{eq: nesterov momentum move}\\
@@ -694,14 +695,14 @@ collect along the way
 where this includes the non-strongly convex case with \(\lbound=0\). So let
 us consider
 \begin{align*}
-	\Phi_1 = \gamma_0 \phi_0 + (1-\gamma_0)\Phi_0
+	\Phi_1 = \gamma \phi_1 + (1-\gamma)\Phi_0
 \end{align*}
-For \(\gamma_0=1\) we would have a lower bound, but if \(\nabla\Loss(\weights_n)\)
-does not happen to be zero, the tangent point \(y_0\) is sitting on a slope and
-therefore is not smaller than the minimum of \(\phi_0=\Phi_1\) and since \(\phi_0\)
+For \(\gamma=1\) we would have a lower bound, but if \(\nabla\Loss(y_1)\)
+does not happen to be zero, the tangent point \(y_1\) is sitting on a slope and
+therefore is not smaller than the minimum of \(\phi_1=\Phi_1\) and since \(\phi_1\)
 is a lower bound on \(\Loss\) it will generally be impossible to satisfy
 (\ref{eq: staying ahead of the estimates}) with \(\weights_1\) in that case.
-So the first take-away is, that we can generally not select \(\gamma_0=1\)
+So the first take-away is, that we can generally not select \(\gamma=1\)
 unless we are already in the minimum. But this also hints at another issue:
 A convex combination of lower bounds
 \begin{align*}
@@ -714,27 +715,27 @@ So the \(y_k\) already need to be equal to the minimum
 of \(\Loss\) such that the \(\phi_k\) start out with no slope and their
 minimum is also equal to \(\weights_*\). If we have
 \begin{align*}
-	\sum_{k=0}^n \hat{\gamma}_k \phi_k(x)
-	+ \left(1-\sum_{k=0}^n \hat{\gamma}_k\right) \Phi_0(x)
+	\sum_{k=1}^n \hat{\gamma}_k \phi_k(x)
+	+ \hat{\gamma}_0 \Phi_0(x)
 \end{align*}
 we get a bit more wiggle room but if we want to slowly remove our upper bound
 we run into a similar problem. Therefore we also need to slowly remove the old
 \(\phi_k\) upper bounds, constructed with \(y_k\) far away from the minimum
 \(\weights_*\). This motivates why we might wish to select
 \begin{align}\label{eq: estimating sequence recursion}
-	\Phi_{n+1}(x) = \gamma_n \phi_n(x) + (1-\gamma_n)\Phi_n(x)
+	\Phi_{n+1}(x) = \gamma_n \phi_{n+1}(x) + (1-\gamma_n)\Phi_n(x)
 \end{align}
 causing an exponential decay not only for the initial upper bound, but also for
 our previous lower bounds. For
 \begin{align*}
-	\Gamma_k^n = \prod_{i=k}^n (1-\gamma_i)
+	\Gamma_k^n := \prod_{i=k}^{n-1} (1-\gamma_i)
 \end{align*}
 one can inductively convert the recursion (\ref{eq: estimating sequence
 recursion}) into
 \begin{align}
 	\nonumber
-	\Phi_{n+1}(\weights)
-	&= \sum_{k=0}^n \Gamma_{k+1}^n\gamma_k \phi_k(\weights)
+	\Phi_n(\weights)
+	&= \sum_{k=1}^n \Gamma_k^n\gamma_{k-1} \phi_k(\weights)
 	+ \Gamma_0^n\Phi_0(\weights) \\
 	\label{eq: estimating sequence explicit}
 	&\le (1-\Gamma_0^n)\Loss(\weights) + \Gamma_0^n\Phi_0(\weights)
@@ -744,7 +745,7 @@ recursion}) into
 	If the \(\weights_n\) satisfy (\ref{eq: staying ahead of the estimates}),
 	then we have
 	\begin{align*}
-		\Loss(\weights_{n+1}) - \Loss(\weights_*)
+		\Loss(\weights_n) - \Loss(\weights_*)
 		\le \Gamma_0^n (\Phi_0(\weights_*)-\Loss(\weights_*))
 	\end{align*}
 	and
@@ -756,9 +757,9 @@ recursion}) into
 \begin{proof}
 	Both statements are fairly easy to prove:
 	\begin{align*}
-		\Loss(\weights_{n+1})
+		\Loss(\weights_n)
 		\xle{(\ref{eq: staying ahead of the estimates})}
-		\min_{\weights}\Phi_{n+1}(\weights)
+		\min_{\weights}\Phi_n(\weights)
 		&\xle{(\ref{eq: estimating sequence explicit})} \min_{\weights} \{
 		(1-\Gamma_0^n) \Loss(\weights) + \Gamma_0^n\Phi_n(\weights) \}\\ 
 		&\le (1-\Gamma_0^n) \Loss(\weights_*) + \Gamma_0^n\Phi_n(\weights_*)
@@ -766,7 +767,7 @@ recursion}) into
 	Subtracting \(\Loss(\weights_*)\) from both sides lets us move on to the
 	second statement:
 	\begin{align*}
-		\Gamma_0^n &= \prod_{i=0}^n (1-\gamma_i)
+		\Gamma_0^{n+1} &= \prod_{i=0}^n (1-\gamma_i)
 		\le\prod_{i=0}^n \exp(-\gamma_i)
 		= \exp\left(-\sum_{i=0}^n\gamma_i\right) \to 0
 		\qedhere
@@ -778,24 +779,96 @@ ahead of the estimates}) while making \(\gamma_k\) as large as possible.
 For that we want an explicit representation of \(\underline{\Phi}_{n}\).
 Fortunately we are only adding up quadratic functions therefore the function
 \(\Phi_{n}\) is quadratic too and can thus be written in the form
-\begin{align*}
-	\Phi_{n}(\weights) = \underline{\Phi}_{n} + \tfrac{\mu_{n}}{2}\|\weights - z_n\|^2
-\end{align*}
+\begin{align}\label{eq: centered Phi representation}
+	\Phi_{n}(\weights) = \underline{\Phi}_{n} + \tfrac{\lbound_{n}}{2}\|\weights - z_n\|^2
+\end{align}
 where our convexity parameter \(\lbound_n\) morphs from \(\lbound_0\) to
 \(\lbound\)
 \begin{align*}
-	\lbound_{n+1} =(1-\Gamma_0^n)\lbound + \Gamma_0^n \lbound_0
-	= \gamma_n \lbound_n + (1-\gamma_n)\lbound_0
+	\lbound_n =(1-\Gamma_0^n)\lbound + \Gamma_0^n \lbound_0
+	= \gamma_{n-1} \lbound + (1-\gamma_{n-1})\lbound_{n-1}
 \end{align*}
-and \(z_n\) is the minimum. We can therefore write our minimal value as
+and \(z_n\) is the minimum. Assuming (\ref{eq: staying ahead of the estimates})
+holds for all \(k<n\), we can therefore write our minimal value as
 \begin{align*}
 	\underline{\Phi}_{n+1}
-	&= \Phi_{n+1}(y_n) - \tfrac{\mu_{n}}{2}\|y_n - z_{n+1}\|^2 \\
-	&= (1-\gamma_n)\underbrace{\Phi_n(y_n)}_{
-		=\underline{\Phi}_{n} + \tfrac{\mu_{n}}{2}\|y_n - z_n\|^2
-	} + \gamma_n \underbrace{\phi_n(y_n)}_{
-		=\Loss(y_n)
-	} -  \tfrac{\mu_{n}}{2}\|y_n - z_n\|^2
+	&= \Phi_{n+1}(y_{n+1}) - \tfrac{\lbound_{n+1}}{2}\|y_{n+1} - z_{n+1}\|^2 \\
+	&\lxeq{(\ref{eq: estimating sequence recursion})}
+	\gamma_n \underbrace{\phi_{n+1}(y_{n+1})}_{
+		=\Loss(y_{n+1})
+	}
+	+ (1-\gamma_n)\underbrace{\Phi_n(y_{n+1})}_{
+		= \underbrace{\underline{\Phi}_{n-1}}_{
+			\ge \Loss(\weights_{n-1})
+			\mathrlap{\ge \Loss(y_n) + \langle \Loss(y_n), \weights_{n-1} - y_n\rangle}
+		} +\mathrlap{\tfrac{\lbound_{n-1}}{2}\|y_n - z_{n-1}\|^2}
+	} - \tfrac{\lbound_n}{2}\|y_n - z_n\|^2 \\
+	&\ge \Loss(y_n) + \text{"junk"}.
+\end{align*}
+Now you might recall that \(y_n\) are our intermediate "information collection"
+points which then define iterate as
+\begin{align*}
+	\weights_n = y_n - \lrSq \nabla\Loss(y_n)
+\end{align*}
+in Nesterov's Momentum method (Definition~\ref{def: nesterov's momentum}).
+Now from Lemma~\ref{lem: smallest upper bound} we know that we can achieve
+\begin{align*}
+	\Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2 \ge \Loss(\weights_n)
+\end{align*}
+by selecting the learning rate \(\lrSq=1/\ubound\). We can therefore satisfy
+(\ref{eq: staying ahead of the estimates}) if we can lower bound our "junk"
+by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\). Now our "junk" is equal to
+\begin{align*}
+	(1-\gamma_{n-1})\left(
+		\langle \Loss(y_n), \weights_{n-1} - y_n\rangle
+		+ \tfrac{\lbound_{n-1}}{2}\|y_n - z_{n-1}\|^2
+	\right)
+	- \tfrac{\lbound_n}{2}\|y_n - z_n\|^2,
+\end{align*}
+which tells us we should probably have a closer look at \(z_n\) and maybe
+express it in relation to \(z_{n-1}\). Now we know that \(z_n\) is the unique
+minimum of \(\Phi_n\) so we can find it with
+\begin{align*}
+	0\xeq{!}\Phi'_n(z_n)
+	= \gamma_{n-1}\underbrace{\phi_n'(z_n)}_{
+		= \nabla\Loss(y_n) \mathrlap{+ \lbound(z_n-y_n)}
+	} +(1-\gamma_{n-1})
+	\underbrace{\Phi'_{n-1}(z_n)}_{
+		=\lbound_{n-1}\mathrlap{(z_n-z_{n-1})}
+	},
+\end{align*}
+where we have used the representation (\ref{eq: centered Phi representation})
+for \(\Phi_{n-1}\). It is also quite reassuring that the gradient at \(y_n\)
+which we ultimately need makes its first appearance here. Collecting all
+the \(z_n\) we get
+\begin{align*}
+	\overbrace{\lbound_n}^{
+		=\mathrlap{\gamma_{n-1}\lbound + (1-\gamma_{n-1})\lbound_{n-1}}
+	}z_n
+	= \gamma_{n-1}\lbound y_n + (1-\gamma_{n-1})\lbound_{n-1}z_{n-1}
+	- \gamma_{n-1}\nabla\Loss(y_n).
+\end{align*}
+Subtracting \(\lbound_n y_n\) results in
+\begin{align*}
+	\lbound_n(z_n-y_n)
+	= (1-\gamma_{n-1})\lbound_{n-1}(z_{n-1}-y_n)
+	- \gamma_{n-1}\nabla\Loss(y_n).
+\end{align*}
+Therefore
+\begin{align*}
+	\tfrac{\lbound_n}2\|y_n-z_n\|^2
+	&= \tfrac1{2\lbound_n}
+	\underbrace{
+		\|(1-\gamma_{n-1})\lbound_{n-1}(z_{n-1}-y_n)
+		- \gamma_{n-1}\nabla\Loss(y_n)\|^2
+	}_{
+	\begin{aligned}
+		=&(1-\gamma_{n-1})^2\lbound_{n-1}^2\|z_{n-1}-y_n\| \\
+		&- 2(1-\gamma_{n-1})\lbound_{n-1}\gamma_{n-1}\langle
+		\nabla\Loss(y_n), y_n-z_{n-1}\rangle \\
+		&+ \gamma_{n-1}^2\|\nabla\Loss(y_n)\|^2
+	\end{aligned}
+	}
 \end{align*}
 
 % \section{Complexity Bounds}

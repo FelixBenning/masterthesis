@@ -609,7 +609,7 @@ Gradient Decent with optimal learning rate minimizes this upper bound:
 	Let \(\nabla f\) be \(\ubound\)-Lipschitz continuous, then for any \(x\in\reals^d\)
 	\begin{subequations}
 	\begin{align}
-		x - \tfrac{2}{\ubound}\nabla f(x) 
+		x - \tfrac{1}{\ubound}\nabla f(x) 
 		&= \arg\min_{y}\{
 			f(x)+ \langle\nabla f(x), y-x\rangle + \tfrac{\ubound}{2}\|y-x\|^2 
 		\}\\
