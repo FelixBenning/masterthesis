@@ -830,8 +830,8 @@ by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2\). Now our ``junk'' is equ
 which tells us we should probably have a closer look at \(z_{n+1}\) and maybe
 express it in relation to \(z_n\).
 
-As we know that \(z_{n+1}\) is the unique
-minimum of \(\Phi_{n+1}\) so we can find it with
+By definition \(z_{n+1}\) is the unique minimum of \(\Phi_{n+1}\) so we can find
+it with
 \begin{align*}
 	0\xeq{!}\Phi'_{n+1}(z_{n+1})
 	= \gamma_n\underbrace{\phi_{n+1}'(z_{n+1})}_{
@@ -908,6 +908,8 @@ to achieve our lower bound
 As we are allowed to select \(\gamma_n\) and \(y_{n+1}\) in iteration \(n\) we
 can ensure that these equations are in fact fulfilled.
 
+\subsection{Convergence Results}
+
 Now while \(\Phi_0\) being an upper bound was nice to build intuition, we do
 not actually need it to be an upper bound. The only thing we really need is
 for equation (\ref{eq: staying ahead of the estimates}) and (\ref{eq: centered
@@ -929,21 +931,23 @@ to entertain the general case with general \(\lbound_0\). So let us summarize
 
 
 \begin{algorithm}
-	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\), }
+	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\)}
 	\(v_0\leftarrow \weights_0\);
 	\(n\leftarrow 0\)\;
 	\While{not converged}{
-		Select \(\gamma_n\) such that
+		\label{line: pick gamma}
+		Select \(\gamma_n\in(0,1)\) such that
 		\begin{algomathdisplay}
-			\ubound\gamma_n^2 = (1-\gamma_n)\lbound+\gamma_n\lbound_n
+			\ubound\gamma_n^2 = \gamma_n\lbound+(1-\gamma_n)\lbound_n
 		\end{algomathdisplay}
 		%
-		\(\lbound_{n+1}\leftarrow (1-\gamma_n)\lbound+\gamma_n\lbound_n\)\;
+		\(\lbound_{n+1}\leftarrow \gamma_n\lbound+(1-\gamma_n)\lbound_n\)\;
 
 		\(y_{n+1}\leftarrow 
+		\displaystyle
 		\frac{\lbound_{n+1}\weights_n + \lbound_n\gamma_n z_n}{\gamma_n\lbound + \lbound_n}\)\;
 
-		Select \(\weights_{n+1}\) such that
+		Select \(\weights_{n+1}\) such that \label{line: selecting next position}
 		\tcp*[f]{e.g. \(\weights_{n+1}=y_{n+1}-\tfrac1\ubound\nabla\Loss(y_{n+1})\)}
 		\begin{algomathdisplay}
 			\Loss(\weights_{n+1}) \le \Loss(y_{n+1}) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2
@@ -957,13 +961,80 @@ to entertain the general case with general \(\lbound_0\). So let us summarize
 
 		\(n\leftarrow n+1\)\;
 	}
-	\caption{General Schema of an Optimal Method (\citeauthor{nesterovLecturesConvexOptimization2018})}
+	\caption{
+		General Schema of Optimal Methods (by \citeauthor{nesterovLecturesConvexOptimization2018})%
+		\label{algo: general schema of optimal methods}
+	}
 \end{algorithm}
 
 \(y_{n+1}\) is currently looking a lot more strange than our simple momentum
 movement in Definition~\ref{def: nesterov's momentum}. And we are currently
 carrying additional baggage like \(z_n\) and \(\lbound_n\) around. We still need
 to fix that.
+
+\begin{lemma}
+	If we use the recursion
+	\begin{align*}
+		\weights_{n+1} = y_{n+1} - \tfrac1\ubound\Loss(y_{n+1})
+	\end{align*}
+	in Algorithm~\ref{algo: general schema of optimal methods} line~\ref{line:
+	selecting next position}, then we can simplify \(z_{n+1}\) and \(y_{n+1}\)
+	to
+	\begin{align}
+		z_{n+1}
+		&= \weights_n + \tfrac1{\gamma_{n-1}}(\weights_{n+1}-\weights_n)\\
+		y_{n+1}
+		&=\weights_n + \momCoeff_n(\weights_n-\weights_{n-1})
+	\end{align}
+	where
+	\begin{align}
+		\momCoeff_n = \frac{\gamma_n\lbound_n(1-\gamma_n)}{}
+		= \frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_{n-1}^2 + \gamma_n}
+	\end{align}
+\end{lemma}
+\begin{proof}
+	\fxnote{appendix}
+\end{proof}
+
+This Lemma allows us to formulate the simplified algorithm
+
+\begin{algorithm}
+	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\)}
+	\(n\leftarrow 0\)\;
+	\While{not converged}{
+		\uIf{\(n=0\)}{
+			Select \(\gamma_0\in(0,1)\) such that
+			\tcp*[f]{Alternative: \(\gamma_0\) is input}
+			\begin{algomathdisplay}
+				\ubound\gamma_0^2 = \gamma_0\lbound+(1-\gamma_0)\lbound_0
+			\end{algomathdisplay}
+		}
+		\Else{
+			Select \(\gamma_n\in(0,1)\) such that
+			\tcp*[f]{\(\lbound_n=\ubound\gamma_{n-1}^2\)}
+			\begin{algomathdisplay}
+				\gamma_n^2 = \gamma_n \tfrac1\condition + (1-\gamma_n) \gamma_{n-1}^2
+			\end{algomathdisplay}
+		}
+		\(\momCoeff_n \leftarrow
+		\displaystyle
+		\frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_{n-1}^2 + \gamma_n}\)\;
+
+		\(y_{n+1} \leftarrow \weights_n + \momCoeff_n(\weights_n-\weights_{n-1})\)\;
+
+		\(\weights_{n+1} \leftarrow y_{n+1} - \tfrac{1}{\ubound}\nabla\Loss(y_{n+1})\)\;
+
+		\(n\leftarrow n+1\)\;
+	}
+	\caption{Dynamic Nesterov Momentum}
+\end{algorithm}
+
+Since we get a fixed \(\gamma_n=\tfrac1{\sqrt{\condition}}\) for
+\(\lbound_0=\lbound\), the momentum coefficient is fixed in this case and equal to 
+\begin{align*}
+	\momCoeff = \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}
+\end{align*}
+which we recognize from our eigenvalue analysis.
 
 % \section{Complexity Bounds}
 
