@@ -31,7 +31,7 @@ velocity is gradient}), we want to set the acceleration equal to our gradient
 \end{align*}
 %
 But without friction we are going to massively overshoot the minimum, so we are
-also going to add a ``friction force" inversely proportional to our current
+also going to add a ``friction force'' inversely proportional to our current
 velocity
 %
 \begin{align}\label{eq: acceleration is gradient + friction}
@@ -107,7 +107,7 @@ by \textcite{gohWhyMomentumReally2017}.
 		}(\weights_n - \weights_{n-1})
 		- \underbrace{\lr^2}_{=:\lrSq}\nabla \Loss(\weights_n)
 	\end{align}
-	In particular we can set ``the momentum coefficient" \(\momCoeff\) to zero to
+	In particular we can set ``the momentum coefficient'' \(\momCoeff\) to zero to
 	obtain gradient decent again. This is of course an artifact of our
 	discretization since \(\lr\to0\) would never allow \(\momCoeff\) to be zero
 	in the limit. But actual implementations often use this
@@ -116,12 +116,12 @@ by \textcite{gohWhyMomentumReally2017}.
 \end{definition}
 %
 Nesterov's momentum is even more aggressive: Instead of using \(p_{n+1}\) for
-the \(\weights_{n+1}\) update, it considers the certain ``momentum move"
+the \(\weights_{n+1}\) update, it considers the certain ``momentum move''
 to calculate an intermediate position \(y_{n+1}\)
 %
 \begin{align*}
 	\weights_{n+1}
-	&= \weights_n + \overbrace{\lr [(1-\lr\friction)\momentum_n}^{\text{"momentum move"}}
+	&= \weights_n + \overbrace{\lr [(1-\lr\friction)\momentum_n}^{\text{``momentum move''}}
 	- \lr\nabla \Loss(\weights_n)] \\
 	&= y_{n+1} - \lrSq \nabla \Loss(\weights_n).
 \end{align*}
@@ -165,7 +165,7 @@ previous position \(\weights_n\).
 \end{definition}
 %
 \begin{remark}\fxwarning{too informal?}
-	This method also known as ``Nesterov's Accelerated Momentmum" is said to date
+	This method also known as ``Nesterov's Accelerated Momentmum'' is said to date
 	back to \textcite{nesterovMethodSolvingConvex1983}.  But not only is the
 	original text in Russian, it also difficult to find on the internet.
 	Fortunately, \citeauthor{nesterovMethodSolvingConvex1983} wrote textbooks,
@@ -286,11 +286,11 @@ appendix. We will only cover the result here.
 	\input{media/annotated_heavy_ball_rates.pdf_tex}
 	\caption{
 		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Heavy Ball Momentum.
-		Strictly speaking the ``Monotonic" (M) and ``Oscillation" (O) areas should not
+		Strictly speaking the ``Monotonic'' (M) and ``Oscillation'' (O) areas should not
 		extend into negative \(\momCoeff\) since \(\sigma_{1/2}\)
 		have opposite signs there, but it still describes the behavior of the
 		dominating eigenvalue. The third label in the legend corresponds to the
-		remarkably sharp border of the ``Ripples" area which I did not want to
+		remarkably sharp border of the ``Ripples'' area which I did not want to
 		draw over. Also recall that \(\momCoeff=0\) represents SGD
 		without momentum.
 	}
@@ -327,7 +327,7 @@ appendix. We will only cover the result here.
 		to the minimum of the quadratic function into the momentum and back like 
 		a pendulum where the friction causes it to eventually end up in the
 		minimum. Looking at the distance to the minimum only, we will therefore
-		observe a sinus wave (``Ripples").
+		observe a sinus wave (``Ripples'').
 		\item In the real case we have \(\sigma_1>\sigma_2\) and
 		\begin{align}
 			\max\{|\sigma_1|, |\sigma_2|\} = \begin{cases}
@@ -341,12 +341,12 @@ appendix. We will only cover the result here.
 			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
 		\end{align*}
 		we have \(1>\sigma_1 > \sigma_2 > 0\) which results in a monotonic
-		linear convergence (``Monotonic" case). For
+		linear convergence (``Monotonic'' case). For
 		\begin{align*}
 			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
 		\end{align*}
 		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
-		an oscillating convergence (``Oscillation"). In contrast to the ``Ripples"
+		an oscillating convergence (``Oscillation''). In contrast to the ``Ripples''
 		we switch the side of the distance to the minimum in every iteration.
 	\end{enumerate}
 \end{theorem}
@@ -460,7 +460,7 @@ While
 analysis of \(\nabla\Loss^2(\weights_*)\) to extend this rate of convergence
 to a local area around \(\weights_*\), \textcite[pp. 78-79]{lessardAnalysisDesignOptimization2016}
 gave an example of an \(\strongConvex{\lbound}{\ubound}\) function where
-the heavy ball method with these ``optimal" parameters is trapped in an attractive
+the heavy ball method with these ``optimal'' parameters is trapped in an attractive
 cycle instead of converging. 
 %
 \begin{figure}[h]
@@ -564,7 +564,7 @@ which after some transformations is itself equivalent to
 	\input{media/annotated_nesterov_rates.pdf_tex}
 	\caption{
 		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Nesterov Momentum.
-		``M" and ``O" stand for the ``Monotonic" and ``Oscillating" types of 
+		``M'' and ``O'' stand for the ``Monotonic'' and ``Oscillating'' types of 
 		real eigenvalues. Note that the separating line of these cases
 		\(\lrSq\hesseEV=1+\tilde{\momCoeff}=1+\momCoeff(1-\lrSq\hesseEV)\)
 		reduces to \(\lrSq\hesseEV=1\) but since we divide by \(1+\momCoeff\)
@@ -635,7 +635,7 @@ them.
 \subsection{Estimating Sequences}
 
 To prove convergence for gradient decent we proved that gradient decent
-minimizes a "local" upper bound (Lemma~\ref{lem: smallest upper bound}). Local
+minimizes a ``local'' upper bound (Lemma~\ref{lem: smallest upper bound}). Local
 in the sense that we only use the gradient information at our current position
 and discard all previous gradient information. To prove better convergence rates
 we need to utilize the previous gradients too.
@@ -692,7 +692,7 @@ collect along the way
 	:= \Loss(y_n) + \langle\nabla\Loss(y_n), \weights-y_n\rangle
 	+ \tfrac{\lbound}{2}\|\weights-y_n\|^2.
 \end{align*}
-where this includes the non-strongly convex case with \(\lbound=0\). So let
+where this includes the non strongly convex case with \(\lbound=0\). So let
 us consider
 \begin{align*}
 	\Phi_1 = \gamma \phi_1 + (1-\gamma)\Phi_0
@@ -706,7 +706,7 @@ So the first take-away is, that we can generally not select \(\gamma=1\)
 unless we are already in the minimum. But this also hints at another issue:
 A convex combination of lower bounds
 \begin{align*}
-	\sum_{k=0}^n \hat{\gamma}_k \phi_k(x)
+	\sum_{k=0}^n \hat{\gamma}_k \phi_k(\weights)
 \end{align*}
 is also a lower bound. But since they generally only have one tangent point
 which is equal and are otherwise strictly lower, it is difficult to find
@@ -715,15 +715,15 @@ So the \(y_k\) already need to be equal to the minimum
 of \(\Loss\) such that the \(\phi_k\) start out with no slope and their
 minimum is also equal to \(\weights_*\). If we have
 \begin{align*}
-	\sum_{k=1}^n \hat{\gamma}_k \phi_k(x)
-	+ \hat{\gamma}_0 \Phi_0(x)
+	\sum_{k=1}^n \hat{\gamma}_k \phi_k(\weights)
+	+ \hat{\gamma}_0 \Phi_0(\weights)
 \end{align*}
 we get a bit more wiggle room but if we want to slowly remove our upper bound
 we run into a similar problem. Therefore we also need to slowly remove the old
 \(\phi_k\) upper bounds, constructed with \(y_k\) far away from the minimum
 \(\weights_*\). This motivates why we might wish to select
 \begin{align}\label{eq: estimating sequence recursion}
-	\Phi_{n+1}(x) = \gamma_n \phi_{n+1}(x) + (1-\gamma_n)\Phi_n(x)
+	\Phi_{n+1}(\weights) := \gamma_n \phi_{n+1}(\weights) + (1-\gamma_n)\Phi_n(\weights)
 \end{align}
 causing an exponential decay not only for the initial upper bound, but also for
 our previous lower bounds. For
@@ -804,10 +804,10 @@ holds for \(n\) we can write our minimal value as
 			\mathrlap{\ge \Loss(y_{n+1}) + \langle \Loss(y_{n+1}), \weights_n - y_{n+1}\rangle}
 		} +\mathrlap{\tfrac{\lbound_n}{2}\|y_{n+1} - z_n\|^2}
 	} - \tfrac{\lbound_n}{2}\|y_n - z_n\|^2 \\
-	&\ge \Loss(y_{n+1}) + \text{"junk"}.
+	&\ge \Loss(y_{n+1}) + \text{``junk''}.
 \end{align*}
-Now you might recall that \(y_{n+1}\) are our intermediate "information
-collection" points which then define the actual iterate as
+Now you might recall that \(y_{n+1}\) are our intermediate ``information
+collection points'' which then define the actual iterate as
 \begin{align*}
 	\weights_{n+1} = y_{n+1} - \lrSq \nabla\Loss(y_{n+1})
 \end{align*}
@@ -818,8 +818,8 @@ Now from Lemma~\ref{lem: smallest upper bound} we know that we can achieve
 	\ge \Loss(\weights_{n+1})
 \end{align*}
 by selecting the learning rate \(\lrSq=1/\ubound\). We can therefore satisfy
-(\ref{eq: staying ahead of the estimates}) if we can lower bound our "junk"
-by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2\). Now our "junk" is equal to
+(\ref{eq: staying ahead of the estimates}) if we can lower bound our ``junk''
+by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2\). Now our ``junk'' is equal to
 \begin{align*}
 	(1-\gamma_n)\left(
 		\langle \Loss(y_{n+1}), \weights_n - y_{n+1}\rangle
@@ -858,7 +858,7 @@ Subtracting \(\lbound_{n+1} y_{n+1}\) results in
 	= (1-\gamma_n)\lbound_n(z_n-y_{n+1})
 	- \gamma_n\nabla\Loss(y_{n+1}).
 \end{align*}
-Plugging this into the last part of our "junk", we get
+Plugging this into the last part of our ``junk'', we get
 \begin{align*}
 	\tfrac{\lbound_{n+1}}2\|y_{n+1}-z_{n+1}\|^2
 	&= \tfrac1{2\lbound_{n+1}}
@@ -874,7 +874,7 @@ Plugging this into the last part of our "junk", we get
 	\end{aligned}
 	}
 \end{align*}
-Therefore our "junk" is equal to
+Therefore our ``junk'' is equal to
 \begin{align*}
 	-\tfrac{\gamma_n^2}{2\lbound_{n+1}}\|\nabla\Loss(y_{n+1})\|^2
 	\begin{aligned}[t]
