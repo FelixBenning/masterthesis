@@ -845,13 +845,13 @@ where we have used the representation (\ref{eq: centered Phi representation})
 for \(\Phi_n\). It is also quite reassuring that the gradient at \(y_{n+1}\)
 which we ultimately need makes its first appearance here. Collecting all
 the \(z_{n+1}\) we get
-\begin{align*}
+\begin{align}\label{eq: center of Phi recursion}
 	\overbrace{\lbound_{n+1}}^{
 		=\mathrlap{\gamma_n\lbound + (1-\gamma_n)\lbound_n}
 	}z_{n+1}
 	= \gamma_n\lbound y_{n+1} + (1-\gamma_n)\lbound_n z_n
 	- \gamma_n\nabla\Loss(y_{n+1}).
-\end{align*}
+\end{align}
 Subtracting \(\lbound_{n+1} y_{n+1}\) results in
 \begin{align*}
 	\lbound_{n+1}(z_{n+1}-y_{n+1})
@@ -925,10 +925,45 @@ With Lemma~\ref{lem: estimating sequence convergence speed} in mind this implies
 that we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
 we derived with eigenvalues back! But since \(\lbound=0\) implies \(\condition=\infty\)
 which would set our rate of convergence to one, we are going to continue
-to entertain the general case with general \(\lbound_0\).
+to entertain the general case with general \(\lbound_0\). So let us summarize
+
+
+\begin{algorithm}
+	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\), }
+	\(v_0\leftarrow \weights_0\);
+	\(n\leftarrow 0\)\;
+	\While{not converged}{
+		Select \(\gamma_n\) such that
+		\begin{algomathdisplay}
+			\ubound\gamma_n^2 = (1-\gamma_n)\lbound+\gamma_n\lbound_n
+		\end{algomathdisplay}
+		%
+		\(\lbound_{n+1}\leftarrow (1-\gamma_n)\lbound+\gamma_n\lbound_n\)\;
+
+		\(y_{n+1}\leftarrow 
+		\frac{\lbound_{n+1}\weights_n + \lbound_n\gamma_n z_n}{\gamma_n\lbound + \lbound_n}\)\;
+
+		Select \(\weights_{n+1}\) such that
+		\tcp*[f]{e.g. \(\weights_{n+1}=y_{n+1}-\tfrac1\ubound\nabla\Loss(y_{n+1})\)}
+		\begin{algomathdisplay}
+			\Loss(\weights_{n+1}) \le \Loss(y_{n+1}) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2
+		\end{algomathdisplay}
+		%
+		\(z_{n+1}\leftarrow \tfrac{1}{\lbound_{n+1}}
+			\left[{\scriptstyle \gamma_n\lbound} y_{n+1} + {\scriptstyle (1-\gamma_n)\lbound_n} z_n
+			- {\scriptstyle \gamma_n}\nabla\Loss(y_{n+1})\right]
+		\)
+		\tcp*{(\ref{eq: center of Phi recursion})}
+
+		\(n\leftarrow n+1\)\;
+	}
+	\caption{General Schema of an Optimal Method (\citeauthor{nesterovLecturesConvexOptimization2018})}
+\end{algorithm}
 
 \(y_{n+1}\) is currently looking a lot more strange than our simple momentum
-movement in Definition~\ref{def: nesterov's momentum}, we still need to fix that.
+movement in Definition~\ref{def: nesterov's momentum}. And we are currently
+carrying additional baggage like \(z_n\) and \(\lbound_n\) around. We still need
+to fix that.
 
 % \section{Complexity Bounds}
 

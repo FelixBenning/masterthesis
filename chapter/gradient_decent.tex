@@ -970,6 +970,7 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 		\|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
+	where \(\condition=\ubound/\lbound\) is the condition number.
 \end{theorem}
 \begin{proof}[Proof {\parencite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}}]
 	This proof starts like the proof for convex functions, cf. (\ref{eq:
@@ -1543,24 +1544,24 @@ Defining \(\weights^{(0)} =1\) we can unify the first two equations (flipping
 the sign)
 \begin{align*}
 	0&= 
-	\tfrac{\weights^{(i+1)}}{\weights^{(i)}}\tfrac{\weights^{(i)}}{\weights^{(i-1)}}
-	- 2\frac{\condition+1}{\condition -1}\tfrac{\weights^{(i)}}{\weights^{(i-1)}}
+	\frac{\weights^{(i+1)}}{\weights^{(i)}}\frac{\weights^{(i)}}{\weights^{(i-1)}}
+	- 2\frac{\condition+1}{\condition -1}\frac{\weights^{(i)}}{\weights^{(i-1)}}
 	+ 1  && i <d
 \end{align*}
 %
-Which means that for a solution \(q\) of the quadratic equation
+Which means that for a solution \(\) of the quadratic equation
 \begin{align}\label{eq: coloring solution quadratic equation}
-	0&= q^2 - 2\frac{\condition+1}{\condition -1}q + 1,
+	0&= x^2 - 2\frac{\condition+1}{\condition -1}x + 1,
 \end{align}
 %
-\(\weights^{(i)} = q^i\) will be a solution to the first \(d-1\) equations.
+\(\weights^{(i)} = x^i\) will be a solution to the first \(d-1\) equations.
 Unfortunately neither of the solutions
 %
 \begin{align*}
-	q_{1/2} &= \frac{\condition+1}{\condition -1} \pm 
+	x_{1/2} &= \frac{\condition+1}{\condition -1} \pm 
 	\sqrt{\left(\tfrac{\condition+1}{\condition-1}\right)^2 -1}
-	=\frac{\condition +1 \pm \sqrt{4\condition}}{\condition -1}
-	= \frac{(\sqrt{\condition}\pm 1)^2}{(\sqrt{\condition}-1)(\sqrt{\condition}+1)}
+	=\frac{\condition +1 \pm \sqrt{4\condition}}{\condition -1}\\
+	&= \frac{(\sqrt{\condition}\pm 1)^2}{(\sqrt{\condition}-1)(\sqrt{\condition}+1)}
 \end{align*}
 %
 is a solution to the last equation. Which is why we are going to formulate the

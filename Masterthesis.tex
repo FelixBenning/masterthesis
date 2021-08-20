@@ -29,6 +29,14 @@
 % \pgfplotsset{compat=1.16}
 
 %%% CODE
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+% fix algomathdisplay (see: https://tex.stackexchange.com/a/611426/148164)
+\makeatletter
+\renewenvironment{algomathdisplay}
+ {\[}
+ {\@endalgocfline\vspace{-\baselineskip}\]{\DontPrintSemicolon\;}}
+\makeatother
 
 %%% MATH
 \usepackage{mathtools} % fixes some things from amsmath and adds some new features
