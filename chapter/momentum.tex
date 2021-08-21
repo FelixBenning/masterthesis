@@ -747,13 +747,13 @@ recursion}) into
 	then we have
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\weights_*)
-		\le \Gamma_0^n (\Phi_0(\weights_*)-\Loss(\weights_*))
+		\le \Gamma_0^n (\Phi_0(\weights_*)-\Loss(\weights_*)).
 	\end{align*}
-	and
+	This motivates why we are interested in \(\Gamma_0^n\to 0\). A sufficient
+	condition is
 	\begin{align*}
 		\sum_{k=0}^\infty \gamma_k = \infty
 	\end{align*}
-	is sufficient for \(\Gamma_0^n\to 0\).
 \end{lemma}
 \begin{proof}
 	Both statements are fairly easy to prove:
@@ -761,7 +761,7 @@ recursion}) into
 		\Loss(\weights_n)
 		\xle{(\ref{eq: staying ahead of the estimates})}
 		\min_{\weights}\Phi_n(\weights)
-		&\xle{(\ref{eq: estimating sequence explicit})} \min_{\weights} \{
+		&\lxle{(\ref{eq: estimating sequence explicit})} \min_{\weights} \{
 		(1-\Gamma_0^n) \Loss(\weights) + \Gamma_0^n\Phi_n(\weights) \}\\ 
 		&\le (1-\Gamma_0^n) \Loss(\weights_*) + \Gamma_0^n\Phi_n(\weights_*)
 	\end{align*}
@@ -812,7 +812,7 @@ collection points'' which then define the actual iterate as
 	\weights_{n+1} = y_{n+1} - \lrSq \nabla\Loss(y_{n+1})
 \end{align*}
 in Nesterov's Momentum method (Definition~\ref{def: nesterov's momentum}).
-Now from Lemma~\ref{lem: smallest upper bound} we know that we can achieve
+Since Lemma~\ref{lem: smallest upper bound} we know that we can achieve
 \begin{align*}
 	\Loss(y_{n+1}) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2
 	\ge \Loss(\weights_{n+1})
@@ -890,7 +890,7 @@ Therefore our ``junk'' is equal to
 	\end{aligned}
 \end{align*}
 As the last summand is positive we can discard it and end up with two equations
-to achieve our lower bound
+sufficient to achieve our lower bound
 \begin{subequations}
 \begin{align}
 	\label{eq: morphing speed equation}
@@ -906,7 +906,7 @@ to achieve our lower bound
 \end{align}
 \end{subequations}
 As we are allowed to select \(\gamma_n\) and \(y_{n+1}\) in iteration \(n\) we
-can ensure that these equations are in fact fulfilled.
+can ensure that these equations are in fact fulfilled. Our dumpster dive paid off!
 
 \subsection{Convergence Results}
 
@@ -946,12 +946,13 @@ to entertain the general case with general \(\lbound_0\). So let us summarize
 		\(y_{n+1}\leftarrow 
 		\displaystyle
 		\frac{\lbound_{n+1}\weights_n + \lbound_n\gamma_n z_n}{\gamma_n\lbound + \lbound_n}\)\;
+		\label{line: definition of y_{n+1}}
 
-		Select \(\weights_{n+1}\) such that \label{line: selecting next position}
+		Select \(\weights_{n+1}\) such that 
 		\tcp*[f]{e.g. \(\weights_{n+1}=y_{n+1}-\tfrac1\ubound\nabla\Loss(y_{n+1})\)}
 		\begin{algomathdisplay}
 			\Loss(\weights_{n+1}) \le \Loss(y_{n+1}) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2
-		\end{algomathdisplay}
+		\end{algomathdisplay}\label{line: selecting next position}
 		%
 		\(z_{n+1}\leftarrow \tfrac{1}{\lbound_{n+1}}
 			\left[{\scriptstyle \gamma_n\lbound} y_{n+1} + {\scriptstyle (1-\gamma_n)\lbound_n} z_n
@@ -974,26 +975,97 @@ to fix that.
 
 \begin{lemma}
 	If we use the recursion
-	\begin{align*}
+	\begin{align}\label{eq-lem-assmpt: weigth recursion}
 		\weights_{n+1} = y_{n+1} - \tfrac1\ubound\Loss(y_{n+1})
-	\end{align*}
+	\end{align}
 	in Algorithm~\ref{algo: general schema of optimal methods} line~\ref{line:
 	selecting next position}, then we can simplify \(z_{n+1}\) and \(y_{n+1}\)
 	to
 	\begin{align}
+		\label{eq: z_n recursion}
 		z_{n+1}
-		&= \weights_n + \tfrac1{\gamma_{n-1}}(\weights_{n+1}-\weights_n)\\
+		&= \weights_n + \tfrac1{\gamma_n}(\weights_{n+1}-\weights_n)\\
 		y_{n+1}
 		&=\weights_n + \momCoeff_n(\weights_n-\weights_{n-1})
 	\end{align}
 	where
 	\begin{align}
-		\momCoeff_n = \frac{\gamma_n\lbound_n(1-\gamma_n)}{}
+		\momCoeff_n
+		= \frac{\lbound_n \gamma_n(1-\gamma_{n-1})}{\gamma_{n-1}(\gamma_n\lbound +\lbound_n)}
 		= \frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_{n-1}^2 + \gamma_n}
 	\end{align}
 \end{lemma}
 \begin{proof}
-	\fxnote{appendix}
+	\fxnote{appendix?}
+	After line~\ref{line: definition of y_{n+1}} we can reorder the equation to
+	get
+	\begin{align*}
+		\lbound_n z_n
+		= \tfrac{1}{\gamma_n} [(\gamma_n\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
+	\end{align*}
+	plugging this into our definition of \(z_{n+1}\) results in our first claim
+	\begin{align*}
+		z_{n+1}
+		&= \tfrac{1}{\lbound_{n+1}}
+		\left[
+			{ \gamma_n\lbound} y_{n+1}
+			+ \tfrac{(1-\gamma_n)}{\gamma_n}
+			[(\gamma_n\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
+			- { \gamma_n}\nabla\Loss(y_{n+1})
+		\right]\\
+		&=\tfrac{1}{\lbound_{n+1}} \underbrace{\Big[
+			\underbrace{\gamma_n\lbound + (1-\gamma_n)\lbound}_{=\lbound}
+			+ \tfrac{1-\gamma_n}{\gamma_n}\lbound_n
+		\Big]}_{
+			=\lbound_{n+1}/\gamma_n
+		}y_{n+1}
+		-\tfrac{1-\gamma_n}{\gamma_n}\weights_n
+		-\underbrace{\tfrac{\gamma_n}{\lbound_{n+1}}}_{
+			=\frac{1}{\ubound\gamma_n} \mathrlap{\ (L\gamma_n^2 = \lbound_{n+1})}
+		}\nabla\Loss(y_{n+1})\\
+		&= \weights_n + \tfrac{1}{\gamma_n}(y_{n+1} - \weights_n)
+		- \tfrac{1}{\ubound\gamma_n}\nabla\Loss(y_{n+1})\\
+		&\lxeq{(\ref{eq-lem-assmpt: weigth recursion})}
+		\weights_n + \tfrac{1}{\gamma_n}(\weights_{n+1}-\weights_n)
+	\end{align*}
+	Now we are going to rewrite \(y_{n+1}\)
+	\begin{align*}
+		y_{n+1}
+		&= \frac{
+			\overbrace{[\gamma_n \lbound + (1-\gamma_n)\lbound_n]}^{\lbound_{n+1}}\weights_n
+			+ \lbound_n \gamma_n z_n
+		}{\gamma_n\lbound +\lbound_n}
+		=\weights_n
+		+ \frac{\lbound_n \gamma_n (z_n - \weights_n)}{\gamma_n\lbound +\lbound_n},
+	\end{align*}
+	which allows us to apply our previous result (\ref{eq: z_n recursion}) to the difference
+	\begin{align*}
+		z_n - \weights_n
+		= \left(\tfrac1{\gamma_{n-1}} -1\right)(\weights_n-\weights_{n-1}),
+	\end{align*}
+	and therefore obtain our second recursion
+	\begin{align*}
+		y_{n+1}
+		=\weights_n
+		+ \underbrace{
+			\frac{\lbound_n \gamma_n(1-\gamma_{n-1})}{\gamma_{n-1}(\gamma_n\lbound +\lbound_n)}
+		}_{=\momCoeff_n}
+		(\weights_n-\weights_{n-1}).
+	\end{align*}
+	Now we just use the identity \(\gamma_n\lbound = \ubound\gamma_n^2 -
+	(1-\gamma_n)\lbound_n\) from the definition of \(\gamma_n\) to simplify our
+	momentum coefficient
+	\begin{align*}
+		\momCoeff_n
+		&= \frac{\lbound_n \gamma_n(1-\gamma_{n-1})}{
+			\gamma_{n-1}([\ubound\gamma_n^2 - (\cancel{1}-\gamma_n)\lbound_n] +\cancel{\lbound_n})
+		}
+		= \frac{\lbound_n\cancel{\gamma_n}(1-\gamma_{n-1})}{
+			\gamma_{n-1}\cancel{\gamma_n}(\ubound\gamma_n + \underbrace{\lbound_n}_{=\ubound\gamma_{n-1}^2})
+		}\\
+		&\lxeq{\bcancel{\ubound\gamma_{n-1}}} \frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_n + \gamma_{n-1}^2}
+		\qedhere
+	\end{align*}
 \end{proof}
 
 This Lemma allows us to formulate the simplified algorithm
@@ -1013,7 +1085,7 @@ This Lemma allows us to formulate the simplified algorithm
 			Select \(\gamma_n\in(0,1)\) such that
 			\tcp*[f]{\(\lbound_n=\ubound\gamma_{n-1}^2\)}
 			\begin{algomathdisplay}
-				\gamma_n^2 = \gamma_n \tfrac1\condition + (1-\gamma_n) \gamma_{n-1}^2
+				\gamma_n^2 = \gamma_n \condition^{-1} + (1-\gamma_n) \gamma_{n-1}^2
 			\end{algomathdisplay}
 		}
 		\(\momCoeff_n \leftarrow
