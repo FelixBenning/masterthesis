@@ -929,7 +929,6 @@ we derived with eigenvalues back! But since \(\lbound=0\) implies \(\condition=\
 which would set our rate of convergence to one, we are going to continue
 to entertain the general case with general \(\lbound_0\). So let us summarize
 
-
 \begin{algorithm}
 	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\)}
 	\(v_0\leftarrow \weights_0\);
@@ -973,7 +972,7 @@ movement in Definition~\ref{def: nesterov's momentum}. And we are currently
 carrying additional baggage like \(z_n\) and \(\lbound_n\) around. We still need
 to fix that.
 
-\begin{lemma}
+\begin{lemma}\label{lem: streamline general schema of optimal methods}
 	If we use the recursion
 	\begin{align}\label{eq-lem-assmpt: weigth recursion}
 		\weights_{n+1} = y_{n+1} - \tfrac1\ubound\Loss(y_{n+1})
@@ -1068,29 +1067,41 @@ to fix that.
 	\end{align*}
 \end{proof}
 
-This Lemma allows us to formulate the simplified algorithm
+With the streamlined recursion from Lemma~\ref{lem: streamline general schema of optimal methods}
+we only need \(\lbound_n\) for the recursion of \(\gamma_n\) itself at this
+point. So dividing the recursion (\ref{eq: morphing speed equation}) by
+\(\ubound\) and defining \(\condition_n:=\ubound/\lbound_n\) we get the equivalent
+recursion
+\begin{align}\label{eq: morphing speed recursion using condition}
+	\gamma_n^2
+	= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_n^{-1}
+	= \condition^{-1}_{n+1}
+\end{align}
+Since we get a fixed \(\hat{\gamma}=1/\sqrt{\condition}\) for
+\(\lbound_0=\lbound\), the momentum coefficient is fixed in this case and equal to 
+\begin{align*}
+	\momCoeff = \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}
+\end{align*}
+which we recognize from our eigenvalue analysis.
 
 \begin{algorithm}
-	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\)}
+	\KwIn{starting point \(\weights_0\), and some \(\condition_0>0\)}
+	\(\gamma_{-1} \leftarrow 1/\sqrt{\condition_0}\)
+	\tcp*{\(\gamma_{n-1}^2=\condition_n^{-1}\) in (\ref{eq: morphing speed recursion using condition})
+	makes \(\condition_n\) obsolete
+	}
 	\(n\leftarrow 0\)\;
 	\While{not converged}{
-		\uIf{\(n=0\)}{
-			Select \(\gamma_0\in(0,1)\) such that
-			\tcp*[f]{Alternative: \(\gamma_0\) is input}
-			\begin{algomathdisplay}
-				\ubound\gamma_0^2 = \gamma_0\lbound+(1-\gamma_0)\lbound_0
-			\end{algomathdisplay}
-		}
-		\Else{
-			Select \(\gamma_n\in(0,1)\) such that
-			\tcp*[f]{\(\lbound_n=\ubound\gamma_{n-1}^2\)}
-			\begin{algomathdisplay}
-				\gamma_n^2 = \gamma_n \condition^{-1} + (1-\gamma_n) \gamma_{n-1}^2
-			\end{algomathdisplay}
-		}
+		Select \(\gamma_n\in(0,1)\) such that
+		\tcp*[f]{\(=1/\sqrt{\condition}\) if \(\condition_0=\condition\)}
+		\begin{algomathdisplay}
+			\gamma_n^2 = \gamma_n \condition^{-1} + (1-\gamma_n) \gamma_{n-1}^2
+		\end{algomathdisplay}
+
 		\(\momCoeff_n \leftarrow
 		\displaystyle
-		\frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_{n-1}^2 + \gamma_n}\)\;
+		\frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_n + \gamma_{n-1}^2}\)
+		\tcp*{\(= \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}\) if \(\condition_0=\condition\)}
 
 		\(y_{n+1} \leftarrow \weights_n + \momCoeff_n(\weights_n-\weights_{n-1})\)\;
 
@@ -1098,23 +1109,36 @@ This Lemma allows us to formulate the simplified algorithm
 
 		\(n\leftarrow n+1\)\;
 	}
-	\caption{Dynamic Nesterov Momentum}
+	\caption{Dynamic Nesterov Momentum\label{algo: dynamic nesterov momentum}}
 \end{algorithm}
-
-Since we get a fixed \(\hat{\gamma}=\tfrac1{\sqrt{\condition}}\) for
-\(\lbound_0=\lbound\), the momentum coefficient is fixed in this case and equal to 
-\begin{align*}
-	\momCoeff = \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}
-\end{align*}
-which we recognize from our eigenvalue analysis.
 
 \begin{figure}[h]
 	\centering
 	\def\svgwidth{1\textwidth}
 	\input{media/gamma_path.pdf_tex}
-	\caption{Visualizing our }
+	\caption{
+		Visualizing the progression of \(\gamma_n\) in recursion (\ref{eq:
+		morphing speed recursion using condition}). If we would start out with
+		\(\condition_0=\condition\) we would have \(\gamma_n=\hat{\gamma}=1/\sqrt{\condition}\)
+		for all \(n\). Otherwise we can see that this \(\hat{\gamma}\) still
+		acts as an attraction point.
+		%
+		In case of \(1/\condition=0\) i.e. \(\lbound=0\)
+		it also visualizes how it is helpful to select a different \(\condition_0\)
+		as convergence bounds are constructed with
+		\(\Gamma_0^n=\prod_{k=0}^{n-1}(1-\gamma_k)\).
+		%
+		But also note that increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
+		increases \(\Phi_0\) which is part of the bound for convergence. So
+		this is no free lunch.
+	}
 	\label{fig: gamma path}
 \end{figure}
+
+What is left to do is an analysis of convergence in particular for the case
+where \(\condition_0\neq\condition\) especially applicable for \(\lbound=0\).
+But Figure~\ref{fig: gamma path} provides some intuition why it might be useful to
+have \(\condition_0>\condition\) even when \(\lbound\neq0\).
 
 % \section{Complexity Bounds}
 
