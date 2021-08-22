@@ -65,21 +65,6 @@ repeat([next_gamma(sqrt(κ_inv_0))^2], 2)
 # ╔═╡ 5db8b32f-e788-43d9-b70e-7525accd2532
 md"# Appendix"
 
-# ╔═╡ f8f8b5df-954b-473c-bc7a-7f3317003094
-a= [1,1.5,2,3,4, 4.5]
-
-# ╔═╡ 145f7b99-d18b-4e66-9f4f-12751438007a
-typeof(a)
-
-# ╔═╡ 5036953b-453e-45d2-b950-40c198aba3d5
-copy(view(a, 2:length(a)))
-
-# ╔═╡ 1d556b5f-c388-4926-b9c4-d8ddbebadb85
-abs(2.0-3.0)>1
-
-# ╔═╡ 263f10fc-aeba-42b5-b17c-f74721fdfb48
-typeof(sortperm([1,3,2]))
-
 # ╔═╡ aff0222d-0705-4ed0-86fb-54c1e6b56623
 cluster(ordered_iter, max_dist) = cluster((x,y)->abs(x-y), ordered_iter, max_dist)
 
@@ -95,23 +80,16 @@ cluster(ordered_iter, max_dist) = cluster((x,y)->abs(x-y), ordered_iter, max_dis
 	@yield view(ordered_iter, start:length(ordered_iter))
 end
 
-# ╔═╡ 544f4ff3-69d6-4f60-80f3-0d5191002e70
-collect(
-	cluster(a, 0.9) do x,y
-		return abs(x-y)
-	end
-)
-
 # ╔═╡ afd29855-ac26-4538-9ab1-5cac4f33e5ba
-function prune_ticks(tick_ids::Vector{Int64}, ticks, min_distance)
-	metric(n,m) = abs(ticks[n]-ticks[m]) 
+function prune_ticks(tick_ids::Vector{Int64}, tick_pos, min_distance)
+	metric(n,m) = abs(tick_pos[n]-tick_pos[m]) 
 	pruned = map(cluster(metric, tick_ids, min_distance)) do group
 		if length(group) == 1
 			return group
 		else
 			return prune_ticks(
 				deleteat!(copy(group), argmax(group)), 
-				ticks, 
+				tick_pos, 
 				min_distance
 			)
 		end
@@ -122,12 +100,20 @@ end
 # ╔═╡ 0d7f59d2-eb27-42cc-bb2c-4e151f605caf
 unzip(zip_iter) = map(idx -> getfield.(zip_iter, idx), fieldnames(eltype(zip_iter)))
 
+# ╔═╡ a411f00c-1811-425e-ae3f-d4b4fb3f2975
+function prune_ticks(ticks, min_distance)
+	tick_pos, tick_labels = unzip(ticks)
+	tick_ids = sortperm(tick_pos)
+	pruned_tick_ids = prune_ticks(tick_ids, tick_pos, min_distance)
+	return (tick_pos[pruned_tick_ids], tick_labels[pruned_tick_ids])
+end
+
 # ╔═╡ 5cb2c147-3d51-4c10-a91c-3e6f746881a0
 begin
 	gamma_path = plot(
 		0:0.01:1, gamma->gamma^2, 
 		label="\$\\gamma^2\$", xlabel="\$\\gamma\$",
-		ytick=unzip(yticks), fontfamily="Computer Modern"
+		ytick=prune_ticks(yticks, 0.03), fontfamily="Computer Modern"
 	)
 	for (idx, gamma) in enumerate(gammas)
 		plot!(gamma_path, 0:0.1:1, x->gamma^2 - x*(gamma^2 - κ_inv), color=idx+1)
@@ -138,29 +124,6 @@ begin
 	end
 	gamma_path
 end
-
-# ╔═╡ a411f00c-1811-425e-ae3f-d4b4fb3f2975
-function prune_ticks(ticks, min_distance)
-	tick_pos, tick_labels = unzip(ticks)
-	tick_ids = sortperm(tick_pos)
-	pruned_tick_ids = prune_ticks(tick_ids, ticks, min_distance)
-	return (tick_pos[pruned_tick_ids], tick_labels[pruned_tick_ids])
-end
-
-# ╔═╡ c4773acf-304e-47f9-abf4-f1254ad59e0e
-prune_ticks(yticks, 1)
-
-# ╔═╡ e7f6f9c9-1d80-481c-adb9-226d1fd91e93
-tick_pos, tick_labels= unzip(yticks)
-
-# ╔═╡ e7f5a2da-bd18-464e-ab33-20e6649f7830
-tick_ids = sortperm(tick_pos)
-
-# ╔═╡ 9efa30bd-dce8-4763-a5c8-3179c16b3160
-pruned_tick_ids = prune_ticks(tick_ids, tick_pos, 0.1)
-
-# ╔═╡ 89718d6a-6974-4052-a9e1-b6a5c37427dc
-tick_pos[pruned_tick_ids]
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1012,21 +975,10 @@ version = "0.9.1+5"
 # ╠═5cb2c147-3d51-4c10-a91c-3e6f746881a0
 # ╠═83ba0586-ca63-46ee-acd7-0d28512b723d
 # ╟─5db8b32f-e788-43d9-b70e-7525accd2532
-# ╠═f8f8b5df-954b-473c-bc7a-7f3317003094
-# ╠═145f7b99-d18b-4e66-9f4f-12751438007a
-# ╠═5036953b-453e-45d2-b950-40c198aba3d5
-# ╠═1d556b5f-c388-4926-b9c4-d8ddbebadb85
-# ╠═263f10fc-aeba-42b5-b17c-f74721fdfb48
-# ╠═544f4ff3-69d6-4f60-80f3-0d5191002e70
 # ╠═aff0222d-0705-4ed0-86fb-54c1e6b56623
 # ╠═47711a72-23d5-43df-b514-411ac62885ab
 # ╠═afd29855-ac26-4538-9ab1-5cac4f33e5ba
 # ╠═a411f00c-1811-425e-ae3f-d4b4fb3f2975
-# ╠═c4773acf-304e-47f9-abf4-f1254ad59e0e
-# ╠═e7f6f9c9-1d80-481c-adb9-226d1fd91e93
-# ╠═e7f5a2da-bd18-464e-ab33-20e6649f7830
-# ╠═9efa30bd-dce8-4763-a5c8-3179c16b3160
-# ╠═89718d6a-6974-4052-a9e1-b6a5c37427dc
 # ╠═5790da0d-a54a-4681-b98c-b9f39be10e9a
 # ╠═0d7f59d2-eb27-42cc-bb2c-4e151f605caf
 # ╟─00000000-0000-0000-0000-000000000001
