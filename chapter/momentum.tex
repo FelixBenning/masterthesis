@@ -22,7 +22,9 @@ cancel out the opposing jumps and go straight down the ravine. In other words
 we want to build momentum. Now if we move according to the sum (integral) of
 the gradients, then our velocity stops being equal to the gradient but instead
 becomes the antiderivative of the gradient.
-
+\begin{align*}
+	\dot{\weights} = -\int\nabla\Loss(\weights)dt
+\end{align*}
 So instead of setting our gradient equal to the velocity like in (\ref{eq:
 velocity is gradient}), we want to set the acceleration equal to our gradient
 %
