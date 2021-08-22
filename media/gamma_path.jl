@@ -21,13 +21,13 @@ begin
 	using ResumableFunctions: ResumableFunctions, @yield, @resumable
 end
 
+# ╔═╡ 29adbff0-8028-4e47-b293-343995c84b98
+md"# Gamma Path"
+
 # ╔═╡ be902ed2-2ded-4999-a015-cd8b31b5be7a
 md"#### κ_inv
 $(@bind κ_inv Slider(0:0.1:1, default=0.1, show_value=true))
 "
-
-# ╔═╡ c189befa-3b9d-47f5-b0b7-6c3a3fee790e
-next_gamma(gamma) = (κ_inv-gamma^2 + sqrt((gamma^2-κ_inv)^2 +4*gamma^2))/2
 
 # ╔═╡ 50f7fe30-02a2-11ec-073e-c9ba5008e015
 md"#### κ\_0\_inv
@@ -38,6 +38,12 @@ $(@bind κ_inv_0 Slider(0:0.1:4, default=1.3, show_value=true))
 md"#### Iterations
 $(@bind iterations Slider(1:10, default=2, show_value=true))
 "
+
+# ╔═╡ 5db8b32f-e788-43d9-b70e-7525accd2532
+md"# Appendix"
+
+# ╔═╡ c189befa-3b9d-47f5-b0b7-6c3a3fee790e
+next_gamma(gamma) = (κ_inv-gamma^2 + sqrt((gamma^2-κ_inv)^2 +4*gamma^2))/2
 
 # ╔═╡ 042b030d-57b1-46c3-a99b-e14162659242
 gammas = vcat([sqrt(κ_inv_0)], accumulate(
@@ -67,8 +73,11 @@ xticks = vcat(
 	]
 )
 
-# ╔═╡ 5db8b32f-e788-43d9-b70e-7525accd2532
-md"# Appendix"
+# ╔═╡ af41dac4-bc97-4ee2-829d-f0bfcb1407b4
+md"## Tick Manipulation"
+
+# ╔═╡ 0d7f59d2-eb27-42cc-bb2c-4e151f605caf
+unzip(zip_iter) = map(idx -> getfield.(zip_iter, idx), fieldnames(eltype(zip_iter)))
 
 # ╔═╡ aff0222d-0705-4ed0-86fb-54c1e6b56623
 cluster(ordered_iter, max_dist) = cluster((x,y)->abs(x-y), ordered_iter, max_dist)
@@ -118,9 +127,6 @@ Prunes away (sortable) positions closer than `min_distance`, assumes that the or
 function prune_positions(positions, min_distance)
 	return prune_positions_unsafe(sortperm(positions), positions, min_distance)
 end
-
-# ╔═╡ 0d7f59d2-eb27-42cc-bb2c-4e151f605caf
-unzip(zip_iter) = map(idx -> getfield.(zip_iter, idx), fieldnames(eltype(zip_iter)))
 
 # ╔═╡ a411f00c-1811-425e-ae3f-d4b4fb3f2975
 function prune_ticks(ticks, min_distance)
@@ -995,21 +1001,23 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╟─042b030d-57b1-46c3-a99b-e14162659242
-# ╟─c189befa-3b9d-47f5-b0b7-6c3a3fee790e
-# ╟─72422dec-6686-4fc5-9413-599e44712996
-# ╟─b41c5953-bd5b-4e3d-a3c5-9a802d56abf1
+# ╟─29adbff0-8028-4e47-b293-343995c84b98
 # ╟─be902ed2-2ded-4999-a015-cd8b31b5be7a
 # ╟─50f7fe30-02a2-11ec-073e-c9ba5008e015
 # ╟─4dc2dc9c-1fda-4720-9567-ac9d4a56068f
 # ╟─5cb2c147-3d51-4c10-a91c-3e6f746881a0
 # ╟─5db8b32f-e788-43d9-b70e-7525accd2532
-# ╠═aff0222d-0705-4ed0-86fb-54c1e6b56623
-# ╠═47711a72-23d5-43df-b514-411ac62885ab
-# ╠═afd29855-ac26-4538-9ab1-5cac4f33e5ba
-# ╠═50d1a1d0-8e5b-4d34-b66c-43e310d1ebd0
-# ╠═a411f00c-1811-425e-ae3f-d4b4fb3f2975
 # ╠═5790da0d-a54a-4681-b98c-b9f39be10e9a
-# ╠═0d7f59d2-eb27-42cc-bb2c-4e151f605caf
+# ╟─042b030d-57b1-46c3-a99b-e14162659242
+# ╟─c189befa-3b9d-47f5-b0b7-6c3a3fee790e
+# ╟─72422dec-6686-4fc5-9413-599e44712996
+# ╟─b41c5953-bd5b-4e3d-a3c5-9a802d56abf1
+# ╟─af41dac4-bc97-4ee2-829d-f0bfcb1407b4
+# ╠═a411f00c-1811-425e-ae3f-d4b4fb3f2975
+# ╟─afd29855-ac26-4538-9ab1-5cac4f33e5ba
+# ╟─50d1a1d0-8e5b-4d34-b66c-43e310d1ebd0
+# ╟─0d7f59d2-eb27-42cc-bb2c-4e151f605caf
+# ╟─aff0222d-0705-4ed0-86fb-54c1e6b56623
+# ╟─47711a72-23d5-43df-b514-411ac62885ab
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
