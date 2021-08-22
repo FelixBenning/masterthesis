@@ -23,21 +23,21 @@ end
 
 # ╔═╡ be902ed2-2ded-4999-a015-cd8b31b5be7a
 md"#### κ_inv
-$(@bind κ_inv Slider(0:0.1:1, default=0.5, show_value=true))
+$(@bind κ_inv Slider(0:0.1:1, default=0.1, show_value=true))
+"
+
+# ╔═╡ c189befa-3b9d-47f5-b0b7-6c3a3fee790e
+next_gamma(gamma) = (κ_inv-gamma^2 + sqrt((gamma^2-κ_inv)^2 +4*gamma^2))/2
+
+# ╔═╡ 50f7fe30-02a2-11ec-073e-c9ba5008e015
+md"#### κ\_0\_inv
+$(@bind κ_inv_0 Slider(0:0.1:4, default=1.3, show_value=true))
 "
 
 # ╔═╡ 4dc2dc9c-1fda-4720-9567-ac9d4a56068f
 md"#### Iterations
 $(@bind iterations Slider(1:10, default=2, show_value=true))
 "
-
-# ╔═╡ 50f7fe30-02a2-11ec-073e-c9ba5008e015
-md"#### κ\_0\_inv
-$(@bind κ_inv_0 Slider(0:0.1:4, default=1.2, show_value=true))
-"
-
-# ╔═╡ c189befa-3b9d-47f5-b0b7-6c3a3fee790e
-next_gamma(gamma) = (κ_inv-gamma^2 + sqrt((gamma^2-κ_inv)^2 +4*gamma^2))/2
 
 # ╔═╡ 042b030d-57b1-46c3-a99b-e14162659242
 gammas = vcat([sqrt(κ_inv_0)], accumulate(
@@ -59,8 +59,13 @@ yticks=vcat(
 	]	
 )
 
-# ╔═╡ 83ba0586-ca63-46ee-acd7-0d28512b723d
-repeat([next_gamma(sqrt(κ_inv_0))^2], 2)
+# ╔═╡ b41c5953-bd5b-4e3d-a3c5-9a802d56abf1
+xticks = vcat(
+	[(0, "0.0"), (1, "1.0"), (sqrt(κ_inv), "\$\\hat{\\gamma}\$") ],
+	[	(gamma, "\$\\gamma_$(idx)\$") 
+		for (idx, gamma) in zip(0:length(gammas), gammas[2:end])
+	]
+)
 
 # ╔═╡ 5db8b32f-e788-43d9-b70e-7525accd2532
 md"# Appendix"
@@ -80,21 +85,38 @@ cluster(ordered_iter, max_dist) = cluster((x,y)->abs(x-y), ordered_iter, max_dis
 	@yield view(ordered_iter, start:length(ordered_iter))
 end
 
-# ╔═╡ afd29855-ac26-4538-9ab1-5cac4f33e5ba
-function prune_ticks(tick_ids::Vector{Int64}, tick_pos, min_distance)
-	metric(n,m) = abs(tick_pos[n]-tick_pos[m]) 
-	pruned = map(cluster(metric, tick_ids, min_distance)) do group
+# ╔═╡ 50d1a1d0-8e5b-4d34-b66c-43e310d1ebd0
+""" Recursive Implementation of `prune_positions` assuming a sorted `pos_id` list is provided as a first parameter
+"""
+function prune_positions_unsafe(sorted_pos_ids, tick_pos, min_distance)
+	metric(n,m) = abs(tick_pos[n]-tick_pos[m]) # distance between ids is real distance
+	
+	# cluster all ids which are closer than the minimum distance, prune groups to
+	# single elements by removing the largest id (least important tick) and recursion
+	pruned = map(cluster(metric, sorted_pos_ids, min_distance)) do group
 		if length(group) == 1
 			return group
 		else
-			return prune_ticks(
+			return prune_positions_unsafe(
 				deleteat!(copy(group), argmax(group)), 
 				tick_pos, 
 				min_distance
 			)
 		end
 	end
+	
+	# concatenate single element lists
 	return hcat(pruned...)
+end
+
+# ╔═╡ afd29855-ac26-4538-9ab1-5cac4f33e5ba
+"""
+Prunes away (sortable) positions closer than `min_distance`, assumes that the order of positions reflect their importance and removes the violating positions from the end until positions are no longer closer than `min_distance`
+
+`return`: indices of remaining positions
+"""
+function prune_positions(positions, min_distance)
+	return prune_positions_unsafe(sortperm(positions), positions, min_distance)
 end
 
 # ╔═╡ 0d7f59d2-eb27-42cc-bb2c-4e151f605caf
@@ -103,8 +125,7 @@ unzip(zip_iter) = map(idx -> getfield.(zip_iter, idx), fieldnames(eltype(zip_ite
 # ╔═╡ a411f00c-1811-425e-ae3f-d4b4fb3f2975
 function prune_ticks(ticks, min_distance)
 	tick_pos, tick_labels = unzip(ticks)
-	tick_ids = sortperm(tick_pos)
-	pruned_tick_ids = prune_ticks(tick_ids, tick_pos, min_distance)
+	pruned_tick_ids = prune_positions(tick_pos, min_distance)
 	return (tick_pos[pruned_tick_ids], tick_labels[pruned_tick_ids])
 end
 
@@ -112,16 +133,24 @@ end
 begin
 	gamma_path = plot(
 		0:0.01:1, gamma->gamma^2, 
-		label="\$\\gamma^2\$", xlabel="\$\\gamma\$",
-		ytick=prune_ticks(yticks, 0.03), fontfamily="Computer Modern"
+		label="\$\\gamma^2\$",
+		ytick=prune_ticks(yticks, 0.03),
+		xtick=prune_ticks(xticks, 0.015),
+		fontfamily="Computer Modern", color=:grey, linestyle=:dash
 	)
-	for (idx, gamma) in enumerate(gammas)
-		plot!(gamma_path, 0:0.1:1, x->gamma^2 - x*(gamma^2 - κ_inv), color=idx+1)
+	for (idx, gamma) in enumerate(gammas[1:iterations])
+		plot!(
+			gamma_path, 0:0.1:1, x->gamma^2 - x*(gamma^2 - κ_inv), 
+			color=idx, 
+			label="\$\\gamma\\kappa^{-1} + (1-\\gamma)\\kappa_$(idx-1)^{-1}\$"
+		)
 		plot!(
 			gamma_path, [next_gamma(gamma)], [next_gamma(gamma)^2],
-			seriestype=:scatter, color=idx+1, label=missing
+			seriestype=:scatter, color=idx, markersize=4, markershape=:+,
+			label=missing
 		)
 	end
+	Plots.savefig(gamma_path, "gamma_path.svg")
 	gamma_path
 end
 
@@ -966,18 +995,19 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╟─be902ed2-2ded-4999-a015-cd8b31b5be7a
-# ╟─4dc2dc9c-1fda-4720-9567-ac9d4a56068f
-# ╟─50f7fe30-02a2-11ec-073e-c9ba5008e015
-# ╠═042b030d-57b1-46c3-a99b-e14162659242
-# ╠═c189befa-3b9d-47f5-b0b7-6c3a3fee790e
+# ╟─042b030d-57b1-46c3-a99b-e14162659242
+# ╟─c189befa-3b9d-47f5-b0b7-6c3a3fee790e
 # ╟─72422dec-6686-4fc5-9413-599e44712996
-# ╠═5cb2c147-3d51-4c10-a91c-3e6f746881a0
-# ╠═83ba0586-ca63-46ee-acd7-0d28512b723d
+# ╟─b41c5953-bd5b-4e3d-a3c5-9a802d56abf1
+# ╟─be902ed2-2ded-4999-a015-cd8b31b5be7a
+# ╟─50f7fe30-02a2-11ec-073e-c9ba5008e015
+# ╟─4dc2dc9c-1fda-4720-9567-ac9d4a56068f
+# ╟─5cb2c147-3d51-4c10-a91c-3e6f746881a0
 # ╟─5db8b32f-e788-43d9-b70e-7525accd2532
 # ╠═aff0222d-0705-4ed0-86fb-54c1e6b56623
 # ╠═47711a72-23d5-43df-b514-411ac62885ab
 # ╠═afd29855-ac26-4538-9ab1-5cac4f33e5ba
+# ╠═50d1a1d0-8e5b-4d34-b66c-43e310d1ebd0
 # ╠═a411f00c-1811-425e-ae3f-d4b4fb3f2975
 # ╠═5790da0d-a54a-4681-b98c-b9f39be10e9a
 # ╠═0d7f59d2-eb27-42cc-bb2c-4e151f605caf

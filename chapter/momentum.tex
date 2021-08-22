@@ -1101,12 +1101,20 @@ This Lemma allows us to formulate the simplified algorithm
 	\caption{Dynamic Nesterov Momentum}
 \end{algorithm}
 
-Since we get a fixed \(\gamma_n=\tfrac1{\sqrt{\condition}}\) for
+Since we get a fixed \(\hat{\gamma}=\tfrac1{\sqrt{\condition}}\) for
 \(\lbound_0=\lbound\), the momentum coefficient is fixed in this case and equal to 
 \begin{align*}
 	\momCoeff = \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}
 \end{align*}
 which we recognize from our eigenvalue analysis.
+
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/gamma_path.pdf_tex}
+	\caption{Visualizing our }
+	\label{fig: gamma path}
+\end{figure}
 
 % \section{Complexity Bounds}
 
