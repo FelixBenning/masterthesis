@@ -26,7 +26,7 @@ md"# Gamma Path"
 
 # ╔═╡ be902ed2-2ded-4999-a015-cd8b31b5be7a
 md"#### κ_inv
-$(@bind κ_inv Slider(0:0.1:1, default=0.1, show_value=true))
+$(@bind κ_inv Slider(0:0.01:1, default=0.1, show_value=true))
 "
 
 # ╔═╡ 50f7fe30-02a2-11ec-073e-c9ba5008e015
@@ -45,6 +45,9 @@ md"# Appendix"
 # ╔═╡ c189befa-3b9d-47f5-b0b7-6c3a3fee790e
 next_gamma(gamma) = (κ_inv-gamma^2 + sqrt((gamma^2-κ_inv)^2 +4*gamma^2))/2
 
+# ╔═╡ ef16026e-3566-48c0-9498-636634b623ef
+beta(γ) = γ*(1-γ) / (next_gamma(γ)+γ^2)
+
 # ╔═╡ 042b030d-57b1-46c3-a99b-e14162659242
 gammas = vcat([sqrt(κ_inv_0)], accumulate(
 	(κ_inv,_)->next_gamma(κ_inv), 
@@ -56,8 +59,9 @@ gammas = vcat([sqrt(κ_inv_0)], accumulate(
 yticks=vcat(
 	[
 		(0,"\$0.0\$"), 
+		(1, "\$1.0\$"),
 		(κ_inv, "\$\\kappa^{-1}\$"), 
-		(1, "\$1.0\$")
+		((1-sqrt(κ_inv))/(1+sqrt(κ_inv)), "\$\\hat{\\beta}\$")
 	],
 	[
 		(gamma^2, "\$\\kappa_$(idx)^{-1}\$") 
@@ -142,11 +146,12 @@ begin
 		label="\$\\gamma^2\$",
 		ytick=prune_ticks(yticks, 0.03),
 		xtick=prune_ticks(xticks, 0.015),
-		fontfamily="Computer Modern", color=:grey, linestyle=:dash
+		fontfamily="Computer Modern", color=:grey, linestyle=:dash, ylim=(-.05,1.1)
 	)
+	plot!(vcat(0:0.005:0.1,0.1:0.01:1), beta, color=:black, linestyle=:dot, linewidth=2, label="\$\\beta\$")
 	for (idx, gamma) in enumerate(gammas[1:iterations])
 		plot!(
-			gamma_path, 0:0.1:1, x->gamma^2 - x*(gamma^2 - κ_inv), 
+			gamma_path, 0:1, x->gamma^2 - x*(gamma^2 - κ_inv), 
 			color=idx, 
 			label="\$\\gamma\\kappa^{-1} + (1-\\gamma)\\kappa_$(idx-1)^{-1}\$"
 		)
@@ -1005,11 +1010,12 @@ version = "0.9.1+5"
 # ╟─be902ed2-2ded-4999-a015-cd8b31b5be7a
 # ╟─50f7fe30-02a2-11ec-073e-c9ba5008e015
 # ╟─4dc2dc9c-1fda-4720-9567-ac9d4a56068f
+# ╠═ef16026e-3566-48c0-9498-636634b623ef
 # ╟─5cb2c147-3d51-4c10-a91c-3e6f746881a0
 # ╟─5db8b32f-e788-43d9-b70e-7525accd2532
 # ╠═5790da0d-a54a-4681-b98c-b9f39be10e9a
 # ╟─042b030d-57b1-46c3-a99b-e14162659242
-# ╟─c189befa-3b9d-47f5-b0b7-6c3a3fee790e
+# ╠═c189befa-3b9d-47f5-b0b7-6c3a3fee790e
 # ╟─72422dec-6686-4fc5-9413-599e44712996
 # ╟─b41c5953-bd5b-4e3d-a3c5-9a802d56abf1
 # ╟─af41dac4-bc97-4ee2-829d-f0bfcb1407b4

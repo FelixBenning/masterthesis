@@ -990,7 +990,7 @@ to fix that.
 		y_{n+1}
 		&=\weights_n + \momCoeff_n(\weights_n-\weights_{n-1})
 	\end{align}
-	where
+	for \(\weights_{-1}:=\weights_0=z_0\) where
 	\begin{align}
 		\momCoeff_n
 		= \frac{\lbound_n \gamma_n(1-\gamma_{n-1})}{\gamma_{n-1}(\gamma_n\lbound +\lbound_n)}
@@ -1080,26 +1080,39 @@ recursion
 	= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_n^{-1}
 	= \condition^{-1}_{n+1}
 \end{align}
+By defining \(\gamma_{-1}:=1/\sqrt{\condition_0}\) we can ensure
+\(\gamma_{n-1}^2 = \condition_n^{-1}\). Applying the p-q formula and discarding
+the negative option results in the explicit recursion
+\begin{align*}
+	\gamma_n
+	= \tfrac12 \left[
+		-(\gamma_{n-1}^2 - \condition^{-1})
+		+ \sqrt{(\gamma_{n-1}^2 - \condition^{-1})^2 + 4 \gamma_{n-1}^2}
+	\right].
+\end{align*}
+
 Since we get a fixed \(\hat{\gamma}=1/\sqrt{\condition}\) for
 \(\lbound_0=\lbound\), the momentum coefficient is fixed in this case and equal to 
 \begin{align*}
-	\momCoeff = \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}
+	\hat{\momCoeff} = \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}
 \end{align*}
 which we recognize from our eigenvalue analysis.
 
 \begin{algorithm}
 	\KwIn{starting point \(\weights_0\), and some \(\condition_0>0\)}
 	\(\gamma_{-1} \leftarrow 1/\sqrt{\condition_0}\)
-	\tcp*{\(\gamma_{n-1}^2=\condition_n^{-1}\) in (\ref{eq: morphing speed recursion using condition})
-	makes \(\condition_n\) obsolete
+	\tcp*{
+		\(\gamma_{n-1}^2=\condition_n^{-1}\) in (\ref{eq: morphing speed recursion using condition})
+		makes \(\condition_n\) obsolete
 	}
+	\(\weights_{-1} \leftarrow \weights_0\)\;
 	\(n\leftarrow 0\)\;
 	\While{not converged}{
-		Select \(\gamma_n\in(0,1)\) such that
-		\tcp*[f]{\(=1/\sqrt{\condition}\) if \(\condition_0=\condition\)}
-		\begin{algomathdisplay}
-			\gamma_n^2 = \gamma_n \condition^{-1} + (1-\gamma_n) \gamma_{n-1}^2
-		\end{algomathdisplay}
+		\(\gamma_n \leftarrow \tfrac12 \left[
+		(\condition^{-1} - \gamma_{n-1}^2)
+		+ \sqrt{(\condition^{-1} - \gamma_{n-1}^2)^2 + 4 \gamma_{n-1}^2}
+		\right]\)\;
+		\tcp{\(=1/\sqrt{\condition}\) if \(\condition_0=\condition\)}
 
 		\(\momCoeff_n \leftarrow
 		\displaystyle
@@ -1124,7 +1137,9 @@ which we recognize from our eigenvalue analysis.
 		morphing speed recursion using condition}). If we would start out with
 		\(\condition_0=\condition\) we would have \(\gamma_n=\hat{\gamma}=1/\sqrt{\condition}\)
 		for all \(n\). Otherwise we can see that this \(\hat{\gamma}\) still
-		acts as an attraction point.
+		acts as an attraction point. \(\momCoeff\) represents \(\momCoeff_n\)
+		plotted against \(\gamma_{n-1}\) and \(\hat{\momCoeff}\) corresponds
+		to \(\hat{\gamma}\).
 		%
 		In case of \(1/\condition=0\) i.e. \(\lbound=0\)
 		it also visualizes how it is helpful to select a different \(\condition_0\)
