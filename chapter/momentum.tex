@@ -806,110 +806,60 @@ holds for \(n-1\) we can write our minimal value as
 			\mathrlap{\ge \Loss(y_n) + \langle \Loss(y_n), \weights_{n-1} - y_n\rangle}
 		} +\mathrlap{\tfrac{\lbound_{n-1}}{2}\|y_n - z_{n-1}\|^2}
 	} - \tfrac{\lbound_n}{2}\|y_n - z_n\|^2 \\
-	&\ge \Loss(y_n) + \text{``junk''}.
+	&\ge \Loss(y_n) + \text{``junk''}
+	\xge{?} \Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 \end{align*}
-Now you might recall that \(y_n\) are our intermediate ``information
-collection points'' which then define the actual iterate as
-\begin{align*}
-	\weights_n = y_n - \lrSq \nabla\Loss(y_n)
-\end{align*}
-in Nesterov's Momentum method (Definition~\ref{def: nesterov's momentum}).
+% Now you might recall that \(y_n\) are our intermediate ``information
+% collection points'' which then define the actual iterate as
+% \begin{align*}
+% 	\weights_n = y_n - \lrSq \nabla\Loss(y_n)
+% \end{align*}
+% in Nesterov's Momentum method (Definition~\ref{def: nesterov's momentum}).
 Since Lemma~\ref{lem: smallest upper bound} we know that we can achieve
 \begin{align*}
 	\Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 	\ge \Loss(\weights_n)
 \end{align*}
-by selecting the learning rate \(\lrSq=1/\ubound\). We can therefore satisfy
-(\ref{eq: staying ahead of the estimates}) if we can lower bound our ``junk''
-by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\). Now our ``junk'' is equal to
+by selecting the learning rate \(\lrSq=1/\ubound\) in
 \begin{align*}
-	(1-\gamma_n)\left(
+	\weights_n = y_n - \lrSq \nabla\Loss(y_n).
+\end{align*}
+To be able to satisfy (\ref{eq: staying ahead of the estimates}) we therefore
+only need to lower bound our ``junk''
+\begin{align*}
+	J := (1-\gamma_n)\left(
 		\langle \Loss(y_n), \weights_{n-1} - y_n\rangle
 		+ \tfrac{\lbound_{n-1}}{2}\|y_n - z_{n-1}\|^2
 	\right)
-	- \tfrac{\lbound_n}{2}\|y_n - z_n\|^2,
+	- \tfrac{\lbound_n}{2}\|y_n - z_n\|^2
 \end{align*}
-which tells us we should probably have a closer look at \(z_n\) and maybe
-express it in relation to \(z_{n-1}\).
-
-By definition \(z_n\) is the unique minimum of \(\Phi_n\) so we can find
-it with
-\begin{align*}
-	0\xeq{!}\Phi'_n(z_n)
-	= \gamma_n\underbrace{\phi_n'(z_n)}_{
-		= \nabla\Loss(y_n) \mathrlap{+ \lbound(z_n-y_n)}
-	} +(1-\gamma_n)
-	\underbrace{\Phi'_{n-1}(z_n)}_{
-		=\lbound_{n-1}\mathrlap{(z_n-z_{n-1})}
-	},
-\end{align*}
-where we have used the representation (\ref{eq: centered Phi representation})
-for \(\Phi_{n-1}\). It is also quite reassuring that the gradient at \(y_n\)
-which we ultimately need makes its first appearance here. Collecting all
-the \(z_n\) we get
-\begin{align}\label{eq: center of Phi recursion}
-	\overbrace{\lbound_n}^{
-		=\mathrlap{\gamma_n\lbound + (1-\gamma_n)\lbound_{n-1}}
-	}z_n
-	= \gamma_n\lbound y_n + (1-\gamma_n)\lbound_n z_{n-1}
-	- \gamma_n\nabla\Loss(y_n).
-\end{align}
-Subtracting \(\lbound_n y_n\) results in
-\begin{align*}
-	\lbound_n(z_n-y_n)
-	= (1-\gamma_n)\lbound_{n-1}(z_{n-1}-y_n)
-	- \gamma_n\nabla\Loss(y_n).
-\end{align*}
-Plugging this into the last part of our ``junk'', we get
-\begin{align*}
-	\tfrac{\lbound_n}2\|y_n-z_n\|^2
-	&= \tfrac1{2\lbound_n}
-	\underbrace{
-		\|{\scriptstyle (1-\gamma_n)\lbound_{n-1}}(z_{n-1}-y_n)
-		- {\scriptstyle \gamma_n}\nabla\Loss(y_n)\|^2
-	}_{
-	\begin{aligned}
-		=&{\scriptstyle (1-\gamma_n)^2\lbound_{n-1}^2}\|z_{n-1}-y_n\|^2 \\
-		&- {\scriptstyle 2(1-\gamma_n)\lbound_{n-1}\gamma_n}\langle
-		\nabla\Loss(y_n), z_{n-1}-y_n\rangle \\
-		&+ {\scriptstyle\gamma_n^2}\|\nabla\Loss(y_n)\|^2
-	\end{aligned}
-	}
-\end{align*}
-Therefore our ``junk'' is equal to
-\begin{align*}
-	-\tfrac{\gamma_n^2}{2\lbound_n}\|\nabla\Loss(y_n)\|^2
-	\begin{aligned}[t]
-		&+ {\scriptstyle(1-\gamma_n)}\left\langle \Loss(y_n),
-		(\weights_n -y_n)
-		+ \tfrac{\lbound_{n-1}\gamma_n}{\lbound_n}(z_{n-1} - y_n)
-		\right\rangle\\
-		&+\tfrac{(1-\gamma_n)\lbound_{n-1}}{2}
-		\underbrace{\left(1-\tfrac{(1-\gamma_n)\lbound_{n-1}}{\lbound_n}\right)}_{
-			= \tfrac{\gamma_n \lbound}{\lbound_n} \ge 0
-		}
-		\|y_n - z_{n-1}\|^2.
-	\end{aligned}
-\end{align*}
-As the last summand is positive we can discard it and end up with two equations
-sufficient to achieve our lower bound
-\begin{subequations}
-\begin{align}
-	\label{eq: morphing speed equation}
-	\frac{1}{\ubound}
-	&= \frac{\gamma_n^2}{\lbound_n}
-	\iff \ubound \gamma_n^2 = \lbound_n = \gamma_n \lbound +  (1-\gamma_n)\lbound_{n-1}
-	\qquad \forall n\ge 1
-	\\
-	0
-	&= (\weights_{n-1} -y_n) + \tfrac{\lbound_n\gamma_n}{\lbound_n}(z_{n-1} - y_n)
-	\xiff{\text{reorder}}
-	y_n
-	= \tfrac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}
-\end{align}
-\end{subequations}
+by \(- \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\). By having a closer look at
+\(z_n\) and expressing it in terms of \(z_{n-1}\) the necessary terms fall out
+and we obtain the following sufficient conditions
+\begin{lemma}[Dumpster Dive]
+	For \(\condition_n := \ubound/\lbound_n\), the conditions
+	\begin{subequations}
+	\begin{align}
+		\nonumber
+		\gamma_n^2 \ge \frac{\lbound_n}{\ubound}
+		&= \frac{\gamma_n \lbound +  (1-\gamma_n)\lbound_{n-1}}{\ubound}\\
+		&= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_{n-1}^{-1}
+		\qquad \forall n\ge 1
+		\label{eq: morphing speed equation}
+	\end{align}
+	and
+	\begin{align}
+		y_n
+		&= \tfrac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}
+	\end{align}
+	\end{subequations}
+	are sufficient for \(J \ge - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\).
+\end{lemma}
+\begin{proof}
+	See Appendix Lemma~\ref{lem-appendix: dumpster dive}
+\end{proof}
 As we are allowed to select \(\gamma_n\) and \(y_n\) in iteration \(n\) we
-can ensure that these equations are in fact fulfilled. Our dumpster dive paid off!
+can ensure that these equations are in fact fulfilled.
 
 \subsection{Convergence Results}
 
@@ -985,7 +935,6 @@ to fix that.
 	selecting next position}, then we can simplify \(z_n\) and \(y_n\)
 	to
 	\begin{align}
-		\label{eq: z_n recursion}
 		z_n
 		&= \weights_{n-1} + \tfrac1{\gamma_n}(\weights_n-\weights_{n-1})
 		\qquad \forall n\ge 1\\
@@ -1000,76 +949,7 @@ to fix that.
 	\end{align}
 \end{lemma}
 \begin{proof}
-	\fxnote{appendix?}
-	After line~\ref{line: definition of y_n} we can reorder the equation to
-	get
-	\begin{align*}
-		\lbound_{n-1} z_{n-1}
-		= \tfrac{1}{\gamma_n} [(\gamma_n\lbound + \lbound_{n-1})y_n - \lbound_n\weights_{n-1}]
-	\end{align*}
-	plugging this into our definition of \(z_n\) results in our first claim
-	\begin{align*}
-		z_n
-		&= \tfrac{1}{\lbound_n}
-		\left[
-			\gamma_n\lbound y_n
-			+ \tfrac{(1-\gamma_n)}{\gamma_n}
-			[(\gamma_n\lbound + \lbound_{n-1})y_n - \lbound_n\weights_{n-1}]
-			- \gamma_n\nabla\Loss(y_n)
-		\right]\\
-		&=\tfrac{1}{\lbound_n} \underbrace{\Big[
-			\underbrace{\gamma_n\lbound + (1-\gamma_n)\lbound}_{=\lbound}
-			+ \tfrac{1-\gamma_n}{\gamma_n}\lbound_{n-1}
-		\Big]}_{
-			=\lbound_n/\gamma_n
-		}y_n
-		-\tfrac{1-\gamma_n}{\gamma_n}\weights_{n-1}
-		-\underbrace{\tfrac{\gamma_n}{\lbound_n}}_{
-			=\frac{1}{\ubound\gamma_n} \mathrlap{\ (L\gamma_n^2 = \lbound_n)}
-		}\nabla\Loss(y_n)\\
-		&= \weights_{n-1} + \tfrac{1}{\gamma_n}(y_n - \weights_{n-1})
-		- \tfrac{1}{\ubound\gamma_n}\nabla\Loss(y_n)\\
-		&\lxeq{(\ref{eq-lem-assmpt: weigth recursion})}
-		\weights_{n-1} + \tfrac{1}{\gamma_n}(\weights_n-\weights_{n-1})
-	\end{align*}
-	Now we are going to rewrite \(y_{n+1}\):
-	\begin{align*}
-		y_{n+1}
-		&= \frac{
-			\overbrace{[\gamma_{n+1} \lbound + (1-\gamma_{n+1})\lbound_n]}^{\lbound_{n+1}}\weights_n
-			+ \lbound_n \gamma_{n+1} z_n
-		}{\gamma_{n+1}\lbound +\lbound_n}
-		=\weights_n
-		+ \frac{\lbound_n \gamma_{n+1} (z_n - \weights_n)}{\gamma_{n+1}\lbound +\lbound_n}
-	\end{align*}
-	For \(n\ge1\) we can apply our previous result (\ref{eq: z_n recursion})
-	\begin{align*}
-		z_n - \weights_n
-		= \left(\tfrac1{\gamma_n} -1\right)(\weights_n-\weights_{n-1}),
-	\end{align*}
-	for \(n=0\) both sides are zero and we therefore obtain our second recursion
-	\begin{align*}
-		y_{n+1}
-		=\weights_n
-		+ \underbrace{
-			\frac{\lbound_n \gamma_{n+1}(1-\gamma_n)}{\gamma_n(\gamma_{n+1}\lbound +\lbound_n)}
-		}_{=\momCoeff_n}
-		(\weights_n-\weights_{n-1}).
-	\end{align*}
-	Now we just use the identity \(\gamma_{n+1}\lbound = \ubound\gamma_{n+1}^2 -
-	(1-\gamma_{n+1})\lbound_n\) from the definition of \(\gamma_{n+1}\) to simplify our
-	momentum coefficient
-	\begin{align*}
-		\momCoeff_n
-		&= \frac{\lbound_n \gamma_{n+1}(1-\gamma_n)}{
-			\gamma_n([\ubound\gamma_{n+1}^2 - (\cancel{1}-\gamma_{n+1})\lbound_n] +\cancel{\lbound_n})
-		}
-		= \frac{\lbound_n\cancel{\gamma_{n+1}}(1-\gamma_n)}{
-			\gamma_n\cancel{\gamma_{n+1}}(\ubound\gamma_{n+1} + \underbrace{\lbound_n}_{=\ubound\gamma_n^2})
-		}\\
-		&\lxeq{\bcancel{\ubound\gamma_n}} \frac{\gamma_n(1-\gamma_n)}{\gamma_{n+1} + \gamma_n^2}
-		\qedhere
-	\end{align*}
+	See Appendix Lemma~\ref{lem-appendix: streamline general schema of optimal methods}
 \end{proof}
 
 With the streamlined recursion from Lemma~\ref{lem: streamline general schema of optimal methods}
