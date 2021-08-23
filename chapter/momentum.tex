@@ -992,7 +992,7 @@ to fix that.
 		y_{n+1}
 		&=\weights_n + \momCoeff_n(\weights_n-\weights_{n-1}) \qquad \forall n\ge 0
 	\end{align}
-	for \(\weights_{-1}:=\weights_0=z_0\) where
+	for \(\weights_{-1}:=\weights_0=z_0\) and
 	\begin{align}
 		\momCoeff_n
 		= \frac{\lbound_n \gamma_{n+1}(1-\gamma_n)}{\gamma_n(\gamma_{n+1}\lbound +\lbound_n)}
@@ -1159,6 +1159,36 @@ What is left to do is an analysis of convergence in particular for the case
 where \(\condition_0\neq\condition\) especially applicable for \(\lbound=0\).
 But Figure~\ref{fig: gamma path} provides some intuition why it might be useful to
 have \(\condition_0>\condition\) even when \(\lbound\neq0\).
+
+\begin{theorem}
+	Let \(\Loss \in \strongConvex{\lbound}{\ubound}\) (includes
+	\(\Loss\in\lipGradientSet{\ubound}\) with \(\lbound=0\)). For starting point
+	\(\weights_0\) and some \(\lbound_0\) let
+	\(\weights_n\) be selected via Algorithm~\ref{algo: dynamic nesterov
+	momentum}, then for \(\Gamma^n=\prod_{k=1}^n(1-\gamma_k)\) we have
+	\begin{align*}
+		\Loss(\weights_n) - \Loss(\weights_*)
+		&\le \Gamma^n\left[
+			\Loss(\weights_0) -\Loss(\weights_*)
+			+ \tfrac{\lbound_0}2\|\weights_0-\weights_*\|^2
+		\right] \\
+		&\le \Gamma^n \tfrac{\ubound + \lbound_0}{2}\|\weights_0-\weights_*\|^2
+	\end{align*}
+	what is more for \(\lbound_0\in (\lbound, 3\ubound + \lbound]\) we have
+	\begin{align*}
+		\Gamma^n
+		\le \frac{4}{\left(\frac{\condition}{\condition_0}-1\right)\left[
+			\exp\left(\frac{n+1}{2\sqrt{\condition}}\right)
+			-\exp\left(-\frac{n+1}{2\sqrt{\condition}}\right)
+		\right]}
+		\le \frac{4}{(\condition_0^{-1}-\condition^{-1})(n+1)^2}
+	\end{align*}
+	and for \(\lbound_0 = \lbound\)
+	\begin{align*}
+		\Gamma^n = (1-\sqrt{\condition^{-1}})^n
+		\le \exp\left(-\frac{n}{\sqrt{\condition}}\right)
+	\end{align*}
+\end{theorem}
 
 % \section{Complexity Bounds}
 
