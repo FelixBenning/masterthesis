@@ -73,7 +73,7 @@ yticks=vcat(
 xticks = vcat(
 	[(0, "0.0"), (1, "1.0"), (sqrt(κ_inv), "\$\\hat{\\gamma}\$") ],
 	[	(gamma, "\$\\gamma_$(idx)\$") 
-		for (idx, gamma) in zip(0:length(gammas), gammas[2:end])
+		for (idx, gamma) in enumerate(gammas[2:end])
 	]
 )
 

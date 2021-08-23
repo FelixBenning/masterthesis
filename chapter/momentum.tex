@@ -1133,9 +1133,9 @@ which we recognize from our eigenvalue analysis.
 	\def\svgwidth{1\textwidth}
 	\input{media/gamma_path.pdf_tex}
 	\caption{
-		Visualizing the progression of \(\gamma_{n+1}\) in recursion (\ref{eq:
+		Visualizing the progression of \(\gamma_n\) in recursion (\ref{eq:
 		morphing speed recursion using condition}). If we would start out with
-		\(\condition_0=\condition\) we would have \(\gamma_{n+1}=\hat{\gamma}=1/\sqrt{\condition}\)
+		\(\condition_0=\condition\) we would have \(\gamma_n=\hat{\gamma}=1/\sqrt{\condition}\)
 		for all \(n\). Otherwise we can see that this \(\hat{\gamma}\) still
 		acts as an attraction point. \(\momCoeff\) represents \(\momCoeff_n\)
 		plotted against \(\gamma_n\) and \(\hat{\momCoeff}\) corresponds
@@ -1144,7 +1144,7 @@ which we recognize from our eigenvalue analysis.
 		In case of \(1/\condition=0\) i.e. \(\lbound=0\)
 		it also visualizes how it is helpful to select a different \(\condition_0\)
 		as convergence bounds are constructed with
-		\(\Gamma_1^n=\prod_{k=0}^{n-1}(1-\gamma_k)\).
+		\(\Gamma_1^n=\prod_{k=1}^n(1-\gamma_k)\).
 		%
 		But also note that increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
 		increases \(\Phi_0\) which is part of the bound for convergence. So
