@@ -725,22 +725,22 @@ we run into a similar problem. Therefore we also need to slowly remove the old
 \(\phi_k\) upper bounds, constructed with \(y_k\) far away from the minimum
 \(\weights_*\). This motivates why we might wish to select
 \begin{align}\label{eq: estimating sequence recursion}
-	\Phi_{n+1}(\weights) := \gamma_n \phi_{n+1}(\weights) + (1-\gamma_n)\Phi_n(\weights)
+	\Phi_{n+1}(\weights) := \gamma_{n+1} \phi_{n+1}(\weights) + (1-\gamma_{n+1})\Phi_n(\weights)
 \end{align}
 causing an exponential decay not only for the initial upper bound, but also for
 our previous lower bounds. For
 \begin{align*}
-	\Gamma_k^n := \prod_{i=k}^{n-1} (1-\gamma_i)
+	\Gamma_k^n := \prod_{i=k}^n (1-\gamma_i)
 \end{align*}
 one can inductively convert the recursion (\ref{eq: estimating sequence
 recursion}) into
 \begin{align}
 	\nonumber
 	\Phi_n(\weights)
-	&= \sum_{k=1}^n \Gamma_k^n\gamma_{k-1} \phi_k(\weights)
-	+ \Gamma_0^n\Phi_0(\weights) \\
+	&= \sum_{k=1}^n \Gamma_{k+1}^n\gamma_k \phi_k(\weights)
+	+ \Gamma_1^n\Phi_0(\weights) \\
 	\label{eq: estimating sequence explicit}
-	&\le (1-\Gamma_0^n)\Loss(\weights) + \Gamma_0^n\Phi_0(\weights)
+	&\le (1-\Gamma_1^n)\Loss(\weights) + \Gamma_1^n\Phi_0(\weights)
 \end{align}
 
 \begin{lemma}
@@ -749,9 +749,9 @@ recursion}) into
 	then we have
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\weights_*)
-		\le \Gamma_0^n (\Phi_0(\weights_*)-\Loss(\weights_*)).
+		\le \Gamma_1^n (\Phi_0(\weights_*)-\Loss(\weights_*)).
 	\end{align*}
-	This motivates why we are interested in \(\Gamma_0^n\to 0\). A sufficient
+	This motivates why we are interested in \(\Gamma_1^n\to 0\). A sufficient
 	condition is
 	\begin{align*}
 		\sum_{k=0}^\infty \gamma_k = \infty
@@ -764,15 +764,15 @@ recursion}) into
 		\xle{(\ref{eq: staying ahead of the estimates})}
 		\min_{\weights}\Phi_n(\weights)
 		&\lxle{(\ref{eq: estimating sequence explicit})} \min_{\weights} \{
-		(1-\Gamma_0^n) \Loss(\weights) + \Gamma_0^n\Phi_n(\weights) \}\\ 
-		&\le (1-\Gamma_0^n) \Loss(\weights_*) + \Gamma_0^n\Phi_n(\weights_*)
+		(1-\Gamma_1^n) \Loss(\weights) + \Gamma_1^n\Phi_n(\weights) \}\\ 
+		&\le (1-\Gamma_1^n) \Loss(\weights_*) + \Gamma_1^n\Phi_n(\weights_*)
 	\end{align*}
 	Subtracting \(\Loss(\weights_*)\) from both sides lets us move on to the
 	second statement:
 	\begin{align*}
-		\Gamma_0^{n+1} &= \prod_{i=0}^n (1-\gamma_i)
-		\le\prod_{i=0}^n \exp(-\gamma_i)
-		= \exp\left(-\sum_{i=0}^n\gamma_i\right) \to 0
+		\Gamma_1^n &= \prod_{i=1}^n (1-\gamma_i)
+		\le\prod_{i=1}^n \exp(-\gamma_i)
+		= \exp\left(-\sum_{i=1}^n\gamma_i\right) \to 0
 		\qedhere
 	\end{align*}
 \end{proof}
@@ -788,8 +788,8 @@ Fortunately we are only adding up quadratic functions therefore the function
 where our convexity parameter \(\lbound_n\) morphs from \(\lbound_0\) to
 \(\lbound\)
 \begin{align*}
-	\lbound_n =(1-\Gamma_0^n)\lbound + \Gamma_0^n \lbound_0
-	= \gamma_{n-1} \lbound + (1-\gamma_{n-1})\lbound_{n-1}
+	\lbound_n =(1-\Gamma_1^n)\lbound + \Gamma_1^n \lbound_0
+	= \gamma_n \lbound + (1-\gamma_n)\lbound_{n-1}
 \end{align*}
 and \(z_n\) is the minimum. Assuming (\ref{eq: staying ahead of the estimates})
 holds for \(n\) we can write our minimal value as
@@ -797,10 +797,10 @@ holds for \(n\) we can write our minimal value as
 	\underline{\Phi}_{n+1}
 	&= \Phi_{n+1}(y_{n+1}) - \tfrac{\lbound_{n+1}}{2}\|y_{n+1} - z_{n+1}\|^2 \\
 	&\lxeq{(\ref{eq: estimating sequence recursion})}
-	\gamma_n \underbrace{\phi_{n+1}(y_{n+1})}_{
+	\gamma_{n+1} \underbrace{\phi_{n+1}(y_{n+1})}_{
 		=\Loss(y_{n+1})
 	}
-	+ (1-\gamma_n)\underbrace{\Phi_n(y_{n+1})}_{
+	+ (1-\gamma_{n+1})\underbrace{\Phi_n(y_{n+1})}_{
 		= \underbrace{\underline{\Phi}_n}_{
 			\ge \Loss(\weights_n)
 			\mathrlap{\ge \Loss(y_{n+1}) + \langle \Loss(y_{n+1}), \weights_n - y_{n+1}\rangle}
@@ -823,7 +823,7 @@ by selecting the learning rate \(\lrSq=1/\ubound\). We can therefore satisfy
 (\ref{eq: staying ahead of the estimates}) if we can lower bound our ``junk''
 by \( - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2\). Now our ``junk'' is equal to
 \begin{align*}
-	(1-\gamma_n)\left(
+	(1-\gamma_{n+1})\left(
 		\langle \Loss(y_{n+1}), \weights_n - y_{n+1}\rangle
 		+ \tfrac{\lbound_n}{2}\|y_{n+1} - z_n\|^2
 	\right)
@@ -836,9 +836,9 @@ By definition \(z_{n+1}\) is the unique minimum of \(\Phi_{n+1}\) so we can find
 it with
 \begin{align*}
 	0\xeq{!}\Phi'_{n+1}(z_{n+1})
-	= \gamma_n\underbrace{\phi_{n+1}'(z_{n+1})}_{
+	= \gamma_{n+1}\underbrace{\phi_{n+1}'(z_{n+1})}_{
 		= \nabla\Loss(y_{n+1}) \mathrlap{+ \lbound(z_{n+1}-y_{n+1})}
-	} +(1-\gamma_n)
+	} +(1-\gamma_{n+1})
 	\underbrace{\Phi'_n(z_{n+1})}_{
 		=\lbound_n\mathrlap{(z_{n+1}-z_n)}
 	},
@@ -849,44 +849,44 @@ which we ultimately need makes its first appearance here. Collecting all
 the \(z_{n+1}\) we get
 \begin{align}\label{eq: center of Phi recursion}
 	\overbrace{\lbound_{n+1}}^{
-		=\mathrlap{\gamma_n\lbound + (1-\gamma_n)\lbound_n}
+		=\mathrlap{\gamma_{n+1}\lbound + (1-\gamma_{n+1})\lbound_n}
 	}z_{n+1}
-	= \gamma_n\lbound y_{n+1} + (1-\gamma_n)\lbound_n z_n
-	- \gamma_n\nabla\Loss(y_{n+1}).
+	= \gamma_{n+1}\lbound y_{n+1} + (1-\gamma_{n+1})\lbound_n z_n
+	- \gamma_{n+1}\nabla\Loss(y_{n+1}).
 \end{align}
 Subtracting \(\lbound_{n+1} y_{n+1}\) results in
 \begin{align*}
 	\lbound_{n+1}(z_{n+1}-y_{n+1})
-	= (1-\gamma_n)\lbound_n(z_n-y_{n+1})
-	- \gamma_n\nabla\Loss(y_{n+1}).
+	= (1-\gamma_{n+1})\lbound_n(z_n-y_{n+1})
+	- \gamma_{n+1}\nabla\Loss(y_{n+1}).
 \end{align*}
 Plugging this into the last part of our ``junk'', we get
 \begin{align*}
 	\tfrac{\lbound_{n+1}}2\|y_{n+1}-z_{n+1}\|^2
 	&= \tfrac1{2\lbound_{n+1}}
 	\underbrace{
-		\|{\scriptstyle (1-\gamma_n)\lbound_n}(z_n-y_{n+1})
-		- {\scriptstyle \gamma_n}\nabla\Loss(y_{n+1})\|^2
+		\|{\scriptstyle (1-\gamma_{n+1})\lbound_n}(z_n-y_{n+1})
+		- {\scriptstyle \gamma_{n+1}}\nabla\Loss(y_{n+1})\|^2
 	}_{
 	\begin{aligned}
-		=&{\scriptstyle (1-\gamma_n)^2\lbound_n^2}\|z_n-y_{n+1}\|^2 \\
-		&- {\scriptstyle 2(1-\gamma_n)\lbound_n\gamma_n}\langle
+		=&{\scriptstyle (1-\gamma_{n+1})^2\lbound_n^2}\|z_n-y_{n+1}\|^2 \\
+		&- {\scriptstyle 2(1-\gamma_{n+1})\lbound_n\gamma_{n+1}}\langle
 		\nabla\Loss(y_{n+1}), z_n-y_{n+1}\rangle \\
-		&+ {\scriptstyle\gamma_n^2}\|\nabla\Loss(y_{n+1})\|^2
+		&+ {\scriptstyle\gamma_{n+1}^2}\|\nabla\Loss(y_{n+1})\|^2
 	\end{aligned}
 	}
 \end{align*}
 Therefore our ``junk'' is equal to
 \begin{align*}
-	-\tfrac{\gamma_n^2}{2\lbound_{n+1}}\|\nabla\Loss(y_{n+1})\|^2
+	-\tfrac{\gamma_{n+1}^2}{2\lbound_{n+1}}\|\nabla\Loss(y_{n+1})\|^2
 	\begin{aligned}[t]
-		&+ {\scriptstyle(1-\gamma_n)}\left\langle \Loss(y_{n+1}),
+		&+ {\scriptstyle(1-\gamma_{n+1})}\left\langle \Loss(y_{n+1}),
 		(\weights_n -y_{n+1})
-		+ \tfrac{\lbound_n\gamma_n}{\lbound_{n+1}}(z_n - y_{n+1})
+		+ \tfrac{\lbound_n\gamma_{n+1}}{\lbound_{n+1}}(z_n - y_{n+1})
 		\right\rangle\\
-		&+\tfrac{(1-\gamma_n)\lbound_n}{2}
-		\underbrace{\left(1-\tfrac{(1-\gamma_n)\lbound_n}{\lbound_{n+1}}\right)}_{
-			= \tfrac{\gamma_n \lbound}{\lbound_{n+1}} \ge 0
+		&+\tfrac{(1-\gamma_{n+1})\lbound_n}{2}
+		\underbrace{\left(1-\tfrac{(1-\gamma_{n+1})\lbound_n}{\lbound_{n+1}}\right)}_{
+			= \tfrac{\gamma_{n+1} \lbound}{\lbound_{n+1}} \ge 0
 		}
 		\|y_{n+1} - z_n\|^2.
 	\end{aligned}
@@ -897,17 +897,17 @@ sufficient to achieve our lower bound
 \begin{align}
 	\label{eq: morphing speed equation}
 	\frac{1}{\ubound}
-	&= \frac{\gamma_n^2}{\lbound_{n+1}}
-	\iff \ubound \gamma_n^2 = \lbound_{n+1} = \gamma_n \lbound +  (1-\gamma_n)\lbound_n
+	&= \frac{\gamma_{n+1}^2}{\lbound_{n+1}}
+	\iff \ubound \gamma_{n+1}^2 = \lbound_{n+1} = \gamma_{n+1} \lbound +  (1-\gamma_{n+1})\lbound_n
 	\\
 	0
-	&= (\weights_n -y_{n+1}) + \tfrac{\lbound_n\gamma_n}{\lbound_{n+1}}(z_n - y_{n+1})
+	&= (\weights_n -y_{n+1}) + \tfrac{\lbound_n\gamma_{n+1}}{\lbound_{n+1}}(z_n - y_{n+1})
 	\xiff{\text{reorder}}
 	y_{n+1}
-	= \tfrac{\lbound_{n+1}\weights_n + \lbound_n\gamma_n z_n}{\gamma_n\lbound + \lbound_n}
+	= \tfrac{\lbound_{n+1}\weights_n + \lbound_n\gamma_{n+1} z_n}{\gamma_{n+1}\lbound + \lbound_n}
 \end{align}
 \end{subequations}
-As we are allowed to select \(\gamma_n\) and \(y_{n+1}\) in iteration \(n\) we
+As we are allowed to select \(\gamma_{n+1}\) and \(y_{n+1}\) in iteration \(n\) we
 can ensure that these equations are in fact fulfilled. Our dumpster dive paid off!
 
 \subsection{Convergence Results}
@@ -923,7 +923,7 @@ particular picking any \(\weights_0\) and selecting
 works as well. And in that case we have \(\lbound_n = \lbound\) for all \(n\)
 which simplifies (\ref{eq: morphing speed equation}) to
 \begin{align*}
-	\gamma_n = \frac1{\sqrt{\condition}} \implies \Gamma_0^n = (1-\tfrac{1}{\sqrt{\condition}})^n
+	\gamma_{n+1} = \frac1{\sqrt{\condition}} \implies \Gamma_1^n = (1-\tfrac{1}{\sqrt{\condition}})^n
 \end{align*}
 With Lemma~\ref{lem: estimating sequence convergence speed} in mind this implies
 that we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
@@ -938,16 +938,16 @@ Algorithm~\ref{algo: general schema of optimal methods}.
 	\(n\leftarrow 0\)\;
 	\While{not converged}{
 		\label{line: pick gamma}
-		Select \(\gamma_n\in(0,1)\) such that
+		Select \(\gamma_{n+1}\in(0,1)\) such that
 		\begin{algomathdisplay}
-			\ubound\gamma_n^2 = \gamma_n\lbound+(1-\gamma_n)\lbound_n
+			\ubound\gamma_{n+1}^2 = \gamma_{n+1}\lbound+(1-\gamma_{n+1})\lbound_n
 		\end{algomathdisplay}
 		%
-		\(\lbound_{n+1}\leftarrow \gamma_n\lbound+(1-\gamma_n)\lbound_n\)\;
+		\(\lbound_{n+1}\leftarrow \gamma_{n+1}\lbound+(1-\gamma_{n+1})\lbound_n\)\;
 
 		\(y_{n+1}\leftarrow 
 		\displaystyle
-		\frac{\lbound_{n+1}\weights_n + \lbound_n\gamma_n z_n}{\gamma_n\lbound + \lbound_n}\)\;
+		\frac{\lbound_{n+1}\weights_n + \lbound_n\gamma_{n+1} z_n}{\gamma_{n+1}\lbound + \lbound_n}\)\;
 		\label{line: definition of y_{n+1}}
 
 		Select \(\weights_{n+1}\) such that 
@@ -957,8 +957,8 @@ Algorithm~\ref{algo: general schema of optimal methods}.
 		\end{algomathdisplay}\label{line: selecting next position}
 		%
 		\(z_{n+1}\leftarrow \tfrac{1}{\lbound_{n+1}}
-			\left[{\scriptstyle \gamma_n\lbound} y_{n+1} + {\scriptstyle (1-\gamma_n)\lbound_n} z_n
-			- {\scriptstyle \gamma_n}\nabla\Loss(y_{n+1})\right]
+			\left[{\scriptstyle \gamma_{n+1}\lbound} y_{n+1} + {\scriptstyle (1-\gamma_{n+1})\lbound_n} z_n
+			- {\scriptstyle \gamma_{n+1}}\nabla\Loss(y_{n+1})\right]
 		\)
 		\tcp*{(\ref{eq: center of Phi recursion})}
 
@@ -986,15 +986,15 @@ to fix that.
 	\begin{align}
 		\label{eq: z_n recursion}
 		z_{n+1}
-		&= \weights_n + \tfrac1{\gamma_n}(\weights_{n+1}-\weights_n)\\
+		&= \weights_n + \tfrac1{\gamma_{n+1}}(\weights_{n+1}-\weights_n)\\
 		y_{n+1}
 		&=\weights_n + \momCoeff_n(\weights_n-\weights_{n-1})
 	\end{align}
 	for \(\weights_{-1}:=\weights_0=z_0\) where
 	\begin{align}
 		\momCoeff_n
-		= \frac{\lbound_n \gamma_n(1-\gamma_{n-1})}{\gamma_{n-1}(\gamma_n\lbound +\lbound_n)}
-		= \frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_{n-1}^2 + \gamma_n}
+		= \frac{\lbound_n \gamma_{n+1}(1-\gamma_n)}{\gamma_n(\gamma_{n+1}\lbound +\lbound_n)}
+		= \frac{\gamma_n(1-\gamma_n)}{\gamma_n^2 + \gamma_{n+1}}
 	\end{align}
 \end{lemma}
 \begin{proof}
@@ -1003,91 +1003,91 @@ to fix that.
 	get
 	\begin{align*}
 		\lbound_n z_n
-		= \tfrac{1}{\gamma_n} [(\gamma_n\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
+		= \tfrac{1}{\gamma_{n+1}} [(\gamma_{n+1}\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
 	\end{align*}
 	plugging this into our definition of \(z_{n+1}\) results in our first claim
 	\begin{align*}
 		z_{n+1}
 		&= \tfrac{1}{\lbound_{n+1}}
 		\left[
-			{ \gamma_n\lbound} y_{n+1}
-			+ \tfrac{(1-\gamma_n)}{\gamma_n}
-			[(\gamma_n\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
-			- { \gamma_n}\nabla\Loss(y_{n+1})
+			{ \gamma_{n+1}\lbound} y_{n+1}
+			+ \tfrac{(1-\gamma_{n+1})}{\gamma_{n+1}}
+			[(\gamma_{n+1}\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
+			- { \gamma_{n+1}}\nabla\Loss(y_{n+1})
 		\right]\\
 		&=\tfrac{1}{\lbound_{n+1}} \underbrace{\Big[
-			\underbrace{\gamma_n\lbound + (1-\gamma_n)\lbound}_{=\lbound}
-			+ \tfrac{1-\gamma_n}{\gamma_n}\lbound_n
+			\underbrace{\gamma_{n+1}\lbound + (1-\gamma_{n+1})\lbound}_{=\lbound}
+			+ \tfrac{1-\gamma_{n+1}}{\gamma_{n+1}}\lbound_n
 		\Big]}_{
-			=\lbound_{n+1}/\gamma_n
+			=\lbound_{n+1}/\gamma_{n+1}
 		}y_{n+1}
-		-\tfrac{1-\gamma_n}{\gamma_n}\weights_n
-		-\underbrace{\tfrac{\gamma_n}{\lbound_{n+1}}}_{
-			=\frac{1}{\ubound\gamma_n} \mathrlap{\ (L\gamma_n^2 = \lbound_{n+1})}
+		-\tfrac{1-\gamma_{n+1}}{\gamma_{n+1}}\weights_n
+		-\underbrace{\tfrac{\gamma_{n+1}}{\lbound_{n+1}}}_{
+			=\frac{1}{\ubound\gamma_{n+1}} \mathrlap{\ (L\gamma_{n+1}^2 = \lbound_{n+1})}
 		}\nabla\Loss(y_{n+1})\\
-		&= \weights_n + \tfrac{1}{\gamma_n}(y_{n+1} - \weights_n)
-		- \tfrac{1}{\ubound\gamma_n}\nabla\Loss(y_{n+1})\\
+		&= \weights_n + \tfrac{1}{\gamma_{n+1}}(y_{n+1} - \weights_n)
+		- \tfrac{1}{\ubound\gamma_{n+1}}\nabla\Loss(y_{n+1})\\
 		&\lxeq{(\ref{eq-lem-assmpt: weigth recursion})}
-		\weights_n + \tfrac{1}{\gamma_n}(\weights_{n+1}-\weights_n)
+		\weights_n + \tfrac{1}{\gamma_{n+1}}(\weights_{n+1}-\weights_n)
 	\end{align*}
 	Now we are going to rewrite \(y_{n+1}\)
 	\begin{align*}
 		y_{n+1}
 		&= \frac{
-			\overbrace{[\gamma_n \lbound + (1-\gamma_n)\lbound_n]}^{\lbound_{n+1}}\weights_n
-			+ \lbound_n \gamma_n z_n
-		}{\gamma_n\lbound +\lbound_n}
+			\overbrace{[\gamma_{n+1} \lbound + (1-\gamma_{n+1})\lbound_n]}^{\lbound_{n+1}}\weights_n
+			+ \lbound_n \gamma_{n+1} z_n
+		}{\gamma_{n+1}\lbound +\lbound_n}
 		=\weights_n
-		+ \frac{\lbound_n \gamma_n (z_n - \weights_n)}{\gamma_n\lbound +\lbound_n},
+		+ \frac{\lbound_n \gamma_{n+1} (z_n - \weights_n)}{\gamma_{n+1}\lbound +\lbound_n},
 	\end{align*}
 	which allows us to apply our previous result (\ref{eq: z_n recursion}) to the difference
 	\begin{align*}
 		z_n - \weights_n
-		= \left(\tfrac1{\gamma_{n-1}} -1\right)(\weights_n-\weights_{n-1}),
+		= \left(\tfrac1{\gamma_n} -1\right)(\weights_n-\weights_{n-1}),
 	\end{align*}
 	and therefore obtain our second recursion
 	\begin{align*}
 		y_{n+1}
 		=\weights_n
 		+ \underbrace{
-			\frac{\lbound_n \gamma_n(1-\gamma_{n-1})}{\gamma_{n-1}(\gamma_n\lbound +\lbound_n)}
+			\frac{\lbound_n \gamma_{n+1}(1-\gamma_n)}{\gamma_n(\gamma_{n+1}\lbound +\lbound_n)}
 		}_{=\momCoeff_n}
 		(\weights_n-\weights_{n-1}).
 	\end{align*}
-	Now we just use the identity \(\gamma_n\lbound = \ubound\gamma_n^2 -
-	(1-\gamma_n)\lbound_n\) from the definition of \(\gamma_n\) to simplify our
+	Now we just use the identity \(\gamma_{n+1}\lbound = \ubound\gamma_{n+1}^2 -
+	(1-\gamma_{n+1})\lbound_n\) from the definition of \(\gamma_{n+1}\) to simplify our
 	momentum coefficient
 	\begin{align*}
 		\momCoeff_n
-		&= \frac{\lbound_n \gamma_n(1-\gamma_{n-1})}{
-			\gamma_{n-1}([\ubound\gamma_n^2 - (\cancel{1}-\gamma_n)\lbound_n] +\cancel{\lbound_n})
+		&= \frac{\lbound_n \gamma_{n+1}(1-\gamma_n)}{
+			\gamma_n([\ubound\gamma_{n+1}^2 - (\cancel{1}-\gamma_{n+1})\lbound_n] +\cancel{\lbound_n})
 		}
-		= \frac{\lbound_n\cancel{\gamma_n}(1-\gamma_{n-1})}{
-			\gamma_{n-1}\cancel{\gamma_n}(\ubound\gamma_n + \underbrace{\lbound_n}_{=\ubound\gamma_{n-1}^2})
+		= \frac{\lbound_n\cancel{\gamma_{n+1}}(1-\gamma_n)}{
+			\gamma_n\cancel{\gamma_{n+1}}(\ubound\gamma_{n+1} + \underbrace{\lbound_n}_{=\ubound\gamma_n^2})
 		}\\
-		&\lxeq{\bcancel{\ubound\gamma_{n-1}}} \frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_n + \gamma_{n-1}^2}
+		&\lxeq{\bcancel{\ubound\gamma_n}} \frac{\gamma_n(1-\gamma_n)}{\gamma_{n+1} + \gamma_n^2}
 		\qedhere
 	\end{align*}
 \end{proof}
 
 With the streamlined recursion from Lemma~\ref{lem: streamline general schema of optimal methods}
-we only need \(\lbound_n\) for the recursion of \(\gamma_n\) itself at this
+we only need \(\lbound_n\) for the recursion of \(\gamma_{n+1}\) itself at this
 point. So dividing the recursion (\ref{eq: morphing speed equation}) by
 \(\ubound\) and defining \(\condition_n:=\ubound/\lbound_n\) we get the equivalent
 recursion
 \begin{align}\label{eq: morphing speed recursion using condition}
-	\gamma_n^2
-	= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_n^{-1}
+	\gamma_{n+1}^2
+	= \gamma_{n+1} \condition^{-1} + (1-\gamma_{n+1})\condition_n^{-1}
 	= \condition^{-1}_{n+1}
 \end{align}
-By defining \(\gamma_{-1}:=1/\sqrt{\condition_0}\) we can ensure
-\(\gamma_{n-1}^2 = \condition_n^{-1}\). Applying the p-q formula and discarding
+By defining \(\gamma_0:=1/\sqrt{\condition_0}\) we can ensure
+\(\gamma_n^2 = \condition_n^{-1}\). Applying the p-q formula and discarding
 the negative option results in the explicit recursion
 \begin{align*}
-	\gamma_n
+	\gamma_{n+1}
 	= \tfrac12 \left[
-		-(\gamma_{n-1}^2 - \condition^{-1})
-		+ \sqrt{(\gamma_{n-1}^2 - \condition^{-1})^2 + 4 \gamma_{n-1}^2}
+		-(\gamma_n^2 - \condition^{-1})
+		+ \sqrt{(\gamma_n^2 - \condition^{-1})^2 + 4 \gamma_n^2}
 	\right].
 \end{align*}
 
@@ -1100,23 +1100,23 @@ which we recognize from our eigenvalue analysis.
 
 \begin{algorithm}
 	\KwIn{starting point \(\weights_0\), and some \(\condition_0>0\)}
-	\(\gamma_{-1} \leftarrow 1/\sqrt{\condition_0}\)
+	\(\gamma_0 \leftarrow 1/\sqrt{\condition_0}\)
 	\tcp*{
-		\(\gamma_{n-1}^2=\condition_n^{-1}\) in (\ref{eq: morphing speed recursion using condition})
+		\(\gamma_n^2=\condition_n^{-1}\) in (\ref{eq: morphing speed recursion using condition})
 		makes \(\condition_n\) obsolete
 	}
 	\(\weights_{-1} \leftarrow \weights_0\)\;
 	\(n\leftarrow 0\)\;
 	\While{not converged}{
-		\(\gamma_n \leftarrow \tfrac12 \left[
-		(\condition^{-1} - \gamma_{n-1}^2)
-		+ \sqrt{(\condition^{-1} - \gamma_{n-1}^2)^2 + 4 \gamma_{n-1}^2}
+		\(\gamma_{n+1} \leftarrow \tfrac12 \left[
+		(\condition^{-1} - \gamma_n^2)
+		+ \sqrt{(\condition^{-1} - \gamma_n^2)^2 + 4 \gamma_n^2}
 		\right]\)\;
 		\tcp{\(=1/\sqrt{\condition}\) if \(\condition_0=\condition\)}
 
 		\(\momCoeff_n \leftarrow
 		\displaystyle
-		\frac{\gamma_{n-1}(1-\gamma_{n-1})}{\gamma_n + \gamma_{n-1}^2}\)
+		\frac{\gamma_n(1-\gamma_n)}{\gamma_{n+1} + \gamma_n^2}\)
 		\tcp*{\(= \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}\) if \(\condition_0=\condition\)}
 
 		\(y_{n+1} \leftarrow \weights_n + \momCoeff_n(\weights_n-\weights_{n-1})\)\;
@@ -1133,18 +1133,18 @@ which we recognize from our eigenvalue analysis.
 	\def\svgwidth{1\textwidth}
 	\input{media/gamma_path.pdf_tex}
 	\caption{
-		Visualizing the progression of \(\gamma_n\) in recursion (\ref{eq:
+		Visualizing the progression of \(\gamma_{n+1}\) in recursion (\ref{eq:
 		morphing speed recursion using condition}). If we would start out with
-		\(\condition_0=\condition\) we would have \(\gamma_n=\hat{\gamma}=1/\sqrt{\condition}\)
+		\(\condition_0=\condition\) we would have \(\gamma_{n+1}=\hat{\gamma}=1/\sqrt{\condition}\)
 		for all \(n\). Otherwise we can see that this \(\hat{\gamma}\) still
 		acts as an attraction point. \(\momCoeff\) represents \(\momCoeff_n\)
-		plotted against \(\gamma_{n-1}\) and \(\hat{\momCoeff}\) corresponds
+		plotted against \(\gamma_n\) and \(\hat{\momCoeff}\) corresponds
 		to \(\hat{\gamma}\).
 		%
 		In case of \(1/\condition=0\) i.e. \(\lbound=0\)
 		it also visualizes how it is helpful to select a different \(\condition_0\)
 		as convergence bounds are constructed with
-		\(\Gamma_0^n=\prod_{k=0}^{n-1}(1-\gamma_k)\).
+		\(\Gamma_1^n=\prod_{k=0}^{n-1}(1-\gamma_k)\).
 		%
 		But also note that increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
 		increases \(\Phi_0\) which is part of the bound for convergence. So
