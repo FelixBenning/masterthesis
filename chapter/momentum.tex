@@ -899,6 +899,7 @@ sufficient to achieve our lower bound
 	\frac{1}{\ubound}
 	&= \frac{\gamma_n^2}{\lbound_n}
 	\iff \ubound \gamma_n^2 = \lbound_n = \gamma_n \lbound +  (1-\gamma_n)\lbound_{n-1}
+	\qquad \forall n\ge 1
 	\\
 	0
 	&= (\weights_{n-1} -y_n) + \tfrac{\lbound_n\gamma_n}{\lbound_n}(z_{n-1} - y_n)
@@ -934,31 +935,31 @@ Algorithm~\ref{algo: general schema of optimal methods}.
 
 \begin{algorithm}
 	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\)}
-	\(v_0\leftarrow \weights_0\);
-	\(n\leftarrow 0\)\;
+	\(z_0\leftarrow \weights_0\);
+	\(n\leftarrow 1\)\;
 	\While{not converged}{
 		\label{line: pick gamma}
-		Select \(\gamma_{n+1}\in(0,1)\) such that
+		Select \(\gamma_n\in(0,1)\) such that
 		\begin{algomathdisplay}
-			\ubound\gamma_{n+1}^2 = \gamma_{n+1}\lbound+(1-\gamma_{n+1})\lbound_n
+			\ubound\gamma_n^2 = \gamma_n\lbound+(1-\gamma_n)\lbound_{n-1}
 		\end{algomathdisplay}
 		%
-		\(\lbound_{n+1}\leftarrow \gamma_{n+1}\lbound+(1-\gamma_{n+1})\lbound_n\)\;
+		\(\lbound_n\leftarrow \gamma_n\lbound+(1-\gamma_n)\lbound_{n-1}\)\;
 
-		\(y_{n+1}\leftarrow 
+		\(y_n\leftarrow 
 		\displaystyle
-		\frac{\lbound_{n+1}\weights_n + \lbound_n\gamma_{n+1} z_n}{\gamma_{n+1}\lbound + \lbound_n}\)\;
-		\label{line: definition of y_{n+1}}
+		\frac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}\)\;
+		\label{line: definition of y_n}
 
-		Select \(\weights_{n+1}\) such that 
-		\tcp*[f]{e.g. \(\weights_{n+1}=y_{n+1}-\tfrac1\ubound\nabla\Loss(y_{n+1})\)}
+		Select \(\weights_n\) such that 
+		\tcp*[f]{e.g. \(\weights_n=y_n-\tfrac1\ubound\nabla\Loss(y_n)\)}
 		\begin{algomathdisplay}
-			\Loss(\weights_{n+1}) \le \Loss(y_{n+1}) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_{n+1})\|^2
+			\Loss(\weights_n) \le \Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 		\end{algomathdisplay}\label{line: selecting next position}
 		%
-		\(z_{n+1}\leftarrow \tfrac{1}{\lbound_{n+1}}
-			\left[{\scriptstyle \gamma_{n+1}\lbound} y_{n+1} + {\scriptstyle (1-\gamma_{n+1})\lbound_n} z_n
-			- {\scriptstyle \gamma_{n+1}}\nabla\Loss(y_{n+1})\right]
+		\(z_n\leftarrow \tfrac{1}{\lbound_n}
+			\left[\gamma_n\lbound y_n + (1-\gamma_n)\lbound_n z_{n-1}
+			- \gamma_n\nabla\Loss(y_n)\right]
 		\)
 		\tcp*{(\ref{eq: center of Phi recursion})}
 
@@ -978,17 +979,18 @@ to fix that.
 \begin{lemma}\label{lem: streamline general schema of optimal methods}
 	If we use the recursion
 	\begin{align}\label{eq-lem-assmpt: weigth recursion}
-		\weights_{n+1} = y_{n+1} - \tfrac1\ubound\Loss(y_{n+1})
+		\weights_n = y_n - \tfrac1\ubound\Loss(y_n)
 	\end{align}
 	in Algorithm~\ref{algo: general schema of optimal methods} line~\ref{line:
-	selecting next position}, then we can simplify \(z_{n+1}\) and \(y_{n+1}\)
+	selecting next position}, then we can simplify \(z_n\) and \(y_n\)
 	to
 	\begin{align}
 		\label{eq: z_n recursion}
-		z_{n+1}
-		&= \weights_n + \tfrac1{\gamma_{n+1}}(\weights_{n+1}-\weights_n)\\
+		z_n
+		&= \weights_{n-1} + \tfrac1{\gamma_n}(\weights_n-\weights_{n-1})
+		\qquad \forall n\ge 1\\
 		y_{n+1}
-		&=\weights_n + \momCoeff_n(\weights_n-\weights_{n-1})
+		&=\weights_n + \momCoeff_n(\weights_n-\weights_{n-1}) \qquad \forall n\ge 0
 	\end{align}
 	for \(\weights_{-1}:=\weights_0=z_0\) where
 	\begin{align}
@@ -999,38 +1001,38 @@ to fix that.
 \end{lemma}
 \begin{proof}
 	\fxnote{appendix?}
-	After line~\ref{line: definition of y_{n+1}} we can reorder the equation to
+	After line~\ref{line: definition of y_n} we can reorder the equation to
 	get
 	\begin{align*}
-		\lbound_n z_n
-		= \tfrac{1}{\gamma_{n+1}} [(\gamma_{n+1}\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
+		\lbound_{n-1} z_{n-1}
+		= \tfrac{1}{\gamma_n} [(\gamma_n\lbound + \lbound_{n-1})y_n - \lbound_n\weights_{n-1}]
 	\end{align*}
-	plugging this into our definition of \(z_{n+1}\) results in our first claim
+	plugging this into our definition of \(z_n\) results in our first claim
 	\begin{align*}
-		z_{n+1}
-		&= \tfrac{1}{\lbound_{n+1}}
+		z_n
+		&= \tfrac{1}{\lbound_n}
 		\left[
-			{ \gamma_{n+1}\lbound} y_{n+1}
-			+ \tfrac{(1-\gamma_{n+1})}{\gamma_{n+1}}
-			[(\gamma_{n+1}\lbound + \lbound_n)y_{n+1} - \lbound_{n+1}\weights_n]
-			- { \gamma_{n+1}}\nabla\Loss(y_{n+1})
+			\gamma_n\lbound y_n
+			+ \tfrac{(1-\gamma_n)}{\gamma_n}
+			[(\gamma_n\lbound + \lbound_{n-1})y_n - \lbound_n\weights_{n-1}]
+			- \gamma_n\nabla\Loss(y_n)
 		\right]\\
-		&=\tfrac{1}{\lbound_{n+1}} \underbrace{\Big[
-			\underbrace{\gamma_{n+1}\lbound + (1-\gamma_{n+1})\lbound}_{=\lbound}
-			+ \tfrac{1-\gamma_{n+1}}{\gamma_{n+1}}\lbound_n
+		&=\tfrac{1}{\lbound_n} \underbrace{\Big[
+			\underbrace{\gamma_n\lbound + (1-\gamma_n)\lbound}_{=\lbound}
+			+ \tfrac{1-\gamma_n}{\gamma_n}\lbound_{n-1}
 		\Big]}_{
-			=\lbound_{n+1}/\gamma_{n+1}
-		}y_{n+1}
-		-\tfrac{1-\gamma_{n+1}}{\gamma_{n+1}}\weights_n
-		-\underbrace{\tfrac{\gamma_{n+1}}{\lbound_{n+1}}}_{
-			=\frac{1}{\ubound\gamma_{n+1}} \mathrlap{\ (L\gamma_{n+1}^2 = \lbound_{n+1})}
-		}\nabla\Loss(y_{n+1})\\
-		&= \weights_n + \tfrac{1}{\gamma_{n+1}}(y_{n+1} - \weights_n)
-		- \tfrac{1}{\ubound\gamma_{n+1}}\nabla\Loss(y_{n+1})\\
+			=\lbound_n/\gamma_n
+		}y_n
+		-\tfrac{1-\gamma_n}{\gamma_n}\weights_{n-1}
+		-\underbrace{\tfrac{\gamma_n}{\lbound_n}}_{
+			=\frac{1}{\ubound\gamma_n} \mathrlap{\ (L\gamma_n^2 = \lbound_n)}
+		}\nabla\Loss(y_n)\\
+		&= \weights_{n-1} + \tfrac{1}{\gamma_n}(y_n - \weights_{n-1})
+		- \tfrac{1}{\ubound\gamma_n}\nabla\Loss(y_n)\\
 		&\lxeq{(\ref{eq-lem-assmpt: weigth recursion})}
-		\weights_n + \tfrac{1}{\gamma_{n+1}}(\weights_{n+1}-\weights_n)
+		\weights_{n-1} + \tfrac{1}{\gamma_n}(\weights_n-\weights_{n-1})
 	\end{align*}
-	Now we are going to rewrite \(y_{n+1}\)
+	Now we are going to rewrite \(y_{n+1}\):
 	\begin{align*}
 		y_{n+1}
 		&= \frac{
@@ -1038,14 +1040,14 @@ to fix that.
 			+ \lbound_n \gamma_{n+1} z_n
 		}{\gamma_{n+1}\lbound +\lbound_n}
 		=\weights_n
-		+ \frac{\lbound_n \gamma_{n+1} (z_n - \weights_n)}{\gamma_{n+1}\lbound +\lbound_n},
+		+ \frac{\lbound_n \gamma_{n+1} (z_n - \weights_n)}{\gamma_{n+1}\lbound +\lbound_n}
 	\end{align*}
-	which allows us to apply our previous result (\ref{eq: z_n recursion}) to the difference
+	For \(n\ge1\) we can apply our previous result (\ref{eq: z_n recursion})
 	\begin{align*}
 		z_n - \weights_n
 		= \left(\tfrac1{\gamma_n} -1\right)(\weights_n-\weights_{n-1}),
 	\end{align*}
-	and therefore obtain our second recursion
+	for \(n=0\) both sides are zero and we therefore obtain our second recursion
 	\begin{align*}
 		y_{n+1}
 		=\weights_n
@@ -1076,13 +1078,13 @@ point. So dividing the recursion (\ref{eq: morphing speed equation}) by
 \(\ubound\) and defining \(\condition_n:=\ubound/\lbound_n\) we get the equivalent
 recursion
 \begin{align}\label{eq: morphing speed recursion using condition}
-	\gamma_{n+1}^2
-	= \gamma_{n+1} \condition^{-1} + (1-\gamma_{n+1})\condition_n^{-1}
-	= \condition^{-1}_{n+1}
+	\gamma_n^2
+	= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_{n-1}^{-1}
+	= \condition^{-1}_n \qquad \forall n\ge 1
 \end{align}
 By defining \(\gamma_0:=1/\sqrt{\condition_0}\) we can ensure
-\(\gamma_n^2 = \condition_n^{-1}\). Applying the p-q formula and discarding
-the negative option results in the explicit recursion
+\(\gamma_n^2 = \condition_n^{-1}\) for all \(n\ge0\). Applying the p-q formula
+and discarding the negative option results in the explicit recursion
 \begin{align*}
 	\gamma_{n+1}
 	= \tfrac12 \left[
