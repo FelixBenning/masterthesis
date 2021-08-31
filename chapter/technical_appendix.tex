@@ -361,21 +361,15 @@
 
 \begin{lemma}[Dumpster Dive]
 	\label{lem-appendix: dumpster dive}
-	For \(\condition_n := \ubound/\lbound_n\), the conditions
-	\begin{subequations}
-	\begin{align}
-		\nonumber
-		\gamma_n^2 \ge \frac{\lbound_n}{\ubound}
-		&= \frac{\gamma_n \lbound +  (1-\gamma_n)\lbound_{n-1}}{\ubound}\\
-		&= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_{n-1}^{-1}
-		\qquad \forall n\ge 1
-	\end{align}
+	The conditions
+	\begin{align*}
+		\ubound\gamma_n^2 \le \lbound_n
+	\end{align*}
 	and
-	\begin{align}
+	\begin{align*}
 		y_n
 		&= \tfrac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}
-	\end{align}
-	\end{subequations}
+	\end{align*}
 	are sufficient for lower bounding
 	\begin{align*}
 		J := (1-\gamma_n)\left(
@@ -448,21 +442,17 @@
 	\end{align*}
 	As the last summand is positive we can discard it and end up with two equations
 	sufficient to achieve our lower bound
-	% \begin{subequations}
-	% \begin{align}
-	% 	\label{eq: morphing speed equation}
-	% 	\frac{1}{\ubound}
-	% 	&= \frac{\gamma_n^2}{\lbound_n}
-	% 	\iff \ubound \gamma_n^2 = \lbound_n = \gamma_n \lbound +  (1-\gamma_n)\lbound_{n-1}
-	% 	\qquad \forall n\ge 1
-	% 	\\
-	% 	0
-	% 	&= (\weights_{n-1} -y_n) + \tfrac{\lbound_n\gamma_n}{\lbound_n}(z_{n-1} - y_n)
-	% 	\xiff{\text{reorder}}
-	% 	y_n
-	% 	= \tfrac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}
-	% \end{align}
-	% \end{subequations}
+	\begin{align*}
+		-\tfrac{\gamma_n^2}{\lbound_n}
+		&\ge -\tfrac{1}{\ubound} \iff \ubound\gamma_n^2 \le \lbound_n
+		\\
+		0
+		&= (\weights_{n-1} -y_n) + \tfrac{\lbound_n\gamma_n}{\lbound_n}(z_{n-1} - y_n)
+		\xiff{\text{reorder}}
+		y_n
+		= \tfrac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}
+		\qedhere
+	\end{align*}
 \end{proof}
 
 \begin{lemma}\label{lem-appendix: streamline general schema of optimal methods}

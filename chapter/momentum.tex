@@ -809,13 +809,9 @@ holds for \(n-1\) we can write our minimal value as
 	&\ge \Loss(y_n) + \text{``junk''}
 	\xge{?} \Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 \end{align*}
-% Now you might recall that \(y_n\) are our intermediate ``information
-% collection points'' which then define the actual iterate as
-% \begin{align*}
-% 	\weights_n = y_n - \lrSq \nabla\Loss(y_n)
-% \end{align*}
-% in Nesterov's Momentum method (Definition~\ref{def: nesterov's momentum}).
-Since Lemma~\ref{lem: smallest upper bound} we know that we can achieve
+Now you might recall that \(y_n\) are our intermediate ``information
+collection points'' which then define the actual iterate. And
+since Lemma~\ref{lem: smallest upper bound} we know that we can achieve
 \begin{align*}
 	\Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 	\ge \Loss(\weights_n)
@@ -837,26 +833,28 @@ by \(- \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\). By having a closer look at
 \(z_n\) and expressing it in terms of \(z_{n-1}\) the necessary terms fall out
 and we obtain the following sufficient conditions
 \begin{lemma}[Dumpster Dive]
-	For \(\condition_n := \ubound/\lbound_n\), the conditions
+	The conditions
 	\begin{subequations}
 	\begin{align}
-		\nonumber
-		\gamma_n^2 \ge \frac{\lbound_n}{\ubound}
-		&= \frac{\gamma_n \lbound +  (1-\gamma_n)\lbound_{n-1}}{\ubound}\\
-		&= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_{n-1}^{-1}
-		\qquad \forall n\ge 1
 		\label{eq: morphing speed equation}
+		\ubound\gamma_n^2 \le \lbound_n \xeq{\text{def.}} \gamma_n \lbound +  (1-\gamma_n)\lbound_{n-1}\qquad \forall n\ge 1
 	\end{align}
+	or equivalently for \(\condition_n := \ubound/\lbound_n\) 
+	\begin{align}
+		\gamma_n^2 &\le \gamma_n \condition^{-1} + (1-\gamma_n)\condition_{n-1}^{-1}
+		\qquad \forall n\ge 1
+		\label{eq: morphing speed equation using condition}
+	\end{align}
+	\end{subequations}
 	and
 	\begin{align}
 		y_n
-		&= \tfrac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}
+		&= \frac{\lbound_n\weights_{n-1} + \lbound_{n-1}\gamma_n z_{n-1}}{\gamma_n\lbound + \lbound_{n-1}}
 	\end{align}
-	\end{subequations}
 	are sufficient for \(J \ge - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\).
 \end{lemma}
 \begin{proof}
-	See Appendix Lemma~\ref{lem-appendix: dumpster dive}
+	See Appendix Lemma~\ref{lem-appendix: dumpster dive}.
 \end{proof}
 As we are allowed to select \(\gamma_n\) and \(y_n\) in iteration \(n\) we
 can ensure that these equations are in fact fulfilled.
@@ -872,17 +870,18 @@ particular picking any \(\weights_0\) and selecting
 	\Phi_0(\weights):= \Loss(\weights_0) + \tfrac{\lbound}{2}\|\weights_0 - \weights\|^2
 \end{align*}
 works as well. And in that case we have \(\lbound_n = \lbound\) for all \(n\)
-which simplifies (\ref{eq: morphing speed equation}) to
+which simplifies (\ref{eq: morphing speed equation using condition}) to
 \begin{align*}
 	\gamma_{n+1} = \frac1{\sqrt{\condition}} \implies \Gamma_1^n = (1-\tfrac{1}{\sqrt{\condition}})^n
 \end{align*}
-With Lemma~\ref{lem: estimating sequence convergence speed} in mind this implies
-that we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
-we derived with eigenvalues back! But since \(\lbound=0\) implies \(\condition=\infty\)
+With Lemma~\ref{lem: estimating sequence convergence speed} in mind this hints
+at how we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
+we derived with eigenvalues back!
+But since \(\lbound=0\) implies \(\condition=\infty\)
 which would set our rate of convergence to one, we are going to continue
 to entertain the general case with general \(\lbound_0\) summarized in
-Algorithm~\ref{algo: general schema of optimal methods}.
-
+Algorithm~\ref{algo: general schema of optimal methods}. 
+%
 \begin{algorithm}
 	\KwIn{starting point \(\weights_0\), and some \(\lbound_0>0\)}
 	\(z_0\leftarrow \weights_0\);
@@ -902,7 +901,7 @@ Algorithm~\ref{algo: general schema of optimal methods}.
 		\label{line: definition of y_n}
 
 		Select \(\weights_n\) such that 
-		\tcp*[f]{e.g. \(\weights_n=y_n-\tfrac1\ubound\nabla\Loss(y_n)\)}
+		\tcp*[f]{e.g. \(\weights_n=y_n-\tfrac1\ubound\nabla\Loss(y_n)\) (Lem~\ref{lem: smallest upper bound})}
 		\begin{algomathdisplay}
 			\Loss(\weights_n) \le \Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 		\end{algomathdisplay}\label{line: selecting next position}
@@ -920,11 +919,40 @@ Algorithm~\ref{algo: general schema of optimal methods}.
 		\label{algo: general schema of optimal methods}
 	}
 \end{algorithm}
+%
+Figure~\ref{fig: gamma path}
+visualizes how larger \(\lbound_0\) than \(\lbound\) increase the \(\gamma_n\)
+to be larger than zero and thus decrease the \(\Gamma_1^n\) below one. It also
+explains why we should make (\ref{eq: morphing speed equation}) an equality.
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/gamma_path.pdf_tex}
+	\caption{
+		Picking the largest possible \(\gamma_n\) which satisfy (\ref{eq:
+		morphing speed equation using condition}) results in equality assuming
+		\(\lbound_0\ge\lbound\).  If we start out with \(\condition_0=\condition\)
+		we have \(\gamma_n=\hat{\gamma}=1/\sqrt{\condition}\)
+		for all \(n\). In any case \(\hat{\gamma}\) acts as an attraction point.
+		% \(\momCoeff\) represents \(\momCoeff_n\)
+		% plotted against \(\gamma_n\) and
+		% \(\hat{\momCoeff}\) corresponds to \(\hat{\gamma}\).
+		%
+		In case of \(1/\condition=0\) i.e. \(\lbound=0\)
+		it also visualizes how it is helpful to select a different \(\condition_0\).
+		%
+		But increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
+		increases \(\Phi_0\) which is part of the bound for convergence. So
+		this is no free lunch.
+	}
+	\label{fig: gamma path}
+\end{figure}
 
-\(y_{n+1}\) is currently looking a lot more strange than our simple momentum
-movement in Definition~\ref{def: nesterov's momentum}. And we are currently
-carrying additional baggage like \(z_n\) and \(\lbound_n\) around. We still need
-to fix that.
+Before we address convergence rates for general \(\lbound_0\) let us take a
+closer look at the strange looking \(y_{n+1}\), which were much more simple in
+Definition~\ref{def: nesterov's momentum} and try to get rid of 
+additional baggage like \(z_n\) and \(\lbound_n\).
 
 \begin{lemma}\label{lem: streamline general schema of optimal methods}
 	If we use the recursion
@@ -954,17 +982,14 @@ to fix that.
 
 With the streamlined recursion from Lemma~\ref{lem: streamline general schema of optimal methods}
 we only need \(\lbound_n\) for the recursion of \(\gamma_{n+1}\) itself at this
-point. So dividing the recursion (\ref{eq: morphing speed equation}) by
-\(\ubound\) and defining \(\condition_n:=\ubound/\lbound_n\) we get the equivalent
-recursion
-\begin{align}\label{eq: morphing speed recursion using condition}
-	\gamma_n^2
-	= \gamma_n \condition^{-1} + (1-\gamma_n)\condition_{n-1}^{-1}
-	= \condition^{-1}_n \qquad \forall n\ge 1
-\end{align}
+point. So we can now use the equivalent recursion (\ref{eq: morphing speed
+equation using condition}) with \(\condition_n:=\ubound/\lbound_n\).
 By defining \(\gamma_0:=1/\sqrt{\condition_0}\) we can ensure
-\(\gamma_n^2 = \condition_n^{-1}\) for all \(n\ge0\). Applying the p-q formula
-and discarding the negative option results in the explicit recursion
+\begin{align*}
+	\gamma_n^2 = \condition_n^{-1} \qquad  \text{for all } n\ge0
+\end{align*}
+which in turn allows us to get rid of the \(\condition_n\). Applying the p-q
+formula and discarding the negative option results in the explicit recursion
 \begin{align*}
 	\gamma_{n+1}
 	= \tfrac12 \left[
@@ -984,8 +1009,8 @@ which we recognize from our eigenvalue analysis.
 	\KwIn{starting point \(\weights_0\), and some \(\condition_0>0\)}
 	\(\gamma_0 \leftarrow 1/\sqrt{\condition_0}\)
 	\tcp*{
-		\(\gamma_n^2=\condition_n^{-1}\) in (\ref{eq: morphing speed recursion using condition})
-		makes \(\condition_n\) obsolete
+		\(\gamma_n^2=\condition_n^{-1}\) in (\ref{eq: morphing speed equation
+		using condition}) makes \(\condition_n\) obsolete
 	}
 	\(\weights_{-1} \leftarrow \weights_0\)\;
 	\(n\leftarrow 0\)\;
@@ -1010,42 +1035,18 @@ which we recognize from our eigenvalue analysis.
 	\caption{Dynamic Nesterov Momentum\label{algo: dynamic nesterov momentum}}
 \end{algorithm}
 
-\begin{figure}[h]
-	\centering
-	\def\svgwidth{1\textwidth}
-	\input{media/gamma_path.pdf_tex}
-	\caption{
-		Visualizing the progression of \(\gamma_n\) in recursion (\ref{eq:
-		morphing speed recursion using condition}). If we would start out with
-		\(\condition_0=\condition\) we would have \(\gamma_n=\hat{\gamma}=1/\sqrt{\condition}\)
-		for all \(n\). Otherwise we can see that this \(\hat{\gamma}\) still
-		acts as an attraction point. \(\momCoeff\) represents \(\momCoeff_n\)
-		plotted against \(\gamma_n\) and \(\hat{\momCoeff}\) corresponds
-		to \(\hat{\gamma}\).
-		%
-		In case of \(1/\condition=0\) i.e. \(\lbound=0\)
-		it also visualizes how it is helpful to select a different \(\condition_0\)
-		as convergence bounds are constructed with
-		\(\Gamma_1^n=\prod_{k=1}^n(1-\gamma_k)\).
-		%
-		But also note that increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
-		increases \(\Phi_0\) which is part of the bound for convergence. So
-		this is no free lunch.
-	}
-	\label{fig: gamma path}
-\end{figure}
 
 What is left to do is an analysis of convergence in particular for the case
 where \(\condition_0\neq\condition\) especially applicable for \(\lbound=0\).
-But Figure~\ref{fig: gamma path} provides some intuition why it might be useful to
-have \(\condition_0>\condition\) even when \(\lbound\neq0\).
+Figure~\ref{fig: gamma path} provides some intuition why it might also be
+useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 
 \begin{theorem}
 	Let \(\Loss \in \strongConvex{\lbound}{\ubound}\) (includes
 	\(\Loss\in\lipGradientSet{\ubound}\) with \(\lbound=0\)). For starting point
-	\(\weights_0\) and some \(\lbound_0\) let
-	\(\weights_n\) be selected via Algorithm~\ref{algo: dynamic nesterov
-	momentum}, then for \(\Gamma^n=\prod_{k=1}^n(1-\gamma_k)\) we have
+	\(\weights_0\) and some \(\lbound_0\) (equivalently \(\condition_0\) or
+	\(\gamma_0\)) let \(\weights_n\) be selected via Algorithm~\ref{algo: dynamic
+	nesterov momentum}, then for \(\Gamma^n=\prod_{k=1}^n(1-\gamma_k)\) we have
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\weights_*)
 		&\le \Gamma^n\left[
