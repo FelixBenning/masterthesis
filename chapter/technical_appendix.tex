@@ -550,6 +550,22 @@
 	\end{align*}
 \end{proof}
 
+\begin{lemma}[{\cite[Lemma 2.2.4]{nesterovLecturesConvexOptimization2018}}]
+	\label{lem-appendix: convergence rate bounds for estimating sequences}
+	For \(\lbound_0\in (\lbound, 3\ubound + \lbound]\) we have
+	\begin{align*}
+		\Gamma^n
+		\le \frac{4}{\left(\frac{\condition}{\condition_0}-1\right)\left[
+			\exp\left(\frac{n+1}{2\sqrt{\condition}}\right)
+			-\exp\left(-\frac{n+1}{2\sqrt{\condition}}\right)
+		\right]}
+		\le \frac{4}{(\condition_0^{-1}-\condition^{-1})(n+1)^2}
+	\end{align*}
+\end{lemma}
+\begin{proof}
+
+\end{proof}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endinput

@@ -871,9 +871,9 @@ particular picking any \(\weights_0\) and selecting
 \end{align*}
 works as well. And in that case we have \(\lbound_n = \lbound\) for all \(n\)
 which simplifies (\ref{eq: morphing speed equation using condition}) to
-\begin{align*}
+\begin{align}\label{eq: convergence rate for lbound_0=lbound}
 	\gamma_{n+1} = \frac1{\sqrt{\condition}} \implies \Gamma_1^n = (1-\tfrac{1}{\sqrt{\condition}})^n
-\end{align*}
+\end{align}
 With Lemma~\ref{lem: estimating sequence convergence speed} in mind this hints
 at how we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
 we derived with eigenvalues back!
@@ -1046,7 +1046,8 @@ useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 	\(\Loss\in\lipGradientSet{\ubound}\) with \(\lbound=0\)). For starting point
 	\(\weights_0\) and some \(\lbound_0\) (equivalently \(\condition_0\) or
 	\(\gamma_0\)) let \(\weights_n\) be selected via Algorithm~\ref{algo: dynamic
-	nesterov momentum}, then for \(\Gamma^n=\prod_{k=1}^n(1-\gamma_k)\) we have
+	nesterov momentum}, then for \(\Gamma^n := \Gamma_1^n =
+	\prod_{k=1}^n(1-\gamma_k)\) we have
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\weights_*)
 		&\le \Gamma^n\left[
@@ -1070,6 +1071,33 @@ useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 		\le \exp\left(-\frac{n}{\sqrt{\condition}}\right)
 	\end{align*}
 \end{theorem}
+\begin{proof}
+	Using
+	\begin{align*}
+		\Phi_0(\weights) := \Loss(\weights_0) + \tfrac{\lbound_0}{2}\|\weights -\weights_0\|^2
+	\end{align*}
+	which ensures \(\weights_0=z_0\) for Lemma~\ref{lem: streamline general
+	schema of optimal methods} allows us to apply Lemma~\ref{lem: estimating
+	sequence convergence speed} to obtain
+	\begin{align*}
+		\Loss(\weights_n)-\Loss(\weights_*)
+		&\le \Gamma_1^n(\Phi_0(\weights_*)-\Loss(\weights_*))\\
+		&= \Gamma^n\left[
+			\Loss(\weights_0) -\Loss(\weights_*)
+			+ \tfrac{\lbound_0}2\|\weights_0-\weights_*\|^2
+		\right]
+	\end{align*}	
+	and using \(\langle \nabla\Loss(\weights_*), \cdot\rangle = 0\) and
+	Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality} we get the
+	second upper bound with
+	\begin{align*}
+		\Loss(\weights_0)-\Loss(\weights_*)\le \tfrac{\ubound}{2}\|\weights_0-\weights\|^2
+	\end{align*}
+	For the upper bound on \(\Gamma^n\) we have already covered the case
+	\(\lbound_0=\lbound\) in (\ref{eq: convergence rate for lbound_0=lbound}),
+	keeping \(1+x\le\exp(x)\) in mind. The general case is covered in the
+	Lemma~\ref{lem-appendix: convergence rate bounds for estimating sequences}
+\end{proof}
 
 % \section{Complexity Bounds}
 
