@@ -1026,7 +1026,8 @@ which we recognize from our eigenvalue analysis.
 		\frac{\gamma_n(1-\gamma_n)}{\gamma_{n+1} + \gamma_n^2}\)
 		\tcp*{\(= \frac{1-1/\sqrt{\condition}}{1+1/\sqrt{\condition}}\) if \(\condition_0=\condition\)}
 
-		\(y_{n+1} \leftarrow \weights_n + \momCoeff_n(\weights_n-\weights_{n-1})\)\;
+		\(y_{n+1} \leftarrow \weights_n + \momCoeff_n(\weights_n-\weights_{n-1})\)
+		\tcp*{\(\beta_0\) does not matter!}
 
 		\(\weights_{n+1} \leftarrow y_{n+1} - \tfrac{1}{\ubound}\nabla\Loss(y_{n+1})\)\;
 
@@ -1041,12 +1042,12 @@ where \(\condition_0\neq\condition\) especially applicable for \(\lbound=0\).
 Figure~\ref{fig: gamma path} provides some intuition why it might also be
 useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 
-\begin{theorem}
+\begin{theorem}\label{thm: nesterov momentum convergence rates}
 	Let \(\Loss \in \strongConvex{\lbound}{\ubound}\) (includes
 	\(\Loss\in\lipGradientSet{\ubound}\) with \(\lbound=0\)). For starting point
 	\(\weights_0\) and some \(\condition_0\) (equivalently \(\lbound_0\) or
-	\(\gamma_0\)) let \(\weights_n\) be selected via Algorithm~\ref{algo: dynamic
-	nesterov momentum}, then for \(\Gamma^n := \Gamma_1^n =
+	\(\gamma_0\)) let \(\weights_n\) be selected via Algorithm~\ref{algo: general schema of optimal methods}
+	or \ref{algo: dynamic nesterov momentum}, then for \(\Gamma^n := \Gamma_1^n =
 	\prod_{k=1}^n(1-\gamma_k)\) we have
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\weights_*)
@@ -1059,7 +1060,7 @@ useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 	where we have for \(\condition_0^{-1}\in (\condition^{-1}, 3 + \condition^{-1}]\)
 	\begin{align*}
 		\Gamma^n
-		\le \frac{4}{\left(\frac{\condition}{\condition_0}-1\right)\left[
+		\le \frac{4\condition^{-1}}{(\condition_0^{-1}-\condition^{-1})\left[
 			\exp\left(\frac{n+1}{2\sqrt{\condition}}\right)
 			-\exp\left(-\frac{n+1}{2\sqrt{\condition}}\right)
 		\right]^2}
@@ -1098,6 +1099,29 @@ useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 	keeping \(1+x\le\exp(x)\) in mind. The general case is covered in the
 	Lemma~\ref{lem-appendix: convergence rate bounds for estimating sequences}
 \end{proof}
+
+\section{Hyperparameter Selection}
+
+Knowing the condition number one might wish to optimize the convergence rate
+of Theorem~\ref{thm: nesterov momentum convergence rates} over \(\condition_0\).
+For \(\condition_0^{-1}\in(\condition^{-1}, 3+\condition^{-1}]\) this entails
+minimizing
+\begin{align}\label{eq: convergence rate optimization}
+	\frac{\ubound+\lbound_0}{\condition_0^{-1}-\condition^{-1}}
+	= \ubound \frac{1+\condition_0^{-1}}{\condition_0^{-1}-\condition^{-1}}
+	= \ubound \frac{1+\frac{1}{\condition_0^{-1}}}{1-\frac{\condition^{-1}}{\condition_0^{-1}}}
+\end{align}
+Since both the enumerator decreases with \(\condition_0^{-1}\) and the
+denominator increases with \(\condition_0^{-1}\), we want to select it as large
+as possible.
+
+Looking at Figure~\ref{fig: gamma path} this should make us suspicious. There
+is nothing special about \(\condition_0^{-1}=3+\condition^{-1}\) when it
+comes to \(\Gamma^n\). The \(\gamma_n\) are still increasing afterwards. And
+from (\ref{eq: convergence rate optimization}) it seems that the trade-off of
+higher \(\lbound_0\) seems to be worth it. So maybe we should have another go
+at bounding \(\Gamma^n\).
+
 
 % \section{Complexity Bounds}
 
