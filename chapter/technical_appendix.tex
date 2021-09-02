@@ -555,7 +555,7 @@
 	For \(\condition_0^{-1}\in (\condition^{-1}, 3 + \condition^{-1}]\) we have
 	\begin{align*}
 		\Gamma^n
-		\le \frac{4}{\left(\frac{\condition}{\condition_0}-1\right)\left[
+		\le \frac{4\condition^{-1}}{(\condition_0^{-1}-\condition^{-1})\left[
 			\exp\left(\frac{n+1}{2\sqrt{\condition}}\right)
 			-\exp\left(-\frac{n+1}{2\sqrt{\condition}}\right)
 		\right]^2}
@@ -564,18 +564,19 @@
 \end{lemma}
 \begin{proof}
 	We are interested in finding a function fulfilling
-	\begin{align*}
+	\begin{align}\label{eq: bounding function properties}
 		\Gamma^n \le \frac{1}{f(n)^2} \iff f(n) \le \frac1{\sqrt{\Gamma^n}}
-	\end{align*}
+	\end{align}
 	Since the weaker inequality would require \(f(n)\sim n\) it might be a
 	good idea to look at the increments
-	\begin{align*}
-		f(0) + \sum_{k=1}^n f(k) - f(k-1) = f(n)
-		\le \frac{1}{\sqrt{\Gamma^n}}
-		= \underbrace{\frac1{\sqrt{\Gamma^0}}}_{=1}
-		+ \sum_{k=1}^n\frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}.
-	\end{align*}
-	In particular it would be sufficient if we had \(f(0) \le 1\) and
+	% \begin{align*}
+	% 	f(0) + \sum_{k=1}^n f(k) - f(k-1) = f(n)
+	% 	\le \frac{1}{\sqrt{\Gamma^n}}
+	% 	= \underbrace{\frac1{\sqrt{\Gamma^0}}}_{=1}
+	% 	+ \sum_{k=1}^n\frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}.
+	% \end{align*}
+	In particular it would be sufficient if we had \(f(0) \le
+	\frac1{\sqrt{\Gamma^0}}=1\) and
 	\begin{align*}
 		f(k) - f(k-1) \le \frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}
 		\qquad \forall k > 0.
@@ -584,9 +585,9 @@
 	if we had not started out looking for a squared \(f\) we would have instead
 	ended up with the increment
 	\begin{align*}
-		\frac{1}{\Gamma^k}-\frac{1}{\Gamma^{k-1}},
+		\frac{1}{\Gamma^k}-\frac{1}{\Gamma^{k-1}}.
 	\end{align*}
-	which provides some intuition how Nesterov might have come up with the following	
+	This provides some intuition how Nesterov might have come up with the following	
 	idea. Let us consider the increment above and multiply it by \(\Gamma^k\).
 	Then we get
 	\begin{align*}
@@ -600,10 +601,12 @@
 	Now we not only need to return to the increments by dividing by \(\Gamma^k\)
 	again, we also need to somehow add roots. To do that we are going to
 	use the third binomial formula
-	\begin{align*}
+	\begin{align}
+		\nonumber
 		\tfrac1{\sqrt{\Gamma^k}}
 		\sqrt{\tfrac{\condition^{-1}}{\Gamma^k} + \condition_0^{-1}-\condition^{-1}}
 		&= \frac{1}{\Gamma^k}-\frac{1}{\Gamma^{k-1}}\\
+		\nonumber
 		&\lxeq{\text{bin.}} 
 		\left(
 			\frac{1}{\sqrt{\Gamma^k}}+\frac{1}{\sqrt{\Gamma^{k-1}}}
@@ -615,7 +618,8 @@
 		\left(
 			\frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}
 		\right)
-	\end{align*}
+		\label{eq: inverse gamma increment}
+	\end{align}
 	where we have used \(\Gamma^k\le\Gamma^{k-1}\) for the inequality. From
 	this we get the sufficient condition
 	\begin{align*}
@@ -636,10 +640,71 @@
 	thrown away is zero in case of \(\condition^{-1}\) i.e. when we do not
 	have strong convexity this is the best we can do.
 	
-	But if we have strong convexity it pays to find a \(f\) whose increments
-	come closer to
+	But for strong convexity we need to find a tighter upper bound \(f\). 
+	If we shuffle around (\ref{eq: inverse gamma increment}) a bit we get
 	\begin{align*}
-		\tfrac{c}{2}\sqrt{\tfrac{\condition^{-1}}{\Gamma^k c^2}+1}
+		\frac{1}{\sqrt{\Gamma^{k-1}}}
+		\le \frac{1}{\sqrt{\Gamma^k}}
+		- \frac{c}{2}\sqrt{\tfrac{\condition^{-1}}{c^2}\left(\tfrac{1}{\sqrt{\Gamma^k}}\right)^2+1}
+		=: g\left(\tfrac1{\sqrt{\Gamma^k}}\right)
+	\end{align*}
+	Now here is the trick: \(g\) is strictly monotonously increasing (its
+	derivative is positive). So if \(n\) was the first number violating
+	our requirement (\ref{eq: bounding function properties}), (i.e.
+	\(\tfrac{1}{\sqrt{\Gamma^n}}< f(n)\)), then due to
+	\begin{align*}
+		f(n-1)
+		\xle{\text{(\ref{eq: bounding function properties})}} \frac{1}{\sqrt{\Gamma^{n-1}}}
+		\le g\left(\tfrac1{\sqrt{\Gamma^n}}\right) 
+		< g(f(n))
+	\end{align*}
+	it would be enough for
+	\begin{align}\label{eq: weird contradiction requirement}
+		g(f(n))\le f(n-1)
+	\end{align}
+	to be true, to obtain a
+	contradiction. So if \(f(0)\le 1\) is a given, \(f(n)\) would then fulfill
+	(\ref{eq: bounding function properties}) by induction\footnote{Unfortunately,
+	I have no idea how Nesterov came up with this trick, nor how he eventually
+	found the function \(f\) that satisfies the requirements}. As we know the
+	result we can define
+	\begin{align*}
+		f(n)
+		:=\tfrac{c}{2\sqrt{\condition^{-1}}}\left[
+			\exp\left(\tfrac{n+1}{2\sqrt{\condition}}\right)
+			-\exp\left(-\tfrac{n+1}{2\sqrt{\condition}}\right)
+		\right]
+		=\frac{c}{4\delta}\left[
+			e^{(n+1)\delta}- e^{-(n+1)\delta}
+		\right]
+	\end{align*}
+	for \(\delta:=\sqrt{\condition^{-1}}/2\le 1/2\). Since \(f(0)\) is increasing in \(\delta\)
+	we have the induction start 
+	\begin{align*}
+		f(0)=\tfrac{c}{4\delta}\left[e^\delta-e^{-\delta}\right]
+		\le \tfrac{c}2\left[e^{1/2}-e^{-1/2}\right]
+		\le \tfrac{c}{\sqrt{3}} \le 1.
+	\end{align*}
+	Now we only need to show (\ref{eq: weird contradiction requirement}) to be
+	true to finish the proof:
+	\begin{align*}
+		g(f(n))
+		&= f(n) - \frac{c}{2}\sqrt{\tfrac{\condition^{-1}}{c^2}f(n)^2 + 1}\\
+		&= f(n) - \frac{c}{2}\sqrt{
+			\tfrac{1}{2^2}\left[e^{(n+1)\delta}- e^{-(n+1)\delta}\right]^2
+			+ 1
+		} \\
+		&= f(n) - \frac{c}{2}\sqrt{
+			\tfrac{1}{2}\left[
+				\tfrac12 e^{2(n+1)\delta}
+				-\smash{\underbrace{e^{(n+1)\delta}e^{-(n+1)\delta}}_{=1}}
+				+\tfrac12e^{-2(n+1)\delta}
+			\right]
+			+ 1
+		}\\
+		&= f(n) - \underbrace{\frac{c}{4}\left[e^{(n+1)\delta}+ e^{-(n+1)\delta}\right]}_{=f'(n)}\\
+		&= f(n) + \langle f'(n), n - (n-1) \rangle \xle{f\text{ convex}} f(n-1)
+		\qedhere
 	\end{align*}
 \end{proof}
 
