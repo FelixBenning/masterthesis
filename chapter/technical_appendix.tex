@@ -552,18 +552,95 @@
 
 \begin{lemma}[{\cite[Lemma 2.2.4]{nesterovLecturesConvexOptimization2018}}]
 	\label{lem-appendix: convergence rate bounds for estimating sequences}
-	For \(\lbound_0\in (\lbound, 3\ubound + \lbound]\) we have
+	For \(\condition_0^{-1}\in (\condition^{-1}, 3 + \condition^{-1}]\) we have
 	\begin{align*}
 		\Gamma^n
 		\le \frac{4}{\left(\frac{\condition}{\condition_0}-1\right)\left[
 			\exp\left(\frac{n+1}{2\sqrt{\condition}}\right)
 			-\exp\left(-\frac{n+1}{2\sqrt{\condition}}\right)
-		\right]}
+		\right]^2}
 		\le \frac{4}{(\condition_0^{-1}-\condition^{-1})(n+1)^2}
 	\end{align*}
 \end{lemma}
 \begin{proof}
-
+	We are interested in finding a function fulfilling
+	\begin{align*}
+		\Gamma^n \le \frac{1}{f(n)^2} \iff f(n) \le \frac1{\sqrt{\Gamma^n}}
+	\end{align*}
+	Since the weaker inequality would require \(f(n)\sim n\) it might be a
+	good idea to look at the increments
+	\begin{align*}
+		f(0) + \sum_{k=1}^n f(k) - f(k-1) = f(n)
+		\le \frac{1}{\sqrt{\Gamma^n}}
+		= \underbrace{\frac1{\sqrt{\Gamma^0}}}_{=1}
+		+ \sum_{k=1}^n\frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}.
+	\end{align*}
+	In particular it would be sufficient if we had \(f(0) \le 1\) and
+	\begin{align*}
+		f(k) - f(k-1) \le \frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}
+		\qquad \forall k > 0.
+	\end{align*}
+	for our weaker inequality this would amount to constant increments. Now
+	if we had not started out looking for a squared \(f\) we would have instead
+	ended up with the increment
+	\begin{align*}
+		\frac{1}{\Gamma^k}-\frac{1}{\Gamma^{k-1}},
+	\end{align*}
+	which provides some intuition how Nesterov might have come up with the following	
+	idea. Let us consider the increment above and multiply it by \(\Gamma^k\).
+	Then we get
+	\begin{align*}
+		1-\frac{\Gamma^k}{\Gamma^{k-1}}
+		&\lxeq{\text{def.}} \gamma_k
+		\xeq{(\ref{eq: morphing speed equation})}
+		\sqrt{\frac{\lbound_k}{\ubound}} \xeq{(\ref{eq: lbound recursion})}
+		\sqrt{\frac{\Gamma^k \lbound_0 + (1-\Gamma^k)\lbound}{\ubound}}\\
+		&\lxeq{\text{def.}} \sqrt{\condition^{-1} + \Gamma^k(\condition_0^{-1}-\condition^{-1})}.
+	\end{align*}
+	Now we not only need to return to the increments by dividing by \(\Gamma^k\)
+	again, we also need to somehow add roots. To do that we are going to
+	use the third binomial formula
+	\begin{align*}
+		\tfrac1{\sqrt{\Gamma^k}}
+		\sqrt{\tfrac{\condition^{-1}}{\Gamma^k} + \condition_0^{-1}-\condition^{-1}}
+		&= \frac{1}{\Gamma^k}-\frac{1}{\Gamma^{k-1}}\\
+		&\lxeq{\text{bin.}} 
+		\left(
+			\frac{1}{\sqrt{\Gamma^k}}+\frac{1}{\sqrt{\Gamma^{k-1}}}
+		\right)
+		\left(
+			\frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}
+		\right) \\
+		&\le \frac{2}{\sqrt{\Gamma^k}}
+		\left(
+			\frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}
+		\right)
+	\end{align*}
+	where we have used \(\Gamma^k\le\Gamma^{k-1}\) for the inequality. From
+	this we get the sufficient condition
+	\begin{align*}
+		f(k) - f(k-1)
+		\le \tfrac12\sqrt{\tfrac{\condition^{-1}}{\Gamma^k} + \condition_0^{-1}-\condition^{-1}}
+		= \tfrac12\underbrace{\sqrt{\condition_0^{-1}-\condition^{-1}}}_{=:c}
+		\sqrt{\tfrac{\condition^{-1}}{\Gamma^k}c^{-2} + 1}
+	\end{align*}
+	In particular we could throw away the complicated positive part in the root
+	to get the sufficient condition
+	\begin{align*}
+		f(k) - f(k-1) := \tfrac{c}2\quad \forall k>0 \quad \text{and}
+		\quad f(0):=\tfrac{c}2 = \tfrac{\sqrt{\condition_0^{-1}-\condition^{-1}}}2
+		\le \tfrac{\sqrt{3}}{2}<1.
+	\end{align*}
+	And this immediately leads to \(f(n) = \tfrac{c}{2}(n+1)\) which provides us
+	with the weaker second bound. Note that the ``complicated'' part we have
+	thrown away is zero in case of \(\condition^{-1}\) i.e. when we do not
+	have strong convexity this is the best we can do.
+	
+	But if we have strong convexity it pays to find a \(f\) whose increments
+	come closer to
+	\begin{align*}
+		\tfrac{c}{2}\sqrt{\tfrac{\condition^{-1}}{\Gamma^k c^2}+1}
+	\end{align*}
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
