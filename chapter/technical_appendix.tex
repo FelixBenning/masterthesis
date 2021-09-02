@@ -568,7 +568,7 @@
 		\Gamma^n \le \frac{1}{f(n)^2} \iff f(n) \le \frac1{\sqrt{\Gamma^n}}
 	\end{align}
 	Since the weaker inequality would require \(f(n)\sim n\) it might be a
-	good idea to look at the increments
+	good idea to look at the increments.
 	% \begin{align*}
 	% 	f(0) + \sum_{k=1}^n f(k) - f(k-1) = f(n)
 	% 	\le \frac{1}{\sqrt{\Gamma^n}}
@@ -581,9 +581,9 @@
 		f(k) - f(k-1) \le \frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}
 		\qquad \forall k > 0.
 	\end{align*}
-	for our weaker inequality this would amount to constant increments. Now
-	if we had not started out looking for a squared \(f\) we would have instead
-	ended up with the increment
+	for our weaker inequality this requires the right side to be lower bounded
+	by a constant. Now if we had not started out looking for a squared \(f\) we
+	would have instead ended up with the increment
 	\begin{align*}
 		\frac{1}{\Gamma^k}-\frac{1}{\Gamma^{k-1}}.
 	\end{align*}
