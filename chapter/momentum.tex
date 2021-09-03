@@ -1232,6 +1232,28 @@ is therefore reasonable.
 	Plugging \(c(1)=2\ubound\) into (\ref{eq: gamma_1 dependent loss difference}).
 \end{proof}
 
+\subsection{Practical Hyperparameter Selection}
+
+Now while Algorithm~\ref{algo: optimal nesterov momentum} eliminates another
+hyperparameter, we still need to somehow know the Lipschitz constant \(\ubound\)
+of the gradient and the condition number \(\condition\).
+
+The Lipschitz constant could be estimated with the fact that Gradient Decent
+stops converging if the learning rate exceeds \(2/\ubound\). Similarly
+Nesterov's Momentum stops converging if the learning rate is just a bit higher
+than \(1/\ubound\) (cf. Figure~\ref{fig: annotated nesterov rates}). Since
+the gradient is also Lipschitz continuous for higher constants, convergence
+does not break if we guess \(\ubound\) too high. But the convergence rate
+will take a hit accordingly. So generally we would want to increase our
+learning rate as much as possible and see when it stops converging and then
+back off a bit.
+
+With the condition number we could just be conservative and set
+\(\condition^{-1}=0\). This sacrifices linear convergence, but in view of the
+asymptotic convergence rates stochasticity causes, this might not be so bad. But
+in situations where the ``transient phase'' (before stochasticity kills fast
+progression) is significant, this might not be a satisfactory answer.
+
 \begin{figure}[h]
 	\centering
 	\def\svgwidth{1\textwidth}
@@ -1248,6 +1270,37 @@ is therefore reasonable.
 	}
 	\label{fig: momentum gamma plot}
 \end{figure}
+
+From our eigenvalue analysis we know that generally smaller eigenvalues will
+still converge (even if we neglect them) although at a slower rate. So we
+could just guess a condition and see how it goes. And if we have a look at
+Figure~\ref{fig: momentum gamma plot} a condition guess will simply stop the
+progression of \(\gamma_n\) towards zero at this point and consequently stop the
+progression of \(\momCoeff_n\) towards one. If we dislike the convergence speed
+we can probably just increase the condition number on the fly which causes the
+\(\gamma_n\) to fall further and momentum to continue its move towards one.
+In Figure~\ref{fig: momentum progression} we can see that it only takes very
+few iterations until we converge to
+\(\hat{\momCoeff}=\frac{1-\sqrt{\condition^{-1}}}{1+\sqrt{\condition^{-1}}}\)
+if \(\condition^{-1}>0\).
+
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/momentum_progression.pdf_tex}
+	\caption{
+		Starting from \(\gamma_1=1\) the progression of \(\momCoeff_n\) for
+		different condition numbers \(\condition\). The approximations
+		\(\momCoeff_n=\frac{t_n-1}{t_{n+1}}\) where \(t_1=1\) and
+		\(t_n=\tfrac12(1+\sqrt{1+4t_n^2})\) and \(\momCoeff_n=\frac{n-1}{n+2}\)
+		for the bad (\(\condition^{-1}=0\)) case seem to be popular in practice
+		\parencite{rechtOptimization2013} (surprisingly, since the
+		true recursion is not much more expensive).
+	}
+	\label{fig: momentum progression}
+\end{figure}
+
+\fxwarning{deal with floats}
 
 
 % \section{Complexity Bounds}

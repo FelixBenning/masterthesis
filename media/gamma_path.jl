@@ -42,6 +42,15 @@ $(@bind iterations Slider(1:10, default=8, show_value=true))
 # ╔═╡ 69bf985f-3773-4846-90a8-1983406aec05
 md"# Momentum Progression"
 
+# ╔═╡ 0b5a5d73-2cb6-4f8d-b174-8efc698f17ab
+mom_itrs = 1:50
+
+# ╔═╡ da7f077b-0dc4-49b7-a0dc-8cba977cdee5
+tk_teboulle = vcat([1], accumulate((t,_)->(1+sqrt(1+4t^2))/2,mom_itrs, init=1))
+
+# ╔═╡ 8ffd2c72-094f-4ac2-93f4-cbd89a36e6c1
+interesting_cond_inv = vcat([0, 0.005, 0.03, 0.1, 0.2, 0.5, 1])
+
 # ╔═╡ 5db8b32f-e788-43d9-b70e-7525accd2532
 md"# Appendix"
 
@@ -53,15 +62,21 @@ next_gamma(gamma, kappa_inv) = (
 # ╔═╡ 364dded2-d049-461f-b460-ff604641c693
 next_gamma(gamma) = next_gamma(gamma, κ_inv)
 
-# ╔═╡ ef16026e-3566-48c0-9498-636634b623ef
-beta(γ, inv_cond) = γ*(1-γ) / (next_gamma(γ, inv_cond)+γ^2)
-
 # ╔═╡ 042b030d-57b1-46c3-a99b-e14162659242
 gammas = vcat([sqrt(κ_inv_0)], accumulate(
-	(κ_inv,_)->next_gamma(κ_inv), 
+	(γ,_)->next_gamma(γ), 
 	1:iterations, 
 	init=sqrt(κ_inv_0)
 ))
+
+# ╔═╡ ef16026e-3566-48c0-9498-636634b623ef
+beta(γ, inv_cond) = γ*(1-γ) / (next_gamma(γ, inv_cond)+γ^2)
+
+# ╔═╡ f71043ab-b991-483f-889d-57cfe7b99583
+gamma_progressions = Dict(
+	cond_inv => vcat([1], accumulate((γ,_)->next_gamma(γ,cond_inv), mom_itrs, init=1))
+	for cond_inv in interesting_cond_inv
+)
 
 # ╔═╡ 72422dec-6686-4fc5-9413-599e44712996
 yticks=vcat(
@@ -90,6 +105,43 @@ md"## Tick Manipulation"
 
 # ╔═╡ 0d7f59d2-eb27-42cc-bb2c-4e151f605caf
 unzip(zip_iter) = map(idx -> getfield.(zip_iter, idx), fieldnames(eltype(zip_iter)))
+
+# ╔═╡ c70eec21-0c9d-4cdc-8cc2-81e1ad479954
+begin
+	mom_progression = plot(
+		ylabel="\$\\beta\$", xlabel="Iteration", legend=:topleft, ylim=(-0.05,1.05),
+		fontfamily="Computer Modern"
+	)
+	for (idx, cond_inv) in enumerate(interesting_cond_inv)
+		plot!(
+			mom_progression, [1,length(mom_itrs)+2], 
+			beta(sqrt(cond_inv), cond_inv)*[1,1],
+			label="\$\\kappa^{-1}=$(cond_inv)\$"
+		)
+	end
+	for (idx, cond_inv) in reverse(collect(enumerate(interesting_cond_inv)))
+		plot!(
+			mom_progression,
+			beta.(gamma_progressions[cond_inv], cond_inv),
+			label=missing, seriestype=:scatter, color=idx, xaxis=:log,
+			xticks=unzip(vcat(
+					[(x, "$(x)") for x in 1:10], 
+					[(15, "15"), (20, "20"), (50,"50")]
+			))
+		)
+	end
+	plot!(
+		mom_progression, mom_itrs, 
+		[(t-1)/tp for (t,tp) in zip(tk_teboulle,tk_teboulle[2:end])],
+		label="\$\\beta_n=(t_n-1)/t_{n+1}\$", color=:black, linestyle=:dash
+	)
+	plot!(
+		mom_progression, mom_itrs, x->(x-1)/(x+2), 
+		label="\$\\beta_n=(n-1)/(n+2)\$", color=:black, linewidth=2, linestyle=:dot
+	)
+	Plots.savefig(mom_progression, "momentum_progression.svg")
+	mom_progression
+end
 
 # ╔═╡ aff0222d-0705-4ed0-86fb-54c1e6b56623
 cluster(ordered_iter, max_dist) = cluster((x,y)->abs(x-y), ordered_iter, max_dist)
@@ -178,7 +230,6 @@ end
 
 # ╔═╡ d22b409b-6f78-4400-ac91-4b05232c7aa0
 begin
-	interesting_cond_inv = vcat([0, 0.005, 0.03, 0.1, 0.2, 0.5, 1])
 	mom_plot = plot(
 		0:0.1:1, x->1-x, color=:black, linestyle=:dash, label=missing,
 		xtick=prune_ticks(
@@ -1048,13 +1099,18 @@ version = "0.9.1+5"
 # ╟─be902ed2-2ded-4999-a015-cd8b31b5be7a
 # ╟─50f7fe30-02a2-11ec-073e-c9ba5008e015
 # ╟─4dc2dc9c-1fda-4720-9567-ac9d4a56068f
-# ╠═5cb2c147-3d51-4c10-a91c-3e6f746881a0
+# ╟─5cb2c147-3d51-4c10-a91c-3e6f746881a0
+# ╟─042b030d-57b1-46c3-a99b-e14162659242
 # ╟─69bf985f-3773-4846-90a8-1983406aec05
-# ╠═ef16026e-3566-48c0-9498-636634b623ef
+# ╟─ef16026e-3566-48c0-9498-636634b623ef
 # ╟─d22b409b-6f78-4400-ac91-4b05232c7aa0
+# ╠═f71043ab-b991-483f-889d-57cfe7b99583
+# ╟─c70eec21-0c9d-4cdc-8cc2-81e1ad479954
+# ╟─da7f077b-0dc4-49b7-a0dc-8cba977cdee5
+# ╟─0b5a5d73-2cb6-4f8d-b174-8efc698f17ab
+# ╟─8ffd2c72-094f-4ac2-93f4-cbd89a36e6c1
 # ╟─5db8b32f-e788-43d9-b70e-7525accd2532
 # ╠═5790da0d-a54a-4681-b98c-b9f39be10e9a
-# ╟─042b030d-57b1-46c3-a99b-e14162659242
 # ╠═c189befa-3b9d-47f5-b0b7-6c3a3fee790e
 # ╟─364dded2-d049-461f-b460-ff604641c693
 # ╟─72422dec-6686-4fc5-9413-599e44712996
