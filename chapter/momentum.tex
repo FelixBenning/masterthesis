@@ -931,20 +931,18 @@ explains why we should make (\ref{eq: morphing speed equation}) an equality.
 	\input{media/gamma_path.pdf_tex}
 	\caption{
 		Picking the largest possible \(\gamma_n\) which satisfy (\ref{eq:
-		morphing speed equation using condition}) results in equality assuming
-		\(\lbound_0\ge\lbound\).  If we start out with \(\condition_0=\condition\)
-		we have \(\gamma_n=\hat{\gamma}=1/\sqrt{\condition}\)
-		for all \(n\). In any case \(\hat{\gamma}\) acts as an attraction point.
+		morphing speed equation using condition}) makes the inequality an
+		equality. If we start out with \(\condition_0=\condition\) we have
+		\(\gamma_n=\hat{\gamma}=\sqrt{\condition^{-1}}\) for all \(n\).
+		Otherwise \(\hat{\gamma}\) acts as an attraction point.
 		% \(\momCoeff\) represents \(\momCoeff_n\)
 		% plotted against \(\gamma_n\) and
 		% \(\hat{\momCoeff}\) corresponds to \(\hat{\gamma}\).
 		%
-		In case of \(1/\condition=0\) i.e. \(\lbound=0\)
-		it also visualizes how it is helpful to select a different \(\condition_0\).
-		%
-		But increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
-		increases \(\Phi_0\) which is part of the bound for convergence. So
-		this is no free lunch.
+		For \(\condition^{-1}=0\) i.e. \(\lbound=0\)
+		we see how it might be helpful to select a different \(\condition_0\)
+		even though increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
+		increases \(\Phi_0\) which is part of the bound on convergence.
 	}
 	\label{fig: gamma path}
 \end{figure}
@@ -1120,7 +1118,116 @@ is nothing special about \(\condition_0^{-1}=3+\condition^{-1}\) when it
 comes to \(\Gamma^n\). The \(\gamma_n\) are still increasing afterwards. And
 from (\ref{eq: convergence rate optimization}) it seems that the trade-off of
 higher \(\lbound_0\) seems to be worth it. So maybe we should have another go
-at bounding \(\Gamma^n\).
+at bounding \(\Gamma^n\). But instead of diving head first into even more
+technical calculations we could also consider the fact that
+\begin{align*}
+	\Gamma^n
+	= \prod_{k=1}^n (1-\gamma_k)
+	= (1-\gamma_1)\Gamma_2^n 
+\end{align*}
+and simply use Lemma~\ref{lem-appendix: convergence rate bounds for estimating sequences}
+with \(\tilde{\gamma}_k = \gamma_{k+1}\) to bound \(\Gamma_2^n=\tilde{\Gamma}^{n-1}\)
+using the fact that
+\begin{align*}
+	\tilde{\condition}_0^{-1} = \condition_1^{-1} = \gamma_1^2 \le 1 \le 3+\condition^{-1}.
+\end{align*}
+With this trick we get\footnote{Once could potentially iterate on this trick to obtain
+tighter bounds on \(\Gamma^n\) since we are using our imprecise upper bound only on the
+remaining product after factoring out parts of it.}
+\begin{align*}
+	\Gamma^n
+	&\le \frac{4\condition^{-1}(1-\gamma_1)}{(\gamma_1^2-\condition^{-1})\left[
+		\exp\left(\frac{n}{2\sqrt{\condition}}\right)
+		-\exp\left(-\frac{n}{2\sqrt{\condition}}\right)
+	\right]^2}
+	\le \frac{4(1-\gamma_1)}{(\gamma_1^2-\condition^{-1})n^2}.
+\end{align*}
+With Theorem~\ref{thm: nesterov momentum convergence rates} the relevant
+constant to optimize is
+\begin{align*}
+	\frac{4(1-\gamma_1)}{\gamma_1^2-\condition^{-1}}\frac{\ubound+\lbound_0}{2}
+	= \frac{2(1-\gamma_1)}{\gamma_1^2-\condition^{-1}}(1+\condition_0^{-1})\ubound
+\end{align*}
+and we can use the \(\gamma_n\) recursion (\ref{eq: morphing speed equation using condition})
+to rewrite \(\condition_0^{-1}\) as
+\begin{align*}
+	\condition_0^{-1} = \frac{\gamma_1^2 - \gamma_1\condition^{-1}}{1-\gamma_1}.
+\end{align*}
+Using this representation we want to minimize
+\begin{align*}
+	c(\gamma_1)
+	:=2\ubound\frac{(1-\gamma_1) + (\gamma_1^2 - \gamma_1\condition^{-1})}{\gamma_1^2 -\condition^{-1}}
+	\qquad \gamma_1\in(\sqrt{\condition^{-1}}, 1).
+\end{align*}
+By taking the derivative of \(c\) one can show that it is monotonously
+decreasing (Lemma~\ref{lem-appendix: derivative loss difference constant in
+gamma}). Taking \(\gamma_1=1\) would imply an infinite
+\(\kappa_0^{-1}\) (and \(\lbound_0\)) and therefore seems to prevent us from
+doing so at first glance. but all relevant things like the loss difference upper
+bound
+\begin{align}\label{eq: gamma_1 dependent loss difference}
+	\Loss(\weights_n)-\Loss(\weights_*)
+	\le c(\gamma_1)
+	\frac{\condition^{-1}\|\weights_0-\weights_*\|^2}{\left[
+		\exp\left(\frac{n}{2\sqrt{\condition}}\right)
+		-\exp\left(-\frac{n}{2\sqrt{\condition}}\right)
+	\right]^2}
+	\le c(\gamma_1)\frac{\|\weights_0-\weights_*\|}{n^2},
+\end{align}
+the momentum \(\momCoeff_n\) (except for \(\momCoeff_0\) which does not
+matter) and our weight iterates \(\weights_n\) are continuous in \(\gamma_1\) at
+one. The limit
+\begin{align*}
+	c(1)=2\ubound
+\end{align*}
+is therefore reasonable.
+
+\begin{algorithm}
+	\KwIn{
+		starting point \(\weights_0\) (condition number \(\condition\),
+		lipschitz constant \(\ubound\))
+	}
+	\(y_1 \leftarrow \weights_0\)\;
+	\(\weights_1 \leftarrow y_1 - \tfrac{1}{\ubound}\nabla\Loss(y_1)\)\;
+
+	\(\gamma_1 \leftarrow 1\); \(n\leftarrow 1\)\;
+	\While{not converged}{
+		\(\gamma_{n+1} \leftarrow \tfrac12 \left[
+		(\condition^{-1} - \gamma_n^2)
+		+ \sqrt{(\condition^{-1} - \gamma_n^2)^2 + 4 \gamma_n^2}
+		\right]\)\;
+
+		\(\momCoeff_n \leftarrow
+		\displaystyle
+		\frac{\gamma_n(1-\gamma_n)}{\gamma_{n+1} + \gamma_n^2}\)\;
+
+		\(y_{n+1} \leftarrow \weights_n + \momCoeff_n(\weights_n-\weights_{n-1})\)\;
+
+		\(\weights_{n+1} \leftarrow y_{n+1} - \tfrac{1}{\ubound}\nabla\Loss(y_{n+1})\)\;
+
+		\(n\leftarrow n+1\)\;
+	}
+	\caption{Optimal Nesterov Momentum\label{algo: optimal nesterov momentum}}
+\end{algorithm}
+\begin{corollary}
+	For \(\Loss \in \strongConvex{\lbound}{\ubound}\) (includes
+	\(\Loss\in\lipGradientSet{\ubound}\) with \(\lbound=0\)), \(\weights_n\)
+	selected by Algorithm~\ref{algo: optimal nesterov momentum}
+	we get
+	\begin{align*}
+		\Loss(\weights_n)-\Loss(\weights_*)
+		\le
+		\frac{2\lbound\|\weights_0-\weights_*\|^2}{\left[
+			\exp\left(\frac{n}{2\sqrt{\condition}}\right)
+			-\exp\left(-\frac{n}{2\sqrt{\condition}}\right)
+		\right]^2}
+		\le\frac{2\ubound\|\weights_0-\weights_*\|}{n^2},
+	\end{align*}
+	where the term in the middle should be ignored for \(\lbound=0\).
+\end{corollary}
+\begin{proof}
+	Plugging \(c(1)=2\ubound\) into (\ref{eq: gamma_1 dependent loss difference}).
+\end{proof}
 
 
 % \section{Complexity Bounds}

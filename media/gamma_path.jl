@@ -31,12 +31,12 @@ $(@bind κ_inv Slider(0:0.01:1, default=0.1, show_value=true))
 
 # ╔═╡ 50f7fe30-02a2-11ec-073e-c9ba5008e015
 md"#### κ\_0\_inv
-$(@bind κ_inv_0 Slider(0:0.1:4, default=1.3, show_value=true))
+$(@bind κ_inv_0 Slider(0:0.1:4, default=1.1, show_value=true))
 "
 
 # ╔═╡ 4dc2dc9c-1fda-4720-9567-ac9d4a56068f
 md"#### Iterations
-$(@bind iterations Slider(1:10, default=2, show_value=true))
+$(@bind iterations Slider(1:10, default=8, show_value=true))
 "
 
 # ╔═╡ 5db8b32f-e788-43d9-b70e-7525accd2532
@@ -61,7 +61,7 @@ yticks=vcat(
 		(0,"\$0.0\$"), 
 		(1, "\$1.0\$"),
 		(κ_inv, "\$\\kappa^{-1}\$"), 
-		((1-sqrt(κ_inv))/(1+sqrt(κ_inv)), "\$\\hat{\\beta}\$")
+		# ((1-sqrt(κ_inv))/(1+sqrt(κ_inv)), "\$\\hat{\\beta}\$")
 	],
 	[
 		(gamma^2, "\$\\kappa_$(idx)^{-1}\$") 
@@ -148,7 +148,10 @@ begin
 		xtick=prune_ticks(xticks, 0.015),
 		fontfamily="Computer Modern", color=:grey, linestyle=:dash, ylim=(-.05,1.1)
 	)
-	plot!(vcat(0:0.005:0.1,0.1:0.01:1), beta, color=:black, linestyle=:dot, linewidth=2, label="\$\\beta\$")
+	# plot!(
+	# 	vcat(0:0.005:0.1,0.1:0.01:1), beta, 
+	# 	color=:black, linestyle=:dot, linewidth=2, label="\$\\beta\$"
+	# )
 	for (idx, gamma) in enumerate(gammas[1:iterations])
 		plot!(
 			gamma_path, 0:1, x->gamma^2 - x*(gamma^2 - κ_inv), 
