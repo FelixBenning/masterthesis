@@ -39,14 +39,22 @@ md"#### Iterations
 $(@bind iterations Slider(1:10, default=8, show_value=true))
 "
 
+# ╔═╡ 69bf985f-3773-4846-90a8-1983406aec05
+md"# Momentum Progression"
+
 # ╔═╡ 5db8b32f-e788-43d9-b70e-7525accd2532
 md"# Appendix"
 
 # ╔═╡ c189befa-3b9d-47f5-b0b7-6c3a3fee790e
-next_gamma(gamma) = (κ_inv-gamma^2 + sqrt((gamma^2-κ_inv)^2 +4*gamma^2))/2
+next_gamma(gamma, kappa_inv) = (
+	kappa_inv-gamma^2 + sqrt((gamma^2-kappa_inv)^2 +4*gamma^2)
+)/2
+
+# ╔═╡ 364dded2-d049-461f-b460-ff604641c693
+next_gamma(gamma) = next_gamma(gamma, κ_inv)
 
 # ╔═╡ ef16026e-3566-48c0-9498-636634b623ef
-beta(γ) = γ*(1-γ) / (next_gamma(γ)+γ^2)
+beta(γ, inv_cond) = γ*(1-γ) / (next_gamma(γ, inv_cond)+γ^2)
 
 # ╔═╡ 042b030d-57b1-46c3-a99b-e14162659242
 gammas = vcat([sqrt(κ_inv_0)], accumulate(
@@ -166,6 +174,33 @@ begin
 	end
 	Plots.savefig(gamma_path, "gamma_path.svg")
 	gamma_path
+end
+
+# ╔═╡ d22b409b-6f78-4400-ac91-4b05232c7aa0
+begin
+	interesting_cond_inv = vcat([0, 0.005, 0.03, 0.1, 0.2, 0.5, 1])
+	mom_plot = plot(
+		0:0.1:1, x->1-x, color=:black, linestyle=:dash, label=missing,
+		xtick=prune_ticks(
+			vcat(
+				[(0, "0"), (1, "1")],
+				[(sqrt(x),"\$\\sqrt{$(x)}\$") for x in interesting_cond_inv]
+			), 0.01 
+		)
+	)
+	for (idx, inv_cond) in enumerate(interesting_cond_inv)
+		plot!(
+			mom_plot, 0:0.01:sqrt(inv_cond), γ->beta(γ, inv_cond),
+			label=missing, color=idx, linestyle=:dot
+		)
+		plot!(
+			mom_plot, sqrt(inv_cond):0.01:1, γ->beta(γ, inv_cond),
+			label="\$\\kappa^{-1}=$(inv_cond)\$", color=idx,
+			ylabel="\$\\beta\$", xlabel="\$\\gamma\$"
+		)
+	end
+	Plots.savefig(mom_plot, "momentum_gamma_plot.svg")
+	mom_plot
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1013,12 +1048,15 @@ version = "0.9.1+5"
 # ╟─be902ed2-2ded-4999-a015-cd8b31b5be7a
 # ╟─50f7fe30-02a2-11ec-073e-c9ba5008e015
 # ╟─4dc2dc9c-1fda-4720-9567-ac9d4a56068f
+# ╠═5cb2c147-3d51-4c10-a91c-3e6f746881a0
+# ╟─69bf985f-3773-4846-90a8-1983406aec05
 # ╠═ef16026e-3566-48c0-9498-636634b623ef
-# ╟─5cb2c147-3d51-4c10-a91c-3e6f746881a0
+# ╟─d22b409b-6f78-4400-ac91-4b05232c7aa0
 # ╟─5db8b32f-e788-43d9-b70e-7525accd2532
 # ╠═5790da0d-a54a-4681-b98c-b9f39be10e9a
 # ╟─042b030d-57b1-46c3-a99b-e14162659242
 # ╠═c189befa-3b9d-47f5-b0b7-6c3a3fee790e
+# ╟─364dded2-d049-461f-b460-ff604641c693
 # ╟─72422dec-6686-4fc5-9413-599e44712996
 # ╟─b41c5953-bd5b-4e3d-a3c5-9a802d56abf1
 # ╟─af41dac4-bc97-4ee2-829d-f0bfcb1407b4

@@ -1232,6 +1232,23 @@ is therefore reasonable.
 	Plugging \(c(1)=2\ubound\) into (\ref{eq: gamma_1 dependent loss difference}).
 \end{proof}
 
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/momentum_gamma_plot.pdf_tex}
+	\caption{
+		Since momentum \(\momCoeff_n\) is a function of \((\gamma_n,
+		\gamma_{n+1})\), and \(\gamma_{n+1}\) is a function of
+		\((\gamma_n,\condition^{-1})\), momentum can be viewed as a function of
+		\((\gamma, \condition^{-1})\). This function
+		\(\momCoeff(\gamma,\condition^{-1})\) is plotted here over \(\gamma\) for
+		different \(\condition^{-1}\). Since the sequence of \(\gamma_n\) stays
+		above \(\hat{\gamma}=\sqrt{\condition^{-1}}\) the line is dotted below
+		this threshold.
+	}
+	\label{fig: momentum gamma plot}
+\end{figure}
+
 
 % \section{Complexity Bounds}
 
