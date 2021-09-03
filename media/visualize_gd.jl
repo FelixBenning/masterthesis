@@ -43,7 +43,7 @@ Show Momentum $(@bind show_momentum PlutoUI.CheckBox(default=true))
 default_ev = [
 	Dict(
 		"saddlepoint" => -1,
-		"bad_conditioning" => 0.2,
+		"bad_conditioning" => 0.12,
 		"normal"=> 1
 	)[viz_type],
 	Dict(
@@ -136,7 +136,7 @@ if maximum(log_rates) > 0
 	))
 else
 	# convex stop once all are close to 0 (below threshold 0.01)
-	ceil(Int32, maximum(log.(0.01 ./[eigenvec1'*start, eigenvec2'*start])./log_rates))
+	ceil(Int32, maximum(log.(0.2 ./[eigenvec1'*start, eigenvec2'*start])./log_rates))
 end
 
 # ╔═╡ 9bcec655-65b9-4444-b6ab-38ab8ab5d169
