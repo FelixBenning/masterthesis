@@ -525,8 +525,11 @@ resulting in
 \end{align*}
 which provides a tighter convergence bound than 
 Theorem~\ref{thm: convex function GD loss upper bound} for gradient decent 
-without momentum \(\momCoeff=0\), but is actually harmed by momentum.
-\fxnote{Check out improvements by \cite{sunNonErgodicConvergenceAnalysis2019}}
+without momentum \(\momCoeff=0\), but is actually harmed by momentum. While
+this bound might not be the best and further improvements could be made
+\parencite[see e.g.][]{sunNonErgodicConvergenceAnalysis2019} it appears that we
+always end up with \(O(1/n)\) convergence rates in the general case and we
+therefore turn towards Nesterov's Momentum.
 
 \section{Nesterov's Momentum Convergence}
 
