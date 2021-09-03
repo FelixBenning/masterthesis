@@ -24,6 +24,12 @@ end
 # ╔═╡ f709e1de-aaac-4eb0-a2e0-a2bfa6ae6370
 md"# Visualize Paraboloid"
 
+# ╔═╡ 7bbb6a10-0f8f-4bbc-b637-eac2007ade5f
+struct Grid
+	x
+	y
+end
+
 # ╔═╡ 491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
 md"# Visualize Gradient Decent"
 
@@ -82,6 +88,20 @@ end
 
 # ╔═╡ 3d9d041e-5d53-410f-a1ce-e63b264ea924
 savefig(eigen_contour, "contour.svg")
+
+# ╔═╡ a6055fa3-1de6-4a22-a685-2ed27da0dc98
+plot_window = Grid(
+	Dict(
+		"saddlepoint" => -4:0.1:4,
+		"bad_conditioning" => -3:0.1:6,
+		"normal" => -3:0.1:6
+	)[viz_type],
+	Dict(
+		"saddlepoint" => -4:0.1:4,
+		"bad_conditioning" => -6:0.1:3,
+		"normal" => -3:0.1:6
+	)[viz_type]
+)
 
 # ╔═╡ f76998fa-a01e-4f5f-b714-2440a2f8dd50
 start = Dict(
@@ -181,7 +201,10 @@ end
 
 # ╔═╡ f15c0419-96ec-4b9f-afab-00e4e8883146
 begin
-	losssurface = plot(-3:0.1:6, -6:0.1:3, f, st=:contour, title="Losssurface")
+	losssurface = plot(
+		plot_window.x, plot_window.y, f, 
+		st=:contour, title="Losssurface"
+	)
 	plot!(
 		losssurface,
 		decent_steps[1,:], 
@@ -1162,6 +1185,8 @@ version = "0.9.1+5"
 # ╟─6ed6aa03-88e1-4e8a-9bfc-60e3d22058e5
 # ╠═c3e4e730-d97d-11eb-0340-1d1e2fd0167a
 # ╟─e771e800-f72c-46db-b80d-598c309f9743
+# ╠═7bbb6a10-0f8f-4bbc-b637-eac2007ade5f
+# ╟─a6055fa3-1de6-4a22-a685-2ed27da0dc98
 # ╠═3d9d041e-5d53-410f-a1ce-e63b264ea924
 # ╟─491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
 # ╟─5993f2a2-dd65-49a5-8777-83ea02194f89
