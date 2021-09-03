@@ -715,6 +715,33 @@
 	\end{align*}
 	is monotonously decreasing.
 \end{lemma}
+\begin{proof}
+	We are going to discard \(2\ubound\) without loss of generality to get	
+	\begin{align*}
+		\frac{dc}{d\gamma_1}
+		&= \frac{
+			(-(1+\condition^{-1})+2\gamma_1)(\gamma_1^2 -\condition^{-1})
+			- (1-\gamma_1(1+\condition^{-1})+\gamma_1^2)2\gamma_1
+		}{(\gamma_1^2-\condition^{-1})^2}.
+	\end{align*}
+	Since we are interested in the sign of the derivative we can discard the
+	denominator and look at just the enumerator
+	\begin{align*}
+		&2\gamma_1(\cancel{\gamma_1^2}-\condition^{-1}) - (1+\condition^{-1})(\gamma_1^2-\condition^{-1})
+		- (1-\gamma_1(1+\condition^{-1})+\cancel{\gamma_1^2})2\gamma_1\\
+		&= -2\gamma_1\condition^{-1} - (1+\condition^{-1})(\gamma_1^2 + \condition^{-1})
+		-2\gamma_1 + 2\gamma_1^2(1+\condition^{-1})\\
+		&= (1+\condition^{-1})\underbrace{(\condition^{-1}-2\gamma_1 + 2\gamma_1^2)}_{=:f(\gamma_1)}.
+	\end{align*}
+	In which we only need to consider the parabola \(f\). Now since the parabola
+	is convex, it takes only negative values for points between two ends where it
+	is negative. And we have
+	\begin{align*}
+		f(\sqrt{\condition^{-1}}) &= 2(\condition^{-1}-\sqrt{\condition^{-1}}) < 0\\
+		f(1) &= \condition^{-1} -1 < 0
+		\qedhere
+	\end{align*}
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
