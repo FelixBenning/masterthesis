@@ -167,9 +167,9 @@ previous position \(\weights_n\).
 \end{definition}
 %
 \begin{remark}\fxwarning{too informal?}
-	This method also known as ``Nesterov's Accelerated Momentmum'' is said to date
-	back to \textcite{nesterovMethodSolvingConvex1983}.  But not only is the
-	original text in Russian, it also difficult to find on the internet.
+	This method also known as ``Nesterov's Accelerated Gradient'' (NAG) is said
+	to date back to \textcite{nesterovMethodSolvingConvex1983}.  But not only is
+	the original text in Russian, it also difficult to find on the internet.
 	Fortunately, \citeauthor{nesterovMethodSolvingConvex1983} wrote textbooks,
 	\citetitle{nesterovLecturesConvexOptimization2018}
 	(\citeyear{nesterovLecturesConvexOptimization2018}) being the most recent.
@@ -1238,6 +1238,7 @@ Now while Algorithm~\ref{algo: optimal nesterov momentum} eliminates another
 hyperparameter, we still need to somehow know the Lipschitz constant \(\ubound\)
 of the gradient and the condition number \(\condition\).
 
+\fxnote{backtracking/armijo's condition?}
 The Lipschitz constant could be estimated with the fact that Gradient Decent
 stops converging if the learning rate exceeds \(2/\ubound\). Similarly
 Nesterov's Momentum stops converging if the learning rate is just a bit higher
@@ -1290,15 +1291,41 @@ if \(\condition^{-1}>0\).
 	\input{media/momentum_progression.pdf_tex}
 	\caption{
 		Starting from \(\gamma_1=1\) the progression of \(\momCoeff_n\) for
-		different condition numbers \(\condition\). The approximations
+		different condition numbers \(\condition\). The heuristics
 		\(\momCoeff_n=\frac{t_n-1}{t_{n+1}}\) where \(t_1=1\) and
 		\(t_n=\tfrac12(1+\sqrt{1+4t_n^2})\) and \(\momCoeff_n=\frac{n-1}{n+2}\)
-		for the bad (\(\condition^{-1}=0\)) case seem to be popular in practice
-		\parencite{rechtOptimization2013} (surprisingly, since the
-		true recursion is not much more expensive).
+		seem to be popular in practice \parencite{rechtOptimization2013}.
 	}
 	\label{fig: momentum progression}
 \end{figure}
+
+What we can also see in Figure~\ref{fig: momentum progression} is that
+\begin{align}\label{eq: simplified dynamic nesterov momentum}
+	\momCoeff_n = \frac{n-1}{n+2} = 1-\frac{3}{n+2}
+\end{align}
+is a decent approximation for the \(\momCoeff_n\) progression when \(\condition^{-1}=0\).
+If we recall our original motivation, \(\momCoeff\) was \(1-\lr\friction\) where
+\(\friction\) was a friction parameter. \textcite{suDifferentialEquationModeling2015}
+show that in the limit of \(\lr\to0\), nesterov momentum with momentum
+coefficient (\ref{eq: simplified dynamic nesterov momentum}) approximates the
+differential equation
+\begin{align*}
+	\ddot{\weights} + \frac{3}{t}\dot{\weights} + \nabla\Loss(\weights) = 0
+\end{align*}
+i.e. decreasing friction \(\friction=3/t\) over time. They then use this
+continuous approximation to derive better convergence rates (\(O(1/n^3)\) instead of
+\(O(1/n^2)\)) when this conservative (\(\condition^{-1}=0\)) assumption is used
+but the loss function is strongly convex. They also propose a scheme of
+``restarting'' Nesterov's Momentum to achieve linear convergence in the
+strongly convex case without knowing the condition number (A restart effectively
+resets momentum back to a lower level).
+
+Last but not least recall that \(\lrSq=1/\ubound\) is the \emph{squared}
+discretization \(\lr^2\) of the ODE which can deceive you into thinking that the
+discretization is similar given that Gradient Decent converges for \(\lr \in
+(0,2/\ubound)\). But the implied discretization \(\lr=1/\sqrt{\ubound}\) of
+Nesterov's Momentum much larger in general. Providing some more intuition where the
+speedup comes from.
 
 \fxwarning{deal with floats}
 
