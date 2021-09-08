@@ -364,7 +364,7 @@ does not require the second derivative is
 \end{figure}
 %
 \begin{proof}
-	For the equivalence of these convexity definitions see \textcite[Theorem
+	For the equivalence of these convexity definitions see e.g. \textcite[Theorem
 	2.1.2, 2.1.4]{nesterovLecturesConvexOptimization2018}\fxnote{appendix?}
  \end{proof}
 %
@@ -566,7 +566,10 @@ which provides intuition how "flat" a minima has to be to cause such behavior.
 The minimum at \(\infty\) has an infinitely wide basin which flattens out
 more and more. If we wanted such an example in a bounded space we would have
 to try and coil up such an infinite slope into a spiral, which spirals outwards
-to avoid convergence.
+to avoid convergence.\footnote{A spiral is of course not convex, so this hints
+at why we are going to need a notion of increasing or infinite dimensions to
+provide complexity bounds in Section~\ref{sec: complexity bounds} essentially
+spiralling through the dimensions.}
 
 Since our example is one dimensional we can also immediately see the "eigenvalue"
 %
@@ -596,11 +599,11 @@ to bound our function
 \end{align}
 %
 The distance penalty can be understood in view of Lemma~\ref{lem: lipschitz and bounded derivative}
-which states that the change of gradient (third derivative) is bounded by \(\ubound\).
+which states that the change of gradient (second derivative) is bounded by \(\ubound\).
 In other words: The gradient changes at most at rate \(\ubound\) so if we
 add this upper bound as a penalty we can be sure to have a real upper bound.
 
-Gradient Decent with optimal learning rate minimizes this upper bound:
+Gradient Decent with learning rate \(1/\ubound\) minimizes this upper bound:
 %
 \begin{lemma}\label{lem: smallest upper bound}
 	Let \(\nabla f\) be \(\ubound\)-Lipschitz continuous, then for any \(x\in\reals^d\)
@@ -846,10 +849,9 @@ a decreasing learning rate. And since we can not guarantee a monotonic decrease
 with subgradients, the name "decent" is generally avoided and we have to keep
 a running minimum. See \textcite[Section 3.2.3]{nesterovLecturesConvexOptimization2018}
 or \textcite[Section 3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
-treatment. The convergence rate is not only dependent on the size of the
-parameter set \(B\) but it also decreases to
+treatment. The convergence rate decreases to
 \begin{align*}
-	O\Big(\frac{B\lipConst}{\sqrt{n}}\Big).
+	O\Big(\frac{\|\weights_0-\weights_*\|\lipConst}{\sqrt{n}}\Big).
 \end{align*}
 }
 
@@ -1139,7 +1141,7 @@ While it is not too surprising that we recovered the learning rate from
 Section~\ref{sec: visualize gd} as we simply provided lower and upper bounds on
 the eigenvalues, it is still reassuring. 
 
-\section{Complexity Bounds}
+\section{Complexity Bounds}\label{sec: complexity bounds}
 
 Now that we found convergence rates for gradient decent on (strongly) convex
 problems, the question is can we do better? I.e. how fast could an algorithm we

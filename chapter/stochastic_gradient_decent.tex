@@ -31,11 +31,11 @@ Sampling an independent sequence \(((X_k,Y_k), k\ge 1)\) from the
 distribution \(\dist\) results in \emph{Stochastic Gradient Decent}
 %
 \begin{align*}
-	\weights_n
-	&= \weights_{n-1} - \lr\nabla\loss(\weights_{n-1}, X_n,Y_n)\\
-	&= \weights_{n-1} - \lr\nabla\Loss(\weights_{n-1})
+	\Weights_n
+	&= \Weights_{n-1} - \lr\nabla\loss(\Weights_{n-1}, X_n,Y_n)\\
+	&= \Weights_{n-1} - \lr\nabla\Loss(\Weights_{n-1})
 	+ \lr\underbrace{
-		[\nabla\Loss(\weights_{n-1}) - \nabla\loss(\weights_{n-1}, X_n, Y_n)]
+		[\nabla\Loss(\Weights_{n-1}) - \nabla\loss(\Weights_{n-1}, X_n, Y_n)]
 	}_{=:\martIncr_n}
 \end{align*}
 Where
@@ -47,10 +47,10 @@ is a martingale for the filtration
 	\filtration_n :=\sigma((X_k, Y_k): k\le n )
 	\qquad (X_k,Y_k)\stackrel{\text{iid}}{\sim}\dist,
 \end{align*}
-since \(\weights_n\) is \(\filtration_n\)-measurable and thus
+since \(\Weights_n\) is \(\filtration_n\)-measurable and thus
 \begin{align*}
 	\E[\martingale_{n+1}\mid \filtration_n]
-	= \underbrace{\E[\nabla\Loss(\weights_n) - \nabla\loss(\weights_n, X_{n+1}, Y_{n+1})\mid \filtration_n]}_{
+	= \underbrace{\E[\nabla\Loss(\Weights_n) - \nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\mid \filtration_n]}_{
 		=0 \quad (X_{n+1},Y_{n+1}) \indep \filtration_n
 	} + \martingale_n
 	= \martingale_n.
@@ -59,23 +59,23 @@ since \(\weights_n\) is \(\filtration_n\)-measurable and thus
 So if we view our recursion as an ODE discretization again
 %
 \begin{align*}
-	\weights^{(\lr)}(t) &:= \weights_{\lfloor t/\lr\rfloor}
-	= \weights_0 - \lr\sum_{k=0}^{\lfloor t/\lr\rfloor-1}\nabla\Loss(\weights_k)
+	\Weights^{(\lr)}(t) &:= \Weights_{\lfloor t/\lr\rfloor}
+	= \weights_0 - \lr\sum_{k=0}^{\lfloor t/\lr\rfloor-1}\nabla\Loss(\Weights_k)
 	+ \lr\sum_{k=1}^{\lfloor t/\lr\rfloor}\martIncr_k
 \end{align*}
 %
 then for \(\lr_n := t/n\) we have
 \begin{align*}
-	\weights^{(\lr_n)}(t) &:= \weights_n
-	= \weights_0 - \lr_n\sum_{k=0}^{n-1}\nabla\Loss(\weights_k)
+	\Weights^{(\lr_n)}(t) &:= \Weights_n
+	= \weights_0 - \lr_n\sum_{k=0}^{n-1}\nabla\Loss(\Weights_k)
 	+\frac{t}{n}\martingale_n
 \end{align*}
 Now if we have some form of law of large numbers for martingales we get
 \(t\martingale_n/n\to 0\) for \(n\to\infty\) which means that in the limit we
 get our deterministic integral equation back back
 \begin{align*}
-	\lim_{n\to\infty}\weights^{(\lr_n)}(t) = \weights(t)
-	= \weights_0 - \int_0^t \nabla\Loss(\weights(s))ds
+	\lim_{n\to\infty}\Weights^{(\lr_n)}(t) = \Weights(t)
+	= \weights_0 - \int_0^t \nabla\Loss(\Weights(s))ds
 \end{align*}
 
 \textcite{nemirovskiRobustStochasticApproximation2009}
