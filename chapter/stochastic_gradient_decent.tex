@@ -387,9 +387,102 @@ condition number \(\condition\) is one which allows one step convergence of GD.
 
 \subsubsection{The Effect of the Condition Number}
 
-
+Now by diagonalizing \(H\) and using the fact that
+\begin{align*}
+	&\prod_{k=0}^{n-1} (1-\lr_k V\diag[\hesseEV_1, \dots, \hesseEV_\dimension]V^T)\\
+	&= V \diag\left[
+		\prod_{k=0}^{n-1}(1-\lr_k\hesseEV_1),
+		\dots, \prod_{k=0}^{n-1}(1-\lr_k\hesseEV_\dimension)
+	\right]V^T
+\end{align*}
+we can consider all the eigenspaces separately again and it is also quite
+obvious that again only the largest and smallest eigenvalue will matter.
+With the usual conditional independence argument we get
 
 \section{Expected Square Error Analysis}
+
+\subsection{Strongly Convex Case}
+
+While we are not going to tether ourselves to Gradient Decent \(\weights_n\) in
+this section, we are still going to split off the noise
+\begin{align*}
+	\|\Weights_{n+1} - \weights_*\|^2
+	&= \|\Weights_n -\weights_* - \lr_n\nabla\Loss(\weights_n) +\lr_n \martIncr_{n+1}\|^2\\
+	&= \begin{aligned}[t]
+		&\|\Weights_n - \weights_* - \lr_n\nabla\Loss(\Weights_n)\|^2\\
+		&+ 2\langle \Weights_n - \weights_* - \lr_n\nabla\Loss(\Weights_n), \lr_n \martIncr_{n+1}\rangle\\
+		&+ \lr_n^2 \|\martIncr_{n+1}\|^2
+	\end{aligned}
+\end{align*}
+The scalar product will disappear once we apply expectation due to conditional
+independence again. For the first part we are going to do the same as in the
+classical case in Theorem~\ref{thm: gd strong convexity convergence rate}:
+\begin{align*}
+	&\|\Weights_n - \weights_* - \lr_n\nabla\Loss(\Weights_n)\|^2\\
+	&= \|\Weights_n - \weights_*\|^2
+	- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\weights_*\rangle}_{
+		\xge{\text{Lem.~\ref{lem: bermanDiv lower bound (strongly convex)}}}
+	 	\tfrac{\ubound\lbound}{\ubound+\lbound}\|\Weights_n - \minimum\|^2
+		\mathrlap{+ \tfrac{1}{\ubound+\lbound}\|\nabla\Loss(\Weights_n)\|^2}
+	}
+	+ \lr_n^2 \|\nabla\Loss(\Weights_n)\|^2\\
+	&\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
+	\|\Weights_n - \weights_*\|^2
+	+ \lr_n(\lr_n - \tfrac{2}{\ubound+\lbound})
+	\|\nabla\Loss(\Weights_n)\|^2
+\end{align*}
+For \(\lr_n\le\tfrac{2}{\ubound+\lbound}\) we can drop the gradient again to
+obtain
+\begin{align*}
+	\E\|\Weights_{n+1} - \weights_*\|^2
+	\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
+	\E\|\Weights_n - \weights_*\|^2 + \lr_n^2 \E\|\martIncr_{n+1}\|^2.
+\end{align*}
+In the classical case we just wanted to select \(\lr_n\) as large as possible,
+i.e. \(\lr_n=\tfrac{2}{\ubound+\lbound}\). But in the stochastic setting there
+are adverse effect of large learning rates due to noise. Now as our upper bound
+is a convex parabola in \(\lr_n\) we can just use the first order condition
+\begin{align*}
+	\frac{d}{d\lr_n}
+	= -2\tfrac{\ubound\lbound}{\ubound+\lbound}
+	\E\|\Weights_n - \weights_*\|^2 + 2\lr_n \E\|\martIncr_{n+1}\|^2
+	\xeq{!} 0
+\end{align*}
+to find the best upper bound
+\begin{align*}
+	\lr_n
+	= \min\left\{\frac{
+		\tfrac{\ubound\lbound}{\ubound+\lbound}\E\|\Weights_n - \weights_*\|^2
+	}{\E\|\martIncr_{n+1}\|^2},
+	\frac{2}{\ubound+\lbound}
+	\right\}.
+\end{align*}
+In particular we still want to ``max out our learing rate'', i.e. select
+\(\lr_n=\tfrac{2}{\ubound+\lbound}\) if
+\begin{align*}
+	2\E\|\martIncr_{n+1}\|^2 \le \ubound\lbound \E\|\Weights_n - \weights_*\|^2,
+\end{align*}
+in other words: the stochastic variance only becomes a problem once we are
+close to the minimum. Before that we basically want to treat our problem like
+the classical one. This results in two training phases, the \emph{transient}
+phase in which we are still far from the minimum, our learning rate is constant
+and we get a linear convergence rate
+\begin{align*}
+	\E\|\Weights_{n+1} - \weights_*\|^2
+	&\le \left(1-2\tfrac{2}{\ubound+\lbound}\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
+	\E\|\Weights_n - \weights_*\|^2 + \left(\tfrac{2}{\ubound+\lbound}\right)^2
+	\underbrace{\E\|\martIncr_{n+1}\|^2}_{
+		\le\tfrac{\ubound\lbound}{2} \E\|\Weights_n - \weights_*\|^2
+	}\\
+	&\le \underbrace{
+		\left(1-\tfrac{2\ubound\lbound}{(\ubound+\lbound)^2}\right)
+	}_{
+		=1-\frac{2}{(1+\condition^{-1})(1+\condition)}
+	}
+	\E\|\Weights_n - \weights_*\|^2.
+\end{align*}
+In the \emph{asymptotic} phase on the other hand, we have to reduce our learning
+rate with the distance to the minimum
 
 
 \subsection{General Convex Case}

@@ -934,6 +934,7 @@ Using this new assumption we get our linear\footnote{
 rate of convergence back, which we had motivated in Section~\ref{sec: visualize gd}. 
 %
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
+	\label{thm: gd strong convexity convergence rate}
 	If \(\Loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
 	\[0 \le \lr \le \tfrac{2}{\ubound+\lbound}\]
 	Gradient Decent generates a sequence \(\weights_n\) satisfying
