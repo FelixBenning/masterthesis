@@ -120,9 +120,9 @@ is not surprising. Unrolling SGD we can rewrite it as
 Which is the same recursion as in GD except for the last term. Now for an
 equidistance grid we have \(\lr=T/N\). Intuitively the last term in \(\Weights_T\)
 should therefore disappear due to some law of large numbers for martingales
-\begin{align*}
-	\sum_{k=0}^{N-1}\lr_k\martIncr_{k+1} = \frac{T}{N}\sum_{k=1}^N\martIncr_k.
-\end{align*}
+\begin{align}\label{eq: mean of martingale increments}
+	\sum_{k=0}^{N-1}\lr\martIncr_{k+1} = \frac{T}{N}\sum_{k=1}^N\martIncr_k.
+\end{align}
 And since the variance of a sum of martingale increments is the sum of variances
 as mixed terms disappear due to conditional independence (\ref{eq: conditional
 independence of martingale increments})
@@ -181,16 +181,221 @@ we get in Theorem~\ref{thm: distance SGD vs GD}.
 			\le \exp\left(\sum_{j=k+1}^{n-1}\lr_j^2\ubound^2 + 2\lr_j\ubound\right)
 		}
 	\end{align*}
-	where we have used \(1+x\le\exp(x)\) to get our first claim.
+	using \(1+x\le\exp(x)\) for the first claim. The rest 
+	follows from \(n\lr\le T\).
 \end{proof}
 
-\subsection{Batch Learning}
+\section{Batch Learning}
 
-cf. \cite{hardtTrainFasterGeneralize2016} \cite{hofferTrainLongerGeneralize2018}
+Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
+estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
+``batch'' of data \((X^{(i)}_{n+1}, Y^{(i)}_{n+1})_{i=1,\dots,m}\) (independently
+\(\dist\) distributed) instead, i.e.
+\begin{align*}
+	\Weights_{n+1} = \Weights_n
+	-\lr_n \underbrace{\frac1{m}\sum_{i=1}^m\nabla\loss(\Weights_n,X^{(i)}_{n+1}, Y^{(i)}_{n+1})}_{
+		=:\nabla\loss_{n+1}^m(\Weights_n)
+	}.
+\end{align*}
+leading to the modified martingale increment
+\begin{align*}
+	\martIncr_n^{(m)}
+	= \nabla\Loss(\Weights_{n-1})
+	- \nabla\loss_n^m(\Weights_{n-1})
+\end{align*}
+with reduced variance
+\begin{align*}
+	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m K.
+\end{align*}
+Now while this variance reduction does reduce our upper bound on the distance
+between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
+comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
+We would incur an equivalent cost, if we reduced our discretization to
+\begin{align*}
+	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}
+\end{align*}
+which increases the number of iterations to reach \(T\) to \(Nm\) which implies
+\(Nm\) gradient evaluations using SGD without batches. And if we have a look
+at the upper bound in Theorem~\ref{thm: distance SGD vs GD} these two actions
+have the same effect on our distance bound between SGD and GD (especially if
+\(\Loss\) is convex as we can then get rid of the exponential term as hinted
+at in the proof of the theorem).
+
+Now of course an upper bound is no guarantee that there is no effect in reality.
+But if we have a look at the term (\ref{eq: mean of martingale increments})
+again which is in some sense the difference between SGD and GD, then we can
+see that these actions have quite a similar effect
+\begin{align*}
+	\lr\sum_{k=1}^N\martIncr_k^{(m)}
+	&=\frac{T}{N}\sum_{k=1}^N
+	\nabla\Loss(\Weights_{k-1})- \nabla\loss_n^m(\Weights_{k-1})\\
+	&=\frac{T}{Nm}\sum_{k=1}^N\sum_{i=1}^m
+	[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X^{(i)}_k, Y^{(i)}_k)]\\
+	&\approx \tilde{\lr} \sum_{k=1}^{Nm}
+	\underbrace{
+		[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X_k, Y_k)]
+	}_{\widetilde{\martIncr}_k}.
+\end{align*}
+The difference is, that batch learning stays on some \(\Weights_k\) and collects
+\(m\) pieces of information before it makes a big step based on this information
+while SGD just makes \(m\) small steps. This also changes the true gradient
+evaluations \(\nabla\Loss(\Weights_k)\) slightly. But since we are only making
+small steps these \(\Weights_k\) will generally be similar. We still can not
+make a definitive assertion which one is better though\footnote{
+	Whether or not you think one method is superior might be correlated with
+	whether or not you think that agile software development is a good idea
+}.
+
+Assuming they have the same effect on the deviation of SGD from GD we can
+make a few practical considerations:
+\begin{itemize}
+	\item A smaller learning rate benefits GD \emph{and} reduces the distance
+	between GD and SGD while batches only do the latter. If we have little data
+	and want to achieve good results in as few gradient evaluations as possible
+	we should in general choose smaller learning rates over larger batch sizes.
+	\item SGD can not be easily parallelized since one needs the previous weights
+	to calculate the next weights. Making multiple gradient evaluations at
+	the same point is trivially parallelizable on the other hand and only
+	requires broadcasting the result for summation. So if the bottleneck is
+	computation time, it makes sense to select batch sizes equal to the number of
+	threads, or if the broadcasting and summing takes significant time, batch
+	sizes which are multiples of the number of threads.
+
+	This is not without caveats though: Increasing the Batch Size to speed up
+	learning requires a proportional increase in the learning rate to actually
+	have an impact on the time required for optimization. And since GD stops
+	converging if learing rates become too large, there is an upper bound on this.
+	And while batches might be ``free'' in a computational sense due to
+	parallelization, they still increase the sample consumption. And if we only
+	have limited data, this often results in more passes over the same data and
+	thus overfitting.
+	
+	Last but not least there might be other opportunities for parallelization
+	like generating ensemble models by optimizing from different starting points
+	or using different models altogether.
+\end{itemize}
+In summary: If you are concerned about the \emph{quality} of your model you should
+probably choose SGD without batches, while concerns about training time justify
+larger batch sizes in some cases.
+
+\textcite{hardtTrainFasterGeneralize2016} \textcite{hofferTrainLongerGeneralize2018}
+
+\section{Quadratic Loss Functions}
+
+While we have proven SGD behaves roughly like GD for small learning rates, we
+are not really that interested in how close SGD is to GD but rather how good it
+is at optimizing \(\Loss\). So to build some intuition let us consider a
+quadratic Loss function again before we get to general convex functions.
+Using the same trick we used in Section~\ref{sec: visualize gd} 
+\begin{align*}
+	\nabla\Loss(\weights)
+	= \nabla^2\Loss(\weights)(\weights-\weights_*)
+	= H(\weights-\weights_*)
+\end{align*}
+we can rewrite SGD (by induction using the triviality of \(n=0\)) as
+\begin{align}
+	\nonumber
+	&\Weights_{n+1}-\weights_*\\
+	\nonumber
+	&= \Weights_n - \weights_* - \lr_n H(\Weights_n-\weights_*) + \lr_n\martIncr_{n+1}\\
+	\nonumber
+	&=(1-\lr_n H)\underbrace{(\Weights_n - \weights_*)}_{
+		\xeq{\text{ind.}} (\weights_n - \weights_*)
+		\mathrlap{+ \sum_{k=0}^{n-1}\lr_k\left(\prod_{i=k+1}^{n-1}(1-\lr_iH)\right)\martIncr_{k+1}}
+	} + \lr_n\martIncr_{n+1}\\
+	\nonumber
+	&= \underbrace{(1-\lr_n H)(\weights_n - \weights_*)}_{=\weights_{n+1}-\weights_* \implies (n\to n+1)}
+	+ \sum_{k=0}^n\lr_k\left(\prod_{i=k+1}^n(1-\lr_iH)\right)\martIncr_{k+1}\\
+	\label{eq: unrolled SGD weights (general quadratic loss case)}
+	&=\left(\prod_{k=0}^n(1-\lr_kH)\right)(\weights_0-\weights_*)
+	+ \sum_{k=0}^n\lr_k\left(\prod_{i=k+1}^n(1-\lr_iH)\right)\martIncr_{k+1}.
+\end{align}
+
+\subsubsection{Variance Reduction}
+
+One particularly interesting case is \(H=\identity\). Why is that interesting?
+Considering that
+\begin{align*}
+	\E[\tfrac12\|\weights-X\|^2]=\E[\loss(\weights,X)]=:\Loss(\weights)
+\end{align*}
+is minimized by \(\weights_*=\E[X]\) and we have
+\begin{align*}
+	\E[\nabla\loss(\weights,X)]
+	=\E[\weights-X]=\weights- \weights_*=\nabla\Loss(\weights)
+\end{align*}
+we necessarily also have
+\begin{align*}
+	\Loss(\weights) = \tfrac12\|\weights-\weights_*\|^2 + \text{const},
+\end{align*}
+which implies \(H=\nabla^2\Loss=\identity\). So this case is essentially
+trying to find the expected value of some random variables as quickly as
+possible. Now by (\ref{eq: unrolled SGD weights (general
+quadratic loss case)}) and
+\begin{align*}
+	\martIncr_n = \nabla\Loss(\Weights_{n-1}) -\nabla\loss(\weights_{n-1}, X_n)
+	= X_n - \E[X]
+\end{align*}
+the \(\Weights_n\) are just an affine transformation of the \(X_n\). And we
+happen to know the best linear unbiased estimator (``BLUE'') of \(\E[X]\)
+which is the mean of the \(X_n\). This means that \(\Weights_n\) is
+necessarily worse that the mean. But with \(\lr_n=\frac1{n+1}\) and by
+induction
+\begin{align}
+	\label{eq: getting rid of w_0 first step}
+	\Weights_1 &= \weights_0 - \frac{1}{0+1}(\weights_0 - X_1) = X_1\\
+	\nonumber
+	\Weights_{n+1}
+	&= \Weights_n - \tfrac{1}{n+1}(\Weights_n - X_{n+1})
+	\xeq{\text{ind.}}\smash{\underbrace{\left(1-\tfrac1{n+1}\right)}_{=\frac{n}{n+1}}}
+	\frac1n\sum_{k=1}^n X_k + \tfrac{1}{n+1}X_{n+1}\\
+	\nonumber
+	&= \frac{1}{n+1}\sum_{k=1}^{n+1}X_k
+\end{align}
+we can also achieve this optimum. For constant learning rates \(\lr<1\) on the
+other hand one can similarly show that we have
+\begin{align*}
+	\Weights_n = (1-\lr)^n\weights_0 + \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}X_{k+1}
+\end{align*}
+or to highlight the connection to (\ref{eq: unrolled SGD weights (general
+quadratic loss case)})
+\begin{align*}
+	\Weights_n - \weights_*
+	= \underbrace{(1-\lr)^n(\weights_0 -\weights_*)}_{=\weights_n-\weights_*}
+	+ \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}
+	\smash{\overbrace{\martIncr_{k+1}}^{X_{k+1}-\weights_*}}.
+\end{align*}
+This implies we do not weight our \(X_k\) equally, but rather use an
+exponential decay giving the most recent data the most weight.
+
+Notice how we can reobtain the rates from Theorem~\ref{thm: distance SGD vs GD}
+by throwing this entire exponential decay away
+\begin{align*}
+	\E\|\Weights_n-\weights_n\|^2
+	&= \E\|\sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}\martIncr_{k+1}\|^2\\
+	&= \sum_{k=0}^{n-1}\lr^2\underbrace{(1-\lr)^{2(n-1-k)}}_{\le1}
+	\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le K}\\
+	&\le \lr^2 n K \le \lr TK.
+\end{align*}
+We can do the same thing with the general case (\ref{eq: unrolled SGD weights
+(general quadratic loss case)}) if we take \(\lr<2/\ubound\) for \(|H|\le\ubound\).
+
+Now this fact is making me quite anxious about the claim that batch learning is
+worse than SGD in general. But we also have to keep in mind how special this
+case is. In (\ref{eq: getting rid of w_0 first step}) we can get rid of the
+initial bias \(\weights_0\) completely. This is only possible because our
+condition number \(\condition\) is one which allows one step convergence of GD.
+
+\subsubsection{The Effect of the Condition Number}
+
+
 
 \section{Expected Square Error Analysis}
 
+
+\subsection{General Convex Case}
+
 \textcite{nemirovskiRobustStochasticApproximation2009}
+
 
 \subsection{Averaging}
 
@@ -201,6 +406,13 @@ cf. \cite{bachNonstronglyconvexSmoothStochastic2013}
 \textcite{simsekliTailIndexAnalysisStochastic2019}
 
 
+\section{Heuristics}
+
+\subsection{Adagrad}
+
+\subsection{Adadelta}
+
+\subsection{RMSProp}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
