@@ -3,7 +3,7 @@
 \chapter{Gradient Decent (GD)}
 
 A step up from zero order methods (such as grid search) are first order methods
-using the first derivative (the gradient). This requires a "first order oracle"
+using the first derivative (the gradient). This requires a ``first order oracle''
 which can provide us with \(\Loss(\weights)\) and \(\nabla \Loss(\weights)\) at any point
 \(\weights\).
 
@@ -22,7 +22,7 @@ discretization of an ordinary differential equation (ODE)
 	= - \nabla \Loss(\weights_n).
 \end{align*}
 %
-Here the "learning rate" \(\lr\) is the time delta between discretizations
+Here the ``learning rate'' \(\lr\) is the time delta between discretizations
 \(t_n\) and \(t_{n+1}\). This of course implies \(t_n = n\lr\). And for
 \(\lr\to\infty\), we arrive at the ODE
 %
@@ -199,7 +199,7 @@ stochasticity would push us off these narrow equilibria so being right on
 top of them is of little concern. But being close to zero in such a component
 still means slow movement away, since we are multiplying by it. This is a
 common explanation for the observation of temporary plateaus in machine learning
-which "suddenly fall off" once the exponential factor ramps up and causes a
+which ``suddenly fall off'' once the exponential factor ramps up and causes a
 sharp drop in the loss (Figure~\ref{fig: visualize saddlepoint gd}).
 %
 \begin{figure}[h]
@@ -231,7 +231,7 @@ This leads us to the condition
 	0< \lr < 2/\lambda_d
 \end{align}
 %
-Selecting \(\lr = 1/\lambda_d\) reduces the exponentiation base ("rate") of the
+Selecting \(\lr = 1/\lambda_d\) reduces the exponentiation base (``rate'') of the
 corresponding eigenspace to zero ensuring convergence in one step.
 But if we want to maximize the convergence rate of \(\weights_n\), this is not
 the best selection.
@@ -533,7 +533,7 @@ In particular we get a convergent average of squared gradients
 	\le \frac{2 \ubound}{n} (\Loss(\weights_0) - \inf_\weights \Loss(\weights)) \in O(1/n).
 \end{align*}
 %
-It is important to note the "square" part. If the series of unsquared gradient
+It is important to note the ``square'' part. If the series of unsquared gradient
 norms were finite as well, the \(\weights_n\) would be a cauchy sequence
 %
 \begin{align*}
@@ -562,7 +562,7 @@ implies
 	\nabla \Loss(t) &= -\tfrac1t
 \end{align*}
 %
-which provides intuition how "flat" a minima has to be to cause such behavior.
+which provides intuition how ``flat'' a minima has to be to cause such behavior.
 The minimum at \(\infty\) has an infinitely wide basin which flattens out
 more and more. If we wanted such an example in a bounded space we would have
 to try and coil up such an infinite slope into a spiral, which spirals outwards
@@ -571,7 +571,7 @@ at why we are going to need a notion of increasing or infinite dimensions to
 provide complexity bounds in Section~\ref{sec: complexity bounds} essentially
 spiralling through the dimensions.}
 
-Since our example is one dimensional we can also immediately see the "eigenvalue"
+Since our example is one dimensional we can also immediately see the ``eigenvalue''
 %
 \begin{align*}
 	\nabla^2 \Loss(\weights(t)) = \exp(-\weights(t)) = 1/t
@@ -653,7 +653,7 @@ this changes now.
 While Lipschitz continuity of the gradient can be viewed as an upper
 bound on the distance between the function and its linear approximation
 (Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality}),
-convexity can be viewed as a lower bound on this "distance", called the 
+convexity can be viewed as a lower bound on this ``distance'', called the 
 the Bergman divergence
 %
 \begin{align*}
@@ -693,9 +693,9 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 	\end{align}
 	%
 	This gradient is equal to the change of gradient from \(x\) to \(y\) and 
-	therefore represents the error "rate" we are making assuming a constant gradient
+	therefore represents the error ``rate'' we are making assuming a constant gradient
 	and linearly approximating \(f\), which is by definition the derivative of the size of
-	\(\bergmanDiv{f}(y,x)\). Now this error "rate" can be translated
+	\(\bergmanDiv{f}(y,x)\). Now this error ``rate'' can be translated
  	back into a real error using the stickiness of the gradient due to
 	its Lipschitz continuity. I.e. by the previous lemma we know that
 	%
@@ -833,7 +833,7 @@ Now we can state the main convergence result
 	\end{align*}
 \end{proof}
 
-\subsection{Subgradient "Decent"}\label{subsec: subgradient method}
+\subsection{Subgradient ``Decent''}\label{subsec: subgradient method}
 If we can not have convergence of the parameters \(\weights\) we might not
 care as much about the convergence of the gradient either. In that case it
 turns out that we can even get convergence of the loss if we only assume
@@ -842,10 +842,10 @@ convexity and \(\lipConst\)-Lipschitz continuity of \(\Loss\) itself, i.e.
 	\Loss \in \lipGradientSet[0,0]{\lipConst}
 \end{align*}
 %
-But this form of Subgradient "Decent"
+But this form of Subgradient ``Decent''
 requires a bounded, convex parameter set we project back into if we leave, and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
-with subgradients, the name "decent" is generally avoided and we have to keep
+with subgradients, the name ``decent'' is generally avoided and we have to keep
 a running minimum. You can either look into \textcite[Section
 3.2.3]{nesterovLecturesConvexOptimization2018} or \textcite[Section
 3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
@@ -916,7 +916,7 @@ which we will now sharpen this to a quadratic lower bound as well.
 %
 Using this new assumption we get our linear\footnote{
 	In the Numerical Analysis, exponential rate of
-	convergence is called "linear convergence" because the relationship
+	convergence is called ``linear convergence'' because the relationship
 	\[
 		\|\weights_{n+1} - \minimum\| \le c \|\weights_n - \minimum\|
 	\]
@@ -930,7 +930,7 @@ Using this new assumption we get our linear\footnote{
 	repeated application of \(\exp\) is annoying to write so writers prefer the
 	recursive notation above which motivates this seemingly peculiar naming.
 	The convergence rate we obtained in Section~\ref{sec: convex convergence theorems}
-	is therefore referred to as "sub-linear" convergence.
+	is therefore referred to as ``sub-linear'' convergence.
 }
 rate of convergence back, which we had motivated in Section~\ref{sec: visualize gd}. 
 %
@@ -1050,7 +1050,7 @@ Now as promised we still have to show the improved lower bound.
 		\bergmanDiv{f}(y,x) = f(y) - f(x) -\langle\nabla f(x), y-x\rangle
 		\ge \tfrac{\lbound}2 \|y-x\|^2,
 	\end{align}
-	we first have to "remove" this lower bound from \(f\) to apply our other
+	we first have to ``remove'' this lower bound from \(f\) to apply our other
 	lower bound. So we define
 	\begin{align*}
 		g_x(y) := f(y) - \tfrac{\lbound}2\|y-x\|^2 \qquad
@@ -1095,7 +1095,7 @@ Now as promised we still have to show the improved lower bound.
 		+ \tfrac{\lbound}2 \|y-x\|^2.
 	\end{align}
 	Since the \(\|y-x\|^2\) lower bound improves the convergence rate in
-	our convergence theorem, it is helpful to view it as the "good" part of
+	our convergence theorem, it is helpful to view it as the ``good'' part of
 	our lower bound and view the application of the gradient lower bound as
 	a fallback.
 
@@ -1243,7 +1243,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	This type of loss function is not unlikely to be encountered in real
 	problems. E.g. in reinforcement learning with sparse rewards the estimation
 	of the value function over states requires the back-propagation of this
-	reward through the states that lead up to it. "Eligibility traces"
+	reward through the states that lead up to it. ``Eligibility traces''
 	\parencite[Chapter 12]{suttonReinforcementLearningIntroduction2018}
 	are an attempt to speed this process up.
 \end{remark}
@@ -1290,14 +1290,14 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\end{align}
 	%
 	where \(\stdBasis_1=(1,0,\dots,0)^T\) is the first standard basis
-	vector and \(\graphLaplacian\) is the "Graph Laplacian"\footnote{
+	vector and \(\graphLaplacian\) is the ``Graph Laplacian``\footnote{
 		It might seem a bit excessive to introduce the concept of graphs when
 		we could have simply calculated the derivative by hand to get the same
 		result. But this graph view is very suggestive how one would generalize
-		this "heat spread" problem to more complicated structures than a
+		this ``heat spread'' problem to more complicated structures than a
 		1-dimensional rod. In particular the connectedness of graphs is related
 		to its condition number \parencite{gohWhyMomentumReally2017}. And this
-		provides some more intuition for how "worst case problems" look like.
+		provides some more intuition for how ``worst case problems'' look like.
 	} for the 
 	\fxnote{tikz graph}{undirected graph} \(\graph=(\vertices, \edges)\) with 
 	\begin{align*}
@@ -1639,7 +1639,7 @@ local perspective. We only care about minimizing the next loss, using
 nothing but the current gradient. In Assumption~\ref{assmpt: parameter in
 linear hull of gradients} on the other hand, we consider the linear span of all
 gradients so far. This distinction is important as it will make the
-"momentum method" discussed in Chapter~\ref{chap: momentum} seem much more obvious.
+``momentum method'' discussed in Chapter~\ref{chap: momentum} seem much more obvious.
 
 Lastly since this generalization of assumptions improved our rate of convergence
 we might ask if we could generalize our assumption further. Heuristics like

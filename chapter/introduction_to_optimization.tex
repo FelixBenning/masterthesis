@@ -21,14 +21,14 @@ And we \emph{want} to minimize the theoretical loss over all examples (risk)
 \section{Zero Order Optimization}
 
 Let us set aside the stochasticity of the problem for a moment and assume we
-could evaluate \(L\) at any point \(\weights\). In other words: we have a "zero
-order oracle" which can tell us \(\Loss(\weights)\) for any \(\weights\) for a fixed
+could evaluate \(L\) at any point \(\weights\). In other words: we have a ``zero
+order oracle'' which can tell us \(\Loss(\weights)\) for any \(\weights\) for a fixed
 computational cost.
 
 If we assume an infinite number of possible inputs \(\weights\), it does not matter
 how much and where we sample \(\Loss\) there is always a different \(\weights\) where
-\(\Loss\) might be arbitrarily lower. This notion is formalized in various "No-Free-Lunch
-Theorems". We must therefore start making assumptions about \(\Loss\) to make this
+\(\Loss\) might be arbitrarily lower. This notion is formalized in various ``No-Free-Lunch
+Theorems''. We must therefore start making assumptions about \(\Loss\) to make this
 problem tractable.
 
 \subsection{Grid Search}
@@ -59,8 +59,8 @@ for the value of the loss function at each center. If the minimum is placed in
 some tile, the Lipschitz continuity forces the center of the tile to be \(\lossError\)
 close to it \parencite[cf.][p. 11]{nesterovLecturesConvexOptimization2018}.
 
-The fact that this is necessary can easily be seen by imagining a "resisting
-oracle" which places the minimum in just the last grid element where we look
+The fact that this is necessary can easily be seen by imagining a ``resisting
+oracle'' which places the minimum in just the last grid element where we look
 \parencite[cf.][p. 13]{nesterovLecturesConvexOptimization2018}. The exponential
 increase of complexity in the dimension makes the problem intractable for even
 mild dimensions and precisions (e.g. \(\dimension=11\), \(\lossError=0.01\), \(\lipConst=2\)
