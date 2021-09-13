@@ -61,7 +61,7 @@ integral equation
 \begin{align*}
 	\weights(t) =  \weights_0 -\int_{0}^{t}\nabla\Loss(\weights(s))ds.
 \end{align*}
-Its Euler discretization is gradient decent 
+Its Euler discretization is gradient descend 
 \begin{align*}
 	\weights_{t_{n+1}}:=\weights_{n+1}
 	= \weights_n - \lr_n \nabla\Loss(\weights_n),
@@ -422,7 +422,7 @@ Notice how we can reobtain the rates from Theorem~\ref{thm: distance SGD vs GD}
 by throwing this entire exponential decay away
 \begin{align*}
 	\E\|\Weights_n-\weights_n\|^2
-	&= \E\|\sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}\martIncr_{k+1}\|^2\\
+	&= \E\left\|\sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}\martIncr_{k+1}\right\|^2\\
 	&= \sum_{k=0}^{n-1}\lr^2\underbrace{(1-\lr)^{2(n-1-k)}}_{\le1}
 	\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \stdBound^2}\\
 	&\le \lr^2 n \stdBound^2 \le \lr T\stdBound^2.
@@ -446,9 +446,36 @@ Now by diagonalizing \(H\) and using the fact that
 		\dots, \prod_{k=0}^{n-1}(1-\lr_k\hesseEV_\dimension)
 	\right]V^T
 \end{align*}
-we can consider all the eigenspaces separately again and it is also quite
-obvious that again only the largest and smallest eigenvalue will matter.
+we can consider all the eigenspaces of (\ref{eq: unrolled SGD weights (general
+quadratic loss case)}) separately again
+\begin{align*}
+	\langle \Weights_{n+1}-\minimum, v_j \rangle
+	= \begin{aligned}[t]
+		&\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right) \langle \weights_0-\minimum, v_j\rangle\\
+		&+ \sum_{k=0}^n \lr_k \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)\langle\martIncr_{k+1},v_j\rangle.
+	\end{aligned}
+\end{align*}
 With the usual conditional independence argument we get
+\begin{align*}
+	\E\|\Weights_{n+1}-\minimum\|^2
+	&= \E[(V^T [\Weights_{n+1}-\minimum])^T(V^T[\Weights_{n+1}-\minimum])]\\
+	&= \sum_{j=1}^\dimension \E\langle\Weights_{n+1}-\minimum, v_j \rangle^2\\
+	&\le \sum_{j=1}^\dimension
+	\begin{aligned}[t]
+		&\Bigg[\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)^2\right) \langle \weights_0-\minimum, v_j\rangle^2\\
+		&+ \sum_{k=0}^n \lr_k^2 \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)^2\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg].
+	\end{aligned}
+\end{align*}
+it is pretty obvious at this point that only the largest and smallest eigenvalue
+are going to matter again for the final convergence rate. Sacrificing the
+constant \(\dimension\) for simplicity and looking at only one eigenspace
+we can use \(1+x\le\exp(x)\) for
+\begin{align*}
+		&\left(\prod_{k=0}^n(1-\lr_k\hesseEV)^2\right) \|\weights_0-\minimum\|^2
+		+ \sum_{k=0}^n \lr_k^2 \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV)\right)^2\stdBound^2\\
+		&\le \exp\left(-2\sum_{k=0}^n\lr_k\hesseEV\right)\|\weights_0-\minimum\|^2
+		+ \sum_{k=0}^n \lr_k^2 \exp\left(-2\sum_{i=k+1}^n\lr_i\hesseEV\right)\stdBound^2\\
+\end{align*}
 
 \section{Expected Square Error Analysis}
 
@@ -693,7 +720,7 @@ and convergence rate
 \end{align*}
 
 While this approach helps us lose the strong convexity assumption, which might
-ensure decent convergence rates along eigenspaces of the hesse matrix with
+ensure descend convergence rates along eigenspaces of the hesse matrix with
 small or zero eigenvalues, it is in a sense much more dependent on the convexity
 of the loss function \(\Loss\) as our averaging of weights is only a
 guaranteed improvement because of it. While Gradient Decent should work
