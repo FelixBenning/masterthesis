@@ -59,25 +59,25 @@ since \(\Weights_n\) is \(\filtration_n\)-measurable which is independent of, i.
 The first way to view SGD is through the lense of approximating the ODE with
 integral equation
 \begin{align*}
-	\weights(t) = \phi^{t-t_0}\weights_0 =  \weights_0 -\int_{t_0}^{t}\nabla\Loss(\weights(s))ds.
+	\weights(t) =  \weights_0 -\int_{0}^{t}\nabla\Loss(\weights(s))ds.
 \end{align*}
 Its Euler discretization is gradient decent 
 \begin{align*}
 	\weights_{t_{n+1}}:=\weights_{n+1}
-	= \psi^{\lr_n} \weights_n = \weights_n - \lr_n \nabla\Loss(\weights_n),
+	= \weights_n - \lr_n \nabla\Loss(\weights_n),
 \end{align*}
 where
 \begin{align*}
-	t_0 \le \dots \le t_N= T \quad \text{with} \quad t_{n+1}-t_n=\lr_n
+	0=t_0 \le \dots \le t_N= T \quad \text{with} \quad t_{n+1}-t_n=\lr_n
 	\quad \text{and}\quad \lr:=\max_n \lr_n
 \end{align*}
 and constant learning rate \(\lr\) represents an equidistant discretization.
 Since \(\nabla\Loss\) is Lipschitz continuous, the local discretization error
 \begin{align*}
-	\|\phi^\lr \weights  - \psi^\lr \weights \|
-	&= \|(\weights - \int_0^\lr\nabla\Loss(\phi^s \weights)ds) - (\weights-\lr\nabla\Loss(w))\|\\
-	&\le  \int_0^\lr \underbrace{\|\nabla\Loss(w) - \nabla\Loss(\phi^s\weights)\|}_{
-		\le \ubound \|\phi^s \weights - \weights\| \in O(s) \mathrlap{\quad\text{(Taylor approx., Lip. \(\nabla\Loss\))}}
+	\|\weights(\lr)  - \weights_\lr \|
+	&= \|(\weights_0 - \int_0^\lr\nabla\Loss(\weights(s))ds) - (\weights_0-\lr\nabla\Loss(\weights_0))\|\\
+	&\le  \int_0^\lr \underbrace{\|\nabla\Loss(\weights_0) - \nabla\Loss(\weights(s))\|}_{
+		\le \ubound \|\weights(s) - \weights(0)\| \in O(s) \mathrlap{\quad\text{(Taylor approx., Lip. \(\nabla\Loss\))}}
 	}ds 
 \end{align*}
 is of order \(O(\lr^2)\). 
@@ -104,19 +104,19 @@ it is enough to bound the distance between SGD and GD.
 		\right)
 	\end{align*}
 	which can be simplified for constant learning rates \(\lr_n=\lr\) and bounded
-	martingale increment variances \(\E\|\martIncr_n\|^2 \le K\) to
+	martingale increment variances \(\E\|\martIncr_n\|^2 \le \stdBound^2\) to
 	\begin{align*}
 		\max_{n}\E\|\weights(t_n)	-\Weights_n\|^2
-		\le \lr TK\exp[T(\lr\ubound^2 + 2\ubound)] \in O(\lr)
+		\le \lr T\stdBound^2\exp[T(\lr\ubound^2 + 2\ubound)] \in O(\lr)
 	\end{align*}
 \end{theorem}
 Now before we get to the proof let us build some intuition why this result
 is not surprising. Unrolling SGD we can rewrite it as
-\begin{align*}
+\begin{align}\label{eq: unrolled SGD}
 	\Weights_{t_n}
 	= \weights_0 - \sum_{k=0}^{n-1} \lr_k \nabla\Loss(\Weights_k)
 	+ \sum_{k=0}^{n-1} \lr_k\martIncr_{k+1}.
-\end{align*}
+\end{align}
 Which is the same recursion as in GD except for the last term. Now for an
 equidistance grid we have \(\lr=T/N\). Intuitively the last term in \(\Weights_T\)
 should therefore disappear due to some law of large numbers for martingales
@@ -185,6 +185,55 @@ we get in Theorem~\ref{thm: distance SGD vs GD}.
 	follows from \(n\lr\le T\).
 \end{proof}
 
+\subsection{Excursion: Stochastic Approximation}
+
+Theorem~\ref{thm: distance SGD vs GD} can feel somewhat unnatural as it requires
+you to restart SGD completely with smaller learning rates to get behavior closer
+to GD and its ODE. If the ODE has an attraction point/area/etc. one might
+instead want to prove convergence to that within one run of SGD by selecting a
+decreasing learning rate sequence. If we have a look at (\ref{eq: unrolled SGD})
+it is quite intuitive that we are going to need
+\begin{align*}
+	\sum_{k=0}^\infty \lr_k = \lim_{n\to\infty}\sum_{k=0}^{n-1} \lr_k
+	= \lim_{n\to\infty}t_n = \infty.
+\end{align*}
+Otherwise we can not really claim that SGD should behave similar to the asymptotic
+behavior of an ODE as we can not let \(t\to\infty\) in the ODE. Additionally
+we somehow need to do variance reduction to get rid of
+\begin{align*}
+	\sum_{k=m}^{m-1} \lr_k\martIncr_{k+1}
+\end{align*}
+to argue that from starting point \(\Weights_{t_m}\) onwards SGD behaves like the ODE
+and therefore ends up in its attraction areas. So we also need
+\(\lr_k \to 0\). How fast it needs to vanish depends on the amount of (bounded)
+moments we have on \(\martIncr_k\) \parencite[p. 110]{kushnerStochasticApproximationAlgorithms1997}.
+If we only have bounded second moments as we have assumed in Theorem~\ref{thm:
+distance SGD vs GD} then we get the classic Stochastic Approximation conditions
+on the learning rate
+\begin{align*}
+	\sum_{n=0}^\infty \lr_n = \infty \qquad \text{and} \qquad \sum_{n=0}^\infty \lr_n^2 <\infty
+\end{align*}
+I.e. learning rates \(\lr_n\) which decrease faster than \(O(1/\sqrt{n})\) but
+not faster than \(O(1/n)\). See \textcite[ch.
+5]{kushnerStochasticApproximationAlgorithms1997} for a proof of
+convergence with probability one of the recursion
+\begin{align*}
+	\Weights_{n+1} = \Weights_n - \lr_n(g(\Weights_n) + \martIncr_{n+1})
+\end{align*}
+towards the asymptotic areas of the limiting
+ODE
+\begin{align*}
+	\dot{\weights} = g(\weights)
+\end{align*}
+under those assumptions.
+
+Note that \(g\) can be, but needs not be a gradient (we have not used that in
+Theorem~\ref{thm: distance SGD vs GD} either). And this direction of
+generalization is necessary to craft convergence proofs for Reinforcement
+Learning where we do not get unbiased estimates of some gradients towards the
+minimum, but rather unbiased estimates of a Bellman Operator (Fixed Point 
+Iteration towards the optimum).
+
 \section{Batch Learning}
 
 Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
@@ -205,7 +254,7 @@ leading to the modified martingale increment
 \end{align*}
 with reduced variance
 \begin{align*}
-	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m K.
+	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \stdBound^2.
 \end{align*}
 Now while this variance reduction does reduce our upper bound on the distance
 between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
@@ -242,7 +291,7 @@ while SGD just makes \(m\) small steps. This also changes the true gradient
 evaluations \(\nabla\Loss(\Weights_k)\) slightly. But since we are only making
 small steps these \(\Weights_k\) will generally be similar. We still can not
 make a definitive assertion which one is better though\footnote{
-	Whether or not you think one method is superior might be correlated with
+	Whether or not you think batch-less SGD is superior might be correlated with
 	whether or not you think that agile software development is a good idea
 }.
 
@@ -278,7 +327,9 @@ In summary: If you are concerned about the \emph{quality} of your model you shou
 probably choose SGD without batches, while concerns about training time justify
 larger batch sizes in some cases.
 
+\fxnote{
 \textcite{hardtTrainFasterGeneralize2016} \textcite{hofferTrainLongerGeneralize2018}
+}
 
 \section{Quadratic Loss Functions}
 
@@ -289,43 +340,43 @@ quadratic Loss function again before we get to general convex functions.
 Using the same trick we used in Section~\ref{sec: visualize gd} 
 \begin{align*}
 	\nabla\Loss(\weights)
-	= \nabla^2\Loss(\weights)(\weights-\weights_*)
-	= H(\weights-\weights_*)
+	= \nabla^2\Loss(\weights)(\weights-\minimum)
+	= H(\weights-\minimum)
 \end{align*}
 we can rewrite SGD (by induction using the triviality of \(n=0\)) as
 \begin{align}
 	\nonumber
-	&\Weights_{n+1}-\weights_*\\
+	&\Weights_{n+1}-\minimum\\
 	\nonumber
-	&= \Weights_n - \weights_* - \lr_n H(\Weights_n-\weights_*) + \lr_n\martIncr_{n+1}\\
+	&= \Weights_n - \minimum - \lr_n H(\Weights_n-\minimum) + \lr_n\martIncr_{n+1}\\
 	\nonumber
-	&=(1-\lr_n H)\underbrace{(\Weights_n - \weights_*)}_{
-		\xeq{\text{ind.}} (\weights_n - \weights_*)
+	&=(1-\lr_n H)\underbrace{(\Weights_n - \minimum)}_{
+		\xeq{\text{ind.}} (\weights_n - \minimum)
 		\mathrlap{+ \sum_{k=0}^{n-1}\lr_k\left(\prod_{i=k+1}^{n-1}(1-\lr_iH)\right)\martIncr_{k+1}}
 	} + \lr_n\martIncr_{n+1}\\
 	\nonumber
-	&= \underbrace{(1-\lr_n H)(\weights_n - \weights_*)}_{=\weights_{n+1}-\weights_* \implies (n\to n+1)}
+	&= \underbrace{(1-\lr_n H)(\weights_n - \minimum)}_{=\weights_{n+1}-\minimum \implies (n\to n+1)}
 	+ \sum_{k=0}^n\lr_k\left(\prod_{i=k+1}^n(1-\lr_iH)\right)\martIncr_{k+1}\\
 	\label{eq: unrolled SGD weights (general quadratic loss case)}
-	&=\left(\prod_{k=0}^n(1-\lr_kH)\right)(\weights_0-\weights_*)
+	&=\left(\prod_{k=0}^n(1-\lr_kH)\right)(\weights_0-\minimum)
 	+ \sum_{k=0}^n\lr_k\left(\prod_{i=k+1}^n(1-\lr_iH)\right)\martIncr_{k+1}.
 \end{align}
 
-\subsubsection{Variance Reduction}
+\subsection{Variance Reduction}\label{subsec: variance reduction}
 
 One particularly interesting case is \(H=\identity\). Why is that interesting?
 Considering that
 \begin{align*}
 	\E[\tfrac12\|\weights-X\|^2]=\E[\loss(\weights,X)]=:\Loss(\weights)
 \end{align*}
-is minimized by \(\weights_*=\E[X]\) and we have
+is minimized by \(\minimum=\E[X]\) and we have
 \begin{align*}
 	\E[\nabla\loss(\weights,X)]
-	=\E[\weights-X]=\weights- \weights_*=\nabla\Loss(\weights)
+	=\E[\weights-X]=\weights- \minimum=\nabla\Loss(\weights)
 \end{align*}
 we necessarily also have
 \begin{align*}
-	\Loss(\weights) = \tfrac12\|\weights-\weights_*\|^2 + \text{const},
+	\Loss(\weights) = \tfrac12\|\weights-\minimum\|^2 + \text{const},
 \end{align*}
 which implies \(H=\nabla^2\Loss=\identity\). So this case is essentially
 trying to find the expected value of some random variables as quickly as
@@ -359,10 +410,10 @@ other hand one can similarly show that we have
 or to highlight the connection to (\ref{eq: unrolled SGD weights (general
 quadratic loss case)})
 \begin{align*}
-	\Weights_n - \weights_*
-	= \underbrace{(1-\lr)^n(\weights_0 -\weights_*)}_{=\weights_n-\weights_*}
+	\Weights_n - \minimum
+	= \underbrace{(1-\lr)^n(\weights_0 -\minimum)}_{=\weights_n-\minimum}
 	+ \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}
-	\smash{\overbrace{\martIncr_{k+1}}^{X_{k+1}-\weights_*}}.
+	\smash{\overbrace{\martIncr_{k+1}}^{X_{k+1}-\minimum}}.
 \end{align*}
 This implies we do not weight our \(X_k\) equally, but rather use an
 exponential decay giving the most recent data the most weight.
@@ -373,8 +424,8 @@ by throwing this entire exponential decay away
 	\E\|\Weights_n-\weights_n\|^2
 	&= \E\|\sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}\martIncr_{k+1}\|^2\\
 	&= \sum_{k=0}^{n-1}\lr^2\underbrace{(1-\lr)^{2(n-1-k)}}_{\le1}
-	\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le K}\\
-	&\le \lr^2 n K \le \lr TK.
+	\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \stdBound^2}\\
+	&\le \lr^2 n \stdBound^2 \le \lr T\stdBound^2.
 \end{align*}
 We can do the same thing with the general case (\ref{eq: unrolled SGD weights
 (general quadratic loss case)}) if we take \(\lr<2/\ubound\) for \(|H|\le\ubound\).
@@ -385,7 +436,7 @@ case is. In (\ref{eq: getting rid of w_0 first step}) we can get rid of the
 initial bias \(\weights_0\) completely. This is only possible because our
 condition number \(\condition\) is one which allows one step convergence of GD.
 
-\subsubsection{The Effect of the Condition Number}
+\subsection{The Effect of the Condition Number}
 
 Now by diagonalizing \(H\) and using the fact that
 \begin{align*}
@@ -401,98 +452,217 @@ With the usual conditional independence argument we get
 
 \section{Expected Square Error Analysis}
 
+This section is inspired by \textcite{nemirovskiRobustStochasticApproximation2009}.
+
 \subsection{Strongly Convex Case}
 
 While we are not going to tether ourselves to Gradient Decent \(\weights_n\) in
 this section, we are still going to split off the noise
 \begin{align*}
-	\|\Weights_{n+1} - \weights_*\|^2
-	&= \|\Weights_n -\weights_* - \lr_n\nabla\Loss(\weights_n) +\lr_n \martIncr_{n+1}\|^2\\
+	\|\Weights_{n+1} - \minimum\|^2
+	&= \|\Weights_n -\minimum - \lr_n\nabla\Loss(\weights_n) +\lr_n \martIncr_{n+1}\|^2\\
 	&= \begin{aligned}[t]
-		&\|\Weights_n - \weights_* - \lr_n\nabla\Loss(\Weights_n)\|^2\\
-		&+ 2\langle \Weights_n - \weights_* - \lr_n\nabla\Loss(\Weights_n), \lr_n \martIncr_{n+1}\rangle\\
+		&\|\Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n)\|^2\\
+		&+ 2\langle \Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n), \lr_n \martIncr_{n+1}\rangle\\
 		&+ \lr_n^2 \|\martIncr_{n+1}\|^2
 	\end{aligned}
 \end{align*}
 The scalar product will disappear once we apply expectation due to conditional
 independence again. For the first part we are going to do the same as in the
 classical case in Theorem~\ref{thm: gd strong convexity convergence rate}:
-\begin{align*}
-	&\|\Weights_n - \weights_* - \lr_n\nabla\Loss(\Weights_n)\|^2\\
-	&= \|\Weights_n - \weights_*\|^2
-	- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\weights_*\rangle}_{
+\begin{align}
+	\nonumber
+	&\|\Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n)\|^2\\
+	\label{eq: getting rid of the scalar product (SGD)}
+	&= \|\Weights_n - \minimum\|^2
+	- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\minimum\rangle}_{
 		\xge{\text{Lem.~\ref{lem: bermanDiv lower bound (strongly convex)}}}
 	 	\tfrac{\ubound\lbound}{\ubound+\lbound}\|\Weights_n - \minimum\|^2
 		\mathrlap{+ \tfrac{1}{\ubound+\lbound}\|\nabla\Loss(\Weights_n)\|^2}
 	}
 	+ \lr_n^2 \|\nabla\Loss(\Weights_n)\|^2\\
+	\nonumber
 	&\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
-	\|\Weights_n - \weights_*\|^2
+	\|\Weights_n - \minimum\|^2
 	+ \lr_n(\lr_n - \tfrac{2}{\ubound+\lbound})
 	\|\nabla\Loss(\Weights_n)\|^2
-\end{align*}
+\end{align}
 For \(\lr_n\le\tfrac{2}{\ubound+\lbound}\) we can drop the gradient again to
 obtain
 \begin{align*}
-	\E\|\Weights_{n+1} - \weights_*\|^2
+	\E\|\Weights_{n+1} - \minimum\|^2
 	\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
-	\E\|\Weights_n - \weights_*\|^2 + \lr_n^2 \E\|\martIncr_{n+1}\|^2.
+	\E\|\Weights_n - \minimum\|^2 + \lr_n^2 \underbrace{\E\|\martIncr_{n+1}\|^2}_{\le\stdBound^2}.
 \end{align*}
 In the classical case we just wanted to select \(\lr_n\) as large as possible,
 i.e. \(\lr_n=\tfrac{2}{\ubound+\lbound}\). But in the stochastic setting there
-are adverse effect of large learning rates due to noise. Now as our upper bound
+are adverse effects of large learning rates due to noise. Now as our upper bound
 is a convex parabola in \(\lr_n\) we can just use the first order condition
 \begin{align*}
 	\frac{d}{d\lr_n}
 	= -2\tfrac{\ubound\lbound}{\ubound+\lbound}
-	\E\|\Weights_n - \weights_*\|^2 + 2\lr_n \E\|\martIncr_{n+1}\|^2
+	\E\|\Weights_n - \minimum\|^2 + 2\lr_n \stdBound^2
 	\xeq{!} 0
 \end{align*}
 to find the best upper bound
 \begin{align*}
 	\lr_n
-	= \min\left\{\frac{
-		\tfrac{\ubound\lbound}{\ubound+\lbound}\E\|\Weights_n - \weights_*\|^2
-	}{\E\|\martIncr_{n+1}\|^2},
-	\frac{2}{\ubound+\lbound}
+	= \min\left\{
+		\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)},
+		\frac{2}{\ubound+\lbound}
 	\right\}.
 \end{align*}
-In particular we still want to ``max out our learing rate'', i.e. select
+So we still want to ``max out our learing rate'' and use
 \(\lr_n=\tfrac{2}{\ubound+\lbound}\) if
 \begin{align*}
-	2\E\|\martIncr_{n+1}\|^2 \le \ubound\lbound \E\|\Weights_n - \weights_*\|^2,
+	\frac{2\stdBound^2}{\ubound\lbound} \le \E\|\Weights_n - \minimum\|^2.
 \end{align*}
-in other words: the stochastic variance only becomes a problem once we are
+In other words: the stochastic variance only becomes a problem once we are
 close to the minimum. Before that we basically want to treat our problem like
 the classical one. This results in two training phases, the \emph{transient}
 phase in which we are still far from the minimum, our learning rate is constant
 and we get a linear convergence rate
 \begin{align*}
-	\E\|\Weights_{n+1} - \weights_*\|^2
+	\E\|\Weights_{n+1} - \minimum\|^2
 	&\le \left(1-2\tfrac{2}{\ubound+\lbound}\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
-	\E\|\Weights_n - \weights_*\|^2 + \left(\tfrac{2}{\ubound+\lbound}\right)^2
-	\underbrace{\E\|\martIncr_{n+1}\|^2}_{
-		\le\tfrac{\ubound\lbound}{2} \E\|\Weights_n - \weights_*\|^2
+	\E\|\Weights_n - \minimum\|^2 + \left(\tfrac{2}{\ubound+\lbound}\right)^2
+	\underbrace{\stdBound^2}_{
+		\le\tfrac{\ubound\lbound}{2} \E\|\Weights_n - \minimum\|^2
 	}\\
 	&\le \underbrace{
 		\left(1-\tfrac{2\ubound\lbound}{(\ubound+\lbound)^2}\right)
 	}_{
 		=1-\frac{2}{(1+\condition^{-1})(1+\condition)}
 	}
-	\E\|\Weights_n - \weights_*\|^2.
+	\E\|\Weights_n - \minimum\|^2.
 \end{align*}
 In the \emph{asymptotic} phase on the other hand, we have to reduce our learning
-rate with the distance to the minimum
+rate with the distance to the minimum. The convergence rate is
+\begin{align*}
+	&\E\|\Weights_{n+1} - \minimum\|^2\\
+	&\le \left(1-2
+		\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)}
+		\tfrac{\ubound\lbound}{\ubound+\lbound}
+	\right)
+	\E\|\Weights_n - \minimum\|^2
+	+ \left(
+		\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)}
+	\right)^2
+	\stdBound^2\\
+	&\le \left(1-
+		\left(\tfrac{\ubound\lbound}{\stdBound(\ubound+\lbound)}\right)^2
+		\E\|\Weights_n - \minimum\|^2
+	\right)
+	\E\|\Weights_n - \minimum\|^2
+\end{align*}
 
+\fxnote{need plot or approximation to the rate resulting from this - probably 1/n}
 
-\subsection{General Convex Case}
+\subsection{General Convex Case -- Averaging}\label{subsec: SGD with Averaging}
 
-\textcite{nemirovskiRobustStochasticApproximation2009}
+While the Strongly Convex Case provides us with a lot of intuition, its assumption
+is often too strong. And we can not use the same approach we used in the classical
+convex but not strongly convex loss functions since the noise prevents us from
+using Lemma~\ref{lem: bermanDiv lower bound} in place of Lemma~\ref{lem:
+bermanDiv lower bound (strongly convex)} to ensure a decreasing distance from
+the optimum. Now since we know that the best asymptotic rates we can get will
+be \(O(1/\sqrt{n})\) due to the averaging example in Subsection~\ref{subsec:
+variance reduction} we are going to use the technique developed to show convergence
+for the subgradient method (cf. Subsection~\ref{subsec: subgradient method}).
+In particular we are going to assume \(\Loss \in \lipGradientSet[0,0]{\lipConst}\).
 
+Now instead of the Lemmas mentioned above we are going to simply use \fxnote{appendix equivalence}{the
+(subgradient) definition of convexity}
+\begin{align*}
+	\Loss(\minimum)
+	\ge \Loss(\Weights_n) + 
+	\langle\nabla\Loss(\Weights_n), -(\Weights_n - \minimum)\rangle
+\end{align*}
+in (\ref{eq: getting rid of the scalar product (SGD)})
+\begin{align*}
+	&\|\Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n)\|^2\\
+	&\le \|\Weights_n - \minimum\|^2
+	- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\minimum\rangle}_{
+		\ge \Loss(\Weights_n) - \Loss(\minimum)
+	}
+	+ \lr_n^2 \|\nabla\Loss(\Weights_n)\|^2
+\end{align*}
+to obtain
+\begin{align*}
+	\E\|\Weights_{n+1}-\minimum\|^2
+	&\le
+	\begin{aligned}[t]
+		&\E\|\Weights_n -\minimum\|^2
+		- 2\lr_n \E[\Loss(\Weights_n) - \Loss(\minimum)]\\
+		&+ \lr_n^2 [
+			\underbrace{\E\|\nabla\Loss(\Weights_n)\|^2}_{\le \lipConst^2}
+			+ \underbrace{\E\|\martIncr_{n+1}\|^2}_{\le \stdBound^2}
+		]
+	\end{aligned}
+\end{align*}
+as \(\Loss\in\lipGradientSet[0,0]{\lipConst}\) implies Lipschitz continuity and thus bounded
+gradients. Note that splitting \(\nabla\loss\) into \(\nabla\Loss\) and \(\martIncr\)
+was of no use here as we end up summing them in the end. \textcite{nemirovskiRobustStochasticApproximation2009}
+uses bounded \(\E\|\nabla\loss\|^2\) from the get go to get the same result.
+This results in
+\begin{align*}
+	&2\sum_{n=0}^{N-1} \lr_n\E[\Loss(\Weights_n)-\Loss(\minimum)]\\
+	&\le \sum_{n=0}^{N-1} \E\|\Weights_n -\minimum\|^2 - \E\|\Weights_{n+1}-\minimum\|^2
+	+ \lr_n^2 [\lipConst^2 + \stdBound^2]\\
+	&\le \E\|\weights_0 - \minimum\|^2 + [\lipConst^2+\stdBound^2]\sum_{n=0}^{N-1} \lr_n^2
+\end{align*}
+Dividing both sides by \(2\sum_{n=0}^{N-1}\lr_n=2T\) makes the term on the left a
+convex combination allowing us to finally get 
+\begin{align*}
+	\E\left[\Loss\left(\sum_{n=0}^{N-1} \frac{\lr_n}{T}\Weights_n\right)\right]-\Loss(\minimum)
+	&\le \sum_{n=0}^{N-1} \frac{\lr_n}{T}\E[\Loss(\Weights_n)]-\Loss(\minimum)\\
+	&\le \frac{
+		\|\weights_0 - \minimum\|^2 + [\lipConst^2+\stdBound^2]\sum_{n=0}^N \lr_n^2
+	}{
+		2T
+	}.
+\end{align*}
+Now if there was no stochasticity one could instead use the minimum of
+\(\Loss(\Weights_n)\) instead which is how one obtains the result in
+Subsection~\ref{subsec: subgradient method}. But since we do have randomness
+it appears to make sense to average the weights \(\Weights_n\) we collect over
+time.
+Now we can ask ourselves what learning rates \(\lr_n\) we should pick to
+minimize our bound. Now due to convexity of the square we have
+\begin{align*}
+	1 = \left(\frac{1}{N}\sum_{n=0}^{N-1}\frac{N}{T}\lr_n\right)^2
+	\xle{\text{conv.}} \frac{1}{N}\sum_{n=0}^{N-1}\left(\frac{N}{T}\lr_n\right)^2
+	\le \frac{N}{T^2}\sum_{n=0}^{N-1}\lr_n^2,
+\end{align*}
+which means that constant learning rates \(\lr=T/N\) are optimal
+\begin{align*}
+	\sum_{n=0}^{N-1}\lr^2 = \frac{T^2}{N} \le \sum_{n=0}^{N-1}\lr_n^2.
+\end{align*}
+This leads to
+\begin{align*}
+	\E\Big[
+		\Loss\Big(\underbrace{
+			\frac{1}{N}\sum_{n=0}^{N-1}\Weights_n
+		}_{=:\Weights^N}\Big)
+	\Big]-\Loss(\minimum)
+	&\le \frac{
+		\|\weights_0 - \minimum\|^2 + [\lipConst^2+\stdBound^2]N\lr^2
+	}{2\lr N}.
+\end{align*}
+Where minimizing over \(\lr\) for a constant number of steps \(N\) now tunes the
+ODE time \(T\) of which an increase entails larger discretizations but also
+allows for more time following the ODE.
+This minimization results in
+\begin{align*}
+	\lr_* = \frac{\|\weights_0-\minimum\|}{\sqrt{\lipConst^2+\stdBound^2}\sqrt{N}}
+\end{align*}
+and convergence rate
+\begin{align*}
+	\E[\Loss(\Weights^N)] -\Loss(\minimum)
+	\le \frac{\|\weights_0-\minimum\|\sqrt{\lipConst^2+\stdBound^2}}{\sqrt{N}}.
+\end{align*}
 
-\subsection{Averaging}
-
-cf. \cite{bachNonstronglyconvexSmoothStochastic2013}
+\fxnote{cf. \cite{bachNonstronglyconvexSmoothStochastic2013}}
 
 \section{SDE View}
 

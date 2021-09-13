@@ -833,8 +833,7 @@ Now we can state the main convergence result
 	\end{align*}
 \end{proof}
 
-\subsection{Subgradient "Decent"}
-\fxnote{More extensive treatment?}{
+\subsection{Subgradient "Decent"}\label{subsec: subgradient method}
 If we can not have convergence of the parameters \(\weights\) we might not
 care as much about the convergence of the gradient either. In that case it
 turns out that we can even get convergence of the loss if we only assume
@@ -847,13 +846,15 @@ But this form of Subgradient "Decent"
 requires a bounded, convex parameter set we project back into if we leave, and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
 with subgradients, the name "decent" is generally avoided and we have to keep
-a running minimum. See \textcite[Section 3.2.3]{nesterovLecturesConvexOptimization2018}
-or \textcite[Section 3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
-treatment. The convergence rate decreases to
+a running minimum. You can either look into \textcite[Section
+3.2.3]{nesterovLecturesConvexOptimization2018} or \textcite[Section
+3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
+treatment or wait til Subsection~\ref{subsec: SGD with Averaging} where we use
+the same proof technique in a more general stochastic setting. The convergence
+rate decreases to
 \begin{align*}
 	O\Big(\frac{\|\weights_0-\weights_*\|\lipConst}{\sqrt{n}}\Big).
 \end{align*}
-}
 
 \subsection{Mirror Decent}
 
