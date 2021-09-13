@@ -27,7 +27,7 @@ jobs:
 
       - uses: xu-cheng/latex-action@v2
         with:
-          root-file: "Masterthesis.tex"
+          root_file: "Masterthesis.tex"
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
