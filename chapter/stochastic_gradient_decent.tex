@@ -558,21 +558,51 @@ rate with the distance to the minimum. The convergence rate is
 
 \fxnote{need plot or approximation to the rate resulting from this - probably 1/n}
 
+Due to Lipschitz continuity of the gradient and it being zero at the minimum,
+the convergence rate of the Loss is
+\begin{align*}
+	\E[\Loss(\Weights_n)]- \Loss(\minimum) \le \tfrac{\ubound}{2}\E\|\Weights_n-\minimum\|^2
+\end{align*}
+
+While the second of the two phases of SGD \parencite[first observed
+by][]{darkenFasterStochasticGradient1991} determines the asymptotic properties
+of SGD  ``in practice it seems that for deeper networks in particular, the first
+phase dominates overall computation time as long as the second phase is cut off
+before the remaining potential gains become either insignificant or entirely
+dominated by overfitting (or both).''  
+\parencite{sutskeverImportanceInitializationMomentum2013}. They also say about
+temporary plateaus, which could be a sign that the first phase is over since
+we do no longer have a contraction for constant learning rates, that 
+``despite appearing to not make much progress, or even becoming significantly
+non-monotonic, the optimizers were doing something apparently useful over these
+extended periods'' as the final errors observed where lower than when they
+tampered with the system (in their case change the momentum coefficient
+\(\momCoeff\) which we will discuss in chapter~\ref{chap: momentum}).
+Recalling Figure~\ref{fig: visualize saddlepoint gd} these temporary plateaus
+might be saddlepoints.
+
+Since it is difficult to discern the second phase from plateaus due to saddlepoints
+this makes the decisions whether or not to decrease the learning rate in those
+cases difficult. The averaging approach in the next subsection is a possible
+solution to this problem. And it also does away with the strong convexity
+assumption.
+
 \subsection{General Convex Case -- Averaging}\label{subsec: SGD with Averaging}
 
-While the Strongly Convex Case provides us with a lot of intuition, its assumption
-is often too strong. And we can not use the same approach we used in the classical
-convex but not strongly convex loss functions since the noise prevents us from
-using Lemma~\ref{lem: bermanDiv lower bound} in place of Lemma~\ref{lem:
-bermanDiv lower bound (strongly convex)} to ensure a decreasing distance from
-the optimum. Now since we know that the best asymptotic rates we can get will
-be \(O(1/\sqrt{n})\) due to the averaging example in Subsection~\ref{subsec:
-variance reduction} we are going to use the technique developed to show convergence
-for the subgradient method (cf. Subsection~\ref{subsec: subgradient method}).
-In particular we are going to assume \(\Loss \in \lipGradientSet[0,0]{\lipConst}\).
+Since the noise prevents us from using Lemma~\ref{lem: bermanDiv lower bound} in
+place of Lemma~\ref{lem: bermanDiv lower bound (strongly convex)} to ensure a
+decreasing distance from the optimum, we can not use the same approach we used
+in the classical convex loss function setting (Section~\ref{sec: convex convergence theorems}).
 
-Now instead of the Lemmas mentioned above we are going to simply use \fxnote{appendix equivalence}{the
-(subgradient) definition of convexity}
+But since we know that the best asymptotic rates we can get will be
+\(O(1/\sqrt{n})\) due to the averaging example in Subsection~\ref{subsec:
+variance reduction} we are going to use the technique developed to show
+convergence for the subgradient method (cf. Subsection~\ref{subsec: subgradient
+method}).
+In particular we are going to assume \(\Loss \in
+\lipGradientSet[0,0]{\lipConst}\). And instead of the Lemmas mentioned above we
+are going to simply use \fxnote{appendix equivalence}{the (subgradient)
+definition of convexity}
 \begin{align*}
 	\Loss(\minimum)
 	\ge \Loss(\Weights_n) + 
@@ -661,6 +691,20 @@ and convergence rate
 	\E[\Loss(\Weights^N)] -\Loss(\minimum)
 	\le \frac{\|\weights_0-\minimum\|\sqrt{\lipConst^2+\stdBound^2}}{\sqrt{N}}.
 \end{align*}
+
+While this approach helps us lose the strong convexity assumption, which might
+ensure decent convergence rates along eigenspaces of the hesse matrix with
+small or zero eigenvalues, it is in a sense much more dependent on the convexity
+of the loss function \(\Loss\) as our averaging of weights is only a
+guaranteed improvement because of it. While Gradient Decent should work
+intuitively on non-convex functions as well for finding a local minimum, this
+averaging technique will generally not play nicely with non-convex functions.
+At the same time we are not averaging during iteration but only at the end.
+So if we moved into a convex area relatively quickly and stayed there for
+most of our learning time then the first few weights outside this convex
+area will be negligible for the average.
+But it might still make sense to wait with the averaging until the time it is
+actually needed to resume convergence.
 
 \fxnote{cf. \cite{bachNonstronglyconvexSmoothStochastic2013}}
 
