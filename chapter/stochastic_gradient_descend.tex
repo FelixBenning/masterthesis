@@ -394,7 +394,7 @@ better than the mean. But with \(\lr_n=\frac1{n+1}\) and by induction
 \begin{align}
 	\label{eq: getting rid of w_0 first step}
 	\Weights_1 &= \weights_0 - \frac{1}{0+1}(\weights_0 - X_1) = X_1\\
-	\nonumber
+	\label{eq: telescoping product}
 	\Weights_{n+1}
 	&= \Weights_n - \tfrac{1}{n+1}(\Weights_n - X_{n+1})
 	\xeq{\text{ind.}}\smash{\underbrace{\left(1-\tfrac1{n+1}\right)}_{=\frac{n}{n+1}}}
@@ -471,10 +471,10 @@ to achieve
 \begin{align*}
 	1-\lr_n\hesseEV = \frac{n}{n+1}
 \end{align*}
-which is then be the product equivalent of a telescoping sum which we have used in
-Subsection~\ref{subsec: variance reduction}. To make that product go away we
-could use \(1+x\le \exp(x)\) inside the square to convert it into a sum.
-But since \(x\to x^2\) is only monotonous for positive \(x\) we need
+which would be the product equivalent of a telescoping sum as we have used in
+(\ref{eq: telescoping product}). To make the product go away we could use
+\(1+x\le \exp(x)\) inside the square to convert it into a sum. But since \(x\to
+x^2\) is only monotonous for positive \(x\) we need
 \begin{align*}
 	1-\lr_k \hesseEV \ge 0 \qquad \forall k\ge 0
 \end{align*}
