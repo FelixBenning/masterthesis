@@ -171,7 +171,8 @@ we get in Theorem~\ref{thm: distance SGD vs GD}.
 		\le (1+\lr_n^2\ubound^2 + 2\lr_n\ubound)\E\|\Weights_n-\weights_n\|^2
 		+ \lr_n^2\E\|\martIncr_{n+1}\|^2.
 	\end{align*}
-	Now we apply the discrete Gr\"onwall inequality\fxnote{appendix} to get
+	Now we apply the discrete Gr\"onwall inequality (Lemma~\ref{lem-appendix:
+	discrete gronwall}) to get
 	\begin{align*}
 		\E\|\Weights_n-\weights_n\|^2
 		\le \sum_{k=0}^{n-1}\lr_k^2\E\|\martIncr_k\|^2
@@ -582,11 +583,14 @@ rate with the distance to the minimum. The convergence rate is
 	\right)
 	\E\|\Weights_n - \minimum\|^2
 \end{align*}
+Using Corollary~\ref{cor-appendix: diminishing contraction} the recursion above
+implies
+\begin{align*}
+	\E\|\Weights_n - \minimum\|^2\in O(1/n).
+\end{align*}
+This also implies \(\lr_n\in O(1/n)\).
 
-\fxnote{need plot or approximation to the rate resulting from this - probably 1/n}
-
-Due to Lipschitz continuity of the gradient and it being zero at the minimum,
-the convergence rate of the Loss is
+Due to Lipschitz continuity of the gradient, the convergence rate of the Loss is
 \begin{align*}
 	\E[\Loss(\Weights_n)]- \Loss(\minimum) \le \tfrac{\ubound}{2}\E\|\Weights_n-\minimum\|^2
 \end{align*}

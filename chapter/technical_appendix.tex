@@ -2,7 +2,9 @@
 
 \chapter{Technical Proofs}
 
-\section{Convex Analysis}
+\section{Non-Trivial Basics}
+
+\subsection{Convex Analysis}
 
 \begin{lemma}\label{Appdx-lem: lipschitz and bounded derivative}
 	If \(f\) is differentiable, then the derivative \(\nabla f\) is
@@ -65,7 +67,6 @@
 		\int_0^1 \|\langle\nabla f(x+\tau(y-x))-\nabla f(x)\| \cdot \|y-x\| d\tau\\
 		&\le \int_0^1 \ubound \|\tau(y-x)\|\cdot\|y-x\| d\tau
 		= \tfrac{\ubound}2 \|y-x\|^2.
-		\qedhere
 	\end{align*}
 	The opposite direction is taken from \textcite[Lemma
 	2.1.5]{nesterovLecturesConvexOptimization2018}.
@@ -85,6 +86,113 @@
 	\end{align*}
 	we only have to divide both sides by \(\tfrac{1}\ubound \|\nabla f(x)-\nabla
 	f(y)\|\) to get \(\ubound\)-Lipschitz continuity back.
+\end{proof}
+
+\subsection{Sequences}
+
+\begin{theorem}[Cesàro-Stolz]\label{thm-appendix: cesaro-stolz}
+	Let \((x_n, n\in\naturals),(y_n, n\in\naturals)\) be real sequences with
+	\(\lim_{n\to\infty}y_n\to\infty\), then for \(\Delta x_n:=x_{n+1}-x_n\)
+	\begin{align}
+		\liminf_n \frac{\Delta x_n}{\Delta y_n}
+		\le \liminf_n \frac{x_n}{y_n} 
+		\le \limsup_n \frac{x_n}{y_n} 
+		\le \limsup_n \frac{\Delta x_n}{\Delta y_n}
+	\end{align}
+	In particular if the limit \(\lim_n\frac{\Delta x_n}{\Delta y_n}\) exists
+	we have equality. Thereby it becomes a discrete version of L'Hôpital's
+	rule.
+\end{theorem}
+\begin{proof}
+	\fxnote{cite \cite{IMOmathHopitalTheorem}}
+	To show the first inequality let us assume we have
+	\begin{align*}
+		\gamma < \liminf_n \frac{\Delta x_n}{\Delta y_n}.
+	\end{align*}
+	Then by definition of the limes inferior there exists \(N\) such that
+	\begin{align*}
+		\gamma \Delta y_n < \Delta x_n \qquad \forall n\ge N
+	\end{align*}
+	Using telescoping sums this implies
+	\begin{align*}
+		\gamma (y_m- y_N)
+		= \gamma \sum_{n=N}^{m-1} \Delta y_n
+		< \sum_{n=N}^{m-1} \Delta x_n
+		= x_m- x_N.
+	\end{align*}
+	Dividing both sides by \(y_m\) and taking the limes inferior keeping in
+	mind that \(y_m\to\infty\) results in
+	\begin{align*}
+		\gamma = \liminf_m \gamma\left(\frac{y_m}{y_m} - \frac{y_N}{y_m}\right)
+		< \liminf_m \frac{x_m}{y_m} - \frac{x_N}{y_m}
+		= \liminf_m \frac{x_m}{y_m}.
+	\end{align*}
+	Since \(\gamma\) was arbitrary this proves the first inequality. The second
+	inequality is true by definition of the limes inferior (superior) and the
+	third inequality can be proved in the same way as the first starting with
+	\(\limsup_n \frac{\Delta x_n}{\Delta y_n} < \gamma\).
+\end{proof}
+\begin{corollary}\label{cor-appendix: diminishing contraction}
+	Let \(a_0 \in [0, 1/q)\) for \(q>0\) and define
+	\begin{align*}
+		a_{n+1} = (1-q a_n)a_n.
+	\end{align*}
+	Then we have
+	\begin{align*}
+		\lim_{n\to\infty} n a_n = 1/q,
+	\end{align*}
+	in particular \(a_n\in O(1/n)\).
+\end{corollary}
+\begin{proof}[Proof {\parencite[by][]{israelHowWorkOut2012}}]
+	By induction \(0\le a_n \le a_{n-1} < 1/q\) where the induction step is
+	\begin{align*}
+		0 \le a_{n+1} = (1-qa_n) a_n \le a_n. 
+	\end{align*}
+	Therefore \(a_n\) is a falling bounded sequences and thus converges to
+	some \(a\in[0,1/q)\) which necessarily fulfills
+		\(a(1-qa) = a\)
+	which implies
+	\begin{align*}
+		\lim_{n\to\infty} a_n = a = 0
+	\end{align*}
+	Thus for \(y_n := 1/a_n\) and \(x_n:=n\) we have
+	\begin{align*}
+		\frac{\Delta x_n}{\Delta y_n}
+		= \frac{1}{\frac{1}{a_{n+1}}-\frac1{a_n}}
+		= \frac{a_{n+1}a_n}{a_n - a_{n+1}}
+		= \frac{(1-q a_n)a_n}{1 - (1-q a_n)}
+		= \frac{1-q a_n}{q} \to 1/q
+	\end{align*}
+	and since \(y_n\to\infty\) we can apply Theorem~\ref{thm-appendix: cesaro-stolz}
+	to get
+	\begin{align*}
+		\lim_{n\to\infty} n a_n
+		&= \lim_{n\to\infty} \frac{x_n}{y_n}
+		= \lim_{n\to\infty} \frac{\Delta x_n}{\Delta y_n}
+		= 1/q.
+		\qedhere
+	\end{align*}
+\end{proof}
+
+\begin{lemma}[Discrete Gr\"onwall]\label{lem-appendix: discrete gronwall}
+	Let \(g_n, a_n, b_n \ge 0\), \(g_0=0\) and
+	\begin{align*}
+		g_{n+1} \le a_n g_n + b_n
+	\end{align*}
+	then we have
+	\begin{align*}
+		g_n \le \sum_{k=0}^{n-1}b_k\prod_{i=k+1}^{n-1}a_i
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	By induction where \(n=0\) is trivial interpreting the empty sum as zero, we have	
+	\begin{align*}
+		g_{n+1}
+		&\le a_n g_n + b_n
+		\xle{\text{ind.}} a_n \left(\sum_{k=0}^{n-1}b_k\prod_{i=k+1}^{n-1}a_i\right) + b_n
+		\le \sum_{k=0}^{n}b_k\prod_{i=k+1}^{n}a_i
+		\qedhere
+	\end{align*}
 \end{proof}
 
 \section{Momentum Convergence}
