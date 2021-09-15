@@ -311,7 +311,7 @@ make a few practical considerations:
 	threads, or if the broadcasting and summing takes significant time, batch
 	sizes which are multiples of the number of threads.
 
-	This is not without caveats though: Increasing the Batch Size to speed up
+	This is not without caveats though: Increasing the batch size to speed up
 	learning requires a proportional increase in the learning rate to actually
 	have an impact on the time required for optimization. And since GD stops
 	converging if learing rates become too large, there is an upper bound on this.
@@ -389,9 +389,8 @@ quadratic loss case)}) and
 \end{align*}
 the \(\Weights_n\) are just an affine transformation of the \(X_n\). And we
 happen to know the best linear unbiased estimator (``BLUE'') of \(\E[X]\)
-which is the mean of the \(X_n\). This means that \(\Weights_n\) is
-necessarily worse that the mean. But with \(\lr_n=\frac1{n+1}\) and by
-induction
+which is the mean of the \(X_n\). This means that \(\Weights_n\) can not be
+better than the mean. But with \(\lr_n=\frac1{n+1}\) and by induction
 \begin{align}
 	\label{eq: getting rid of w_0 first step}
 	\Weights_1 &= \weights_0 - \frac{1}{0+1}(\weights_0 - X_1) = X_1\\
@@ -422,11 +421,11 @@ exponential decay giving the most recent data the most weight.
 Notice how we can reobtain the rates from Theorem~\ref{thm: distance SGD vs GD}
 by throwing this entire exponential decay away
 \begin{align*}
-	\E\|\Weights_n-\weights_n\|^2
-	&= \E\left\|\sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}\martIncr_{k+1}\right\|^2\\
-	&= \sum_{k=0}^{n-1}\lr^2\underbrace{(1-\lr)^{2(n-1-k)}}_{\le1}
+	\E\|\Weights_N-\weights_n\|^2
+	&= \E\left\|\sum_{k=0}^{N-1}\lr(1-\lr)^{N-1-k}\martIncr_{k+1}\right\|^2\\
+	&= \sum_{k=0}^{N-1}\lr^2\underbrace{(1-\lr)^{2(N-1-k)}}_{\le1}
 	\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \stdBound^2}\\
-	&\le \lr^2 n \stdBound^2 \le \lr T\stdBound^2.
+	&\le \lr^2 N \stdBound^2 = \lr T\stdBound^2.
 \end{align*}
 We can do the same thing with the general case (\ref{eq: unrolled SGD weights
 (general quadratic loss case)}) if we take \(\lr<2/\ubound\) for \(|H|\le\ubound\).
@@ -461,21 +460,54 @@ With the usual conditional independence argument we get
 	\E\|\Weights_{n+1}-\minimum\|^2
 	&= \E[(V^T [\Weights_{n+1}-\minimum])^T(V^T[\Weights_{n+1}-\minimum])]\\
 	&= \sum_{j=1}^\dimension \E\langle\Weights_{n+1}-\minimum, v_j \rangle^2\\
-	&\le \sum_{j=1}^\dimension
+	&= \sum_{j=1}^\dimension
 	\begin{aligned}[t]
-		&\Bigg[\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)^2\right) \langle \weights_0-\minimum, v_j\rangle^2\\
+		&\Bigg[\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right)^2 \langle \weights_0-\minimum, v_j\rangle^2\\
 		&+ \sum_{k=0}^n \lr_k^2 \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)^2\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg].
 	\end{aligned}
 \end{align*}
-it is pretty obvious at this point that only the largest and smallest eigenvalue
-are going to matter again for the final convergence rate. Sacrificing the
-constant \(\dimension\) for simplicity and looking at only one eigenspace
-we can use \(1+x\le\exp(x)\) for
+Since the eigenvalues are all different, we can not select \(\lr_n=\frac{1}{\hesseEV(n+1)}\)
+to achieve
 \begin{align*}
-		&\left(\prod_{k=0}^n(1-\lr_k\hesseEV)^2\right) \|\weights_0-\minimum\|^2
-		+ \sum_{k=0}^n \lr_k^2 \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV)\right)^2\stdBound^2\\
-		&\le \exp\left(-2\sum_{k=0}^n\lr_k\hesseEV\right)\|\weights_0-\minimum\|^2
-		+ \sum_{k=0}^n \lr_k^2 \exp\left(-2\sum_{i=k+1}^n\lr_i\hesseEV\right)\stdBound^2\\
+	1-\lr_n\hesseEV = \frac{n}{n+1}
+\end{align*}
+which is then be the product equivalent of a telescoping sum which we have used in
+Subsection~\ref{subsec: variance reduction}. To make that product go away we
+could use \(1+x\le \exp(x)\) inside the square to convert it into a sum.
+But since \(x\to x^2\) is only monotonous for positive \(x\) we need
+\begin{align*}
+	1-\lr_k \hesseEV \ge 0 \qquad \forall k\ge 0
+\end{align*}
+So to emulate the optimal learning rate from Subsection~\ref{subsec: variance reduction}
+let us try out \(\lr_k = \tfrac{1}{\hesseEV_\dimension(k+1)}\). With this in
+mind we can show
+\begin{align*}
+	\left(\prod_{i=k+1}^{N-1}(1-\lr_i\hesseEV)\right)
+	&\le\exp\left(-2\sum_{i=k+1}^{N-1}\lr_i\hesseEV_j\right)\\
+	&\le \exp\left(-2\frac{\hesseEV_j}{\hesseEV_\dimension}[\log(N+1)-\log(k+2)]\right)\\
+	&= \left(\frac{N+1}{k+2}\right)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}},
+\end{align*}
+where we have used
+\begin{align*}
+	\hesseEV_\dimension\sum_{i=k}^{n-1} \lr_i
+	= \sum_{i=k+1}^n \frac{1}{i}
+	= \int_{k+1}^{n+1} \frac{1}{\lfloor x\rfloor} dx
+	\ge \int_{k+1}^{n+1} \frac{1}x dx
+	= \log(n+1) - \log(k+1).
+\end{align*}
+Using this detour over the exponential function and back we get
+\begin{align*}
+	&\E\|\Weights_N - \minimum\|^2\\
+	&\le \sum_{j=1}^d \Bigg[ (N+1)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}}\langle\weights_0-\minimum, v_j\rangle^2
+	+ \sum_{k=0}^n \lr_k^2 \left(\tfrac{N+1}{k+2}\right)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}}
+	\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg]\\
+	&\le (N+1)^{-2\frac{\hesseEV_1}{\hesseEV_\dimension}}\|\weights_0-\minimum\|^2
+	+ \sum_{k=0}^{N-1} \lr_k^2 \left(\tfrac{N+1}{k+2}\right)^{-2\frac{\hesseEV_1}{\hesseEV_\dimension}}
+	\E[\|\martIncr_{k+1}\|^2]\\
+	&\le (N+1)^{-2\condition^{-1}}\|\weights_0-\minimum\|^2
+	+ \frac{\stdBound^2}{\hesseEV_d} (N+1)^{-2\condition^{-1}}
+	\underbrace{\sum_{k=0}^{N-1} (k+2)^{-2(1-\condition^{-1})}}_{\sim \int_1^N x^{-2(1-\condition^{-1})}dx}\\
+	&\in O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \sigma^2 O(N^{-1+2\condition^{-1}} + c) \right].
 \end{align*}
 
 \section{Expected Square Error Analysis}
