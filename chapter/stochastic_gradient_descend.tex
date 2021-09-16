@@ -402,7 +402,7 @@ better than the mean. But with \(\lr_n=\frac1{n+1}\) and by induction
 	\nonumber
 	&= \frac{1}{n+1}\sum_{k=1}^{n+1}X_k
 \end{align}
-we can also achieve this optimum. For constant learning rates \(\lr<1\) on the
+we can also achieve this optimum. For constant learning rates \(\lr=T/N<1\) on the
 other hand one can similarly show that we have
 \begin{align*}
 	\Weights_n = (1-\lr)^n\weights_0 + \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}X_{k+1}
@@ -419,7 +419,7 @@ This implies we do not weight our \(X_k\) equally, but rather use an
 exponential decay giving the most recent data the most weight.
 
 Notice how we can reobtain the rates from Theorem~\ref{thm: distance SGD vs GD}
-by throwing this entire exponential decay away
+by throwing the exponential decay away
 \begin{align*}
 	\E\|\Weights_N-\weights_n\|^2
 	&= \E\left\|\sum_{k=0}^{N-1}\lr(1-\lr)^{N-1-k}\martIncr_{k+1}\right\|^2\\
@@ -430,15 +430,37 @@ by throwing this entire exponential decay away
 We can do the same thing with the general case (\ref{eq: unrolled SGD weights
 (general quadratic loss case)}) if we take \(\lr<2/\ubound\) for \(|H|\le\ubound\).
 
-Now this fact is making me quite anxious about the claim that batch learning is
-worse than SGD in general. But we also have to keep in mind how special this
-case is. In (\ref{eq: getting rid of w_0 first step}) we can get rid of the
-initial bias \(\weights_0\) completely. This is only possible because our
-condition number \(\condition\) is one which allows one step convergence of GD.
+Throwing away this entire exponential decay might make you a bit anxious about
+the claim that batch learning is worse than SGD in general. But notice how
+keeping this factor actually helps the argument for smaller step sizes as it
+decreases in the number of discretization points \(N\) but is not influenced by
+\(\stdBound^2\). In that sense it supports the argument that smaller learning
+rates are preferable over batches.
 
-\subsection{The Effect of the Condition Number}
+And we also have to keep in mind how special this case is. In (\ref{eq: getting
+rid of w_0 first step}) we can get rid of the initial bias \(\weights_0\)
+completely. This is only possible because our condition number \(\condition\) is
+one which allows one step convergence of GD. If that was not the case then we
+would also have to account for the error of classical GD which is not improved
+by batch sizes at all but by smaller learning rates. Although keep in mind that
+a smaller discretization only do so much for improving classical GD since
+\begin{align*}
+	\weights_N - \minimum = (1- h)^N (\weights_0 - \minimum)
+	= \underbrace{(1- T/N)^N}_{\to \exp(-T) \mathrlap{\quad (N\to\infty)}}(\weights_0 - \minimum).
+\end{align*}
+This view on the other hand might be too pessimistic. Since we have thrown away
+the exponential decay caused by smaller discretizations we have underestimated
+its benefit. By increasing \(T\) just a little to offset this, 
+we could keep the benefits on the variance constant while improving the
+convergence of GD. Choosing decreasing learning rates \(\lr_n\sim1/n\)
+has the effect that their sum and thus \(T\) is the harmonic series which is
+roughly equivalent to \(\log(n)\). In other words we might actually be able
+to increase \(T\) while keeping the variance constant. So let us try this
+for condition numbers not equal to one.
 
-Now by diagonalizing \(H\) and using the fact that
+\subsection{The Effect of the Condition Number}\label{subsec: condition in quadratic SGD}
+
+By diagonalizing \(H\) and using the fact that
 \begin{align*}
 	&\prod_{k=0}^{n-1} (1-\lr_k V\diag[\hesseEV_1, \dots, \hesseEV_\dimension]V^T)\\
 	&= V \diag\left[
@@ -476,7 +498,7 @@ which would be the product equivalent of a telescoping sum as we have used in
 \(1+x\le \exp(x)\) inside the square to convert it into a sum. But since \(x\to
 x^2\) is only monotonous for positive \(x\) we need
 \begin{align*}
-	1-\lr_k \hesseEV \ge 0 \qquad \forall k\ge 0
+	1-\lr_k \hesseEV_j \ge 0 \qquad \forall k\ge 0, \forall j \in\{1,\dots,\dimension\}
 \end{align*}
 So to emulate the optimal learning rate from Subsection~\ref{subsec: variance reduction}
 let us try out \(\lr_k = \tfrac{1}{\hesseEV_\dimension(k+1)}\). With this in
@@ -507,12 +529,40 @@ Using this detour over the exponential function and back we get
 	&\le (N+1)^{-2\condition^{-1}}\|\weights_0-\minimum\|^2
 	+ \frac{\stdBound^2}{\hesseEV_d} (N+1)^{-2\condition^{-1}}
 	\underbrace{\sum_{k=0}^{N-1} (k+2)^{-2(1-\condition^{-1})}}_{\sim \int_1^N x^{-2(1-\condition^{-1})}dx}\\
-	&\in O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \sigma^2 O(N^{-1+2\condition^{-1}} + c) \right].
+	&\in O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \stdBound^2 O(N^{-1+2\condition^{-1}} + c) \right].
 \end{align*}
+Now for \(\condition<2\) this simplifies to 
+\begin{align*}
+	O(N^{-2\condition^{-1}})\|\weights_0-\minimum\|^2 + O(N^{-1})\stdBound^2
+	= O(N^{-1})\stdBound^2
+\end{align*}
+which means that first of all it still does not matter whether or not we
+increase \(N\) or decrease our variance \(\stdBound^2\) with batches for the
+variance part, but decreasing the learning rate improves the classical error
+bound although asymptotically only the variance matters. For worse conditions
+the speed of convergence simplifies to
+\begin{align*}
+	O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \stdBound^2 c\right].
+\end{align*}
+In this case whether or not it makes sense to reduce the variance depends on the
+relative size of \(\stdBound^2 c\) in comparison to \(\|\weights_n-\minimum\|^2\),
+but as we will see with the next approach our convergence rate is actually
+worse than it should be. Since the approximation \(1+x\approx\exp(x)\) is
+very good for small \(x\) and our learning rate is decreasing we can probably
+rule out that the detour over the exponential function and logarithm messed
+with our asymptotic rate (although it might be possible to get rid of the
+constant \(c\) from the integral), but in general the fault probably does not
+lie with our bounds but rather with our selection of the learning rate
+\(\lr_n = \tfrac{1}{\hesseEV_\dimension(n+1)}\).
+
+In the next section we are going to find locally optimal learning rates (i.e.
+learning rates which maximize the decrease from \(n\) to \(n+1\)).
 
 \section{Expected Square Error Analysis}
 
-This section is inspired by \textcite{nemirovskiRobustStochasticApproximation2009}.
+This section is based on \textcite{nemirovskiRobustStochasticApproximation2009},
+though they used bounded gradients instead of Lipschitz gradients for their
+proof of the strongly convex case.
 
 \subsection{Strongly Convex Case}
 
@@ -565,13 +615,13 @@ is a convex parabola in \(\lr_n\) we can just use the first order condition
 	\xeq{!} 0
 \end{align*}
 to find the best upper bound
-\begin{align*}
+\begin{align}\label{eq: optimal learning rate SGD}
 	\lr_n
 	= \min\left\{
 		\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)},
 		\frac{2}{\ubound+\lbound}
 	\right\}.
-\end{align*}
+\end{align}
 So we still want to ``max out our learing rate'' and use
 \(\lr_n=\tfrac{2}{\ubound+\lbound}\) if
 \begin{align*}
@@ -618,21 +668,51 @@ rate with the distance to the minimum. The convergence rate is
 Using Corollary~\ref{cor-appendix: diminishing contraction} the recursion above
 implies
 \begin{align*}
-	\E\|\Weights_n - \minimum\|^2\in O(1/n).
+	\lim_{n\to\infty} n\E\|\Weights_n - \minimum\|^2
+	= \stdBound^2 \left(\frac{\ubound+\lbound}{\ubound\lbound}\right)^2
 \end{align*}
-This also implies \(\lr_n\in O(1/n)\).
-
-Due to Lipschitz continuity of the gradient, the convergence rate of the Loss is
+Notice how that implies
 \begin{align*}
-	\E[\Loss(\Weights_n)]- \Loss(\minimum) \le \tfrac{\ubound}{2}\E\|\Weights_n-\minimum\|^2
+	\E\|\Weights_n - \minimum\|^2 \in O(\stdBound^2/n)
 \end{align*}
+which tells us again that it does not matter whether we reduce the variance
+\(\stdBound^2\) with larger batch sizes or decrease the learning rate. In
+particular we can see from the optimal learning rate (\ref{eq: optimal learning rate SGD})
+that the learning rate increases for smaller \(\stdBound^2\). For the 
+optimal learning rate we further have
+\begin{align*}
+	\lim_{n\to\infty} n \lr_n = \frac{\ubound\lbound}{\ubound+\lbound}.
+\end{align*}
+And due to Lipschitz continuity of the gradient, the convergence rate of the Loss is
+\begin{align*}
+	\E[\Loss(\Weights_n)]- \Loss(\minimum)
+	&\le \tfrac{\ubound}{2}\E\|\Weights_n-\minimum\|^2\\
+	&\in \begin{cases}
+		O\left(\left[1-\frac{2}{(1+\condition^{-1})(1+\condition)}\right]^n\right)
+		& \frac{2\stdBound^2}{\ubound\lbound} \le \E\|\Weights_n - \minimum\|^2\\
+		O(\stdBound^2/n) & \text{afterwards}
+	\end{cases}
+\end{align*}
+What this tells us is two things: During the transient phase where the variance
+\(\stdBound^2\) is relatively negligible increasing the batch size has \emph{no
+effect} on the convergence speed and only eats more computational resources
+(which might not be felt due to parallelization) and more data (which will be
+felt in the form of overfitting if it results in data reuse). And during the
+second phase it does not matter whether or not the learning rate is decreased
+or batch sizes increased. That is if we get the learning rate right. If we mess
+that up the learning rate might be worse than \(O(N^{-1})\) as we have seen
+in Subsection~\ref{subsec: condition in quadratic SGD}. To circumvent this issue
+some people recommend a piecewise constant learning rate which is only reduced
+when the loss plateaus as the noise becomes to large for the given rate.
+\fxnote{come up with a schedule such that the piecewise constant learning
+rates result in O(1/n) convergence rates?}
 
-While the second of the two phases of SGD \parencite[first observed
+And while the second of the two phases of SGD \parencite[first observed
 by][]{darkenFasterStochasticGradient1991} determines the asymptotic properties
 of SGD  ``in practice it seems that for deeper networks in particular, the first
 phase dominates overall computation time as long as the second phase is cut off
 before the remaining potential gains become either insignificant or entirely
-dominated by overfitting (or both).''  
+dominated by overfitting (or both)''  
 \parencite{sutskeverImportanceInitializationMomentum2013}. They also say about
 temporary plateaus, which could be a sign that the first phase is over since
 we do no longer have a contraction for constant learning rates, that 
@@ -754,26 +834,41 @@ and convergence rate
 	\E[\Loss(\Weights^N)] -\Loss(\minimum)
 	\le \frac{\|\weights_0-\minimum\|\sqrt{\lipConst^2+\stdBound^2}}{\sqrt{N}}.
 \end{align*}
+In particular note that again decreasing \(\stdBound^2\) is (at best) equivalent
+to increasing \(N\) and only if \(\lipConst\) is negligible. This matches our
+theory that no batches are preferable.
 
 While this approach helps us lose the strong convexity assumption, which might
-ensure descend convergence rates along eigenspaces of the hesse matrix with
+ensure decent convergence rates along eigenspaces of the hesse matrix with
 small or zero eigenvalues, it is in a sense much more dependent on the convexity
 of the loss function \(\Loss\) as our averaging of weights is only a
 guaranteed improvement because of it. While Gradient Decent should work
-intuitively on non-convex functions as well for finding a local minimum, this
-averaging technique will generally not play nicely with non-convex functions.
-At the same time we are not averaging during iteration but only at the end.
-So if we moved into a convex area relatively quickly and stayed there for
+intuitively on non-convex functions as well for finding a local minimum (only with
+worse rates of convergence in eigenspaces with small eigenvalues, cf.
+Subsection~\ref{subsec: condition in quadratic SGD}), this averaging technique
+will generally not play nicely with non-convex functions.
+
+Although if we moved into a convex area relatively quickly and stayed there for
 most of our learning time then the first few weights outside this convex
 area will be negligible for the average.
 But it might still make sense to wait with the averaging until the time it is
-actually needed to resume convergence.
+actually needed to resume convergence especially since the rate of convergence
+is also much worse.
 
 \fxnote{cf. \cite{bachNonstronglyconvexSmoothStochastic2013}}
 
 \section{SDE View}
 
-\textcite{simsekliTailIndexAnalysisStochastic2019}
+While we got bounds on \(\E\|\Weights_n - \minimum\|^2\) which entails a
+distributional bound using something like Chebyshev's inequality, we only
+have convergence of the expected value of the loss. It might therefore be
+interesting to further develop our understanding of the distribution of \(\Weights_n\).
+
+A more recent approach is to model SGD not as an approximation of an ODE but a
+stochastic differential equation (SDE).
+
+
+[\textcite{simsekliTailIndexAnalysisStochastic2019}]
 
 
 \section{Heuristics}
