@@ -59,10 +59,8 @@ order ODE
 	= g(y).
 \end{align*}
 %
-Which allows us to naively discretize our ODE with the Euler discretization
-\fxnote{whitespace issue with subequations}
-%
 \begin{subequations}
+Which allows us to naively discretize our ODE with the Euler discretization
 \begin{align}
 	\weights_{n+1} &= \weights_n + \lr \momentum_n \label{eq: naive momentum move}\\
 	\momentum_{n+1} &= \momentum_n + \lr [-\nabla \Loss(\weights_n) - \friction \momentum_n]

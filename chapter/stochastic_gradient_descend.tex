@@ -87,7 +87,7 @@ error is therefore of order 1, i.e.
 \begin{align*}
 	\max_{n} \|\weights(t_n) - \weights_n\| \in O(\lr),
 \end{align*}
-\fxnote{appendix?}{as is usually covered in ``Numerics of ODE's'' courses.}
+\fxnote{refer to book instead of course?}{as is usually covered in ``Numerics of ODE's'' courses.}
 Due to \((a+b)^2\le2(a^2+b^2)\), and therefore 
 \begin{align*}
 	\max_n\E[\|\weights(t_n)-\Weights_n\|^2]
@@ -836,7 +836,7 @@ and convergence rate
 \end{align*}
 In particular note that again decreasing \(\stdBound^2\) is (at best) equivalent
 to increasing \(N\) and only if \(\lipConst\) is negligible. This matches our
-theory that no batches are preferable.
+theory that SGD without batches is preferable.
 
 While this approach helps us lose the strong convexity assumption, which might
 ensure decent convergence rates along eigenspaces of the hesse matrix with
@@ -853,9 +853,8 @@ most of our learning time then the first few weights outside this convex
 area will be negligible for the average.
 But it might still make sense to wait with the averaging until the time it is
 actually needed to resume convergence especially since the rate of convergence
-is also much worse.
-
-\fxnote{cf. \cite{bachNonstronglyconvexSmoothStochastic2013}}
+is also much worse. \textcite{bachNonstronglyconvexSmoothStochastic2013}
+recover the convergence rate \(O(1/N)\) only for a very specific model.
 
 \section{SDE View}
 
