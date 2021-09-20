@@ -5,7 +5,7 @@
 To understand why the convergence rate is poor when the condition
 number is high, we can visualize a high ratio of the lowest to the highest
 eigenvalue as a narrow ravine. The gradient points in the direction of the
-strongest descend which is mostly to the opposite side of the ravine and only slightly
+strongest descent which is mostly to the opposite side of the ravine and only slightly
 along its length. This causes our iterate to bounce back and forth between
 the walls of the ravine.
 %
@@ -108,10 +108,10 @@ by \textcite{gohWhyMomentumReally2017}.
 		- \underbrace{\lr^2}_{=:\lrSq}\nabla \Loss(\weights_n)
 	\end{align}
 	In particular we can set ``the momentum coefficient'' \(\momCoeff\) to zero to
-	obtain gradient descend again. This is of course an artifact of our
+	obtain gradient descent again. This is of course an artifact of our
 	discretization since \(\lr\to0\) would never allow \(\momCoeff\) to be zero
 	in the limit. But actual implementations often use this
-	(\(\momCoeff,\lrSq\))-parametrization and thus treat gradient descend as a
+	(\(\momCoeff,\lrSq\))-parametrization and thus treat gradient descent as a
 	special case.
 \end{definition}
 %
@@ -446,7 +446,7 @@ So why should we even considering Nesterov's Momentum then?
 The first issue you
 might have noticed is: Since \emph{all eigenspaces} are in the complex case,
 all of them have the worst contraction factor \(\sqrt{\momCoeff_*}\). In stochastic
-gradient descend on the other hand the contraction factor is \(|1-\lr_*\hesseEV_i|\)
+gradient descent on the other hand the contraction factor is \(|1-\lr_*\hesseEV_i|\)
 for the eigenspace \(i\), which can be considerably better than the worst
 contraction factor 
 \[|1-\lr_*\hesseEV_\dimension|=|1-\lr_*\hesseEV_1|.\]
@@ -522,7 +522,7 @@ resulting in
 	\le \frac{1}{1-\momCoeff}\frac{\ubound\|\weights_0-\weights_*\|^2}{2(n+1)}
 \end{align*}
 which provides a tighter convergence bound than 
-Theorem~\ref{thm: convex function GD loss upper bound} for gradient descend 
+Theorem~\ref{thm: convex function GD loss upper bound} for gradient descent 
 without momentum \(\momCoeff=0\), but is actually harmed by momentum. While
 this bound might not be the best and further improvements could be made
 \parencite[see e.g.][]{sunNonErgodicConvergenceAnalysis2019} it appears that we
@@ -582,7 +582,7 @@ heavy ball momentum \(\tilde{\momCoeff}_i\) which is a good sign if we want
 to avoid the ``Weakest Link Contraction Factor'' issue we had in heavy ball
 momentum. And if we are in the complex case the convergence rate is
 \(\sqrt{\momCoeff(1-\lrSq\hesseEV_i)}\) which looks like the root of the gradient
-descend convergence rate multiplied by a factor we could make smaller than one.
+descent convergence rate multiplied by a factor we could make smaller than one.
 
 To ensure all eigenspaces are in the complex case, we first need to ensure that
 all \(\tilde{\momCoeff}_i\) are positive which requires
@@ -619,7 +619,7 @@ that the rightmost line was right on top of the black line and then moved up
 our momentum term until all our rates where in the ripples area. From the
 plot you might get the intuition that we can improve convergence if we
 increase the learning rate to move the largest eigenvalue into the oscillating
-range just like in the gradient descend. And this is in fact not the optimal
+range just like in the gradient descent. And this is in fact not the optimal
 selection of learning rates. \textcite{lessardAnalysisDesignOptimization2016}
 claim\footnote{The proof is left to the reader} that optimal tuning results in
 \begin{align*}
@@ -637,7 +637,7 @@ them.
 
 \subsection{Estimating Sequences}
 
-To prove convergence for gradient descend we proved that gradient descend
+To prove convergence for gradient descent we proved that gradient descent
 minimizes a ``local'' upper bound (Lemma~\ref{lem: smallest upper bound}). Local
 in the sense that we only use the gradient information at our current position
 and discard all previous gradient information. To prove better convergence rates
@@ -1301,7 +1301,7 @@ What we can also see in Figure~\ref{fig: momentum progression} is that
 \begin{align}\label{eq: simplified dynamic nesterov momentum}
 	\momCoeff_n = \frac{n-1}{n+2} = 1-\frac{3}{n+2}
 \end{align}
-is a descend approximation for the \(\momCoeff_n\) progression when \(\condition^{-1}=0\).
+is a decent approximation for the \(\momCoeff_n\) progression when \(\condition^{-1}=0\).
 If we recall our original motivation, \(\momCoeff\) was \(1-\lr\friction\) where
 \(\friction\) was a friction parameter. \textcite{suDifferentialEquationModeling2015}
 show that in the limit of \(\lr\to0\), nesterov momentum with momentum

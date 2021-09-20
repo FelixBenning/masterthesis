@@ -8,7 +8,7 @@ which can provide us with \(\Loss(\weights)\) and \(\nabla \Loss(\weights)\) at 
 \(\weights\).
 
 One immediately obvious way to utilize this information is to
-incrementally move in the direction of steepest descend, i.e.
+incrementally move in the direction of steepest descent, i.e.
 %
 \begin{align*}
 	\weights_{n+1} = \weights_n - \lr\nabla \Loss(\weights_n).
@@ -139,7 +139,7 @@ can write the gradient at \(\weights\) as
 \end{align}
 %
 But note that \(\hat{\weights}\) depends on \(\weights\), so we need to index both
-by \(n\) to rewrite gradient descend
+by \(n\) to rewrite gradient descent
 %
 \begin{align*}
 	\weights_{n+1} &= \weights_n - \lr\nabla \Loss(\weights_n)\\
@@ -325,7 +325,7 @@ to our assumption that we created a ball around the minimum of \(\Loss\).
 
 The statement that we are being pushed out of the non-convex regions is a bit
 dubious as we could start right on top of local maxima or rims of saddle points.
-But as we are ultimately interested in stochastic gradient descend, these zero
+But as we are ultimately interested in stochastic gradient descent, these zero
 measure areas are of little concern. But as we already found out in
 Subsection~\ref{subsec: Negative Eigenvalues}, starting close to such a feature
 increases the amount of time it takes for us to escape that area which means
@@ -841,7 +841,7 @@ convexity and \(\lipConst\)-Lipschitz continuity of \(\Loss\) itself, i.e.
 But this form of Subgradient ``Decent''
 requires a bounded, convex parameter set we project back into if we leave, and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
-with subgradients, the name ``descend'' is generally avoided and we have to keep
+with subgradients, the name ``descent'' is generally avoided and we have to keep
 a running minimum. You can either look into \textcite[Section
 3.2.3]{nesterovLecturesConvexOptimization2018} or \textcite[Section
 3.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
@@ -868,10 +868,10 @@ In order to get close to the minimum we use this bound in
 	&= \min_y \{f(x) + \langle f(x), y-x\rangle +\bergmanDiv{f}(y,x)\} \\
 	&\le \min_y\{f(x) + \langle f(x), y-x\rangle +\tfrac{\ubound}{2} \|y-x\|^2\}
 \end{align*}
-As we have shown in Lemma~\ref{lem: smallest upper bound}, gradient descend
+As we have shown in Lemma~\ref{lem: smallest upper bound}, gradient descent
 minimizes this upper bound. The basic idea of ``Mirror Decent'' is: If we had a
 better upper bound on the Bergman divergence, then we could also improve on
-gradient descend by taking the minimum of this improved upper bound.
+gradient descent by taking the minimum of this improved upper bound.
 
 
 \section{Strong Convexity}\label{sec: Strong Convexity}
@@ -1141,11 +1141,11 @@ the eigenvalues, it is still reassuring.
 
 \section{Complexity Bounds}\label{sec: complexity bounds}
 
-Now that we found convergence rates for gradient descend on (strongly) convex
+Now that we found convergence rates for gradient descent on (strongly) convex
 problems, the question is can we do better? I.e. how fast could an algorithm we
 could possibly think of be? To tackle this problem let us first make an
 assumption about what this algorithm can do.
-Unrolling our gradient descend algorithm
+Unrolling our gradient descent algorithm
 %
 \begin{align*}
 	\weights_n = \weights_0 - \lr\sum_{k=0}^{n-1} \nabla \Loss(\weights_k)
@@ -1182,7 +1182,7 @@ which I further modify into the following example.
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_coloring_problem.pdf_tex}
 	\caption{Even after \(\dimension\) steps (when all tiles have a non-zero value)
-	gradient descend is still far off from the solution even using the optimal
+	gradient descent is still far off from the solution even using the optimal
 	learning rate \(1/\ubound\)}
 	\label{fig: visualize coloring problem}
 \end{figure}
@@ -1221,7 +1221,7 @@ For the loss function
 	+ \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 \end{align}
 %
-this is just the gradient descend recursion. Now here is the crucial insight:
+this is just the gradient descent recursion. Now here is the crucial insight:
 
 Since any weight (parameter component) is only affected once its neighbors are
 affected, the second weight can not be affected before the second step since
@@ -1622,7 +1622,7 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 \end{proof}
 
 In view of Lemma~\ref{lem: smallest upper bound} which states that gradient
-descend is in some sense optimal (minimizes the upper bound induced by
+descent is in some sense optimal (minimizes the upper bound induced by
 Lipschitz continuity of the gradient), it might be surprising how far away
 Gradient Decent is from these lower bounds. Maybe these lower bounds are not
 tight enough? This is not the case. In the next chapter we will get to know

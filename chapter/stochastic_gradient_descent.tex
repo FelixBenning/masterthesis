@@ -61,7 +61,7 @@ integral equation
 \begin{align*}
 	\weights(t) =  \weights_0 -\int_{0}^{t}\nabla\Loss(\weights(s))ds.
 \end{align*}
-Its Euler discretization is gradient descend 
+Its Euler discretization is gradient descent 
 \begin{align*}
 	\weights_{t_{n+1}}:=\weights_{n+1}
 	= \weights_n - \lr_n \nabla\Loss(\weights_n),
@@ -451,7 +451,7 @@ a smaller discretization only do so much for improving classical GD since
 This view on the other hand might be too pessimistic. Since we have thrown away
 the exponential decay caused by smaller discretizations we have underestimated
 its benefit. By increasing \(T\) just a little to offset this, 
-we could keep the benefits on the variance constant while improving the
+we could keep the variance constant while improving the
 convergence of GD. Choosing decreasing learning rates \(\lr_n\sim1/n\)
 has the effect that their sum and thus \(T\) is the harmonic series which is
 roughly equivalent to \(\log(n)\). In other words we might actually be able
@@ -548,12 +548,10 @@ In this case whether or not it makes sense to reduce the variance depends on the
 relative size of \(\stdBound^2 c\) in comparison to \(\|\weights_n-\minimum\|^2\),
 but as we will see with the next approach our convergence rate is actually
 worse than it should be. Since the approximation \(1+x\approx\exp(x)\) is
-very good for small \(x\) and our learning rate is decreasing we can probably
+very good for small \(x\) and our learning rate is decreasing we can
 rule out that the detour over the exponential function and logarithm messed
-with our asymptotic rate (although it might be possible to get rid of the
-constant \(c\) from the integral), but in general the fault probably does not
-lie with our bounds but rather with our selection of the learning rate
-\(\lr_n = \tfrac{1}{\hesseEV_\dimension(n+1)}\).
+with our asymptotic rate, so the problem are not our bounds but rather the
+selection of the learning rate \(\lr_n = \tfrac{1}{\hesseEV_\dimension(n+1)}\).
 
 In the next section we are going to find locally optimal learning rates (i.e.
 learning rates which maximize the decrease from \(n\) to \(n+1\)).
