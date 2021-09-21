@@ -663,24 +663,21 @@ rate with the distance to the minimum. The convergence rate is
 	\right)
 	\E\|\Weights_n - \minimum\|^2
 \end{align*}
-Using Corollary~\ref{cor-appendix: diminishing contraction} the recursion above
+Using Lemma~\ref{lem-appendix: diminishing contraction} the recursion above
 implies
 \begin{align*}
-	\lim_{n\to\infty} n\E\|\Weights_n - \minimum\|^2
-	= \stdBound^2 \left(\frac{\ubound+\lbound}{\ubound\lbound}\right)^2
+	\E\|\Weights_n - \minimum\|^2
+	\le \frac{\stdBound^2}{n+1} \left(\frac{\ubound+\lbound}{\ubound\lbound}\right)^2
 \end{align*}
-Notice how that implies
-\begin{align*}
-	\E\|\Weights_n - \minimum\|^2 \in O(\stdBound^2/n)
-\end{align*}
-which tells us again that it does not matter whether we reduce the variance
+Which tells us again that it does not matter whether we reduce the variance
 \(\stdBound^2\) with larger batch sizes or decrease the learning rate. In
 particular we can see from the optimal learning rate (\ref{eq: optimal learning rate SGD})
 that the learning rate increases for smaller \(\stdBound^2\). For the 
 optimal learning rate we further have
 \begin{align*}
-	\lim_{n\to\infty} n \lr_n = \frac{\ubound\lbound}{\ubound+\lbound}.
+	\lr_n \le \frac{\ubound+\lbound}{(n+1)\ubound\lbound} = \frac{\condition + 1}{(n+1)\ubound}.
 \end{align*}
+Which is curiously independent from \(\stdBound^2\).
 And due to Lipschitz continuity of the gradient, the convergence rate of the Loss is
 \begin{align*}
 	\E[\Loss(\Weights_n)]- \Loss(\minimum)

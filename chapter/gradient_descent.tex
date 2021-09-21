@@ -774,59 +774,47 @@ Now we can state the main convergence result
 	the recursion derived in (\ref{eq: bound increment})
 	%
 	\begin{align*}
-		\overbrace{\Loss(\weights_{n+1}) - \Loss(\minimum)}^{=:\Delta_{n+1}}
-		&\le \overbrace{\Loss(\weights_n)-\Loss(\minimum)}^{=:\Delta_n}
+		\Loss(\weights_{n+1}) - \Loss(\minimum)
+		&\le \Loss(\weights_n)-\Loss(\minimum)
 		- \overbrace{\lr(1-\lr\ubound/2)}^{=:\omega} \|\nabla \Loss(\weights_n)\|^2\\
-		&\lxle{(\ref{eq: lower bound gradient size})} \Delta_n - \tfrac{\omega}{\|\weights_0-\minimum\|^2}\Delta_n^2
+		&\lxle{(\ref{eq: lower bound gradient size})}
+		\Loss(\weights_n)-\Loss(\minimum)
+		\left(1 - \tfrac{\omega}{\|\weights_0-\minimum\|^2}(\Loss(\weights_n)-\Loss(\minimum))\right)
 	\end{align*}
 	%
-	To get a simpler recursion we are going to use the fact that the loss delta
-	decreases, by dividing both sides by \(\Delta_n\Delta_{n+1}\) which results in
+	The rate of this contraction can be bounded (cf. Lemma~\ref{lem-appendix:
+	diminishing contraction}) to be 
 	%
 	\begin{align*}
-		\frac{1}{\Delta_{n+1}}
-		&\ge \frac{1}{\Delta_n}
-		+ \frac{\omega}{\|\weights_0-\minimum\|^2}
-		\underbrace{\frac{\Delta_n}{\Delta_{n+1}}}_{\ge 1}
-		\xge{\text{Induction}} \frac{1}{\Delta_0}
-		+ \tfrac{\omega}{\|\weights_0-\minimum\|^2}(n+1)
-	\end{align*}
-	%
-	This can now be transformed into an upper bound
-	%
-	\begin{align*}
-		\Delta_n
+		\Loss(\weights_n)-\Loss(\minimum)
 		&\le \frac{1}{
-			\frac{1}{\Delta_0} + \tfrac{\omega}{\|\weights_0-\minimum\|^2}n
+			\frac{1}{\Loss(\weights_0)-\Loss(\minimum)} + \tfrac{\omega}{\|\weights_0-\minimum\|^2}n
 		}
-		= \frac{\Delta_0\|\weights_0-\minimum\|^2}{\|\weights_0-\minimum\|^2 + n\omega\Delta_0 }.
 	\end{align*}
 	%
-	The first representation shows that our upper bound is increasing in \(\Delta_0\)
-	so an upper bound on \(\Delta_0\)
+	Since our upper bound is increasing in \(\Loss(\weights_0)-\Loss(\minimum)\)
+	we can use
 	%
 	\begin{align*}
-		\Delta_0 + \Loss(\minimum) = \Loss(\weights_0)
+		\Loss(\weights_0) - \Loss(\minimum)
 		&\xle{\ref{lem: Lipschitz Gradient implies taylor inequality}}
-		\Loss(\minimum) + \langle\nabla\Loss(\minimum), \weights_0 - \minimum\rangle
-		+\frac{\ubound}{2}\|\weights_0-\minimum\|^2 \\
-		&= \Loss(\minimum) + \tfrac{\ubound}{2}\|\weights_0-\minimum\|^2
+		\langle\underbrace{\nabla\Loss(\minimum)}_{=0}, \weights_0 - \minimum\rangle
+		+\frac{\ubound}{2}\|\weights_0-\minimum\|^2
 	\end{align*}
 	%
-	immediately yields the upper bound (\ref{eq: convex function loss upper bound}) using the
-	definition of \(\omega\)
+	to get an upper bound only dependent on \(\|\weights_0 - \minimum\|^2\):
 	%
 	\begin{align*}
-		\Delta_n
-		&\le \frac{\tfrac\ubound{2} \|\weights_0-\minimum\|^4}{
-			\|\weights_0-\minimum\|^2
-			+ n\omega\tfrac\ubound{2} \|\weights_0-\minimum\|^2
+		\Loss(\weights_n)-\Loss(\minimum)
+		&\le \frac{\|\weights_0-\minimum\|^2}{
+			\frac{2}{\ubound} + \omega n
 		}
-		= \frac{2\ubound \|\weights_0-\minimum\|^2}{
-			4 +   n 2\ubound\omega
-		}.
-		\qedhere
+		= \frac{2\ubound\|\weights_0-\minimum\|^2}{
+			4 + n 2\ubound \omega
+		}
 	\end{align*}
+	To finally obtain (\ref{eq: convex function loss upper bound}) using the
+	definition of \(\omega\).
 \end{proof}
 
 \subsection{Subgradient ``Decent''}\label{subsec: subgradient method}

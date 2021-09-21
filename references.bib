@@ -122,6 +122,21 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2013_Bach_Moulines\\Bach_Moulines_2013_Non-strongly-convex smooth stochastic approximation with convergence rate O(1-n).pdf;C\:\\Users\\felix\\Zotero\\storage\\CFCQP8CT\\1306.html}
 }
 
+@online{bassilyExponentialConvergenceSGD2018,
+  title = {On Exponential Convergence of {{SGD}} in Non-Convex over-Parametrized Learning},
+  author = {Bassily, Raef and Belkin, Mikhail and Ma, Siyuan},
+  date = {2018-11-05},
+  eprint = {1811.02564},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math, stat},
+  url = {http://arxiv.org/abs/1811.02564},
+  urldate = {2021-09-21},
+  abstract = {Large over-parametrized models learned via stochastic gradient descent (SGD) methods have become a key element in modern machine learning. Although SGD methods are very effective in practice, most theoretical analyses of SGD suggest slower convergence than what is empirically observed. In our recent work [8] we analyzed how interpolation, common in modern over-parametrized learning, results in exponential convergence of SGD with constant step size for convex loss functions. In this note, we extend those results to a much broader non-convex function class satisfying the Polyak-Lojasiewicz (PL) condition. A number of important non-convex problems in machine learning, including some classes of neural networks, have been recently shown to satisfy the PL condition. We argue that the PL condition provides a relevant and attractive setting for many machine learning problems, particularly in the over-parametrized regime.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Machine Learning},
+  file = {C\:\\gdrive\\ZoteroPaper\\2018_Bassily et al\\Bassily et al_2018_On exponential convergence of SGD in non-convex over-parametrized learning.pdf;C\:\\Users\\felix\\Zotero\\storage\\EL9D8S6I\\1811.html}
+}
+
 @article{beckFastIterativeShrinkageThresholding2009,
   title = {A {{Fast Iterative Shrinkage}}-{{Thresholding Algorithm}} for {{Linear Inverse Problems}}},
   author = {Beck, A. and Teboulle, M.},
@@ -254,6 +269,50 @@
   pages = {124018},
   publisher = {{IOP Publishing}},
   file = {C\:\\gdrive\\ZoteroPaper\\2019_Chaudhari et al\\Chaudhari et al_2019_Entropy-sgd.pdf}
+}
+
+@inproceedings{cheeConvergenceDiagnosticsStochastic2018,
+  title = {Convergence Diagnostics for Stochastic Gradient Descent with Constant Learning Rate},
+  booktitle = {Proceedings of the {{Twenty}}-{{First International Conference}} on {{Artificial Intelligence}} and {{Statistics}}},
+  author = {Chee, Jerry and Toulis, Panos},
+  date = {2018-03-31},
+  pages = {1476--1485},
+  publisher = {{PMLR}},
+  issn = {2640-3498},
+  url = {https://proceedings.mlr.press/v84/chee18a.html},
+  urldate = {2021-09-20},
+  abstract = {Many iterative procedures in stochastic optimization exhibit a transient phase followed by a stationary phase. During the transient phase the procedure converges towards a region of interest, and during the stationary phase the procedure oscillates in that region, commonly around a single point. In this paper, we develop a statistical diagnostic test to detect such phase transition in the context of stochastic gradient descent with constant learning rate. We present theory and experiments suggesting that the region where the proposed diagnostic is activated coincides with the convergence region. For a class of loss functions, we derive a closed-form solution describing such region. Finally, we suggest an application to speed up convergence of stochastic gradient descent by halving the learning rate each time stationarity is detected. This leads to a new variant of stochastic gradient descent, which in many settings is comparable to state-of-art.},
+  eventtitle = {International {{Conference}} on {{Artificial Intelligence}} and {{Statistics}}},
+  langid = {english},
+  file = {C\:\\gdrive\\ZoteroPaper\\2018_Chee_Toulis\\Chee_Toulis_2018_Convergence diagnostics for stochastic gradient descent with constant learning.pdf;C\:\\Users\\felix\\Zotero\\storage\\BRBEW465\\Chee and Toulis - 2018 - Convergence diagnostics for stochastic gradient de.pdf}
+}
+
+@online{cheeConvergenceDiagnosticsStochastic2018a,
+  title = {Convergence Diagnostics for Stochastic Gradient Descent with Constant Step Size},
+  author = {Chee, Jerry and Toulis, Panos},
+  date = {2018-02-22},
+  eprint = {1710.06382},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math, stat},
+  url = {http://arxiv.org/abs/1710.06382},
+  urldate = {2021-09-20},
+  abstract = {Many iterative procedures in stochastic optimization exhibit a transient phase followed by a stationary phase. During the transient phase the procedure converges towards a region of interest, and during the stationary phase the procedure oscillates in that region, commonly around a single point. In this paper, we develop a statistical diagnostic test to detect such phase transition in the context of stochastic gradient descent with constant learning rate. We present theory and experiments suggesting that the region where the proposed diagnostic is activated coincides with the convergence region. For a class of loss functions, we derive a closed-form solution describing such region. Finally, we suggest an application to speed up convergence of stochastic gradient descent by halving the learning rate each time stationarity is detected. This leads to a new variant of stochastic gradient descent, which in many settings is comparable to state-of-art.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Statistics Theory,Statistics - Computation,Statistics - Machine Learning},
+  file = {C\:\\gdrive\\ZoteroPaper\\2018_Chee_Toulis\\Chee_Toulis_2018_Convergence diagnostics for stochastic gradient descent with constant step size.pdf;C\:\\Users\\felix\\Zotero\\storage\\BB787665\\1710.html}
+}
+
+@inproceedings{cheeUnderstandingDetectingConvergence2020,
+  title = {Understanding and {{Detecting Convergence}} for {{Stochastic Gradient Descent}} with {{Momentum}}},
+  booktitle = {2020 {{IEEE International Conference}} on {{Big Data}} ({{Big Data}})},
+  author = {Chee, Jerry and Li, Ping},
+  date = {2020-12},
+  pages = {133--140},
+  doi = {10.1109/BigData50022.2020.9378129},
+  abstract = {Convergence detection of iterative stochastic optimization methods is of great practical interest. This paper considers stochastic gradient descent (SGD) with a constant learning rate and momentum. We show that there exists a transient phase in which iterates move towards a region of interest, and a stationary phase in which iterates remain bounded in that region around a minimum point. We construct a statistical diagnostic test for convergence to the stationary phase using the inner product between successive gradients and demonstrate that the proposed diagnostic works well. We theoretically and empirically characterize how momentum can affect the test statistic of the diagnostic, and how the test statistic captures a relatively sparse signal within the gradients in convergence. Finally, we demonstrate an application to automatically tune the learning rate by reducing it each time stationarity is detected, and show the procedure is robust to mis-specified initial rates.},
+  eventtitle = {2020 {{IEEE International Conference}} on {{Big Data}} ({{Big Data}})},
+  keywords = {Big Data,Convergence,Iterative methods,Monitoring,Reliability,Trajectory,Transient analysis},
+  file = {C\:\\gdrive\\ZoteroPaper\\2020_Chee_Li\\Chee_Li_2020_Understanding and Detecting Convergence for Stochastic Gradient Descent with.pdf}
 }
 
 @online{choromanskaLossSurfacesMultilayer2015,
@@ -668,6 +727,21 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2020_Jia_Su\\Jia_Su_2020_Information-Theoretic Local Minima Characterization and Regularization.pdf;C\:\\Users\\felix\\Zotero\\storage\\9WX7XUPX\\jia20a.html}
 }
 
+@online{karimiLinearConvergenceGradient2020,
+  title = {Linear {{Convergence}} of {{Gradient}} and {{Proximal}}-{{Gradient Methods Under}} the {{Polyak}}-\textbackslash{{L}}\{\}ojasiewicz {{Condition}}},
+  author = {Karimi, Hamed and Nutini, Julie and Schmidt, Mark},
+  date = {2020-09-12},
+  eprint = {1608.04636},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math, stat},
+  url = {http://arxiv.org/abs/1608.04636},
+  urldate = {2021-09-21},
+  abstract = {In 1963, Polyak proposed a simple condition that is sufficient to show a global linear convergence rate for gradient descent. This condition is a special case of the \textbackslash L\{\}ojasiewicz inequality proposed in the same year, and it does not require strong convexity (or even convexity). In this work, we show that this much-older Polyak-\textbackslash L\{\}ojasiewicz (PL) inequality is actually weaker than the main conditions that have been explored to show linear convergence rates without strong convexity over the last 25 years. We also use the PL inequality to give new analyses of randomized and greedy coordinate descent methods, sign-based gradient descent methods, and stochastic gradient methods in the classic setting (with decreasing or constant step-sizes) as well as the variance-reduced setting. We further propose a generalization that applies to proximal-gradient methods for non-smooth optimization, leading to simple proofs of linear convergence of these methods. Along the way, we give simple convergence results for a wide variety of problems in machine learning: least squares, logistic regression, boosting, resilient backpropagation, L1-regularization, support vector machines, stochastic dual coordinate ascent, and stochastic variance-reduced gradient methods.},
+  archiveprefix = {arXiv},
+  keywords = {65K10,Computer Science - Machine Learning,G.1.6,I.2.6,Mathematics - Optimization and Control,Statistics - Computation,Statistics - Machine Learning},
+  file = {C\:\\gdrive\\ZoteroPaper\\2020_Karimi et al\\Karimi et al_2020_Linear Convergence of Gradient and Proximal-Gradient Methods Under the.pdf;C\:\\Users\\felix\\Zotero\\storage\\GHLSLYL9\\1608.html}
+}
+
 @online{kawaguchiGeneralizationDeepLearning2020,
   title = {Generalization in {{Deep Learning}}},
   author = {Kawaguchi, Kenji and Kaelbling, Leslie Pack and Bengio, Yoshua},
@@ -856,6 +930,15 @@
   file = {C\:\\Users\\felix\\Zotero\\storage\\J5462BX9\\Mulayoff and Michaeli - 2020 - Unique Properties of Flat Minima in Deep Networks.pdf;C\:\\Users\\felix\\Zotero\\storage\\3Z7EQ2T8\\mulayoff20a.html}
 }
 
+@article{murataStatisticalStudyOnline1998,
+  title = {A Statistical Study of On-Line Learning},
+  author = {Murata, Noboru},
+  date = {1998},
+  journaltitle = {Online Learning and Neural Networks. Cambridge University Press, Cambridge, UK},
+  pages = {63--92},
+  file = {C\:\\gdrive\\ZoteroPaper\\1998_Murata\\Murata_1998_A statistical study of on-line learning.pdf}
+}
+
 @online{neelakantanAddingGradientNoise2015,
   title = {Adding {{Gradient Noise Improves Learning}} for {{Very Deep Networks}}},
   author = {Neelakantan, Arvind and Vilnis, Luke and Le, Quoc V. and Sutskever, Ilya and Kaiser, Lukasz and Kurach, Karol and Martens, James},
@@ -1009,6 +1092,22 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning,Computer Science - Neural and Evolutionary Computing},
   file = {C\:\\gdrive\\ZoteroPaper\\2014_Pascanu et al\\Pascanu et al_2014_On the saddle point problem for non-convex optimization.pdf;C\:\\Users\\felix\\Zotero\\storage\\7B28YP5G\\1405.html}
+}
+
+@inproceedings{pesmeConvergenceDiagnosticBasedStep2020,
+  title = {On {{Convergence}}-{{Diagnostic}} Based {{Step Sizes}} for {{Stochastic Gradient Descent}}},
+  booktitle = {Proceedings of the 37th {{International Conference}} on {{Machine Learning}}},
+  author = {Pesme, Scott and Dieuleveut, Aymeric and Flammarion, Nicolas},
+  date = {2020-11-21},
+  pages = {7641--7651},
+  publisher = {{PMLR}},
+  issn = {2640-3498},
+  url = {https://proceedings.mlr.press/v119/pesme20a.html},
+  urldate = {2021-09-20},
+  abstract = {Constant step-size Stochastic Gradient Descent exhibits two phases: a transient phase during which iterates make fast progress towards the optimum, followed by a stationary phase during which iterates oscillate around the optimal point. In this paper, we show that efficiently detecting this transition and appropriately decreasing the step size can lead to fast convergence rates. We analyse the classical statistical test proposed by Pflug (1983), based on the inner product between consecutive stochastic gradients. Even in the simple case where the objective function is quadratic we show that this test cannot lead to an adequate convergence diagnostic. We then propose a novel and simple statistical procedure that accurately detects stationarity and we provide experimental results showing state-of-the-art performance on synthetic and real-word datasets.},
+  eventtitle = {International {{Conference}} on {{Machine Learning}}},
+  langid = {english},
+  file = {C\:\\gdrive\\ZoteroPaper\\2020_Pesme et al\\Pesme et al_2020_On Convergence-Diagnostic based Step Sizes for Stochastic Gradient Descent.pdf;C\:\\Users\\felix\\Zotero\\storage\\GF333ESK\\Pesme et al. - 2020 - On Convergence-Diagnostic based Step Sizes for Sto.pdf}
 }
 
 @article{polyakAccelerationStochasticApproximation1992,
