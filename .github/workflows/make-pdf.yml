@@ -25,12 +25,12 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Turn of Draft Mode
+        run: sed -i 's/draft/final/' Masterthesis.tex
+
       - uses: xu-cheng/latex-action@v2
         with:
           root_file: "Masterthesis.tex"
-      
-      - name: Turn of Draft Mode
-        run: sed -i 's/draft/final/' Masterthesis.tex
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
