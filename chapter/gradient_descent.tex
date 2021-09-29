@@ -30,11 +30,12 @@ If we view the learning rate as a time delta between times
 \(\lr\to\infty\), we arrive at the ODE in time \(t\)
 %
 \begin{align}\label{eq: velocity is gradient}
+	\tag{Gradient Flow}
 	\dot{\weights}(t) = -\nabla \Loss(\weights(t)).
 \end{align}
 %
-This ODE is known as ``Gradient Flow''. If you are familiar with Lyapunov
-functions you will not be surprised by the next argument:
+If you are familiar with Lyapunov functions you will not be surprised by the
+next argument:
 %
 \begin{align}\label{eq: gradient integral}
 	\Loss(\weights(t_1)) - \Loss(\weights(t_0))
@@ -96,6 +97,7 @@ approximation only relative to \(\weights\). To obtain its absolute coordinates
 we define
 %
 \begin{align}\label{eq: newton minimum approx}
+	\tag{Newton-Raphson Step}
 	\hat{\weights} := \weights + \hat{x}
 	\xeq{(\ref{eq: newton minimum approx relative coords})}
 	\weights -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
@@ -138,7 +140,7 @@ positive definiteness of \(\nabla^2 \Loss(\weights)\) to make it invertible, so 
 then \(\hat{x}\) would not be a minimum but all the other arguments would still
 hold.
 In that case the eigenvalues might be negative as well as positive, which would
-represent a saddle point (cf. Figure~\ref{fig: visualize saddlepoint gd}), or
+represent a saddle point (cf. Figure~\ref{fig: visualize saddle point gd}), or
 all negative which would represent a maximum.
 
 Using the representation (\ref{paraboloid approximation of L}) of \(\Loss\) we
@@ -196,6 +198,8 @@ exponentially on its own
 This is beautifully illustrated with interactive graphs in
 \citetitle{gohWhyMomentumReally2017} by \citeauthor{gohWhyMomentumReally2017}.
 
+\section{Assumptions on the Loss \texorpdfstring{\(\Loss\)}{ℒ}}
+
 \subsection{Negative Eigenvalues}\label{subsec: Negative Eigenvalues}
 
 Now if \(\hesseEV_i<0\), then \(1-\lr\hesseEV_i\) would be greater
@@ -211,7 +215,7 @@ But since we are ultimately interested in stochastic loss functions, the
 stochasticity would push us off these narrow equilibria. So being right on
 top of them is of little concern. But being close to zero in such a component
 still means slow movement away, since we are multiplying by it. This
-(Figure~\ref{fig: visualize saddlepoint gd}) is a possible explanation for the
+(Figure~\ref{fig: visualize saddle point gd}) is a possible explanation for the
 common observation in deep learning of ``long
 plateaus on the way down when the error hardly change[s], followed
 by sharp drops'' \parencite{sejnowskiUnreasonableEffectivenessDeep2020} when
@@ -222,13 +226,13 @@ the exponential factor ramps up.
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_saddlepoint.pdf_tex}
 	\caption{Start=\(0.001v_1+4v_2\), \(\hesseEV_1=-1, \hesseEV_2=2\), learning rate\(=0.34\)}
-	\label{fig: visualize saddlepoint gd}
+	\label{fig: visualize saddle point gd}
 \end{figure}
 
-\subsection{Assuming Convexity}
+\subsection{Necessary Assumptions in the Quadratic Case}
 
-Let us consider strictly positive eigenvalues now and assume that our
-eigenvalues are already sorted
+Since negative eigenvalues repel, let us consider strictly positive eigenvalues
+now and assume that our eigenvalues are already sorted
 %
 \begin{align}
 	0 < \hesseEV_1 \le \dots \le \hesseEV_d.
@@ -291,21 +295,182 @@ surprising if we recall our visualization in Figure~\ref{fig: 2d paraboloid}.
 When the eigenvalues are the same, the contours are concentric circles and the
 gradient points right at the center.
 
-\section{Generalizing Assumptions}
+\subsection{Generalizing Assumptions}
 
-Let us try to get rid of the assumptions we made in \ref{sec: visualize gd}.
-The most egregious assumption was a constant second derivative. We used this
-constant second derivative to determine the (constant) condition number of
-the (constant) eigenvalues. Since we used only the smallest and largest
-eigenvalue, it is natural to guess that simply bounding the second derivative
-from above and below should be sufficient:
+To prove convergence in a more general setting we need to formulate the assumptions
+we made about the eigenvalues of the hesse matrix without actually requiring
+the existence of a hesse matrix if possible. 
+\begin{definition}
+	We call a matrix \(A\) ``positive definite'', if
+	\begin{align*}
+		\langle x, Ax \rangle \ge 0 \quad \forall x
+	\end{align*}
+	which is equivalent to \(A\) having only positive eigenvalues as can be seen
+	by testing the definition with eigenvectors and utilizing linearity to generalize.
+	We denote
+	\begin{align*}
+		A \precsim B \iff B-A \text{ is positive definite}
+	\end{align*}
+\end{definition}
+
+\subsubsection{Convexity}
+
+So instead of non-negative eigenvalues we can demand ``convexity'' which does
+not require the existence of a hesse matrix but is equivalent to its positive
+definiteness if it exists.
 %
-\begin{align*}
+\begin{definition}[Convexity]\label{def: convexity}
+	A function \(f:\reals^\dimension\to \reals\) is called \emph{convex}, if 
+	\begin{align}\label{eq: convex combination definition}
+		f(x + \hesseEV(y-x)) \le f(x) + \hesseEV (f(y)-f(x))
+		\qquad \forall x,y\in\reals^\dimension,\ \forall\hesseEV\in[0,1].
+	\end{align}
+	It can be shown \parencite[e.g.][Prop. 1.1]{bubeckConvexOptimizationAlgorithms2015} that this
+	definition is equivalent to non-emptyness of the set of subgradients for all \(x\)
+	\begin{align}\label{eq: subgradient definition}
+		\partial f(x) = \{
+			G \in\reals^\dimension: f(x) + \langle G, y-x\rangle \le f(y)
+			\quad \forall y\in\reals^\dimension
+		\}.
+	\end{align}
+	If \(f\) is differentiable and convex, then the gradient \(\nabla f\) is in
+	this set of subgradients \parencite[e.g.][Prop.
+	1.1]{bubeckConvexOptimizationAlgorithms2015} and therefore makes it nonempty.
+	Which means that for differentiable \(f\) the statement
+	\begin{align*}
+		f(x) + \langle\nabla f(x), y-x\rangle \le f(y)\qquad \forall x,y\in\reals^\dimension
+	\end{align*}
+	is another possible definition. If \(f\) is twice differentiable then another
+	equivalent statement is \parencite[e.g.][Theorem 2.1.4]{nesterovLecturesConvexOptimization2018}
+	\begin{align*}
+		0\precsim\nabla^2 f.
+	\end{align*}
+\end{definition}
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_convexity.pdf_tex}
+	\caption{
+		Visualize Convexity Definitions: We can see that a linear combination
+		of two function values will stay above the linear combination of its inputs
+		(\ref{eq: convex combination definition}) and that there is a slope inducing
+		a line which touches the function in some point and stays below it
+		(\ref{eq: subgradient definition}).
+	}
+	\label{fig: visualize convexity definition}
+\end{figure}
+%
+\subsubsection{Strong Convexity and Lipschitz Continuous Gradient}
+
+If you recall how the rate of convergence was related to the condition number
+\(\hesseEV_\dimension/\hesseEV_1 =\condition\), then it is not surprising that
+the lack of a lower and upper bound will have us struggle to get convergence as
+\(\hesseEV_\dimension\) can be arbitrarily large and \(\hesseEV_1\) arbitrarily
+small. To get similar convergence results we have to assume something like
+%
+\begin{align}\label{eq: upper lower bound on hesse matrix}
 	\lbound \identity \precsim \nabla^2 \Loss(\weights) \precsim \ubound \identity.
-\end{align*}
+\end{align}
 %
-Here \(A \precsim B\) should be read as \(0\precsim B-A\) which we define to mean
-\(B-A\) is positive definite.
+We will see that the lower bound is not necessary to get convergence of the
+loss function, but it is necessary to get convergence of the weights. It is
+also necessary for a linear\footnote{
+	In the Numerical Analysis, exponential rate of
+	convergence is called ``linear convergence'' because the relationship
+	\[
+		\|\weights_{n+1} - \minimum\| \le c \|\weights_n - \minimum\|
+	\]
+	is linear. In
+	general convergence order \(q\) implies 
+	\[
+		\|\weights_{n+1} -\minimum\| \le c\|\weights_n - \minimum\|^q.
+	\]
+	This is likely because quadratic convergence (\(q=2\)) already results in an ``actual
+	rate of convergence'' of \(c^{\left(2^n\right)}\) which is double exponential and
+	repeated application of \(\exp\) is annoying to write, so writers prefer the
+	recursive notation above which motivates this seemingly peculiar naming.
+	Slower convergence orders are referred to as ``sub-linear'' convergence.
+}
+rate of convergence. When it comes to the upper bound on the other hand recall
+that we have used it to bound the learning rate, ensuring that
+\(1-\lr\hesseEV_\dimension\) is larger than \(-1\). If we did not have an upper
+bound then we could not guarantee this ``stability'' of gradient descent. Now
+we do not want to assume the hesse matrix exists so let us integrate (\ref{eq:
+upper lower bound on hesse matrix}) and use the constants to make sure that we
+have equality of the functions and derivatives in \(\weights\), then we get
+\begin{align*}
+	\frac{\lbound}{2}\| \theta - \weights\|^2
+	\le \underbrace{
+		\Loss(\theta) - \Loss(\weights) - \langle \nabla \Loss(\weights), \theta-\weights\rangle
+	}_{=:\bregmanDiv{\Loss}(\theta, \weights)\quad\text{(Bregman Divergence)}}
+	\le \frac{\ubound}{2}\| \theta - \weights\|^2.
+\end{align*}
+The ``Bregman Divergence'' is the distance between the real function and its first
+taylor approximation. If we would move the first taylor approximation from the
+middle to the sides on the other hand, this represents a quadratic upper and lower
+bound on \(\Loss\) as illustrated in Figure~\ref{fig: visualize strong
+convexity}.
+\begin{definition}\label{def: strong convexity}
+	A function \(\Loss\) is \emph{strongly convex}, if for all \(x,y\)
+	\begin{align*}
+		\Loss(x) + \langle \nabla \Loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \Loss(y)
+	\end{align*}
+\end{definition}
+
+The upper bound requires some discussion. First notice that the operator norm is
+equal to the largest absolute eigenvalue
+\begin{align*}
+	\|A\| := \sup_{\|x\| =1} \|Ax\|
+	= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}
+	= \sup_{\|x\| =1} \sqrt{\sum_{i=1}^\dimension \hesseEV_i^2 x_i^2},
+	= \max_{i=1,\dots,\dimension} |\hesseEV_i|
+\end{align*}
+where we have used the orthonormal basis of eigenvectors \((v_i)_i\) with
+eigenvalues \((\hesseEV_i)_i\) of a (symmetric) matrix A to represent a point
+\(x\in\reals^\dimension\)
+\begin{align*}
+	x = \sum_{i=1}^{d}x_i v_i.
+\end{align*}
+As we have no negative eigenvalues in the convex case, the upper bound on the
+hesse matrix is equivalent to a bound on its operator norm. And since a
+bounded derivative is equivalent to Lipschitz continuity of the function itself
+(cf. Lemma~\ref{lem-appendix: lipschitz and bounded derivative}) another way
+to express our upper bound is by requiring Lipschitz continuity of the gradient
+\(\nabla \Loss\). And these two formulations are equivalent under convexity
+%
+\begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
+	\label{lem: Lipschitz Gradient implies taylor inequality}
+	If \(\nabla \Loss\) is \(\ubound\)-Lipschitz continuous, then
+	\begin{align*}
+		| \Loss(y) - \Loss(x) - \langle \nabla \Loss(x), y-x\rangle |
+		\le \tfrac{\ubound}2 \|y-x\|^2
+	\end{align*}
+	If \(\Loss\) is convex, then the opposite direction is also true.
+\end{lemma}
+\begin{proof}
+	See Appendix \ref{Appdx-lem: Lipschitz Gradient implies taylor inequality}.
+\end{proof}
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/visualize_strong_convexity.pdf_tex}
+	\caption{Strong Convexity provides a tighter lower bound}
+	\label{fig: visualize strong convexity}
+\end{figure}
+%
+\begin{definition}
+	Finally let us borrow some notation from \citeauthor{nesterovLecturesConvexOptimization2018}:
+	\begin{description}
+		\item[{\(\lipGradientSet[q,p]{\ubound}\)}] the set of \(q\) times differentiable functions with an
+		\(\ubound\)-Lipschitz continuous \(p\)-th derivative
+		\item[{\(\strongConvex[q,p]{\lbound}{\ubound}\)}] the \(\lbound\)-strongly convex
+		functions from \(\lipGradientSet[q,p]{\ubound}\).
+	\end{description}
+\end{definition}
+
+\section{Discussing Assumptions}
 
 \subsection{Convexity}
 
@@ -345,137 +510,116 @@ measure areas are of little concern. But as we already found out in
 Subsection~\ref{subsec: Negative Eigenvalues}, starting close to such a feature
 increases the amount of time it takes for us to escape that area which means
 we can not really provide an upper bound on the time it takes to end up in
-a locally convex area.
+a locally convex area, as we can arbitrarily increase the escape time by
+setting the starting point closer and closer to the local maxima or rim of a
+saddle point.
 
 So the best we can do without actually getting into probability theory is to
 hand-wave this starting phase away with the unlikelihood of it taking too long
-due to the exponential repulsion from negative eigenvalues.
+due to the exponential repulsion from negative eigenvalues. The probability
+theory to make more precise statements is still in active development and will
+require a metastability analysis of the SDE induced by stochastic gradient descent
+\parencite[e.g.][]{bovierMetastabilityPotentialTheoreticApproach2015,nguyenFirstExitTime2019}
+resulting in exit time bounds as well as an upper bound on the distance of SGD
+to this limiting SDE
+\parencite[e.g.][]{liStochasticModifiedEquations2017,ankirchnerApproximatingStochasticGradient2021}.
 
-The only meaningful generalization
-\parencite[cf.][]{karimiLinearConvergenceGradient2020} seems to be ``invexity''
-instead of convexity and the Polyak-\L{}ojasiewicz (PL) condition instead of
-strong convexity which we will introduce later. But since we have built
-intuition on how non-convex regions repel iterates into convex regions we
-now have intuition how general smooth functions behave and it is more difficult
-to build this intuition for non-invex regions so we do not really gain much
-intuition by this generalization. But since this generalization highlights the
-attributes of (strong)-convexity we actually need, it is well worth a
-complementary read. Their convergence proofs are easy to follow once one has
-understood the convex case.
+\subsection{Loss surface}
 
-In the following we are going to assume convexity.
-%
-\begin{figure}[h]
-	\centering
-	\def\svgwidth{1\textwidth}
-	\input{media/visualize_convexity.pdf_tex}
-	\caption{
-		Visualize Convexity Definitions: We can see that a linear combination
-		of two function values will stay above the linear combination of its inputs
-		(\ref{eq: convex combination definition}) and that there is a slope inducing
-		a line which touches the function in some point and stays below it
-		(\ref{eq: subgradient definition}).
-	}
-	\label{fig: visualize convexity definition}
-\end{figure}
-%
-\begin{definition}[Convexity]\label{def: convexity}
-	A function \(f:\reals^\dimension\to \reals\) is called \emph{convex}, if 
-	\begin{align}\label{eq: convex combination definition}
-		f(x + \hesseEV(y-x)) \le f(x) + \hesseEV (f(y)-f(x))
-		\qquad \forall x,y\in\reals^\dimension,\ \forall\hesseEV\in[0,1].
-	\end{align}
-	It can be shown \parencite[e.g.][Prop. 1.1]{bubeckConvexOptimizationAlgorithms2015} that this
-	definition is equivalent to non-emptyness of the set of subgradients
-	\begin{align}\label{eq: subgradient definition}
-		\partial f(x) = \{
-			G \in\reals^\dimension: f(x) + \langle G, y-x\rangle \le f(y)
-			\quad \forall y\in\reals^\dimension
-		\}.
-	\end{align}
-	If \(f\) is differentiable and convex, then the gradient \(\nabla f\) is in
-	this set of subgradients \parencite[e.g.][Prop.
-	1.1]{bubeckConvexOptimizationAlgorithms2015} and therefore makes it nonempty.
-	Which means that for differentiable \(f\) the statement
-	\begin{align*}
-		f(x) + \langle\nabla f(x), y-x\rangle \le f(y)\qquad \forall x,y\in\reals^\dimension
-	\end{align*}
-	is another possible definition. If \(f\) is twice differentiable then another
-	equivalent statement is \parencite[e.g.][Theorem 2.1.4]{nesterovLecturesConvexOptimization2018}
-	\begin{align*}
-		0\precsim\nabla^2 f.
-	\end{align*}
- \end{definition}
-%
-\begin{remark}
-	Now if you recall how the rate of convergence was related to the condition number
-	\(\hesseEV_d/\hesseEV_1 =\condition\), then you will not be surprised to see us 
-	struggle to get a convergence rate with only non-negative eigenvalues in 
-	the remaining section. As eigenvalues close or equal to zero will blow up this
-	condition number. We will therefore strengthen these assumptions in
-	Section~\ref{sec: Strong Convexity} but we can actually make a few assertions
-	with convexity only.
-\end{remark}
+Another pain point is the fact that we just end up in \emph{some} convex area in
+\emph{some} local minima. This problem has been addressed by \textcite{pascanuSaddlePointProblem2014}
+who summarize a distribution analysis by \textcite{brayStatisticsCriticalPoints2007}
+of critical points in random gaussian fields. Intuitively the dimension
+increases the number of eigenvalues of the hessian making it
+exponentially less likely that \emph{all} of them are either positive or 
+negative. But the lower the loss at the critical point, the likelier it is
+is in fact a minimum. This means that on a gaussian random field critical points
+which are local minima are likely close to the global minimum. \textcite{pascanuSaddlePointProblem2014}
+then confirm this hypothesis empirically by analyzing the share of saddle
+points of critical points found at a certain loss levels of a loss function
+induced by training models on a reduced MNIST dataset. So it \emph{appears} that
+random gaussian fields approximate deep learning problems sufficiently well to
+argue that local minima will generally be close enough to the global minima
+that this issue does not matter. Further theoretical justification is
+provided by \textcite{choromanskaLossSurfacesMultilayer2015}.
 
-\subsection{Lipschitz Gradient}
+\textcite{garipovLossSurfacesMode2018} find in an empirical study that local
+minima can be connected by a simple path (e.g. linear spline with just one
+fee knot) with near-constant loss. In other words the local minima do not only
+appear to be of similar height (in loss), they also appear to be connected
+by a network of valleys. They then propose purposefully making SGD unstable
+with higher learning rates once it converged, to explore these valleys and find
+other minima to create ensemble models with (e.g. bagging, boosting, etc.). 
 
-We still need a replacement for the upper bound of our second derivative. Since
-if the second derivative was unbounded then we could have arbitrarily high
-eigenvalues \(\hesseEV_i\) which would make it impossible to select a learning rate
-small enough that we can guarantee
-\begin{align*}
-	-1 \le 1-\lr\hesseEV_i \qquad \forall i=1,\dots, \dimension
-\end{align*}
-Using the orthonormal basis of eigenvectors \((v_i)_i\) of
-a (symmetric) matrix \(A\) to represent a point \(x\in\reals^\dimension\)
-\begin{align*}
-	x = \sum_{i=1}^{d}x_i v_i
-\end{align*}
-in the definition of the operator norm
-%
-\begin{align*}
-	\|A\| := \sup_{\|x\| =1} \|Ax\|
-	= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}
-	= \sup_{\|x\| =1} \sqrt{\sum_{i=1}^\dimension \hesseEV_i^2 x_i^2}
-\end{align*}
-%
-it becomes immediately clear that the operator norm is equal to the largest
-absolute eigenvalue using \(x=\stdBasis_d\). This implies that for positive
-eigenvalues 
-%
+\textcite{izmailovAveragingWeightsLeads2019} find that averaging the weights
+of these minima instead of creating ensembles from them seems to work as well.
+In a convex area this is no surprise as a convex combination of points
+has smaller loss than the linear combination of losses (see also
+Subsection~\ref{subsec: SGD with Averaging}).
+
+
+\subsubsection{Second Order Methods}
+
+The assumption of strong convexity can lead people to suggest using second order
+methods like the Newton-Raphson Method, which has much better convergence
+guarantees. But while we do assume convexity to be able to bound convergence
+rates, we still want to use our method on non-convex functions. And the
+Newton-Raphson Method has a bunch of issues in this case.
+
+As we can see in (\ref{eq: newton minimum approx}) the method jumps right to the
+``center'' of a quadratic function. This is nice if this center is a minimum,
+which convexity guarantees, but it is not so nice if the center is a saddle point
+or maximum. Additionally the method becomes unstable (impossible) for small 
+(zero) eigenvalues as the hesse matrix is then hard to numerically invert (no
+longer invertible).
+Additional to these fundamental problems, the storage of the Hesse matrix requires
+\(O(\dimension^2)\) space already and its inversion takes \(O(\dimension^3)\)
+time which is infeasible for high dimensional data, especially since gradient
+descent will do \(O(\dimension^2)\) steps while the Newton-Raphson method does
+one inversion. Lastly there are issues obtaining the Hesse matrix in a stochastic
+setting.
+
+So the difficulty in creating a second order method lies in addressing all these
+concerns at once. One approach by \textcite{martensDeepLearningHessianfree2010},
+called ``Hessian Free Optimization'' was reasonably successful and is based on
+the ``Conjugate Gradient Method'' \parencite[for an introduction see
+e.g.][]{shewchukIntroductionConjugateGradient1994}\fxnote{or own chapter/section?}.
+While CG converges in \(\dimension\) steps on quadratic loss functions, there
+are no convergence guarantees for general loss functions. Another Quasi-Newton
+method was proposed by \textcite{vinyalsKrylovSubspaceDescent2012} which was
+adapted into a saddle point repelling algorithm by
+\textcite{dauphinIdentifyingAttackingSaddle2014}. L-BFGS
+\parencite[e.g.][]{haghighiNumericalOptimizationUnderstanding2014} does probably
+not repel from saddle points as it attempts to estimate the real hessian.
+
+\subsection{Strong Convexity}
+
+\textcite{karimiLinearConvergenceGradient2020} show that virtually all
+attempts to generalize strong convexity are special cases of the
+Polyak-\L{}ojasiewicz condition
 \begin{align}
-	\label{eq: operator norm upper bound relation}
-	\nabla^2 \Loss(\weights) \precsim \ubound\identity
-	\iff \|\nabla^2 \Loss(\weights)\|\le \ubound,
+	\label{eq: PL condition}\tag{PL}
+	\|\nabla \Loss(\weights) \|^2 \ge c(\Loss(\weights)-\inf_{\theta}\Loss(\theta)).
 \end{align}
-%
-and the following lemma allows us to get rid of the existence of the second
-derivative for the upper bound entirely
-%
-\begin{lemma}\label{lem: lipschitz and bounded derivative}
-	If \(f\) is differentiable, then the derivative \(\nabla f\) is
-	bounded (w.r.t. the operator norm) by constant \(\lipConst\)
-	\begin{align*}
-		\|\nabla f\| \le\lipConst 
-	\end{align*}	
-	if and only if the function
-	\(f\) is \(\lipConst\)-Lipschitz continuous
-	\begin{align*}
-		\|f(x) - f(y)\| \le \lipConst \|x-y\|.
-	\end{align*}
-\end{lemma}
-\begin{proof}
-	See Appendix \ref{Appdx-lem: lipschitz and bounded derivative}.
-\end{proof}
-%
-\noindent
-So instead of the upper bound on the second derivative we can use Lipschitz
-continuity of the derivative and convexity to formulate the upper and lower
-bound without actually using the derivative.
+This condition does not require convexity but rather ``invexity'' of which
+convexity is a special case. Considering (\ref{eq: gradient integral}) it is
+perhaps not too surprising that a lower bound on the gradient for a given
+distance we want to cover allows for convergence proofs. But while convexity
+comes with a geometric intuition this condition (\ref{eq: PL condition})
+does not really.
 
-Now we have to ask ourselves whether this  is a reasonable assumption. There
-are two somewhat convincing reasons why there is probably not much more space
-for generalization.
+And since we have built intuition on how non-convex regions
+repel iterates into convex regions we now have intuition how general smooth
+functions behave and it is more difficult to build this intuition for non-invex
+regions so we do not really gain much intuition by this generalization. But
+since this generalization highlights the attributes of (strong)-convexity we
+actually need, it is well worth a complementary read. Their convergence proofs
+are very easy to follow.
+
+\subsection{Discussing Lipschitz Gradients}
+
+There are two somewhat convincing reasons why there is probably not much more
+space for generalization.
 
 First, we are using our derivative to define an ODE (\ref{eq: velocity is
 gradient}) and it is very common to use Lipschitz continuity to argue for
@@ -487,7 +631,7 @@ Second, we need at least uniform continuity of \(\nabla \Loss\) so that the ineq
 %
 \begin{align}\label{eq: bounded gradient integral}
 	\int_{t_0}^\infty \|\nabla \Loss(\weights(s))\|^2 ds
-	&\le \Loss(\weights(t_0)) - \liminf_{t\to\infty} \Loss(\weights(t)) \\
+	&\le \Loss(\weights(t_0)) - \lim_{t\to\infty} \Loss(\weights(t)) \\
 	&\le \Loss(\weights(t_0)) - \inf_{\weights} \Loss(\weights) < \infty \nonumber
 \end{align}
 %
@@ -500,18 +644,6 @@ while it is not sufficient, the difference between \(\weights_{n+1}\) and
 therefore necessary.
 So let us see if we can get convergence of the discrete gradients as well.
 %
-\begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
-	\label{lem: Lipschitz Gradient implies taylor inequality}
-	If \(\nabla f\) is \(\ubound\)-Lipschitz continuous, then
-	\begin{align*}
-		| f(y) - f(x) - \langle \nabla f(x), y-x\rangle |
-		\le \tfrac{\ubound}2 \|y-x\|^2
-	\end{align*}
-	If \(f\) is convex, then the opposite direction is also true.
-\end{lemma}
-\begin{proof}
-	See Appendix \ref{Appdx-lem: Lipschitz Gradient implies taylor inequality}.
-\end{proof}
 %
 \noindent
 Using the Lipschitz continuity of the gradient and Lemma~\ref{lem: Lipschitz
@@ -649,7 +781,7 @@ to bound our function
 	+ \underbrace{\tfrac\ubound{2} \|y-\weights_n\|^2}_{\text{distance penalty}}.
 \end{align}
 %
-The distance penalty can be understood in view of Lemma~\ref{lem: lipschitz and bounded derivative}
+The distance penalty can be understood in view of Lemma~\ref{lem-appendix: lipschitz and bounded derivative}
 which states that the change of gradient (second derivative) is bounded by \(\ubound\).
 In other words: The gradient changes at most at rate \(\ubound\) so if we
 add this upper bound as a penalty we can be sure to have a real upper bound.
@@ -657,36 +789,36 @@ add this upper bound as a penalty we can be sure to have a real upper bound.
 Gradient Decent with learning rate \(1/\ubound\) minimizes this upper bound:
 %
 \begin{lemma}\label{lem: smallest upper bound}
-	Let \(\nabla f\) be \(\ubound\)-Lipschitz continuous, then for any \(x\in\reals^d\)
-	\begin{subequations}
+	Let \(\nabla \Loss\) be \(\ubound\)-Lipschitz continuous, then for any \(\weights\in\reals^d\)
 	\begin{align}
-		x - \tfrac{1}{\ubound}\nabla f(x) 
+		\weights - \tfrac{1}{\ubound}\nabla \Loss(\weights) 
 		&= \arg\min_{y}\{
-			f(x)+ \langle\nabla f(x), y-x\rangle + \tfrac{\ubound}{2}\|y-x\|^2 
+			\Loss(\weights)+ \langle\nabla \Loss(\weights), \theta-\weights\rangle + \tfrac{\ubound}{2}\|\theta-\weights\|^2 
 		\}\\
 		\label{eq: min approximation}
-		\min_{y} f(y)	
-		&\lxle{\ref{lem: Lipschitz Gradient implies taylor inequality}} \min_{y} \{
-			f(x)+ \langle\nabla f(x), y-x\rangle + \tfrac{\ubound}{2}\|y-x\|^2 
+		\inf_{\theta} \Loss(\theta)	
+		&\lxle{\ref{lem: Lipschitz Gradient implies taylor inequality}}
+		\min_{\theta} \{
+			\Loss(\weights)+ \langle\nabla \Loss(\weights), \theta-\weights\rangle
+			+ \tfrac{\ubound}{2}\|\theta-\weights\|^2 
 		\} \\ \nonumber
-		&= f(x) - \tfrac{1}{2\ubound} \|\nabla f(x)\|^2
+		&= \Loss(\weights) - \tfrac{1}{2\ubound} \|\nabla \Loss(x)\|^2
 	\end{align}
-	\end{subequations}
 \end{lemma}
 \begin{proof}
-	The direction is irrelevant for the distance penalty term \(\|y-x\|^2\), and
+	The direction is irrelevant for the distance penalty term \(\|\theta-\weights\|^2\), and
 	\begin{align*}
-		y-x = -\tfrac{r}{\|\nabla f(x)\|}\nabla f(x)
+		\theta-\weights = -\tfrac{r}{\|\nabla \Loss(\weights)\|}\nabla \Loss(\weights)
 	\end{align*}	
 	solves
 	\begin{align*}
-		\min_{x,y} \{\langle \nabla f(x), y-x \rangle : \|y-x\|=r \}
+		\min_{\theta} \{\langle \nabla \Loss(\weights), \theta-\weights \rangle : \|\theta-\weights\|=r \}
 	\end{align*}
 	as can be seen via the Cauchy-Schwarz inequality. We can  therefore
 	reformulate our minimization problem into
 	\begin{align*}
-		\min_{r} \{ f(x) + \langle \nabla f(x), -r \nabla f(x)\rangle
-		+ \tfrac{\ubound}{2}\|r\nabla f(x)\|^2\}
+		\min_{\lr} \{ \Loss(\weights) + \langle \nabla \Loss(\weights), -\lr \nabla \Loss(\weights)\rangle
+		+ \tfrac{\ubound}{2}\|\lr\nabla \Loss(\weights)\|^2\}
 	\end{align*}
 	which we have already seen in (\ref{eq: bound increment}) and solved
 	by (\ref{eq: optimal loss decrease step}).
@@ -705,10 +837,10 @@ While Lipschitz continuity of the gradient can be viewed as an upper
 bound on the distance between the function and its linear approximation
 (Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality}),
 convexity can be viewed as a lower bound on this ``distance'', called the 
-the Bergman divergence
+the Bregman divergence
 %
 \begin{align*}
-	\bergmanDiv{f}(y,x):= f(y)-f(x)-\langle \nabla f(x), y-x\rangle \ge 0
+	\bregmanDiv{f}(y,x):= f(y)-f(x)-\langle \nabla f(x), y-x\rangle \ge 0
 \end{align*}
 %
 This lower bound can be sharpened using the Lipschitz continuity of
@@ -722,9 +854,9 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 	Let \(f\in\lipGradientSet{\ubound}\)
 	\begin{subequations}
 	\begin{align}
-		\bergmanDiv{f}(y,x)
+		\bregmanDiv{f}(y,x)
 		&\ge \tfrac{1}{2\ubound}\|\nabla f(x) - \nabla f(y)\|^2\\
-		\label{eq: bergmanDiv lower bound b}
+		\label{eq: bregmanDiv lower bound b}
 		\langle \nabla f(x) - \nabla f(y), x-y\rangle
 		&\ge \tfrac{1}{\ubound}\|\nabla f(x) - \nabla f(y)\|^2
 	\end{align}	
@@ -734,36 +866,36 @@ with an \(\ubound\)-Lipschitz continuous \(p\)-th derivative by
 	Since \(y\mapsto \langle\nabla f(x), y-x\rangle\) is linear, we know that
 	%
 	\begin{align*}
-		\phi(y):=\bergmanDiv{f}(y,x) = f(y)-f(x)-\langle \nabla f(x), y-x\rangle 
+		\phi(y):=\bregmanDiv{f}(y,x) = f(y)-f(x)-\langle \nabla f(x), y-x\rangle 
 	\end{align*}
 	%
 	still has \(\ubound\)-Lipschitz gradient
 	%
-	\begin{align}\label{eq: bergman divergence gradient}
+	\begin{align}\label{eq: bregman divergence gradient}
 		\nabla\phi(y) = \nabla f(y) - \nabla f(x).
 	\end{align}
 	%
 	This gradient is equal to the change of gradient from \(x\) to \(y\) and 
 	therefore represents the error ``rate'' we are making assuming a constant gradient
 	and linearly approximating \(f\), which is by definition the derivative of the size of
-	\(\bergmanDiv{f}(y,x)\). Now this error ``rate'' can be translated
+	\(\bregmanDiv{f}(y,x)\). Now this error ``rate'' can be translated
  	back into a real error using the stickiness of the gradient due to
 	its Lipschitz continuity. I.e. by the previous lemma we know that
 	%
 	\begin{align*}
-		0 = \bergmanDiv{f}(x,x)
+		0 = \bregmanDiv{f}(x,x)
 		\xeq{f\text{ convex}} \min_z\phi(z)
 		\xle{(\ref{eq: min approximation})} \phi(y) - \tfrac{1}{2\ubound}\|\nabla \phi(y)\|^2.
 	\end{align*}
 	%
-	Now (\ref{eq: bergman divergence gradient}) implies our first result
+	Now (\ref{eq: bregman divergence gradient}) implies our first result
 	%
 	\begin{align*}
 		\tfrac{1}{2\ubound}\|\nabla f(y) - \nabla f(x)\|^2
-		\le \phi(y) =\bergmanDiv{f}(y,x).
+		\le \phi(y) =\bregmanDiv{f}(y,x).
 	\end{align*}
-	The second inequality follows from adding \(\bergmanDiv{f}(x,y)\) to
-	\(\bergmanDiv{f}(y,x)\).
+	The second inequality follows from adding \(\bregmanDiv{f}(x,y)\) to
+	\(\bregmanDiv{f}(y,x)\).
 \end{proof}
 
 Now we can state the main convergence result
@@ -796,7 +928,7 @@ Now we can state the main convergence result
 			\langle \nabla\Loss(\weights_n), \weights_n - \minimum\rangle
 		}_{
 			\ge \tfrac{1}\ubound \|\nabla \Loss (\weights_n) - \nabla\Loss(\minimum)\|^2
-			\mathrlap{\quad \text{using (\ref{eq: bergmanDiv lower bound b})}}
+			\mathrlap{\quad \text{using (\ref{eq: bregmanDiv lower bound b})}}
 		} + \lr^2\|\nabla \Loss(\weights_n)\|^2
 		\\
 		&\le \|\weights_n - \minimum\|^2 - 
@@ -893,9 +1025,9 @@ rate decreases to
 
 \subsection{Mirror Decent}
 
-Lipschitz continuity represents an upper bound on the Bergman divergence
+Lipschitz continuity represents an upper bound on the Bregman divergence
 \begin{align*}
-	\bergmanDiv{f}(y,x)
+	\bregmanDiv{f}(y,x)
 	= f(y) - f(x) - \langle\nabla f(x), y-x\rangle
 	\lxle{\ref{lem: Lipschitz Gradient implies taylor inequality}}
 	\tfrac{\ubound}{2} \|y-x\|^2.
@@ -904,12 +1036,12 @@ In order to get close to the minimum we use this bound in
 (\ref{eq: min approximation}) to get an upper bound
 \begin{align*}
 	\min_y f(y)
-	&= \min_y \{f(x) + \langle f(x), y-x\rangle +\bergmanDiv{f}(y,x)\} \\
+	&= \min_y \{f(x) + \langle f(x), y-x\rangle +\bregmanDiv{f}(y,x)\} \\
 	&\le \min_y\{f(x) + \langle f(x), y-x\rangle +\tfrac{\ubound}{2} \|y-x\|^2\}
 \end{align*}
 As we have shown in Lemma~\ref{lem: smallest upper bound}, gradient descent
 minimizes this upper bound. The basic idea of ``Mirror Decent'' is: If we had a
-better upper bound on the Bergman divergence, then we could also improve on
+better upper bound on the Bregman divergence, then we could also improve on
 gradient descent by taking the minimum of this improved upper bound.
 
 
@@ -932,41 +1064,8 @@ And convexity was defined as a lower bound
 %
 which we will now sharpen this to a quadratic lower bound as well.
 %
-\begin{definition}\label{def: strong convexity}
-	A function \(\Loss\) is \emph{strongly convex}, if for all \(x,y\)
-	\begin{align*}
-		\Loss(x) + \langle \nabla \Loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \Loss(y)
-	\end{align*}
-	And let \(\strongConvex{\lbound}{\ubound}\) denote the \(\lbound\)-strongly convex
-	functions form \(\lipGradientSet{\ubound}\).
-\end{definition}
 %
-\begin{figure}[h]
-	\centering
-	\def\svgwidth{1\textwidth}
-	\input{media/visualize_strong_convexity.pdf_tex}
-	\caption{Strong Convexity provides a tighter lower bound}
-	\label{fig: visualize strong convexity}
-\end{figure}
-%
-Using this new assumption we get our linear\footnote{
-	In the Numerical Analysis, exponential rate of
-	convergence is called ``linear convergence'' because the relationship
-	\[
-		\|\weights_{n+1} - \minimum\| \le c \|\weights_n - \minimum\|
-	\]
-	is linear. In
-	general convergence order \(q\) implies 
-	\[
-		\|\weights_{n+1} -\minimum\| \le c\|\weights_n - \minimum\|^q.
-	\]
-	This is because quadratic convergence (\(q=2\)) already results in an actual
-	rate of convergence of \(c^{\left(2^n\right)}\) which is double exponential and
-	repeated application of \(\exp\) is annoying to write so writers prefer the
-	recursive notation above which motivates this seemingly peculiar naming.
-	The convergence rate we obtained in Section~\ref{sec: convex convergence theorems}
-	is therefore referred to as ``sub-linear'' convergence.
-}
+Using this new assumption we get our linear
 rate of convergence back, which we had motivated in Section~\ref{sec: visualize gd}. 
 %
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
@@ -1020,7 +1119,7 @@ rate of convergence back, which we had motivated in Section~\ref{sec: visualize 
 	\end{align*}
 	But now we need to find a better lower bound for the scalar product in the
 	middle to obtain a significant decrease. Previously we used the lower bound
-	on the Bergman Divergence from Lemma~\ref{lem: bermanDiv lower bound}, now
+	on the Bregman Divergence from Lemma~\ref{lem: bermanDiv lower bound}, now
 	we have a lower bound from the strong convexity property. But just as using
 	convexity directly in the previous theorem was too weak and had to be
 	improved with Lemma~\ref{lem: bermanDiv lower bound}, we are going to use
@@ -1078,11 +1177,11 @@ Now as promised we still have to show the improved lower bound.
 \end{lemma}
 \begin{proof}
 	Similarly to Lemma~\ref{lem: bermanDiv lower bound} we want to
-	add \(\bergmanDiv{f}(x,y)\) and \(\bergmanDiv{f}(y,x)\) together to
+	add \(\bregmanDiv{f}(x,y)\) and \(\bregmanDiv{f}(y,x)\) together to
 	get a lower bound for the scalar product equal to this sum. But since we
 	already have a lower bound due to strong convexity
-	\begin{align}\label{eq: strong convexity implies bergmanDiv lower bound}
-		\bergmanDiv{f}(y,x) = f(y) - f(x) -\langle\nabla f(x), y-x\rangle
+	\begin{align}\label{eq: strong convexity implies bregmanDiv lower bound}
+		\bregmanDiv{f}(y,x) = f(y) - f(x) -\langle\nabla f(x), y-x\rangle
 		\ge \tfrac{\lbound}2 \|y-x\|^2,
 	\end{align}
 	we first have to ``remove'' this lower bound from \(f\) to apply our other
@@ -1091,9 +1190,9 @@ Now as promised we still have to show the improved lower bound.
 		g_x(y) := f(y) - \tfrac{\lbound}2\|y-x\|^2 \qquad
 		\nabla g_x(y) = \nabla f(y) - \lbound(y-x)
 	\end{align*}
-	which still has positive Bergman Convergence, i.e. is convex
+	which still has positive Bregman Convergence, i.e. is convex
 	\begin{align*}
-		\bergmanDiv{g_x}(y,z)
+		\bregmanDiv{g_x}(y,z)
 		&= g_x(y) - g_x(z) - \langle\nabla g_x(z), y-z\rangle \\
 		&= 
 		\begin{aligned}[t]
@@ -1104,27 +1203,27 @@ Now as promised we still have to show the improved lower bound.
 			+ \tfrac\lbound{2}\|z-x\|^2
 			+ \lbound\langle z-x, y-z\rangle
 		\end{aligned}\\
-		&= \bergmanDiv{f}(y,z) - \tfrac{\lbound}2\|y-z\|^2
-		\xge{(\ref{eq: strong convexity implies bergmanDiv lower bound})} 0
+		&= \bregmanDiv{f}(y,z) - \tfrac{\lbound}2\|y-z\|^2
+		\xge{(\ref{eq: strong convexity implies bregmanDiv lower bound})} 0
 	\end{align*}
 	and has \((\ubound-\lbound)\)-Lipschitz continuous gradient by
 	Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality} and 
 	\begin{align}
-		\label{eq: bergmanDiv upper bound}
-		\bergmanDiv{f}(y,z) \le \tfrac{\ubound}2\|y-z\|^2.
+		\label{eq: bregmanDiv upper bound}
+		\bregmanDiv{f}(y,z) \le \tfrac{\ubound}2\|y-z\|^2.
 	\end{align}
 	The inequality above also follows from Lemma~\ref{lem: Lipschitz Gradient
 	implies taylor inequality}. Therefore
 	\(g_x\in\lipGradientSet{\ubound-\lbound}\) and if \(\ubound -\lbound>0\) we
 	can now apply Lemma~\ref{lem: bermanDiv lower bound} to get
 	\begin{align}
-		\bergmanDiv{f}(y,x)
-		&= \bergmanDiv{g_x}(y,x) + \tfrac{\lbound}2 \|y-x\|^2
+		\bregmanDiv{f}(y,x)
+		&= \bregmanDiv{g_x}(y,x) + \tfrac{\lbound}2 \|y-x\|^2
 		\nonumber \\
 		&\ge \tfrac{1}{2(\ubound-\lbound)} \|\nabla g_x(x) - \nabla g_x(y)\|^2
 		+ \tfrac{\lbound}2 \|y-x\|^2 
 		\nonumber \\
-		\label{eq: improved lower bound strong convex bergman Divergence}
+		\label{eq: improved lower bound strong convex bregman Divergence}
 		&\ge \tfrac{1}{2(\ubound-\lbound)}
 		\|\nabla f(x) - \lbound x - (\nabla f(y)-\lbound y)\|^2
 		+ \tfrac{\lbound}2 \|y-x\|^2.
@@ -1136,22 +1235,22 @@ Now as promised we still have to show the improved lower bound.
 
 	The case \(\ubound=\lbound\) which we have to cover separately offers some
 	more insight into that. In this case our lower bound  (\ref{eq:
-	strong convexity implies bergmanDiv lower bound}) makes (\ref{eq: bergmanDiv
+	strong convexity implies bregmanDiv lower bound}) makes (\ref{eq: bregmanDiv
 	upper bound}) an equality. This means we could get
 	\begin{align*}
 		\langle \nabla f(x) - \nabla f(y), x-y\rangle
-		= \bergmanDiv{f}(x,y) + \bergmanDiv{f}(y,x) = \lbound \|y-x\|^2.
+		= \bregmanDiv{f}(x,y) + \bregmanDiv{f}(y,x) = \lbound \|y-x\|^2.
 	\end{align*}
 	But instead we apply Lemma~\ref{lem: bermanDiv lower bound} to half of it
 	which results in the statement of this lemma.
 
 	Now we just have to finish the case \(\ubound>\lbound\). In equation
-	(\ref{eq: improved lower bound strong convex bergman Divergence}) we have
+	(\ref{eq: improved lower bound strong convex bregman Divergence}) we have
 	already removed the dependence on our helper function \(g_x\) and will now
-	use its symmetry to add together the mirrored Bergman Divergences to get
+	use its symmetry to add together the mirrored Bregman Divergences to get
 	\begin{align*}
 		&\langle \nabla f(x) - \nabla f(y), x-y\rangle
-		= \bergmanDiv{f}(x,y) + \bergmanDiv{f}(y,x) \\
+		= \bregmanDiv{f}(x,y) + \bregmanDiv{f}(y,x) \\
 		&\ge \tfrac{1}{\ubound-\lbound}
 		\underbrace{\|\nabla f(x) - \lbound x - (\nabla f(y)-\lbound y)\|^2}_{
 			=\|\nabla f(x) - \nabla f(y)\|^2

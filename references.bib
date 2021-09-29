@@ -88,6 +88,23 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2021_Ankirchner_Perko\\Ankirchner_Perko_2021_Approximating stochastic gradient descent with diffusions.pdf}
 }
 
+@article{armijoMinimizationFunctionsHaving1966,
+  title = {Minimization of Functions Having {{Lipschitz}} Continuous First Partial Derivatives.},
+  author = {Armijo, Larry},
+  date = {1966-01},
+  journaltitle = {Pacific Journal of Mathematics},
+  volume = {16},
+  number = {1},
+  pages = {1--3},
+  publisher = {{Pacific Journal of Mathematics, A Non-profit Corporation}},
+  issn = {0030-8730},
+  url = {https://projecteuclid.org/journals/pacific-journal-of-mathematics/volume-16/issue-1/Minimization-of-functions-having-Lipschitz-continuous-first-partial-derivatives/pjm/1102995080.full},
+  urldate = {2021-09-27},
+  abstract = {Pacific Journal of Mathematics},
+  keywords = {65.10,65.30},
+  file = {C\:\\gdrive\\ZoteroPaper\\1966_Armijo\\Armijo_1966_Minimization of functions having Lipschitz continuous first partial derivatives.pdf;C\:\\Users\\felix\\Zotero\\storage\\MU2L36LP\\1102995080.html}
+}
+
 @online{assranConvergenceNesterovAccelerated2020,
   title = {On the {{Convergence}} of {{Nesterov}}'s {{Accelerated Gradient Method}} in {{Stochastic Settings}}},
   author = {Assran, Mahmoud and Rabbat, Michael},
@@ -340,6 +357,21 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2020_Chee_Li\\Chee_Li_2020_Understanding and Detecting Convergence for Stochastic Gradient Descent with.pdf}
 }
 
+@online{chenFiniteSampleAnalysisNonlinear2021,
+  title = {Finite-{{Sample Analysis}} of {{Nonlinear Stochastic Approximation}} with {{Applications}} in {{Reinforcement Learning}}},
+  author = {Chen, Zaiwei and Zhang, Sheng and Doan, Thinh T. and Clarke, John-Paul and Maguluri, Siva Theja},
+  date = {2021-07-08},
+  eprint = {1905.11425},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math},
+  url = {http://arxiv.org/abs/1905.11425},
+  urldate = {2021-09-28},
+  abstract = {Motivated by applications in reinforcement learning (RL), we study a nonlinear stochastic approximation (SA) algorithm under Markovian noise, and establish its finite-sample convergence bounds under various stepsizes. Specifically, we show that when using constant stepsize (i.e., \$\textbackslash epsilon\_k\textbackslash equiv \textbackslash epsilon\$), the algorithm achieves exponential fast convergence with asymptotic accuracy \$\textbackslash mathcal\{O\}(\textbackslash epsilon\textbackslash log(1/\textbackslash epsilon))\$. When using diminishing stepsizes with appropriate decay rate, the algorithm converges with rate \$\textbackslash mathcal\{O\}(\textbackslash log(k)/k)\$. Our proof is based on the Lyapunov drift arguments, and to handle the Markovian noise, we exploit the fast mixing of the underlying Markov chain. To demonstrate the generality of our theoretical results on Markovian SA, we use it to derive the finite-sample bounds of the popular \$Q\$-learning with linear function approximation algorithm, under a condition on the behavior policy. Importantly, we do not need to make the unrealistic assumption that the samples are i.i.d., and do not require an additional projection step in the algorithm to maintain the boundedness of the iterates. Numerical simulations corroborate our theoretical findings.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control},
+  file = {C\:\\gdrive\\ZoteroPaper\\2021_Chen et al\\Chen et al_2021_Finite-Sample Analysis of Nonlinear Stochastic Approximation with Applications.pdf;C\:\\Users\\felix\\Zotero\\storage\\T56FWGND\\1905.html}
+}
+
 @online{choromanskaLossSurfacesMultilayer2015,
   title = {The {{Loss Surfaces}} of {{Multilayer Networks}}},
   author = {Choromanska, Anna and Henaff, Mikael and Mathieu, Michael and Arous, Gérard Ben and LeCun, Yann},
@@ -405,6 +437,36 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning},
   file = {C\:\\gdrive\\ZoteroPaper\\2017_Dinh et al\\Dinh et al_2017_Sharp Minima Can Generalize For Deep Nets.pdf;C\:\\Users\\felix\\Zotero\\storage\\JT5F9JLJ\\1703.html}
+}
+
+@online{doanConvergenceRatesAccelerated2020,
+  title = {Convergence {{Rates}} of {{Accelerated Markov Gradient Descent}} with {{Applications}} in {{Reinforcement Learning}}},
+  author = {Doan, Thinh T. and Nguyen, Lam M. and Pham, Nhan H. and Romberg, Justin},
+  date = {2020-10-19},
+  eprint = {2002.02873},
+  eprinttype = {arxiv},
+  primaryclass = {math},
+  url = {http://arxiv.org/abs/2002.02873},
+  urldate = {2021-09-28},
+  abstract = {Motivated by broad applications in machine learning, we study the popular accelerated stochastic gradient descent (ASGD) algorithm for solving (possibly nonconvex) optimization problems. We characterize the finite-time performance of this method when the gradients are sampled from Markov processes, and hence biased and dependent from time step to time step; in contrast, the analysis in existing work relies heavily on the stochastic gradients being independent and sometimes unbiased. Our main contributions show that under certain (standard) assumptions on the underlying Markov chain generating the gradients, ASGD converges at the nearly the same rate with Markovian gradient samples as with independent gradient samples. The only difference is a logarithmic factor that accounts for the mixing time of the Markov chain. One of the key motivations for this study are complicated control problems that can be modeled by a Markov decision process and solved using reinforcement learning. We apply the accelerated method to several challenging problems in the OpenAI Gym and Mujoco, and show that acceleration can significantly improve the performance of the classic temporal difference learning and REINFORCE algorithms.},
+  archiveprefix = {arXiv},
+  keywords = {Mathematics - Optimization and Control},
+  file = {C\:\\gdrive\\ZoteroPaper\\2020_Doan et al\\Doan et al_2020_Convergence Rates of Accelerated Markov Gradient Descent with Applications in.pdf;C\:\\Users\\felix\\Zotero\\storage\\QGKZNBDB\\2002.html}
+}
+
+@online{doanFiniteTimeAnalysisStochastic2020,
+  title = {Finite-{{Time Analysis}} of {{Stochastic Gradient Descent}} under {{Markov Randomness}}},
+  author = {Doan, Thinh T. and Nguyen, Lam M. and Pham, Nhan H. and Romberg, Justin},
+  date = {2020-04-01},
+  eprint = {2003.10973},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math},
+  url = {http://arxiv.org/abs/2003.10973},
+  urldate = {2021-09-28},
+  abstract = {Motivated by broad applications in reinforcement learning and machine learning, this paper considers the popular stochastic gradient descent (SGD) when the gradients of the underlying objective function are sampled from Markov processes. This Markov sampling leads to the gradient samples being biased and not independent. The existing results for the convergence of SGD under Markov randomness are often established under the assumptions on the boundedness of either the iterates or the gradient samples. Our main focus is to study the finite-time convergence of SGD for different types of objective functions, without requiring these assumptions. We show that SGD converges nearly at the same rate with Markovian gradient samples as with independent gradient samples. The only difference is a logarithmic factor that accounts for the mixing time of the Markov chain.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control},
+  file = {C\:\\gdrive\\ZoteroPaper\\2020_Doan et al\\Doan et al_2020_Finite-Time Analysis of Stochastic Gradient Descent under Markov Randomness.pdf;C\:\\Users\\felix\\Zotero\\storage\\F9BX6EKJ\\2003.html}
 }
 
 @online{dontlooWhatDifferenceMomentum2016,
@@ -537,6 +599,22 @@
   eventtitle = {Conference on {{Learning Theory}}},
   langid = {english},
   file = {C\:\\Users\\felix\\Zotero\\storage\\DGPALN9K\\Ge et al. - 2015 - Escaping From Saddle Points — Online Stochastic Gr.pdf;C\:\\Users\\felix\\Zotero\\storage\\9RW3A2KU\\Ge15.html}
+}
+
+@article{georgeAdaptiveStepsizesRecursive2006,
+  title = {Adaptive Stepsizes for Recursive Estimation with Applications in Approximate Dynamic Programming},
+  author = {George, Abraham P. and Powell, Warren B.},
+  date = {2006-10},
+  journaltitle = {Machine Learning},
+  shortjournal = {Mach Learn},
+  volume = {65},
+  number = {1},
+  pages = {167--198},
+  issn = {0885-6125, 1573-0565},
+  doi = {10.1007/s10994-006-8365-9},
+  abstract = {We address the problem of determining optimal stepsizes for estimating parameters in the context of approximate dynamic programming. The sufficient conditions for convergence of the stepsize rules have been known for 50 years, but practical computational work tends to use formulas with parameters that have to be tuned for specific applications. The problem is that in most applications in dynamic programming, observations for estimating a value function typically come from a data series that can be initially highly transient. The degree of transience affects the choice of stepsize parameters that produce the fastest convergence. In addition, the degree of initial transience can vary widely among the value function parameters for the same dynamic program. This paper reviews the literature on deterministic and stochastic stepsize rules, and derives formulas for optimal stepsizes for minimizing estimation error. This formula assumes certain parameters are known, and an approximation is proposed for the case where the parameters are unknown. Experimental work shows that the approximation provides faster convergence than other popular formulas.},
+  langid = {english},
+  file = {C\:\\gdrive\\ZoteroPaper\\2006_George_Powell\\George_Powell_2006_Adaptive stepsizes for recursive estimation with applications in approximate.pdf}
 }
 
 @inproceedings{ghadimiGlobalConvergenceHeavyball2015,
@@ -690,6 +768,22 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning,Statistics - Machine Learning},
   file = {C\:\\gdrive\\ZoteroPaper\\2018_Hoffer et al\\Hoffer et al_2018_Train longer, generalize better.pdf;C\:\\Users\\felix\\Zotero\\storage\\R3E6INJM\\1705.html}
+}
+
+@article{huddeStochasticGronwallInequality2021,
+  title = {A Stochastic {{Gronwall}} Inequality and Applications to Moments, Strong Completeness, Strong Local {{Lipschitz}} Continuity, and Perturbations},
+  author = {Hudde, Anselm and Hutzenthaler, Martin and Mazzonetto, Sara},
+  date = {2021-05},
+  journaltitle = {Annales de l'Institut Henri Poincaré, Probabilités et Statistiques},
+  volume = {57},
+  number = {2},
+  pages = {603--626},
+  publisher = {{Institut Henri Poincaré}},
+  issn = {0246-0203},
+  doi = {10.1214/20-AIHP1064},
+  abstract = {There are numerous applications of the classical (deterministic) Gronwall inequality. Recently, Michael Scheutzow discovered a stochastic Gronwall inequality which provides upper bounds for p-th moments, p∈(0,1), of the supremum of nonnegative scalar continuous processes which satisfy a linear integral inequality. In this article we complement this with upper bounds for p-th moments, p∈[2,∞), of the supremum of general Itô processes which satisfy a suitable one-sided affine-linear growth condition. As example applications, we improve known results on strong local Lipschitz continuity in the starting point of solutions of stochastic differential equations (SDEs), on (exponential) moment estimates for SDEs, on strong completeness of SDEs, and on perturbation estimates for SDEs.},
+  keywords = {60E15,60H10,Exponential moments,martingale inequality,Perturbation theory,Stochastic Gronwall inequality,Stochastic Gronwall lemma,strong completeness,Strong local Lipschitz continuity},
+  file = {C\:\\gdrive\\ZoteroPaper\\2021_Hudde et al\\Hudde et al_2021_A stochastic Gronwall inequality and applications to moments, strong.pdf;C\:\\Users\\felix\\Zotero\\storage\\RF7V9J8Q\\20-AIHP1064.html}
 }
 
 @article{imkellerFirstExitTimes2006,
@@ -864,6 +958,20 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2017_Kingma_Ba\\Kingma_Ba_2017_Adam.pdf;C\:\\Users\\felix\\Zotero\\storage\\6WJBPWQT\\1412.html}
 }
 
+@incollection{krizekGeometricInterpretationsConjugate2004,
+  title = {Geometric {{Interpretations}} of {{Conjugate Gradient}} and {{Related Methods}}},
+  booktitle = {Conjugate {{Gradient Algorithms}} and {{Finite Element Methods}}},
+  author = {Křížek, Michal and Korotov, Sergey},
+  editor = {Křížek, Michal and Neittaanmäki, Pekka and Korotov, Sergey and Glowinski, Roland},
+  date = {2004},
+  series = {Scientific {{Computation}}},
+  pages = {25--43},
+  publisher = {{Springer Berlin Heidelberg}},
+  location = {{Berlin, Heidelberg}},
+  doi = {10.1007/978-3-642-18560-1_3},
+  isbn = {978-3-642-62159-8 978-3-642-18560-1}
+}
+
 @article{kushnerRatesConvergenceSequential1978,
   title = {Rates of {{Convergence}} for {{Sequential Monte Carlo Optimization Methods}}},
   author = {Kushner, Harold J.},
@@ -962,6 +1070,16 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Computer Vision and Pattern Recognition,Computer Science - Machine Learning,Statistics - Machine Learning},
   file = {C\:\\gdrive\\ZoteroPaper\\2018_Li et al\\Li et al_2018_Visualizing the Loss Landscape of Neural Nets.pdf;C\:\\Users\\felix\\Zotero\\storage\\CI5Q2T87\\1712.html}
+}
+
+@article{mahsereciProbabilisticLineSearches2017,
+  title = {Probabilistic {{Line Searches}} for {{Stochastic Optimization}}},
+  author = {Mahsereci, Maren and Hennig, Philipp},
+  date = {2017},
+  pages = {59},
+  abstract = {In deterministic optimization, line searches are a standard tool ensuring stability and efficiency. Where only stochastic gradients are available, no direct equivalent has so far been formulated, because uncertain gradients do not allow for a strict sequence of decisions collapsing the search space. We construct a probabilistic line search by combining the structure of existing deterministic methods with notions from Bayesian optimization. Our method retains a Gaussian process surrogate of the univariate optimization objective, and uses a probabilistic belief over the Wolfe conditions to monitor the descent. The algorithm has very low computational cost, and no user-controlled parameters. Experiments show that it effectively removes the need to define a learning rate for stochastic gradient descent.},
+  langid = {english},
+  file = {C\:\\gdrive\\ZoteroPaper\\_Mahsereci_Hennig\\Mahsereci_Hennig_Probabilistic Line Searches for Stochastic Optimization.pdf}
 }
 
 @online{mandtStochasticGradientDescent2018,
@@ -1087,6 +1205,22 @@
   abstract = {In this paper we propose an accelerated version of the cubic regularization of Newton’s method (Nesterov and Polyak, in Math Program 108(1): 177–205, 2006). The original version, used for minimizing a convex function with Lipschitz-continuous Hessian, guarantees a global rate of convergence of order \$\$O\textbackslash big(\{1 \textbackslash over k\^2\}\textbackslash big)\$\$, where k is the iteration counter. Our modified version converges for the same problem class with order \$\$O\textbackslash big(\{1 \textbackslash over k\^3\}\textbackslash big)\$\$, keeping the complexity of each iteration unchanged. We study the complexity of both schemes on different classes of convex problems. In particular, we argue that for the second-order schemes, the class of non-degenerate problems is different from the standard class.},
   langid = {english},
   file = {C\:\\gdrive\\ZoteroPaper\\2008_Nesterov\\Nesterov_2008_Accelerating the cubic regularization of Newton’s method on convex problems2.pdf}
+}
+
+@article{nesterovAcceleratingCubicRegularization2008a,
+  title = {Accelerating the Cubic Regularization of {{Newton}}’s Method on Convex Problems},
+  author = {Nesterov, Yu.},
+  date = {2008-03-01},
+  journaltitle = {Mathematical Programming},
+  shortjournal = {Math. Program.},
+  volume = {112},
+  number = {1},
+  pages = {159--181},
+  issn = {1436-4646},
+  doi = {10.1007/s10107-006-0089-x},
+  abstract = {In this paper we propose an accelerated version of the cubic regularization of Newton’s method (Nesterov and Polyak, in Math Program 108(1): 177–205, 2006). The original version, used for minimizing a convex function with Lipschitz-continuous Hessian, guarantees a global rate of convergence of order \$\$O\textbackslash big(\{1 \textbackslash over k\^2\}\textbackslash big)\$\$, where k is the iteration counter. Our modified version converges for the same problem class with order \$\$O\textbackslash big(\{1 \textbackslash over k\^3\}\textbackslash big)\$\$, keeping the complexity of each iteration unchanged. We study the complexity of both schemes on different classes of convex problems. In particular, we argue that for the second-order schemes, the class of non-degenerate problems is different from the standard class.},
+  langid = {english},
+  file = {C\:\\gdrive\\ZoteroPaper\\2008_Nesterov\\Nesterov_2008_Accelerating the cubic regularization of Newton’s method on convex problems3.pdf}
 }
 
 @book{nesterovIntroductoryLecturesConvex2004,
@@ -1359,6 +1493,23 @@
   file = {C\:\\Users\\felix\\Zotero\\storage\\RZVZADR9\\Sakurai et al. - 2016 - Alternating optimization method based on nonnegati.pdf}
 }
 
+@article{scheutzowStochasticGronwallLemma2013,
+  title = {A Stochastic Gronwall Lemma},
+  author = {Scheutzow, Michael},
+  date = {2013-06-01},
+  journaltitle = {Infinite Dimensional Analysis, Quantum Probability and Related Topics},
+  shortjournal = {Infin. Dimens. Anal. Quantum. Probab. Relat. Top.},
+  volume = {16},
+  number = {02},
+  pages = {1350019},
+  publisher = {{World Scientific Publishing Co.}},
+  issn = {0219-0257},
+  doi = {10.1142/S0219025713500197},
+  abstract = {We prove a stochastic Gronwall lemma of the following type: if Z is an adapted non-negative continuous process which satisfies a linear integral inequality with an added continuous local martingale M and a process H on the right-hand side, then for any p ∈ (0, 1) the pth moment of the supremum of Z is bounded by a constant κp (which does not depend on M) times the pth moment of the supremum of H. Our main tool is a martingale inequality which is due to D. Burkholder. We provide an alternative simple proof of the martingale inequality which provides an explicit numerical value for the constant cp appearing in the inequality which is at most four times as large as the optimal constant.},
+  keywords = {martingale inequality,Stochastic Gronwall lemma},
+  file = {C\:\\gdrive\\ZoteroPaper\\2013_Scheutzow\\Scheutzow_2013_A stochastic gronwall lemma.pdf}
+}
+
 @online{schmidtDescendingCrowdedValley2021,
   title = {Descending through a {{Crowded Valley}} -- {{Benchmarking Deep Learning Optimizers}}},
   author = {Schmidt, Robin M. and Schneider, Frank and Hennig, Philipp},
@@ -1494,6 +1645,21 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2015_Su et al\\Su et al_2015_A Differential Equation for Modeling Nesterov's Accelerated Gradient Method.pdf;C\:\\Users\\felix\\Zotero\\storage\\Y73GE2KR\\1503.html}
 }
 
+@online{sunMarkovChainGradient2018,
+  title = {On {{Markov Chain Gradient Descent}}},
+  author = {Sun, Tao and Sun, Yuejiao and Yin, Wotao},
+  date = {2018-09-11},
+  eprint = {1809.04216},
+  eprinttype = {arxiv},
+  primaryclass = {math, stat},
+  url = {http://arxiv.org/abs/1809.04216},
+  urldate = {2021-09-28},
+  abstract = {Stochastic gradient methods are the workhorse (algorithms) of large-scale optimization problems in machine learning, signal processing, and other computational sciences and engineering. This paper studies Markov chain gradient descent, a variant of stochastic gradient descent where the random samples are taken on the trajectory of a Markov chain. Existing results of this method assume convex objectives and a reversible Markov chain and thus have their limitations. We establish new non-ergodic convergence under wider step sizes, for nonconvex problems, and for non-reversible finite-state Markov chains. Nonconvexity makes our method applicable to broader problem classes. Non-reversible finite-state Markov chains, on the other hand, can mix substatially faster. To obtain these results, we introduce a new technique that varies the mixing levels of the Markov chains. The reported numerical results validate our contributions.},
+  archiveprefix = {arXiv},
+  keywords = {Mathematics - Optimization and Control,Statistics - Machine Learning},
+  file = {C\:\\gdrive\\ZoteroPaper\\2018_Sun et al\\Sun et al_2018_On Markov Chain Gradient Descent.pdf;C\:\\Users\\felix\\Zotero\\storage\\LVX3YPTI\\1809.html}
+}
+
 @article{sunNonErgodicConvergenceAnalysis2019,
   title = {Non-{{Ergodic Convergence Analysis}} of {{Heavy}}-{{Ball Algorithms}}},
   author = {Sun, Tao and Yin, Penghang and Li, Dongsheng and Huang, Chun and Guan, Lei and Jiang, Hao},
@@ -1578,6 +1744,38 @@
   file = {C\:\\Users\\felix\\Zotero\\storage\\NW3E5TH8\\visualizing-and-animating-optimization-algorithms-with-matplotlib.html}
 }
 
+@online{truongBacktrackingGradientDescent2019,
+  title = {Backtracking Gradient Descent Method for General \${{C}}\^1\$ Functions, with Applications to {{Deep Learning}}},
+  author = {Truong, Tuyen Trung and Nguyen, Tuan Hang},
+  date = {2019-04-04},
+  eprint = {1808.05160},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math, stat},
+  url = {http://arxiv.org/abs/1808.05160},
+  urldate = {2021-09-27},
+  abstract = {While Standard gradient descent is one very popular optimisation method, its convergence cannot be proven beyond the class of functions whose gradient is globally Lipschitz continuous. As such, it is not actually applicable to realistic applications such as Deep Neural Networks. In this paper, we prove that its backtracking variant behaves very nicely, in particular convergence can be shown for all Morse functions. The main theoretical result of this paper is as follows. Theorem. Let \$f:\textbackslash mathbb\{R\}\^k\textbackslash rightarrow \textbackslash mathbb\{R\}\$ be a \$C\^1\$ function, and \$\textbackslash\{z\_n\textbackslash\}\$ a sequence constructed from the Backtracking gradient descent algorithm. (1) Either \$\textbackslash lim \_\{n\textbackslash rightarrow\textbackslash infty\}||z\_n||=\textbackslash infty\$ or \$\textbackslash lim \_\{n\textbackslash rightarrow\textbackslash infty\}||z\_\{n+1\}-z\_n||=0\$. (2) Assume that \$f\$ has at most countably many critical points. Then either \$\textbackslash lim \_\{n\textbackslash rightarrow\textbackslash infty\}||z\_n||=\textbackslash infty\$ or \$\textbackslash\{z\_n\textbackslash\}\$ converges to a critical point of \$f\$. (3) More generally, assume that all connected components of the set of critical points of \$f\$ are compact. Then either \$\textbackslash lim \_\{n\textbackslash rightarrow\textbackslash infty\}||z\_n||=\textbackslash infty\$ or \$\textbackslash\{z\_n\textbackslash\}\$ is bounded. Moreover, in the latter case the set of cluster points of \$\textbackslash\{z\_n\textbackslash\}\$ is connected. Some generalised versions of this result, including an inexact version, are included. Another result in this paper concerns the problem of saddle points. We then present a heuristic argument to explain why Standard gradient descent method works so well, and modifications of the backtracking versions of GD, MMT and NAG. Experiments with datasets CIFAR10 and CIFAR100 on various popular architectures verify the heuristic argument also for the mini-batch practice and show that our new algorithms, while automatically fine tuning learning rates, perform better than current state-of-the-art methods such as MMT, NAG, Adagrad, Adadelta, RMSProp, Adam and Adamax.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Numerical Analysis,Mathematics - Optimization and Control,Statistics - Machine Learning},
+  file = {C\:\\gdrive\\ZoteroPaper\\2019_Truong_Nguyen\\Truong_Nguyen_2019_Backtracking gradient descent method for general $C^1$ functions, with.pdf;C\:\\Users\\felix\\Zotero\\storage\\43XEVGBC\\1808.html}
+}
+
+@article{truongBacktrackingGradientDescent2021,
+  title = {Backtracking {{Gradient Descent Method}} and {{Some Applications}} in {{Large Scale Optimisation}}. {{Part}} 2: {{Algorithms}} and {{Experiments}}},
+  shorttitle = {Backtracking {{Gradient Descent Method}} and {{Some Applications}} in {{Large Scale Optimisation}}. {{Part}} 2},
+  author = {Truong, Tuyen Trung and Nguyen, Hang-Tuan},
+  date = {2021-12-01},
+  journaltitle = {Applied Mathematics \& Optimization},
+  shortjournal = {Appl Math Optim},
+  volume = {84},
+  number = {3},
+  pages = {2557--2586},
+  issn = {1432-0606},
+  doi = {10.1007/s00245-020-09718-8},
+  abstract = {In this paper, we provide new results and algorithms (including backtracking versions of Nesterov accelerated gradient and Momentum) which are more applicable to large scale optimisation as in Deep Neural Networks. We also demonstrate that Backtracking Gradient Descent (Backtracking GD) can obtain good upper bound estimates for local Lipschitz constants for the gradient, and that the convergence rate of Backtracking GD is similar to that in classical work of Armijo.  Experiments with datasets CIFAR10 and CIFAR100 on various popular architectures verify a heuristic argument that Backtracking GD stabilises to a finite union of sequences constructed from Standard GD for the mini-batch practice, and show that our new algorithms (while automatically fine tuning learning rates) perform better than current state-of-the-art methods such as Adam, Adagrad, Adadelta, RMSProp, Momentum and Nesterov accelerated gradient. To help readers avoiding the confusion between heuristics and more rigorously justified algorithms, we also provide a review of the current state of convergence results for gradient descent methods. Accompanying source codes are available on GitHub.},
+  langid = {english},
+  file = {C\:\\gdrive\\ZoteroPaper\\2021_Truong_Nguyen\\Truong_Nguyen_2021_Backtracking Gradient Descent Method and Some Applications in Large Scale.pdf}
+}
+
 @online{truongFastSimpleModification2021,
   title = {A Fast and Simple Modification of {{Newton}}'s Method Helping to Avoid Saddle Points},
   author = {Truong, Tuyen Trung and To, Tat Dat and Nguyen, Tuan Hang and Nguyen, Thu Hang and Nguyen, Hoang Phuong and Helmy, Maged},
@@ -1641,6 +1839,22 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2020_Vieillard et al\\Vieillard et al_2020_Momentum in Reinforcement Learning.pdf;C\:\\Users\\felix\\Zotero\\storage\\FIGNTXJ9\\1910.html}
 }
 
+@inproceedings{vinyalsKrylovSubspaceDescent2012,
+  title = {Krylov {{Subspace Descent}} for {{Deep Learning}}},
+  booktitle = {Proceedings of the {{Fifteenth International Conference}} on {{Artificial Intelligence}} and {{Statistics}}},
+  author = {Vinyals, Oriol and Povey, Daniel},
+  date = {2012-03-21},
+  pages = {1261--1268},
+  publisher = {{PMLR}},
+  issn = {1938-7228},
+  url = {https://proceedings.mlr.press/v22/vinyals12.html},
+  urldate = {2021-09-29},
+  abstract = {In this paper, we propose a second order optimization method to learn models where both the dimensionality of the parameter space and the number of training samples is high.  In our method, we construct on each iteration a Krylov subspace formed by the gradient and an approximation to the Hessian matrix, and then use a subset of the training data samples to optimize over this subspace.  As with the Hessian Free (HF) method of Martens (2010), the Hessian matrix is never explicitly constructed, and is computed using a subset of data.  In practice, as in HF, we typically use a positive definite substitute for the Hessian matrix such as the Gauss-Newton matrix.  We investigate the effectiveness of our proposed method on deep neural networks, and compare its performance to widely used methods such as stochastic gradient descent, conjugate gradient descent and L-BFGS, and also to HF. Our method leads to faster convergence than either L-BFGS or HF, and generally performs better than either of them in cross-validation accuracy.  It is also simpler and more general than HF, as it does not require a positive semidefinite approximation of the Hessian matrix to work well nor the setting of a damping parameter.  The chief drawback versus HF is the need for memory to store a basis for the Krylov subspace.},
+  eventtitle = {Artificial {{Intelligence}} and {{Statistics}}},
+  langid = {english},
+  file = {C\:\\gdrive\\ZoteroPaper\\2012_Vinyals_Povey\\Vinyals_Povey_2012_Krylov Subspace Descent for Deep Learning.pdf}
+}
+
 @online{wilsonMarginalValueAdaptive2018,
   title = {The {{Marginal Value}} of {{Adaptive Gradient Methods}} in {{Machine Learning}}},
   author = {Wilson, Ashia C. and Roelofs, Rebecca and Stern, Mitchell and Srebro, Nathan and Recht, Benjamin},
@@ -1681,6 +1895,22 @@
   file = {C\:\\gdrive\\ZoteroPaper\\2016_Yang et al\\Yang et al_2016_Unified Convergence Analysis of Stochastic Momentum Methods for Convex and.pdf;C\:\\Users\\felix\\Zotero\\storage\\3P5ILC4P\\1604.html}
 }
 
+@article{yaoAdaptiveThreetermConjugate2018,
+  title = {An Adaptive Three-Term Conjugate Gradient Method Based on Self-Scaling Memoryless {{BFGS}} Matrix},
+  author = {Yao, Shengwei and Ning, Liangshuo},
+  date = {2018-04-01},
+  journaltitle = {Journal of Computational and Applied Mathematics},
+  shortjournal = {Journal of Computational and Applied Mathematics},
+  volume = {332},
+  pages = {72--85},
+  issn = {0377-0427},
+  doi = {10.1016/j.cam.2017.10.013},
+  abstract = {Due to its simplicity and low memory requirement, conjugate gradient methods are widely used for solving large-scale unconstrained optimization problems. In this paper, we propose a three-term conjugate gradient method. The search direction is given by a symmetrical Perry matrix, which contains a positive parameter. The value of this parameter is determined by minimizing the distance of this matrix and the self-scaling memoryless BFGS matrix in the Frobenius norm. The sufficient descent property of the generated directions holds independent of line searches. The global convergence of the given method is established under Wolfe line search for general non-convex functions. Numerical experiments show that the proposed method is promising.},
+  langid = {english},
+  keywords = {Conjugate gradient method,Global convergence,Self-scaling memoryless BFGS matrix,Unconstrained optimization},
+  file = {C\:\\Users\\felix\\Zotero\\storage\\YYQV6SMD\\S0377042717305034.html}
+}
+
 @online{zhangDeepLearningElastic2015,
   title = {Deep Learning with {{Elastic Averaging SGD}}},
   author = {Zhang, Sixin and Choromanska, Anna and LeCun, Yann},
@@ -1709,6 +1939,21 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Machine Learning},
   file = {C\:\\gdrive\\ZoteroPaper\\2017_Zhang et al\\Zhang et al_2017_Understanding deep learning requires rethinking generalization.pdf;C\:\\Users\\felix\\Zotero\\storage\\988LPWUC\\1611.html}
+}
+
+@online{zhouTheoreticallyUnderstandingWhy2020,
+  title = {Towards {{Theoretically Understanding Why SGD Generalizes Better Than ADAM}} in {{Deep Learning}}},
+  author = {Zhou, Pan and Feng, Jiashi and Ma, Chao and Xiong, Caiming and HOI, Steven and E, Weinan},
+  date = {2020-10-12},
+  eprint = {2010.05627},
+  eprinttype = {arxiv},
+  primaryclass = {cs, math, stat},
+  url = {http://arxiv.org/abs/2010.05627},
+  urldate = {2021-09-28},
+  abstract = {It is not clear yet why ADAM-alike adaptive gradient algorithms suffer from worse generalization performance than SGD despite their faster training speed. This work aims to provide understandings on this generalization gap by analyzing their local convergence behaviors. Specifically, we observe the heavy tails of gradient noise in these algorithms. This motivates us to analyze these algorithms through their Levy-driven stochastic differential equations (SDEs) because of the similar convergence behaviors of an algorithm and its SDE. Then we establish the escaping time of these SDEs from a local basin. The result shows that (1) the escaping time of both SGD and ADAM\textasciitilde depends on the Radon measure of the basin positively and the heaviness of gradient noise negatively; (2) for the same basin, SGD enjoys smaller escaping time than ADAM, mainly because (a) the geometry adaptation in ADAM\textasciitilde via adaptively scaling each gradient coordinate well diminishes the anisotropic structure in gradient noise and results in larger Radon measure of a basin; (b) the exponential gradient average in ADAM\textasciitilde smooths its gradient and leads to lighter gradient noise tails than SGD. So SGD is more locally unstable than ADAM\textasciitilde at sharp minima defined as the minima whose local basins have small Radon measure, and can better escape from them to flatter ones with larger Radon measure. As flat minima here which often refer to the minima at flat or asymmetric basins/valleys often generalize better than sharp ones\textasciitilde\textbackslash cite\{keskar2016large,he2019asymmetric\}, our result explains the better generalization performance of SGD over ADAM. Finally, experimental results confirm our heavy-tailed gradient noise assumption and theoretical affirmation.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Machine Learning},
+  file = {C\:\\gdrive\\ZoteroPaper\\2020_Zhou et al\\Zhou et al_2020_Towards Theoretically Understanding Why SGD Generalizes Better Than ADAM in.pdf;C\:\\Users\\felix\\Zotero\\storage\\VJGSCQN4\\2010.html}
 }
 
 @inproceedings{zinkevichOnlineConvexProgramming2003,
