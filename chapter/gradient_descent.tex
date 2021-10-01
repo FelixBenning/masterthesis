@@ -44,12 +44,13 @@ next argument:
 	\le 0
 \end{align}
 %
-immediately implies
+which immediately implies
+%
 \begin{align*}
 	\Loss(\weights(t_0)) \ge \Loss(\weights(t_1)) \ge \dots \ge \inf_\weights \Loss(\weights) \ge 0
 \end{align*}
-which implies convergence of \(\Loss(\weights(t))\). But not necessarily a
-convergent \(\weights(t)\) and not necessarily convergence to \(\inf_\weights
+implying convergence of \(\Loss(\weights(t))\). But it does not necessitate a
+convergent \(\weights(t)\) nor convergence to \(\inf_\weights
 \Loss(\weights)\).
 
 \section{Visualizing the 2nd Taylor Approximation}\label{sec: visualize gd}
@@ -94,7 +95,8 @@ but also the original taylor approximation
 %
 So far we have expressed the location of the minimum \(\hat{x}\) of the Taylor
 approximation only relative to \(\weights\). To obtain its absolute coordinates
-we define
+we define\footnote{We now motivated the Newton-Raphson Method in passing, which is
+a second order method utilizing the second derivative.}
 %
 \begin{align}\label{eq: newton minimum approx}
 	\tag{Newton-Raphson Step}
@@ -103,7 +105,7 @@ we define
 	\weights -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
 \end{align}
 %
-and obtain the notion of a paraboloid centered around \(\hat{\weights}\)
+and obtain the notion of a paraboloid centered around vertex \(\hat{\weights}\)
 %
 \begin{align}\label{paraboloid approximation of L}
 	\Loss(\theta)
@@ -136,7 +138,7 @@ second eigenspace.
 
 Before we move on I want to briefly mention that we only really needed the
 positive definiteness of \(\nabla^2 \Loss(\weights)\) to make it invertible, so that
-\(\hat{x}\) is well defined. If it was not positive definite but still invertible,
+the vertex \(\hat{x}\) is well defined. If it was not positive definite but still invertible,
 then \(\hat{x}\) would not be a minimum but all the other arguments would still
 hold.
 In that case the eigenvalues might be negative as well as positive, which would
@@ -271,7 +273,7 @@ This is minimized when
 	1-\lr\hesseEV_1 = \lr\hesseEV_d -1,
 \end{align*}
 %
-implying
+implying an optimal learning rate
 %
 \begin{align}\label{eq: optimal SGD lr eigenvalue representation}
 	\lr^* = \frac{2}{\hesseEV_1 + \hesseEV_d}.
@@ -292,8 +294,8 @@ becomes close to one if the condition number \(\condition\) is large.
 If all the eigenvalues are the same on the other hand, the condition number
 becomes one and the rate is zero, implying instant convergence. This is not
 surprising if we recall our visualization in Figure~\ref{fig: 2d paraboloid}.
-When the eigenvalues are the same, the contours are concentric circles and the
-gradient points right at the center.
+When the eigenvalues are the same, the contour lines are concentric circles and
+the gradient points right at the center.
 
 \subsection{Generalizing Assumptions}
 
@@ -305,7 +307,7 @@ the existence of a hesse matrix if possible.
 	\begin{align*}
 		\langle x, Ax \rangle \ge 0 \quad \forall x
 	\end{align*}
-	which is equivalent to \(A\) having only positive eigenvalues as can be seen
+	which is equivalent to \(A\) having only positive eigenvalues, as can be seen
 	by testing the definition with eigenvectors and utilizing linearity to generalize.
 	We denote
 	\begin{align*}
@@ -315,9 +317,9 @@ the existence of a hesse matrix if possible.
 
 \subsubsection{Convexity}
 
-So instead of non-negative eigenvalues we can demand ``convexity'' which does
+Instead of non-negative eigenvalues we can demand ``convexity'' which does
 not require the existence of a hesse matrix but is equivalent to its positive
-definiteness if it exists.
+definiteness (non-negative eigenvalues) if it exists.
 %
 \begin{definition}[Convexity]\label{def: convexity}
 	A function \(f:\reals^\dimension\to \reals\) is called \emph{convex}, if 
@@ -410,9 +412,10 @@ The ``Bregman Divergence'' is the distance between the real function and its fir
 taylor approximation. If we would move the first taylor approximation from the
 middle to the sides on the other hand, this represents a quadratic upper and lower
 bound on \(\Loss\) as illustrated in Figure~\ref{fig: visualize strong
-convexity}.
+convexity}. For \(\lbound=0\) we get the definition of convexity back.
 \begin{definition}\label{def: strong convexity}
-	A function \(\Loss\) is \emph{strongly convex}, if for all \(x,y\)
+	A function \(\Loss\) is \(\lbound\)-\emph{strongly convex} for some
+	\(\lbound>0\), if for all \(x,y\)
 	\begin{align*}
 		\Loss(x) + \langle \nabla \Loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \Loss(y)
 	\end{align*}
@@ -437,7 +440,8 @@ hesse matrix is equivalent to a bound on its operator norm. And since a
 bounded derivative is equivalent to Lipschitz continuity of the function itself
 (cf. Lemma~\ref{lem-appendix: lipschitz and bounded derivative}) another way
 to express our upper bound is by requiring Lipschitz continuity of the gradient
-\(\nabla \Loss\). And these two formulations are equivalent under convexity
+\(\nabla \Loss\). Under convexity Lipschitz continuity and our upper bound are
+in fact equivalent.
 %
 \begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
 	\label{lem: Lipschitz Gradient implies taylor inequality}
@@ -456,7 +460,8 @@ to express our upper bound is by requiring Lipschitz continuity of the gradient
 	\centering
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_strong_convexity.pdf_tex}
-	\caption{Strong Convexity provides a tighter lower bound}
+	\caption{Strong convexity provides a tighter lower bound than convexity
+	while Lipschitz continuity of the gradient provides an upper bound.}
 	\label{fig: visualize strong convexity}
 \end{figure}
 %
@@ -1150,14 +1155,14 @@ Lipschitz continuity represents an upper bound on the Bregman divergence
 	\bregmanDiv{f}(y,x)
 	= f(y) - f(x) - \langle\nabla f(x), y-x\rangle
 	\lxle{(\ref{eq: lin approx + distance penalty notion})}
-	\tfrac{\ubound}{1} \|y-x\|^2.
+	\tfrac{\ubound}{2} \|y-x\|^2.
 \end{align*}
 As we have shown in Lemma~\ref{lem: smallest upper bound}, gradient descent
 minimizes this upper bound
 \begin{align*}
 	\min_y f(y)
 	&= \min_y \{f(x) + \langle f(x), y-x\rangle +\bregmanDiv{f}(y,x)\} \\
-	&\le \min_y\{f(x) + \langle f(x), y-x\rangle +\tfrac{\ubound}{1} \|y-x\|^2\}.
+	&\le \min_y\{f(x) + \langle f(x), y-x\rangle +\tfrac{\ubound}{2} \|y-x\|^2\}.
 \end{align*}
 The basic idea of ``Mirror Decent'' is: If we had a
 better upper bound on the Bregman divergence, then we could also improve on
