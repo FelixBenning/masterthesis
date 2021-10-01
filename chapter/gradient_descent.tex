@@ -56,32 +56,36 @@ convergent \(\weights(t)\) nor convergence to \(\inf_\weights
 \section{Visualizing the 2nd Taylor Approximation}\label{sec: visualize gd}
 
 To build some intuition what leads to convergence of \(\weights(t)\) let us
-consider more simple cases. If we assume our Hesse matrix \(\nabla^2
-\Loss(\weights)\) exists and is positive definite (all eigenvalues positive), then for
-the second order Taylor approximation \(T_2\Loss\) of the loss \(\Loss\)
+consider more simple cases. For the second order Taylor approximation
+\(T_2\Loss\) of the loss \(\Loss\)
 %
 \begin{align*}
 	\Loss(\weights+x) \approx T_2\Loss(\weights+x)
-	= \Loss(\weights) + x^T \nabla \Loss(\weights) + \tfrac12 x^T \nabla^2 \Loss(\weights) x
+	= \Loss(\weights) + x^T \nabla \Loss(\weights) + \tfrac12 x^T \nabla^2 \Loss(\weights) x,
 \end{align*}
 %
-we can find the minimum 
-\begin{align}\label{eq: newton minimum approx relative coords}
-	\hat{x} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights)
-\end{align}
 using only the first order condition, i.e. by setting the first derivative to zero
 %
+\begin{align}\label{eq: Taylor approx derivative}
+	\nabla T_2\Loss(\weights+x) = \nabla \Loss(\weights) + \nabla^2\Loss(\weights) x \xeq{!} 0
+\end{align}
+%
+we can find the minimum 
+%
+\begin{align}\label{eq: newton minimum approx relative coords}
+	\hat{x} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
+\end{align}
+%
+if we assume our Hesse matrix \(\nabla^2 \Loss(\weights)\) exists and is
+positive definite (all eigenvalues positive) which also means it is invertible.
+The next equation explains itself if you plug (\ref{eq: newton minimum approx
+relative coords}) into it and compare it to (\ref{eq: Taylor approx derivative})
+%
 \begin{align*}
-	\nabla T_2\Loss(\weights+x) = \nabla \Loss(\weights) + \nabla^2\Loss(\weights) x \xeq{!} 0.
+	\nabla T_2\Loss(\weights+x) = \nabla^2 \Loss(\weights)(x-\hat{x}).
 \end{align*}
 %
-This minimum allows us not only to rewrite the taylor derivative
-%
-\begin{align*}
-	\nabla T_2\Loss(\weights+x) = \nabla^2 \Loss(\weights)(x-\hat{x}),
-\end{align*}
-%
-but also the original taylor approximation
+Similarly we can rewrite the original taylor approximation
 %
 \begin{align*}
 	T_2\Loss(\weights+x)
@@ -477,8 +481,7 @@ in fact equivalent.
 
 \section{Convergence with Convexity}\label{sec: convex convergence theorems}
 
-As a bounded hesse matrix \(\nabla^2\Loss \precsim \ubound\) implies a limited
-rate of change of the gradient, the upper bound we have
+The upper bound we have can also be understood as a distance penalty
 
 \begin{align}\label{eq: lin approx + distance penalty notion}
 	\Loss(\theta)
@@ -488,14 +491,13 @@ rate of change of the gradient, the upper bound we have
 	+ \overbrace{\underbrace{\bregmanDiv{\Loss}(\theta,\weights_n)}_{
 		\xle{(\ref{eq: bregman divergence upper and lower bound})}
 		\tfrac\ubound{2} \|\theta-\weights_n\|^2 
-	}}^{\text{distance penalty}}
+	}}^{\text{distance penalty}},
 \end{align}
 %
-can also be understood as a distance penalty, penalizing the fact that we do
-not have enough information about the loss if we move farther away from our
-current point. Our limit on the change of the gradient
+penalizing the fact that we do not have enough information about the loss if we
+move farther away from our current point. Our limit on the change of the gradient
 allows us to create this worst case upper bound though.
-Gradient Decent with learning rate \(1/\ubound\) minimizes this upper bound:
+Gradient Decent with learning rate \(1/\ubound\) minimizes this upper bound.
 %
 \begin{lemma}\label{lem: smallest upper bound}
 	Let \(\nabla \Loss\) be \(\ubound\)-Lipschitz continuous, then for any \(\weights\in\reals^d\)
@@ -591,8 +593,8 @@ as we will see in the proof of the following theorem.
 		\ge \frac{\Loss(\weights_n)-\Loss(\minimum)}{\|\weights_0-\minimum\|}
 	\end{align}
 	if we can make sure that our weights do not move away from our minimum \(\minimum\).
-	Here we need to bring in convexity again. With that we will prove in
-	Lemma~\ref{lem: bermanDiv lower bound} that
+	Utilizing convexity again we will prove in Lemma~\ref{lem: bermanDiv lower
+	bound} that
 	\begin{align*}
 		\langle\nabla\Loss(\weights) - \Loss(\minimum), \weights-\minimum\rangle
 		\ge \tfrac1{\ubound} \|\nabla\Loss(\weights) - \nabla\Loss(\minimum)\|^2.
@@ -725,12 +727,13 @@ Now given that we have proven (\ref{eq: decreasing weight difference}), i.e.
 \end{align*}
 for convex functions and provided a lower bound for the gradient it might seem
 like we should be able to state a convergence statement about the weights as
-well. But the lower bound on our gradient uses the current loss delta, and if
-our loss function is really flat, then the loss difference to the minimum might
-already be really small even if we are still far away.
+well. But the lower bound on our gradient uses the current loss delta. And if
+our loss function is really flat, then the loss difference might already be
+really small even if we are still far away in parameter space.
 
-Strong Convexity prevents that by requiring a minimum of curvature. So we can
-provide a lower bound of the gradient using the weight difference directly
+Strong Convexity prevents this by requiring a minimum of curvature (cf.
+Figure~\ref{fig: visualize strong convexity}). With it we can provide a lower
+bound of the gradient using the weight difference directly
 \begin{align}
 	\nonumber
 	\|\nabla\Loss(\weights)\|\|\weights -\minimum\|
@@ -753,7 +756,7 @@ upper bound}) results in \(\lr=1/\ubound\) and convergence rate
 	\le (1-\tfrac{1}{2\condition})^{n+1}\|\weights_0-\minimum\|^2
 \end{align*}
 %
-which is in the same ballpark as we got in the quadratic problem but with a bit
+which is in the same ballpark as we got in the quadratic problem. But with a bit
 more work we can actually achieve the same rates.
 %
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
@@ -797,20 +800,20 @@ more work we can actually achieve the same rates.
 \end{theorem}
 \begin{proof}[Proof {\parencite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}}]
 	This proof starts like the proof for convex functions, cf. (\ref{eq:
-	decreasing weight difference}):
+	decreasing weight difference})
  \begin{align*}
 		\|\weights_{n+1} - \minimum\|^2
 		&= \| \weights_n -\minimum - \lr\nabla\Loss(\weights_n)\|^2\\
 		&= \| \weights_n - \minimum\|^2
 		- 2\lr\langle \nabla\Loss(\weights_n), \weights_n - \minimum\rangle
-		+ \lr^2 \| \nabla\Loss(\weights_n)\|^2
+		+ \lr^2 \| \nabla\Loss(\weights_n)\|^2.
 	\end{align*}
 	But now we need to find a better lower bound for the scalar product in the
-	middle to obtain a significant decrease. Previously we used the lower bound
-	on the Bregman Divergence from Lemma~\ref{lem: bermanDiv lower bound}, now
-	we could also use the lower bound from the strong convexity property. But
-	we can not use both which seems like we are loosing sharpness in our bound.
-	And indeed this bound can be improved to be
+	middle. Previously we used the lower bound on the Bregman Divergence from
+	Lemma~\ref{lem: bermanDiv lower bound}. Now we could also use the lower bound
+	from the strong convexity property directly. But we can not use both which
+	seems like we are loosing sharpness in our bound. And indeed this bound can
+	be improved to be
  	\begin{align*}
 		&\langle \nabla\Loss(\weights_n) -\nabla\Loss(\minimum), \weights_n - \minimum\rangle	\\
 		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \minimum\|^2
@@ -828,11 +831,12 @@ more work we can actually achieve the same rates.
 		\|\nabla\Loss(\weights_n)\|^2
 	\end{align*}
 	which immediately proves (\ref{eq: gd strong convexity convergence rate
-	1}) using induction. Note that we could also use our lower bound on the
-	gradient, but this does not represent a significant improvement especially
-	for the optimal rates where we max out the learning rate making the
-	term on the right zero. (\ref{eq: gd strong convexity convergence rate 2})
-	follows from our upper bound on the loss using weights, cf. (\ref{eq: weights bound loss}) 
+	1}) using induction. Note that we could additionally use our lower bound on the
+	gradient. But this does not represent a significant improvement,
+	especially for the optimal rates where we max out the learning rate making
+	the term on the right equal to zero. (\ref{eq: gd strong convexity
+	convergence rate 2}) follows from our upper bound on the loss using weights,
+	cf. (\ref{eq: weights bound loss}) 
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\minimum)
 		\le \tfrac\ubound{2} \| \weights_n - \minimum\|^2.
@@ -1048,7 +1052,8 @@ who summarize a distribution analysis by \textcite{brayStatisticsCriticalPoints2
 of critical points in random gaussian fields. Intuitively the dimension
 increases the number of eigenvalues of the hessian, making it
 exponentially less likely that \emph{all} of them are either positive or 
-negative. But the lower the loss at the critical point, the likelier it is
+negative. In other words: In high dimension almost all critical points are
+saddle points! But the lower the loss at the critical point, the likelier it is
 in fact a minimum. This means that on a gaussian random field critical points
 which are local minima are likely close to the global minimum. \textcite{pascanuSaddlePointProblem2014}
 then confirm this hypothesis empirically by analyzing the share of saddle
@@ -1172,7 +1177,7 @@ gradient descent by taking the minimum of this improved upper bound.
 
 We are using our derivative to define an ODE (\ref{eq: velocity is
 gradient}) and it is very common to use Lipschitz continuity to argue for
-existence, uniqueness and maybe most importantly stability of ODEs. While these
+existence, uniqueness and stability of ODEs. While these
 properties might not be needed for effective optimization, working without them
 will likely be very cumbersome, as a discretization of the Gradient Flow ODE
 (like Gradient Descent) would not necessarily approximate this ODE. And if we
@@ -1180,7 +1185,7 @@ recall (cf. Lemma~\ref{lem: smallest upper bound}) that \(\lr=1/\ubound\) is
 optimal since Lipschitz continuity of the gradient provides us confidence
 bounds on an area where the slope does not change too much, it is not surprising
 that a faster rate of change of the slope (a higher \(\ubound\)) requires us
-to make smaller steps. And if we do not have an upper bound on this rate at all
+to make smaller steps. And if we do not have an upper bound on this rate at all,
 no step size would be small enough.
 
 Approaching this problem from the continuos side, we need at least uniform
@@ -1188,7 +1193,7 @@ continuity of \(\nabla \Loss\) so that the inequality
 %
 \begin{align}\label{eq: bounded gradient integral}
 	\int_{t_0}^\infty \|\nabla \Loss(\weights(s))\|^2 ds
-	&\le \Loss(\weights(t_0)) - \lim_{t\to\infty} \Loss(\weights(t)) \\
+	&= \Loss(\weights(t_0)) - \lim_{t\to\infty} \Loss(\weights(t)) \\
 	&\le \Loss(\weights(t_0)) - \inf_{\weights} \Loss(\weights) < \infty \nonumber
 \end{align}
 %
@@ -1196,20 +1201,24 @@ derived from (\ref{eq: gradient integral}) is sufficient for a convergent
 \(\|\nabla \Loss(\weights(t))\|\) otherwise the gradients could be arbitrarily
 large or small which would prevent convergence of the gradient decent iteration as
 the difference between \(\weights_{n+1}\) and \(\weights_n\) is proportional to
-the gradient.
+the gradient. And in this case we are not using an upper bound which might
+not have been tight but rather an equality.
 
 Note that convergence of the gradient does not yet ensure that \(\weights(t)\)
 converges, only that its derivative \(\dot{\weights}(t) = -\nabla \Loss(\weights(t))\)
 converges. The logarithm is an obvious example where this goes wrong.
 Convergence of the gradient is therefore necessary but not sufficient.
 
-In the discrete case we get a similar relationship. Instead of the integral
-we get a sum using Lemma~\ref{lem: smallest upper bound}
-%
+In the discrete case we get a similar relationship. Summing over the inequality 
+\begin{align*}
+	\Loss(\weights_{n+1}) - \Loss(\weights_n) \le -\tfrac{1}{2\ubound}\|\nabla\Loss(\weights_n)\|^2
+\end{align*}
+from Lemma~\ref{lem: smallest upper bound} results in a sum similar to the
+integral we have seen
 \begin{align*}
 	\frac{1}{2\ubound} \sum_{k=0}^{n-1}\|\nabla \Loss(\weights_k)\|^2
 	\le \Loss(\weights_0) - \Loss(\weights_n)
-	\le \Loss(\weights_0) - \inf_{\weights} \Loss(\weights)
+	\le \Loss(\weights_0) - \inf_{\weights} \Loss(\weights).
 \end{align*}
 %
 Since \(\tfrac{1}{\ubound}\) is the time increment \(\lr\) between the \(\weights_k\)
@@ -1218,7 +1227,7 @@ version (\ref{eq: bounded gradient integral}).
 In particular we get a convergent average of squared gradients
 %
 \begin{align*}
-	\frac{1}{n} \sum_{k=0}^n \|\nabla \Loss(\weights_k)\|^2
+	\frac{1}{n} \sum_{k=0}^{n-1} \|\nabla \Loss(\weights_k)\|^2
 	\le \frac{2 \ubound}{n} (\Loss(\weights_0) - \inf_\weights \Loss(\weights))
 	\in O(\ubound/n).
 \end{align*}
@@ -1273,16 +1282,15 @@ which decreases towards zero, stalling the movement towards the minimum.
 \section{Complexity Bounds}\label{sec: complexity bounds}
 
 Now that we found convergence rates for gradient descent on (strongly) convex
-problems, the question is can we do better? I.e. how fast could an algorithm we
-could possibly think of be? To tackle this problem let us first make an
-assumption about what this algorithm can do.
-Unrolling our gradient descent algorithm
+problems, the question is can we do better? I.e. how fast could an algorithms
+possibly be? To tackle this problem let us first make an assumption about what
+this algorithm can do. Unrolling our gradient descent algorithm
 %
 \begin{align*}
 	\weights_n = \weights_0 - \lr\sum_{k=0}^{n-1} \nabla \Loss(\weights_k)
 \end{align*}
 %
-we can see that even if we allowed custom learning rates for every iteration
+we can see, that even if we allowed custom learning rates for every iteration
 %
 \begin{align*}
 	\weights_n = \weights_0 - \sum_{k=0}^{n-1} \lr_k \nabla \Loss(\weights_k)
@@ -1385,8 +1393,8 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\begin{align}
 		\Loss(\weights_n) - \Loss(\minimum)
 		&\ge \frac{\ubound \|\weights_0 - \minimum\|^2}{16(n+1)^2} \\
-		\|\weights_k -\minimum\|^2 
-		&\ge \frac13 \|\weights_0 - \minimum\|^2
+		\|\weights_n -\minimum\|^2 
+		&\ge \frac12 \|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
 	where \(\minimum = \arg\min_\weights \Loss(\weights)\) is the unique minimum.
@@ -1453,9 +1461,11 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		\end{pmatrix*}
 	\end{align*}
 	%
-	This means our loss function is quadratic which means that our
-	hesse matrix \(\nabla \tilde{\Loss}(\weights)\) is a constant \(H\). And it is
-	positive definite because
+	This means our loss function is quadratic with
+	\begin{align*}
+		\nabla^2\tilde{\Loss}(\weights) = H = (A_G + \stdBasis_1 \stdBasis_1^T)
+	\end{align*}
+	And the Hesse matrix is positive definite because
 	%
 	\begin{align*}
 		\langle \weights , H \weights\rangle
@@ -1494,12 +1504,12 @@ this argument results in the following theorem inspired by \textcite[Theorem
 			+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 		\right].
 	\end{align*}
-	Now we know that \(\minimum = (1,\dots,1)^T\) achieves a loss of zero which is
+	Further, we know that \(\minimum = (1,\dots,1)^T\) achieves a loss of zero which is
 	the unique minimum as the loss function is positive and convex. Since we
 	assumed w.l.o.g. that \(\weights_0=\mathbf{0}\) we get
 	%
 	\begin{align}\label{eq: initial distance}
-		\|\minimum - \weights_0\|^2 = \dimension
+		\|\minimum - \weights_0\|^2 = \dimension.
 	\end{align}
 	%
 	We also know
@@ -1513,15 +1523,14 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	which immediately results in the second claim of the theorem
 	\begin{align*}
 		\|\minimum - \weights_n\|^2
-		&\ge \sum_{k=n+1}^d (\minimum^{(k)}- \weights_n^{(k)})^2
-		= d-(n+1) \\
-		&= n = \tfrac{n}{2n+1} d
-		\ge \tfrac13 \|\minimum - \weights_0\|^2. 
+		&\ge \sum_{k=n+1}^d \underbrace{(\minimum^{(k)}- \weights_n^{(k)})^2}_{=1}
+		= d-n \\
+		&\lxeq{(\ref{eq: w.l.o.g dim=2n+1})} n+1
+		\xeq{(\ref{eq: w.l.o.g dim=2n+1})} \tfrac{n+1}{2n+1} d
+		\xge{(\ref{eq: initial distance})} \tfrac12 \|\minimum - \weights_0\|^2. 
 	\end{align*}
-	Where we have assumed without loss of generality that \(n\ge1\) in the last
-	inequality. The case \(n=0\) is obvious.
 
-	To get the first bound on the loss function we have to be a bit more subtle.
+	To get the bound on the loss function we have to be a bit more subtle.
 	On \(\reals^n\subseteq \reals^\dimension\) the modified loss function
 	%
 	\begin{align}\label{eq: sink loss}
@@ -1578,12 +1587,14 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\end{align*}	
 	%
 	And this is in fact the solution of our linear equation (\ref{eq: optimality
-	condition for sink loss}) as can be verified by calculation. Now we just
-	have to plug this into our loss function
+	condition for sink loss}) as can be verified by calculation. Since
+	\(\weights_n \in \reals^n\) on which \(\Loss\) and \(\Loss_n\) are equal
+	we finally get
 	%
 	\begin{align*}
-		&\Loss(\weights_n)-\inf_\weights\Loss(\weights)
-		\ge \Loss(\hat{\weights}_n)\\
+		\Loss(\weights_n)-\inf_\weights\Loss(\weights)
+		&=\Loss(\weights_n) = \Loss_n(\weights_n) \ge \Loss_n(\hat{\weights}_n)
+		= \Loss(\hat{\weights}_n)\\
 		&= \frac{\ubound}{8}\left[
 			\left(-\tfrac1{n+1}\right)^2 + \left(1-\tfrac{n}{n+1}\right)^2
 			+ \sum_{k=1}^{n-1}\left(\tfrac{k+1}{n+1}-\tfrac{k}{n+1}\right)^2
@@ -1725,10 +1736,14 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 	where \(\minimum\) is the unique minimum of \(\Loss\).
 \end{theorem}
 \begin{proof}
-	We can again assume without loss of generality that \(\weights_0=\mathbf{0}\).
-	Of the two solutions to the linear equations (\ref{eq: solution to the
-	strongly convex coloring problem}) induced by the two solutions \(q_{1/2}\)
-	of (\ref{eq: coloring solution quadratic equation}) only
+	Since our factor becomes zero for \(\condition=1\) we can assume without loss
+	of generality that \(\condition>1\).
+	
+	Further, we can again assume without loss of generality that
+	\(\weights_0=\mathbf{0}\).  Of the two solutions to the linear equations
+	(\ref{eq: solution to the strongly convex coloring problem}) induced by the
+	two solutions \(q_{1/2}\) of (\ref{eq: coloring solution quadratic equation})
+	only
 	\begin{align*}
 		\minimum^{(i)} = \left(\frac{\sqrt{\condition}-1}{\sqrt{\condition}+1}\right)^i
 		= \left(1 - \frac{2}{1+\sqrt{\condition}}\right)^i =: q^i
@@ -1757,8 +1772,8 @@ In view of Lemma~\ref{lem: smallest upper bound} which states that gradient
 descent is in some sense optimal (minimizes the upper bound induced by
 Lipschitz continuity of the gradient), it might be surprising how far away
 Gradient Decent is from these lower bounds. Maybe these lower bounds are not
-tight enough? This is not the case. In the next chapter we will get to know
-a family of methods which do achieve these rates of convergence.
+tight enough? This is not the case. In Chapter~\ref{chap: momentum} we will get
+to know a family of methods which do achieve these rates of convergence.
 
 So can we
 explain the Lemma? Well, first of all it is of course just an upper bound we
