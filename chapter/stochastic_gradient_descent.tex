@@ -553,8 +553,318 @@ rule out that the detour over the exponential function and logarithm messed
 with our asymptotic rate, so the problem are not our bounds but rather the
 selection of the learning rate \(\lr_n = \tfrac{1}{\hesseEV_\dimension(n+1)}\).
 
-In the next section we are going to find locally optimal learning rates (i.e.
-learning rates which maximize the decrease from \(n\) to \(n+1\)).
+\subsection{Optimal Rates}
+
+So can we select better rates? Let us try to find optimal learning rates somehow.
+First we are going to use the fact that a basis change to a different orthonormal 
+basis is an isometry\footnote{
+	Proof: \(\|x\|^2 = x^Tx = x^TVV^Tx = (V^T x)^T V^Tx = \|V^T x\|^2\)
+}
+and thus
+\begin{align}
+	\nonumber
+	\E\|\Weights_{n+1} - \minimum\|^2
+	&= \E\|V^T(\Weights_{n+1} - \minimum)\|^2
+	= \sum_{j=1} \E\langle\Weights_{n+1}-\minimum, v_j\rangle^2\\
+	\label{eq: expected square error in quadratic case}
+	&= \sum_{j=1}^\dimension (1-\lr_n \hesseEV_j)^2 \E\langle\Weights_{n+1}-\minimum\rangle^2
+	+ \lr_n^2 \E\langle \martIncr_{n+1}, v_j\rangle^2
+\end{align}
+where we have used conditional independence of \(\Weights_n\) and \(\martIncr_{n+1}\)
+for the last equation. Now optimizing over \(\lr_n\) by taking the derivative
+of the term above with respect to \(\lr_n\) would result in
+\begin{align*}
+	\lr_n^* &= \frac{
+		\sum_{j=1}^\dimension \hesseEV_j \E\langle \Weights_n-\minimum, v_j\rangle^2
+	}{
+		\sum_{j=1}^\dimension\hesseEV_j^2\E\langle\Weights_n-\minimum, v_j\rangle^2
+		+ \E\langle\martIncr_{n+1}, v_j\rangle^2
+	}\\
+	&= \frac{
+		\E\langle \Weights_n - \minimum, \nabla\Loss(\Weights_n)\rangle
+	}{
+		\E\|\nabla\Loss(\Weights_n)\|^2 + \E\|\martIncr_{n+1}\|^2
+	}
+	= \frac{
+		\E\langle \Weights_n - \minimum, \nabla\Loss(\Weights_n)\rangle
+	}{
+		\E\|\nabla\loss(\Weights_n)\|^2
+	}.
+\end{align*}
+But while we can estimate the divisor, we do not know the scalar product between
+the true gradient and the direction to the minimum. If we knew that we could
+probably get to the minimum much faster.
+
+But we do not, which might be surprising since we got ``optimal'' rates when
+we did the same for the non-stochastic gradient in Subsection~\ref{subsec:
+necessary assumptions in the quadratic case}. But now, even if we assumed
+\(\E\|\martIncr_{n+1}\|^2=0\), we get these weird optimal rates. What happened?
+Well, in Subsection~\ref{subsec: necessary assumptions in the quadratic case}
+we did not actually optimize over the euclidean norm. Instead we looked at the
+reduction factor for every eigenspace and tried to minimize their maximum.
+This does not take the actual size of the eigen-components
+\(\E\langle\Weights_n-\minimum, v_j\rangle^2\) of our distance to the optimum
+\(\minimum\) into account. And if one of these components is very small, then
+we could sacrifice its reduction factor for a smaller factor in the other
+eigenspaces. We did not do that in Subsection~\ref{subsec: necessary assumptions
+in the quadratic case} because we used constant learning rates which would
+sacrifice one eigenspace for another indefinitely. But no matter how big the
+initial difference, if the rate of one eigenspace is smaller than another then
+eventually the error in the eigenspace with the smaller rate will be
+negligible compared to the one with the larger rate. This means that
+asymptotically only the maximum of these factors matter.
+
+Now if we assume rotationally invariant noise, i.e.
+\begin{align*}
+	\E\langle\martIncr_{n+1},v_j\rangle^2 = \E\langle\martIncr_{n+1}, v_i\rangle^2
+	\qquad \forall i,j
+\end{align*}
+then due to
+\begin{align*}
+	(1-\lr_n \hesseEV_j)
+	\le \max \{ (1-\lr_n\hesseEV_1)^2, (1-\lr_n\hesseEV_\dimension)^2 \}
+\end{align*}
+the error of the eigenspaces in-between will eventually be negligible. So we 
+only really have a trade off between the smallest and largest eigenvalue again.
+If we would use the learning rates to favour one over the other, then this would
+make up for any differences that might have existed after a finite time and
+from then on both errors would be similar in size which would mean we should
+not treat them differently anymore. This motivates why it is reasonable to
+neglect differences between the size of eigen-components at least for the
+asymptotic rate.
+
+Now we need to translate this intuition into actual maths. For that we are
+going to define a new norm
+\begin{align}
+	\|X\|_{V,\infty}
+	:= \sqrt{\max_{i=1,\dots,\dimension} \E\langle X, v_i\rangle^2}.
+\end{align}
+Note that without the expectation this would just be the infinity norm with regard
+to the basis \(v_1,\dots,v_\dimension\). Now positive definiteness and
+scalability of the norm are trivial, the triangle inequality follows from the
+triangle inequality of the \(L^2\) norm \(\|X\|_{L^2} := \sqrt{\E\|X\|^2}\)
+\begin{align*}
+	\|X+Y\|_{V,\infty}
+	= \max_{j=1,\dots,\dimension} \|\langle X, v_j\rangle + \langle Y, v_j\rangle\|_{L^2}
+	\le \|X\|_{V,\infty} + \|Y\|_{V,\infty}.
+\end{align*}
+As we have used the \(L^2\) norm until now, let us consider its relation
+to this new norm. Of course the norms are equivalent
+\begin{align*}
+	\|X\|_{V,\infty}^2
+	= \max_{i=1,\dots,\dimension} \E\langle X, v_i\rangle^2
+	\le \sum_{i=1}^\dimension \E\langle X, v_i\rangle^2
+	= \|X\|_{L^2}
+	\le \dimension \|X\|_{V,\infty}^2
+\end{align*}
+but \(\dimension\) is potentially quite large. But as we have argued in the
+limiting case all the eigenspaces except the one with the largest and smallest
+eigenvalue vanish, so then the factor comes closer to \(2\) independent of the
+dimension \(\dimension\).
+
+Armed with this norm we can now tackle our problem again using the same
+transformations (in particular conditional independence) as in (\ref{eq:
+expected square error in quadratic case}), we get
+\begin{align}
+	\nonumber
+	\|\Weights_{n+1} -\minimum\|_{V,\infty}^2
+	&= \max_{j=1,\dots,\dimension} \E\langle\Weights_{n+1} -\minimum, v_j\rangle^2\\
+	\nonumber
+	&= \max_{j=1,\dots,\dimension} (1-\lr_n\hesseEV_j)^2\E\langle\Weights_n -\minimum, v_j\rangle^2
+	+ \lr_n^2 \E\langle \martIncr_{n+1}, v_j \rangle^2\\
+	\nonumber
+	&\le \max_{j=1,\dots,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
+	+ \lr_n^2 \|\martIncr_{n+1}\|_{V,\infty}^2\\
+	\label{eq: upper bound weird norm weight distance}
+	&= \max_{j=1,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
+	+ \lr_n^2 \underbrace{\|\martIncr_{n+1}\|_{V,\infty}^2}_{\le \stdBound^2}
+\end{align}
+if we assume bounded variance. Okay, so let us optimize over this bound. Since
+we are looking at a maximum over parabolas in \(\lr_n\), the first order
+condition would be enough as this is a convex function. But while the maximum is
+continuous we have a discontinuity in the derivative 
+\begin{align*}
+	\frac{d}{d\lr_n}
+	= \begin{cases}
+	(2\lr_n \hesseEV_1^2 - 2\hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2
+	+ 2 \lr_n \stdBound^2
+	& \lr_n \le \frac{2}{\hesseEV_1+\hesseEV_\dimension}\\
+	(2\lr_n \hesseEV_\dimension^2 - 2\hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2
+	+ 2 \lr_n \stdBound^2
+	& \lr_n \ge \frac{2}{\hesseEV_1+\hesseEV_\dimension}
+	\end{cases},
+\end{align*}
+which might prevent the monotonously increasing derivative from ever being equal
+to zero. In fact we need either
+\begin{align*}
+	\frac{2}{\hesseEV_1+\hesseEV_\dimension} \xle{!} \lr_n
+	&= \frac{
+		\hesseEV_\dimension \|\Weights_n-\minimum\|_{V,\infty}^2
+	}{
+		\hesseEV_\dimension^2 \|\Weights_n-\minimum\|_{V,\infty}^2 + \stdBound^2
+	}\\
+	&= \frac{1}{
+		\hesseEV_\dimension
+		+ \frac{\stdBound^2}{
+			\hesseEV_\dimension\|\Weights_n-\minimum\|_{V,\infty}^2
+		}
+	}
+\end{align*}
+or equivalently
+\begin{align*}
+	\frac{\hesseEV_1+\hesseEV_\dimension}{2}
+	\xge{!} \hesseEV_\dimension
+	+ \frac{\stdBound^2}{
+		\hesseEV_\dimension\|\Weights_n-\minimum\|_{V,\infty}^2
+	}
+	\ge \hesseEV_\dimension,
+\end{align*}
+which is a contradiction for \(\hesseEV_1 < \hesseEV_\dimension\), as is
+always the case (except when all eigenvalues are equal). Or we want
+\begin{align*}
+	&\frac{2}{\hesseEV_1+\hesseEV_\dimension} \xge{!} \lr_n
+	= \frac{1}{
+		\hesseEV_1 + \frac{\stdBound^2}{
+			\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
+		}
+	}
+	% \\
+	% &\iff 
+	% \frac{\hesseEV_1+\hesseEV_\dimension}{2}
+	% \le \hesseEV_1 + \frac{\stdBound^2}{
+	% 	\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
+	% }\\
+	% &\iff 
+	% \frac{\condition-1}{2\hesseEV_1}=\frac{\hesseEV_\dimension-\hesseEV_1}{2}\le
+	% \frac{\stdBound^2}{
+	% 	\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
+	% }\\
+\end{align*}
+which simplifies to
+\begin{align*}
+	\frac{\stdBound^2}{
+		\|\Weights_n-\minimum\|_{V,\infty}^2
+	}
+	\ge\frac{\condition-1}{2},
+\end{align*}
+covering the case \(\condition=1\) allowing us to assume \(\hesseEV_1 <
+\hesseEV_\dimension\) without loss of generality in the previous case. If
+the condition above is not satisfied, then the optimal learning rate is at the
+discontinuity (the same as in the classical case). So in summary we have
+\begin{align*}
+	\lr_n^* = \begin{cases}
+		\frac{2}{\hesseEV_1+\hesseEV_\dimension}
+		&\frac{\stdBound^2}{
+			\|\Weights_n-\minimum\|_{V,\infty}^2
+		}
+		\le \frac{\condition-1}{2}\\
+		\left(
+			\hesseEV_1 + \frac{\stdBound^2}{
+				\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
+			}
+		\right)^{-1}
+		&\frac{\stdBound^2}{
+			\|\Weights_n-\minimum\|_{V,\infty}^2
+		}
+		\ge \frac{\condition-1}{2}
+	\end{cases}.
+\end{align*}
+We can interpret this as follows: If the noise is negligible compared to the
+distance to the minimum, we want to use the same learning rates as in the
+classical case -- simply ignoring the existence of noise. After this ``transient
+phase'' we are in the ``noise reduction'' phase and want to select a learning rate
+which decreases with the distance to the minimum. For the asymptotic rate of
+convergence only the second case matters but the transient phase might be much
+more important for practical applications.
+
+In particular for \(\condition=1\) we are in this asymptotic phase immediately.
+Before we plug our learning rate into our upper bound (\ref{eq: upper bound
+weird norm weight distance}), let us do some preparation 
+\begin{align}
+	\nonumber
+	&\|\Weights_{n+1} -\minimum\|_{V,\infty}^2\\
+	\nonumber
+	&\le \max_{j=1,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
+	+ \lr_n^2 \stdBound^2\\
+	\label{eq: upper bound useful for rate of convergence}
+	&= \max_{j=1,\dimension}\left(1- 2\hesseEV_j\lr_n + \lr_n^2\hesseEV_j^2
+		+\lr_n^2\tfrac{\stdBound^2}{\|\Weights_n-\minimum\|_{V,\infty}^2}
+	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	\nonumber
+	&= \max_{j=1,\dimension}\Bigg(1- \lr_n \hesseEV_j\Big[2 - \lr_n \left(
+		\hesseEV_j + \tfrac{\stdBound^2}{\hesseEV_j\|\Weights_n-\minimum\|_{V,\infty}^2}
+	\right)\Big] \Bigg)\|\Weights_n-\minimum\|_{V,\infty}^2.
+\end{align}
+Since the maximum is attained by the eigenspace with the smallest eigenvalue \(\hesseEV_1\)
+in the asymptotic case, our bound reduces to
+\begin{align*}
+	\|\Weights_{n+1} -\minimum\|_{V,\infty}^2
+	&\le (1- \lr_n^* \hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	&= \left(1- \tfrac{1}{1+ \tfrac{\stdBound^2}{\hesseEV_1^2\|\Weights_n-\minimum\|^2}}\right)
+	\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	&= \left(1- \tfrac{
+		\hesseEV_1^2 \|\Weights_n-\minimum\|_{V,\infty}^2
+	}{
+		\stdBound^2
+		\left(\tfrac{\hesseEV_1^2\|\Weights_n-\minimum\|^2}{\stdBound^2}+1\right)
+	}\right)
+	\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	&\le \Bigg(
+	1- \underbrace{\tfrac{
+		\hesseEV_1^2
+	}{
+		\stdBound^2
+		\left(\tfrac{2\hesseEV_1^2}{\condition -1}+1\right)
+	}}_{=:q}
+	\|\Weights_n-\minimum\|_{V,\infty}^2
+	\Bigg)
+	\|\Weights_n-\minimum\|_{V,\infty}^2,
+\end{align*}
+where we have used our lower bound on the variance-distance fraction
+\begin{align*}
+	\frac{\stdBound^2}{
+		\|\Weights_n-\minimum\|_{V,\infty}^2
+	}
+	\ge \frac{\condition-1}{2}
+\end{align*}
+characterizing the asymptotic phase. Using Lemma~\ref{lem-appendix: diminishing contraction}
+this implies
+\begin{align*}
+	\|\Weights_n-\minimum\|_{V,\infty}^2
+	\le \frac{1}{nq + \tfrac{1}{\|\Weights_0-\minimum\|_{V,\infty}}},
+\end{align*}
+assuming we have started in the asymptotic phase with \(\Weights_0\). Now in the
+transient phase we can apply
+\begin{align*}
+	\frac{\stdBound^2}{
+		\|\Weights_n-\minimum\|_{V,\infty}^2
+	}
+	\le \frac{\condition-1}{2}
+\end{align*}
+directly to (\ref{eq: upper bound useful for rate of convergence}) to get
+\begin{align*}
+	\|\Weights_{n+1}-\minimum\|_{V,\infty}^2
+	&= \max_{j=1,\dimension}\left((1- \hesseEV_j\lr_n)^2
+		+\lr_n^2\tfrac{\stdBound^2}{\|\Weights_n-\minimum\|_{V,\infty}^2}
+	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	&\le \max_{j=1,\dimension}\left((1- \hesseEV_j\lr_n)^2
+		+\lr_n^2\tfrac{\condition-1}{2}
+	\right)\|\Weights_n-\minimum\|_{V,\infty}^2.
+\end{align*}
+And for the learning rate \(\lr_n^*=\tfrac{2}{\hesseEV_1+\hesseEV_\dimension}\)
+we have
+\begin{align*}
+	(1-\hesseEV_1\lr_n^*)^2
+	= (1-\hesseEV_\dimension\lr_n^*)^2
+	= \left(1-\tfrac{2}{1+\condition}\right)^2
+\end{align*}
+and therefore
+\begin{align*}
+	\|\Weights_{n+1}-\minimum\|_{V,\infty}^2
+	&\le \left(\left(1-\tfrac{2}{1+\condition}\right)^2
+		+\left(\tfrac{2}{\hesseEV_1+\hesseEV_\dimension}\right)^2\tfrac{\condition-1}{2}
+	\right)\|\Weights_n-\minimum\|_{V,\infty}^2.
+\end{align*}
 
 \section{Expected Square Error Analysis}
 
