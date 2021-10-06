@@ -621,7 +621,7 @@ Now if we assume rotationally invariant noise, i.e.
 \end{align*}
 then due to
 \begin{align*}
-	(1-\lr_n \hesseEV_j)
+	(1-\lr_n \hesseEV_j)^2
 	\le \max \{ (1-\lr_n\hesseEV_1)^2, (1-\lr_n\hesseEV_\dimension)^2 \}
 \end{align*}
 the error of the eigenspaces in-between will eventually be negligible. So we 
@@ -633,7 +633,7 @@ not treat them differently anymore. This motivates why it is reasonable to
 neglect differences between the size of eigen-components at least for the
 asymptotic rate.
 
-Now we need to translate this intuition into actual maths. For that we are
+Now we need to translate this intuition into actual maths. For that, we are
 going to define a new norm
 \begin{align}
 	\|X\|_{V,\infty}
@@ -641,7 +641,7 @@ going to define a new norm
 \end{align}
 Note that without the expectation this would just be the infinity norm with regard
 to the basis \(v_1,\dots,v_\dimension\). Now positive definiteness and
-scalability of the norm are trivial, the triangle inequality follows from the
+scalability of the norm are trivial, and the triangle inequality follows from the
 triangle inequality of the \(L^2\) norm \(\|X\|_{L^2} := \sqrt{\E\|X\|^2}\)
 \begin{align*}
 	\|X+Y\|_{V,\infty}
@@ -662,7 +662,7 @@ limiting case all the eigenspaces except the one with the largest and smallest
 eigenvalue vanish, so then the factor comes closer to \(2\) independent of the
 dimension \(\dimension\).
 
-Armed with this norm we can now tackle our problem again using the same
+Armed with this norm, we can now tackle our problem again. Using the same
 transformations (in particular conditional independence) as in (\ref{eq:
 expected square error in quadratic case}), we get
 \begin{align}
@@ -689,7 +689,7 @@ continuous we have a discontinuity in the derivative
 	(2\lr_n \hesseEV_1^2 - 2\hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2
 	+ 2 \lr_n \stdBound^2
 	& \lr_n \le \frac{2}{\hesseEV_1+\hesseEV_\dimension}\\
-	(2\lr_n \hesseEV_\dimension^2 - 2\hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2
+	(2\lr_n \hesseEV_\dimension^2 - 2\hesseEV_\dimension)\|\Weights_n-\minimum\|_{V,\infty}^2
 	+ 2 \lr_n \stdBound^2
 	& \lr_n \ge \frac{2}{\hesseEV_1+\hesseEV_\dimension}
 	\end{cases},
@@ -745,7 +745,7 @@ which simplifies to
 	\frac{\stdBound^2}{
 		\|\Weights_n-\minimum\|_{V,\infty}^2
 	}
-	\ge\frac{\condition-1}{2},
+	\ge\frac{\hesseEV_1^2(\condition-1)}{2},
 \end{align*}
 covering the case \(\condition=1\) allowing us to assume \(\hesseEV_1 <
 \hesseEV_\dimension\) without loss of generality in the previous case. If
@@ -757,7 +757,7 @@ discontinuity (the same as in the classical case). So in summary we have
 		&\frac{\stdBound^2}{
 			\|\Weights_n-\minimum\|_{V,\infty}^2
 		}
-		\le \frac{\condition-1}{2}\\
+		\le \frac{\hesseEV_1^2(\condition-1)}{2}\\
 		\left(
 			\hesseEV_1 + \frac{\stdBound^2}{
 				\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
@@ -766,7 +766,7 @@ discontinuity (the same as in the classical case). So in summary we have
 		&\frac{\stdBound^2}{
 			\|\Weights_n-\minimum\|_{V,\infty}^2
 		}
-		\ge \frac{\condition-1}{2}
+		\ge \frac{\hesseEV_1^2(\condition-1)}{2}
 	\end{cases}.
 \end{align*}
 We can interpret this as follows: If the noise is negligible compared to the
@@ -814,8 +814,8 @@ in the asymptotic case, our bound reduces to
 		\hesseEV_1^2
 	}{
 		\stdBound^2
-		\left(\tfrac{2\hesseEV_1^2}{\condition -1}+1\right)
-	}}_{=:q}
+		\left(\tfrac{2}{\condition -1}+1\right)
+	}}_{=\tfrac{\hesseEV_1^2(\condition-1)}{\stdBound^2(\condition+1)}}
 	\|\Weights_n-\minimum\|_{V,\infty}^2
 	\Bigg)
 	\|\Weights_n-\minimum\|_{V,\infty}^2,
@@ -823,7 +823,7 @@ in the asymptotic case, our bound reduces to
 where we have used our lower bound on the variance-distance fraction
 \begin{align*}
 	\frac{\stdBound^2}{
-		\|\Weights_n-\minimum\|_{V,\infty}^2
+		\hesseEV_1^2\|\Weights_n-\minimum\|_{V,\infty}^2
 	}
 	\ge \frac{\condition-1}{2}
 \end{align*}
@@ -831,7 +831,10 @@ characterizing the asymptotic phase. Using Lemma~\ref{lem-appendix: diminishing 
 this implies
 \begin{align*}
 	\|\Weights_n-\minimum\|_{V,\infty}^2
-	\le \frac{1}{nq + \tfrac{1}{\|\Weights_0-\minimum\|_{V,\infty}}},
+	\le \frac{1}{
+		n\tfrac{\hesseEV_1^2(\condition-1)}{\stdBound^2(\condition+1)}
+		+ \tfrac{1}{\|\Weights_0-\minimum\|_{V,\infty}}
+	},
 \end{align*}
 assuming we have started in the asymptotic phase with \(\Weights_0\). Now in the
 transient phase we can apply
@@ -839,7 +842,7 @@ transient phase we can apply
 	\frac{\stdBound^2}{
 		\|\Weights_n-\minimum\|_{V,\infty}^2
 	}
-	\le \frac{\condition-1}{2}
+	\le \frac{\hesseEV_1^2(\condition-1)}{2}
 \end{align*}
 directly to (\ref{eq: upper bound useful for rate of convergence}) to get
 \begin{align*}
@@ -848,22 +851,27 @@ directly to (\ref{eq: upper bound useful for rate of convergence}) to get
 		+\lr_n^2\tfrac{\stdBound^2}{\|\Weights_n-\minimum\|_{V,\infty}^2}
 	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
 	&\le \max_{j=1,\dimension}\left((1- \hesseEV_j\lr_n)^2
-		+\lr_n^2\tfrac{\condition-1}{2}
+		+\lr_n^2\tfrac{\hesseEV_1^2(\condition-1)}{2}
 	\right)\|\Weights_n-\minimum\|_{V,\infty}^2.
 \end{align*}
-And for the learning rate \(\lr_n^*=\tfrac{2}{\hesseEV_1+\hesseEV_\dimension}\)
+And for the learning rate \(\lr_n^*=\tfrac{2}{\hesseEV_1+\hesseEV_\dimension}=\tfrac{2}{\hesseEV_1(1+\condition)}\)
 we have
 \begin{align*}
-	(1-\hesseEV_1\lr_n^*)^2
-	= (1-\hesseEV_\dimension\lr_n^*)^2
+	(1-\hesseEV_\dimension\lr_n^*)^2
+	= (1-\hesseEV_1\lr_n^*)^2
 	= \left(1-\tfrac{2}{1+\condition}\right)^2
 \end{align*}
 and therefore
 \begin{align*}
 	\|\Weights_{n+1}-\minimum\|_{V,\infty}^2
 	&\le \left(\left(1-\tfrac{2}{1+\condition}\right)^2
-		+\left(\tfrac{2}{\hesseEV_1+\hesseEV_\dimension}\right)^2\tfrac{\condition-1}{2}
-	\right)\|\Weights_n-\minimum\|_{V,\infty}^2.
+		+\left(\tfrac{2}{\hesseEV_1(1+\condition)}\right)^2\tfrac{\hesseEV_1^2(\condition-1)}{2}
+	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	&=\left(
+		\left(\tfrac{\condition-1}{\condition+1}\right)^2 + 2 \tfrac{\condition-1}{(\condition+1)^2}
+	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	&= \tfrac{\condition-1}{(\condition+1)^2}(\condition-1 + 2)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+	&= \left(1-\tfrac{2}{1+\condition}\right)\|\Weights_n - \minimum\|_{V,\infty}^2.
 \end{align*}
 
 \section{Expected Square Error Analysis}
