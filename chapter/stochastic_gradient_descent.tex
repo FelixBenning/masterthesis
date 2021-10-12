@@ -1,16 +1,16 @@
 % !TEX root = ../Masterthesis.tex
 
-\chapter{Stochastic Gradient Decent (SGD)}
+\chapter{Stochastic Gradient Descent (SGD)}\label{chap: sgd}
 
-Until now we have always assumed we had access to the theoretical loss \(\Loss\) 
-directly. In reality we almost never have. What we can do instead is use the
-stochastic gradient
+Until now we have always assumed we had access to the expected loss (Risk)
+\(\Loss\) directly. In reality we almost never have. What we can do instead is
+use the stochastic gradient
 %
 \begin{align*}
 	\nabla_\weights\loss (\weights, X,Y) \qquad (X,Y)\sim\dist.
 \end{align*}
 %
-Its expected value is the theoretical loss again\footnote{
+Its expected value is the Risk again\footnote{
 	We need to be able to swap the expectation with differentiation. A sufficient 
 	condition is continuity of \(\nabla\loss\) in \(\weights\), which allows us
 	to use the mean value theorem
@@ -28,7 +28,7 @@ Its expected value is the theoretical loss again\footnote{
 }. To shorten notation we will assume that the gradient is always meant
 with respect to \(\weights\) unless otherwise stated.
 Sampling an independent sequence \(((X_k,Y_k), k\ge 1)\) from the 
-distribution \(\dist\) results in \emph{Stochastic Gradient Decent}
+distribution \(\dist\) results in \emph{Stochastic Gradient Descent}
 %
 \begin{align*}
 	\Weights_{n+1}
@@ -882,7 +882,7 @@ proof of the strongly convex case.
 
 \subsection{Strongly Convex Case}
 
-While we are not going to tether ourselves to Gradient Decent \(\weights_n\) in
+While we are not going to tether ourselves to Gradient Descent \(\weights_n\) in
 this section, we are still going to split off the noise
 \begin{align*}
 	\|\Weights_{n+1} - \minimum\|^2
@@ -1155,7 +1155,7 @@ While this approach helps us lose the strong convexity assumption, which might
 ensure decent convergence rates along eigenspaces of the hesse matrix with
 small or zero eigenvalues, it is in a sense much more dependent on the convexity
 of the loss function \(\Loss\) as our averaging of weights is only a
-guaranteed improvement because of it. While Gradient Decent should work
+guaranteed improvement because of it. While Gradient Descent should work
 intuitively on non-convex functions as well for finding a local minimum (only with
 worse rates of convergence in eigenspaces with small eigenvalues, cf.
 Subsection~\ref{subsec: condition in quadratic SGD}), this averaging technique

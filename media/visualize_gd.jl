@@ -31,7 +31,7 @@ struct Grid
 end
 
 # ╔═╡ 491bbd1c-39f6-4631-a9e0-1e29dbcc4ec1
-md"# Visualize Gradient Decent"
+md"# Visualize Gradient Descent"
 
 # ╔═╡ 5993f2a2-dd65-49a5-8777-83ea02194f89
 md"""Problem type
@@ -111,7 +111,7 @@ start = Dict(
 )[viz_type]
 
 # ╔═╡ 02bfcd93-3512-4d75-9bb2-021fbf226a31
-md"### Gradient Decent Steps"
+md"### Gradient Descent Steps"
 
 # ╔═╡ fa713758-2713-4446-aa5c-f5fa1e2f601c
 md"
@@ -146,13 +146,13 @@ $(@bind gd_steps Slider(1:max_steps, default=max_steps, show_value=true))
 
 # ╔═╡ e12b1bcb-4bbf-4adb-b277-c5703486ec72
 begin
-	decent_steps = Array{Float32}(undef, 2, gd_steps)
-	decent_steps[:,1] = start
+	descent_steps = Array{Float32}(undef, 2, gd_steps)
+	descent_steps[:,1] = start
 	for step in 2:gd_steps
-		decent_steps[:,step] = 
-		decent_steps[:,step-1] - lr .* gradient(f, decent_steps[:, step-1])[1]
+		descent_steps[:,step] = 
+		descent_steps[:,step-1] - lr .* gradient(f, descent_steps[:, step-1])[1]
 	end
-	decent_steps
+	descent_steps
 end
 
 # ╔═╡ 2d3d6cdf-42f5-4c51-b3fe-58f227bb5aac
@@ -207,18 +207,18 @@ begin
 	)
 	plot!(
 		losssurface,
-		decent_steps[1,:], 
-		decent_steps[2,:],
+		descent_steps[1,:], 
+		descent_steps[2,:],
 		markershape=:circle,
-		label="Gradient Decent",
+		label="Gradient Descent",
 		color=2,
 		# aspect_ratio=1
 	)
-	gd_loss = mapslices(f, decent_steps; dims=(1))'
+	gd_loss = mapslices(f, descent_steps; dims=(1))'
 	lossplot = plot(
 		gd_loss, 
 		st=:scatter, 
-		label="Gradient Decent", 
+		label="Gradient Descent", 
 		title="Loss", 
 		xlabel="Iteration",
 		xlim=(0, max_steps+1),

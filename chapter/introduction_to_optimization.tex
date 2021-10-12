@@ -1,53 +1,132 @@
 % !TEX root = ../Masterthesis.tex
 
-\chapter{Introduction to Optimization}
+\chapter{Introduction}
 
-\section{Application: Supervised Machine Learning}
+\section{Optimization in Machine Learning}
 
-Let \(\model(X)\) be a (parametrized) prediction for \(Y\), where \(Z=(X,Y)\)
-is drawn from a distribution \(\dist\) of real world examples. The prediction
-error of our parameter \(\weights\) is a loss function \(l(\weights, X, Y)\), e.g. 
+In statistics/machine learning we usually want to find some model
+which ``best describes'' our data. So let \(\model(X)\) be a prediction for
+\(Y\), parametrized by weights \(\weights\), where \(Z=(X,Y)\) is drawn from a
+distribution \(\dist\) of real world examples. We formalize the prediction error
+of our parameter \(\weights\) with a loss function \(l(\weights, z)\), e.g. 
+a squared loss
 %
 \begin{align*}
-	\loss(\weights, x, y) := (\model(x) - y)^2.
+	\loss(\weights, z) := (\model(x) - y)^2.
 \end{align*}
 %
-And we \emph{want} to minimize the theoretical loss over all examples (risk)
+We then want to minimize the expected loss over all examples (``Risk'')
 %
 \begin{align*}
-	\Loss(\weights) := \E_{X,Y\sim \dist} [\loss(\weights, X, Y)].
+	\Loss(\weights) := \E_{Z\sim \dist} [\loss(\weights, Z)].
 \end{align*}
+In general we do not have access to this expected loss. Instead we usually
+assume to be in possession of a sample \(\sample=(Z_1, \dots, Z_{\sampleSize})\) drawn
+(independently) from distribution \(\dist\). This gives rise to the empirical
+Risk
+\begin{align*}
+	\Loss_\sample(\weights)
+	:= \frac{1}{\sampleSize}\sum_{k=1}^\sampleSize \loss(\weights, Z_k)
+	= \E_{Z\sim \dist_\sample}[\loss(\weights, Z)],
+\end{align*}
+where \(\dist_\sample\) is the empirical distribution generated from sampling
+uniformly from the set \(\sample\). Since the empirical Risk approaches the
+theoretical Risk as \(\sampleSize\to\infty\) if some law of large number is
+applicable (as is usually the case), the next best thing to minimizing \(\Loss\)
+is thus often to minimize \(\Loss_\sample\). In the case of a linear model
+\begin{align*}
+	\model(x) = \langle x, \weights \rangle
+\end{align*}
+minimizing the empirical risk induced by a square loss
+\begin{align*}
+	\Loss_\sample(\weights)
+	= \frac{1}{\sampleSize}\sum_{k=1}^\sampleSize (\model(X_k)-Y_k)^2
+	= \frac{1}{\sampleSize}\| \mathbf{X}^T\weights - \mathbf{Y}\|^2
+\end{align*}
+can be done analytically, resulting in the well known least squared
+regression
+\begin{align*}
+	\minimum = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{Y} \quad \text{where}\quad 
+	\begin{aligned}
+		\mathbf{X}&=(X_1,\dots,X_\sampleSize)^T\\
+		\mathbf{Y}&=(Y_1,\dots,Y_\sampleSize)^T
+	\end{aligned}.
+\end{align*}
+But this is not possible in general. And even if it was possible, it might still
+be difficult to come up with the solution, halting experimentation
+with different types of models. We are therefore interested in (numeric)
+algorithms which can minimize arbitrary loss functions.
+
+This train of thought leads us to various ``black box'' models where we assume
+no knowledge of the loss function itself but assume we have some form of oracle
+telling us things about the loss function. ``Zero Order Oracles'' allow us to
+evaluate the loss function at a particular point, i.e. retrieve \(\Loss(\weights)\)
+for any \(\weights\) at a fixed cost. ``First Order Oracles'' provide us not
+only with \(\Loss(\weights)\) but also with \(\nabla\Loss(\weights)\), etc.
+
+In some sense these black box models are extremely wasteful as we do not utilize
+any of the inherent structure of our model. ``Structural Optimization'' addresses
+this problem and opens up the black box and makes further assumptions about
+the loss function. Proximal methods for example assume that some form of convex
+regularization function (distance penalty) is part of our overall loss
+function \parencite[see e.g.][]{bottouOptimizationMethodsLargeScale2018}:
+\begin{align*}
+	\Loss(\weights)
+	= F(\weights) + \lambda \underbrace{\Omega(\weights)}_{\mathclap{\text{Regularizer}}}.
+\end{align*}
+Nevertheless we are going to mostly navigate around structural optimization in
+this work, only touching on it again with ``Mirror Descent'' in
+Subsection~\ref{subsec: mirror descent}.
+
+We are also going to assume that the set of possible weights is a real
+vector space \(\reals^\dimension\). Since projections \(\Pi_\Omega\) to convex
+subsets \(\Omega\) are contractions \parencite[Lemma
+3.1]{bubeckConvexOptimizationAlgorithms2015}
+\begin{align*}
+	\| \Pi_\Omega(x) - \Pi_\Omega(y) \| \le \| x - y \|
+\end{align*}
+they can often be applied without any complication to existing proofs which show
+a reduction in the distance to the minimum
+\begin{align*}
+	\|\weights_{n+1} - \minimum \|
+	&= \|\Pi_\Omega(\tilde{\weights}_{n+1}) - \Pi_\Omega(\minimum)\|
+	\le \|\tilde{\weights}_{n+1} - \minimum \|\\
+	&\le \text{ unbounded arguments }\\
+	&\le \|\weights_n - \minimum\|
+\end{align*}
+This therefore only introduces spurious complexity unhelpful for comprehension.
+
+The next section will explain why we are going to mostly skip Zero Order
+Optimization.
 
 \section{Zero Order Optimization}
 
-Let us set aside the stochasticity of the problem for a moment and assume we
-could evaluate \(\Loss\) at any point \(\weights\). In other words: we have a ``zero
-order oracle'' which can tell us \(\Loss(\weights)\) for any \(\weights\) for a fixed
-computational cost.
-
 If we assume an infinite number of possible inputs \(\weights\), it does not matter
 how much and where we sample \(\Loss\) there is always a different \(\weights\) where
-\(\Loss\) might be arbitrarily lower. This notion is formalized in various ``No-Free-Lunch
-Theorems''. We must therefore start making assumptions about \(\Loss\) to make this
+\(\Loss\) might be arbitrarily lower (see various ``No-Free-Lunch Theorems'').
+We must therefore start making assumptions about \(\Loss\) to make this
 problem tractable.
 
 \subsection{Grid Search}
 
-
-While Lipschitz continuity 
+It is reasonable to assume that if we sample our loss function in some point \(\weights\)
+then at points close to \(\weights\) the loss will not be much different. Otherwise
+we would have to sample every point which is not possible. This assumption is
+continuity. One possible formulation is Lipschitz continuity
 %
 \begin{align*}
-	| \Loss(\weights_1) - \Loss(\weights_2) | < \lipConst | \weights_1 - \weights_2 |
+	| \Loss(\weights_1) - \Loss(\weights_2) | < \lipConst | \weights_1 - \weights_2 |.
 \end{align*}
 %
-is sufficient to find an \(\lossError\)-solution \(\hat{\weights}\) inside a unit
-(hyper-)cube
+And while Lipschitz continuity is sufficient to find an \(\lossError\)-solution
+\(\hat{\weights}\) inside a unit (hyper-)cube
 %
 \begin{align*}
 	\Loss(\hat{\weights}) \le \inf_{ 0\le\weights_i\le 1} \Loss(\weights) + \lossError
 \end{align*}
 %
-in finite time, it still requires a full \emph{grid search} with time complexity
+in a finite number of evaluations of the loss, it still requires a full
+\emph{grid search} with time complexity
 %
 \begin{align*}
 	\left(\left\lfloor \frac{\lipConst}{2\lossError}\right\rfloor + 1\right)^\dimension
@@ -64,10 +143,48 @@ oracle'' which places the minimum in just the last grid element where we look
 \parencite[cf.][p. 13]{nesterovLecturesConvexOptimization2018}. The exponential
 increase of complexity in the dimension makes the problem intractable for even
 mild dimensions and precisions (e.g. \(\dimension=11\), \(\lossError=0.01\), \(\lipConst=2\)
-implies millions of years of computation). So we have to make further
-assumptions. 
+implies millions of years of computation).
 
-\fxnote{simulated annealing? evolutionary algorithms?}{\subsection{Heuristics}}
+\subsection{Other Algorithms}
+
+Now there are more sophisticated Zero Order Optimization techniques than Grid
+Search, like Vaidya's cutting plane method
+\parencite[e.g.][]{bubeckConvexOptimizationAlgorithms2015} with complexity
+\(O(\dimension^4)\) or \(O(\dimension^3)\) ``up to logarithmic factors''
+\parencite[Section 2.3]{bubeckConvexOptimizationAlgorithms2015} and heuristics
+like simulated annealing and evolutionary algorithms which might perform better
+than naive grid search. But in the end they all scale relatively poor in the
+dimension. Calculating the \mbox{(sub-)gradient} on the other hand scales only
+linearly in the dimension. Calculating the second derivative (hesse matrix)
+requires \(O(\dimension^2)\) operations again and doing something useful with it
+(e.g. solving a linear equation), usually causes \(O(\dimension^3)\)
+operations. For this reason first order methods seem most suited for high
+dimensional optimization, as their convergence guarantees are independent of
+the dimension.
+
+\section{Gameplan}
+
+As motivated above we are going to focus mostly on first order methods. More
+issues with second order methods are mentioned in Subsection~\ref{subsec: loss
+surface}. A terse review of zero order methods can be found in
+\textcite{bubeckConvexOptimizationAlgorithms2015}. A review with a stronger
+focus on second order methods can be found in
+\textcite{bottouOptimizationMethodsLargeScale2018}. The second half of
+\textcite{nesterovLecturesConvexOptimization2018} introduces more ideas for
+structural optimization, the first half covers both first order and second
+order methods extensively but does not consider stochasticity.
+
+In Chapter~\ref{chap: gradient descent} we are going to review the well
+established method of gradient descent which can minimize deterministic
+functions. While this method is applicable to \(\Loss_\sample\) i.e. allows us to
+minimize empirical risk, we are going to question this approach in
+Chapter~\ref{chap: sgd} where we show that it is possible to minimize \(\Loss\)
+itself provided we have an infinite supply of samples. If we start to reuse
+samples we would just end up minimizing \(\Loss_\sample\) again. In
+Chapter~\ref{chap: momentum} we are going to discuss methods to speed up
+gradient descent. Some of which actually achieve the optimal rate of convergence
+in a particular set of optimizers discussed in Section~\ref{sec:
+complexity bounds}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

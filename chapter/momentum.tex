@@ -1237,7 +1237,7 @@ hyperparameter, we still need to somehow know the Lipschitz constant \(\ubound\)
 of the gradient and the condition number \(\condition\).
 
 \fxnote{backtracking/armijo's condition?}
-The Lipschitz constant could be estimated with the fact that Gradient Decent
+The Lipschitz constant could be estimated with the fact that Gradient Descent
 stops converging if the learning rate exceeds \(2/\ubound\). Similarly
 Nesterov's Momentum stops converging if the learning rate is just a bit higher
 than \(1/\ubound\) (cf. Figure~\ref{fig: annotated nesterov rates}). Since
@@ -1320,7 +1320,7 @@ resets momentum back to a lower level).
 
 Last but not least recall that \(\lrSq=1/\ubound\) is the \emph{squared}
 discretization \(\lr^2\) of the ODE which can deceive you into thinking that the
-discretization is similar given that Gradient Decent converges for \(\lr \in
+discretization is similar given that Gradient Descent converges for \(\lr \in
 (0,2/\ubound)\). But the implied discretization \(\lr=1/\sqrt{\ubound}\) of
 Nesterov's Momentum much larger in general. Providing some more intuition where the
 speedup comes from.

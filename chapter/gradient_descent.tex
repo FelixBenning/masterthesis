@@ -1,14 +1,10 @@
 % !TEX root = ../Masterthesis.tex
 
-\chapter{Gradient Decent (GD)}
+\chapter{Gradient Descent (GD)}\label{chap: gradient descent}
 
-A step up from zero order methods (such as grid search) are first order methods
-using the first derivative (the gradient). This requires a ``first order oracle''
-which can provide us with \(\Loss(\weights)\) and \(\nabla \Loss(\weights)\) at any point
-\(\weights\).
-
-One immediately obvious way to utilize this information is to
-incrementally move in the direction of steepest descent, i.e.
+One immediately obvious way to utilize the gradient information
+\(\nabla\Loss(\weights)\) provided by first order oracles is to incrementally
+move in the direction of steepest descent, i.e.
 %
 \begin{align*}
 	\weights_{n+1} = \weights_n - \lr\nabla \Loss(\weights_n).
@@ -498,7 +494,7 @@ The upper bound we have can also be understood as a distance penalty
 penalizing the fact that we do not have enough information about the loss if we
 move farther away from our current point. Our limit on the change of the gradient
 allows us to create this worst case upper bound though.
-Gradient Decent with learning rate \(1/\ubound\) minimizes this upper bound.
+Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 %
 \begin{lemma}\label{lem: smallest upper bound}
 	Let \(\nabla \Loss\) be \(\ubound\)-Lipschitz continuous, then for any \(\weights\in\reals^d\)
@@ -567,7 +563,7 @@ as we will see in the proof of the following theorem.
 \begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
 	\label{thm: convex function GD loss upper bound}
 	Let \(\Loss\in\lipGradientSet{\ubound}\), let \(\minimum\) be the unique minimum.
-	Then Gradient Decent with learning rate \(0 < \lr < 2/\ubound\) results in
+	Then Gradient Descent with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align}\label{eq: convex function loss upper bound}
 		\Loss(\weights_n) - \Loss(\minimum)
 		\le \frac{2\ubound\|\weights_0 - \minimum\|}{4 + n\ubound\lr(2-\ubound\lr)}
@@ -764,7 +760,7 @@ more work we can actually achieve the same rates.
 	\label{thm: gd strong convexity convergence rate}
 	If \(\Loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
 	\[0 \le \lr \le \tfrac{2}{\ubound+\lbound}\]
-	Gradient Decent generates a sequence \(\weights_n\) satisfying
+	Gradient Descent generates a sequence \(\weights_n\) satisfying
 	\begin{subequations}
 	\begin{align}
 		\label{eq: gd strong convexity convergence rate 1}
@@ -969,7 +965,7 @@ Now as promised we still have to show the improved lower bound.
 
 \section{Discussion of Assumptions}
 
-\subsection{Subgradient ``Decent''}\label{subsec: subgradient method}
+\subsection{Subgradient ``Descent''}\label{subsec: subgradient method}
 
 If we can not have convergence of the parameters \(\weights\) we might not
 care as much about the convergence of the gradient either. In that case it
@@ -979,7 +975,7 @@ convexity and \(\lipConst\)-Lipschitz continuity of \(\Loss\) itself, i.e.
 	\Loss \in \lipGradientSet[0,0]{\lipConst}
 \end{align*}
 %
-But this form of Subgradient ``Decent''
+But this form of Subgradient ``Descent''
 requires a bounded, convex parameter set we project back into if we leave, and
 a decreasing learning rate. And since we can not guarantee a monotonic decrease
 with subgradients, the name ``descent'' is generally avoided and we have to keep
@@ -1045,7 +1041,7 @@ resulting in exit time bounds as well as an upper bound on the distance of SGD
 to this limiting SDE
 \parencite[e.g.][]{liStochasticModifiedEquations2017,ankirchnerApproximatingStochasticGradient2021}.
 
-\subsection{Loss surface}
+\subsection{Loss Surface}\label{subsec: loss surface}
 
 Another pain point is the fact that we just end up in \emph{some} convex area in
 \emph{some} local minima. This problem has been addressed by \textcite{pascanuSaddlePointProblem2014}
@@ -1154,7 +1150,7 @@ actually need. And we have basically already proven this condition with
 (\ref{eq: strong convexity implies PL}). We only need to use our upper bound on the loss
 using weights (\ref{eq: weights bound loss}).
 
-\subsection{Mirror Decent}
+\subsection{Mirror Descent}\label{subsec: mirror descent}
 
 Lipschitz continuity represents an upper bound on the Bregman divergence
 \begin{align*}
@@ -1170,8 +1166,10 @@ minimizes this upper bound
 	&= \min_y \{f(x) + \langle f(x), y-x\rangle +\bregmanDiv{f}(y,x)\} \\
 	&\le \min_y\{f(x) + \langle f(x), y-x\rangle +\tfrac{\ubound}{2} \|y-x\|^2\}.
 \end{align*}
-The basic idea of ``Mirror Decent'' is: If we had a
-better upper bound on the Bregman divergence, then we could also improve on
+The basic idea of ``Mirror Descent'' \parencite[
+e.g.][]{guptaAdvancedAlgorithmsFall2020,chenLargeScaleOptimizationData2019,bubeckConvexOptimizationAlgorithms2015}
+is: If we had a better upper bound on the Bregman divergence, then we could also
+improve on
 gradient descent by taking the minimum of this improved upper bound.
 
 \subsection{Lipschitz Gradient}
@@ -1200,7 +1198,7 @@ continuity of \(\nabla \Loss\) so that the inequality
 %
 derived from (\ref{eq: gradient integral}) is sufficient for a convergent
 \(\|\nabla \Loss(\weights(t))\|\) otherwise the gradients could be arbitrarily
-large or small which would prevent convergence of the gradient decent iteration as
+large or small which would prevent convergence of the gradient descent iteration as
 the difference between \(\weights_{n+1}\) and \(\weights_n\) is proportional to
 the gradient. And in this case we are not using an upper bound which might
 not have been tight but rather an equality.
@@ -1772,7 +1770,7 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 In view of Lemma~\ref{lem: smallest upper bound} which states that gradient
 descent is in some sense optimal (minimizes the upper bound induced by
 Lipschitz continuity of the gradient), it might be surprising how far away
-Gradient Decent is from these lower bounds. Maybe these lower bounds are not
+Gradient Descent is from these lower bounds. Maybe these lower bounds are not
 tight enough? This is not the case. In Chapter~\ref{chap: momentum} we will get
 to know a family of methods which do achieve these rates of convergence.
 
