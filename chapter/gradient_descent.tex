@@ -2,9 +2,10 @@
 
 \chapter{Gradient Descent (GD)}\label{chap: gradient descent}
 
-One immediately obvious way to utilize the gradient information
-\(\nabla\Loss(\weights)\) provided by first order oracles is to incrementally
-move in the direction of steepest descent, i.e.
+One relatively obvious way to utilize the gradient information
+\(\nabla\Loss(\weights)\) provided by first order oracles, is to incrementally
+move in the direction of steepest descent
+\parencite{cauchyMethodeGeneralePour1847}, i.e.
 %
 \begin{align*}
 	\weights_{n+1} = \weights_n - \lr\nabla \Loss(\weights_n).
