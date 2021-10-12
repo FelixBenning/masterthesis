@@ -171,12 +171,11 @@ previous position \(\weights_n\).
 	Fortunately, \citeauthor{nesterovMethodSolvingConvex1983} wrote textbooks,
 	\citetitle{nesterovLecturesConvexOptimization2018}
 	(\citeyear{nesterovLecturesConvexOptimization2018}) being the most recent.
-	Unfortunately, the chapter 2.2 on optimal methods provides barely any
-	intuition at all and it is advisable to consult other sources (e.g.
-	\textcite{dontlooWhatDifferenceMomentum2016}). If you
-	want to recognize this scheme in \textcite{nesterovLecturesConvexOptimization2018}
-	compare (\ref{eq: nesterov intermediate position version}) with Nesterov's
-	Constant Step Scheme III (2.2.22).
+	Unfortunately chapter 2.2 on optimal methods provides barely any
+	intuition at all, and it is advisable to consult other sources (e.g.
+	\textcite{dontlooWhatDifferenceMomentum2016}). Section~\ref{sec: nesterov
+	momentum convergence} is my best attempt to make these proofs somewhat
+	intuitive.
  \end{remark}
 
 \section{Heavy Ball Convergence}
@@ -529,7 +528,7 @@ this bound might not be the best and further improvements could be made
 always end up with \(O(1/n)\) convergence rates in the general case and we
 therefore turn towards Nesterov's Momentum.
 
-\section{Nesterov's Momentum Convergence}
+\section{Nesterov's Momentum Convergence}\label{sec: nesterov momentum convergence}
 
 The Eigenvalue analysis of Nesterov's Momentum starts out very similar and we
 easily obtain the analog eigenspace transformation to (\ref{eq: eigenspace
