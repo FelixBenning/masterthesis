@@ -2,6 +2,43 @@
 
 \chapter{Stochastic Gradient Descent (SGD)}\label{chap: sgd}
 
+So far we have only discussed the minimization of a function we can get accurate
+gradient information from. If our loss function is stochastic the best we can
+do so far, is to minimize the empirical risk
+\begin{align*}
+	\Loss_\sample(\weights) = \frac{1}{\sampleSize}\sum_{k=1}^\sampleSize \loss(\weights, Z_k)
+	= \E_{Z\sim \dist_\sample}[\loss(\weights, Z)]
+\end{align*}
+for some sample \(\sample=(Z_1,\dots,Z_\sampleSize)\) inducing the empirical
+distribution \(\dist_\sample\). Now if we minimize \(\Loss_\sample\) to
+get close to the minimum of \(\Loss\) we are really applying a type of triangle
+inequality
+\begin{align*}
+	&\Loss(\weights) - \Loss(\minimum)\\
+	&=
+	\underbrace{\Loss(\weights) - \Loss(\minimum^{(\sample)})}_{
+	\le \sup_{\weights}|\Loss_\sample(\weights)-\Loss(\weights)|
+	}
+	{\scriptstyle
+	+ \Loss_\sample(\weights) - \Loss_\sample(\minimum^{(\sample)})
+	+ \underbrace{
+		\scriptstyle
+		\Loss_\sample(\minimum^{(\sample)}) - \Loss_\sample(\minimum)
+	}_{\le 0}
+	}
+	+ \underbrace{
+		\Loss_\sample(\minimum)- \Loss(\minimum)
+	}_{\le \sup_{\weights}|\Loss_\sample(\weights)-\Loss(\weights)|}
+	\\
+	&\le \underbrace{\Loss_\sample(\weights) - \Loss_\sample(\minimum^{(\sample)})}_{
+		\text{apply GD results}
+	}
+	+ 2\underbrace{\sup_{\weights}|\Loss_\sample(\weights)-\Loss(\weights)|}_{\text{Statistical Learning}}
+\end{align*}
+where \(\minimum^{(\sample)}\) minimizes \(\Loss_\sample\). Bounding the
+distance between the theoretical and empirical risk uniformly is the topic
+of statistical learning.
+
 Until now we have always assumed we had access to the expected loss (Risk)
 \(\Loss\) directly. In reality we almost never have. What we can do instead is
 use the stochastic gradient
