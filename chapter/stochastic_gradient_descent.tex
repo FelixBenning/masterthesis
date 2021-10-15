@@ -12,15 +12,15 @@ do so far, is to minimize the empirical risk
 for some sample \(\sample=(Z_1,\dots,Z_\sampleSize)\) inducing the empirical
 distribution \(\dist_\sample\). Now if we minimize \(\Loss_\sample\) to
 get close to the minimum of \(\Loss\) we are really applying a type of triangle
-inequality
+inequality \parencite[e.g.][]{bottouOptimizationMethodsLargeScale2018}
 \begin{align*}
-	&\Loss(\weights) - \Loss(\minimum)\\
+	&\Loss(\hat{\weights}) - \Loss(\minimum)\\
 	&=
-	\underbrace{\Loss(\weights) - \Loss(\minimum^{(\sample)})}_{
-	\le \sup_{\weights}|\Loss_\sample(\weights)-\Loss(\weights)|
+	\underbrace{\Loss(\hat{\weights}) - \Loss_\sample(\hat{\weights})}_{
+	\le \sup_{\weights}|\mathrlap{\Loss_\sample(\weights)-\Loss(\weights)|}
 	}
-	{\scriptstyle
-	+ \Loss_\sample(\weights) - \Loss_\sample(\minimum^{(\sample)})
+	{
+	+ \Loss_\sample(\hat{\weights}) - \Loss_\sample(\minimum^{(\sample)})
 	+ \underbrace{
 		\scriptstyle
 		\Loss_\sample(\minimum^{(\sample)}) - \Loss_\sample(\minimum)
@@ -30,14 +30,51 @@ inequality
 		\Loss_\sample(\minimum)- \Loss(\minimum)
 	}_{\le \sup_{\weights}|\Loss_\sample(\weights)-\Loss(\weights)|}
 	\\
-	&\le \underbrace{\Loss_\sample(\weights) - \Loss_\sample(\minimum^{(\sample)})}_{
+	&\le \underbrace{\Loss_\sample(\hat{\weights}) - \Loss_\sample(\minimum^{(\sample)})}_{
 		\text{apply GD results}
 	}
 	+ 2\underbrace{\sup_{\weights}|\Loss_\sample(\weights)-\Loss(\weights)|}_{\text{Statistical Learning}}
 \end{align*}
 where \(\minimum^{(\sample)}\) minimizes \(\Loss_\sample\). Bounding the
 distance between the theoretical and empirical risk uniformly is the topic
-of statistical learning.
+of statistical learning. In general this distance can be bounded with some
+measure (the Vapnik-Chervonenkis (VC) dimension) of how expressive the
+hypothesis class \(\{\model\}\) is \parencite{vapnikOverviewStatisticalLearning1999}.
+In general the more dimensions our weight vectors \(\weights\) have the larger
+the VC-dimension. Although VC dimensions try to remove ``duplicates'', i.e.
+parameters which do not actually allow for different models, e.g. chaining
+linear functions only results in a linear function and therefore does not
+increase the expressiveness of our hypothesis class. Nevertheless deep learning
+models should still be highly over-parametrized according to this theory and
+have no business generalizing to unseen examples, yet they seem to do.
+
+To solve this mystery one has to make the upper bounds more algorithm specific
+and avoid taking the supremum over all possible parameters for all \(\weights\)
+but rather only for the weights that our algorithm would actually pick. E.g. for
+an algorithm \(\algo\) \textcite{hardtTrainFasterGeneralize2016} use the upper
+bound
+\begin{align*}
+	&\Loss(\algo(\sample)) - \Loss(\minimum)\\
+	&\le \underbrace{\Loss(\algo(\sample)) - \Loss_\sample(\algo(\sample))}_{
+		=: \epsilon_\text{gen}^\sample(\algo(\sample))
+	}
+	+ \underbrace{\Loss_\sample(\algo(\sample)) - \Loss_\sample(\minimum^{(\sample)})}_{\text{optimization error (GD)}}
+	+ \Loss_\sample(\minimum^{(\sample)}) - \Loss(\minimum).
+\end{align*}
+In their analysis in expectation over \(\sample\) (and \(\algo\) if it is a
+randomized algorithm), they use
+\begin{align*}
+	\Loss(\minimum) &= \inf_{\weights}\E[\loss(\weights, Z)]
+	= \inf_{\weights}\E\underbrace{
+		\left[\frac{1}{\sampleSize}\sum_{k=1}^\sampleSize\loss(\weights, Z_k)\right]
+	}_{\ge \Loss_\sample(\minimum^{(\sample)})}
+	\ge \E[\Loss_\sample(\minimum^{(\sample)})]
+\end{align*}
+to get rid of the last term and focus on the expected generalization error
+\begin{align*}
+	\epsilon_{\text{gen}}:=\E[\epsilon_{\text{gen}}^\sample]
+	=\E[\Loss(\algo(\sample)) - \Loss_\sample(\algo(\sample))].
+\end{align*}
 
 Until now we have always assumed we had access to the expected loss (Risk)
 \(\Loss\) directly. In reality we almost never have. What we can do instead is
