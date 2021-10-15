@@ -75,16 +75,38 @@ to get rid of the last term and focus on the expected generalization error
 	\epsilon_{\text{gen}}:=\E[\epsilon_{\text{gen}}^\sample]
 	=\E[\Loss(\algo(\sample)) - \Loss_\sample(\algo(\sample))].
 \end{align*}
+Their bounds are much better in the sense that they are independent of
+the (VC-)dimension of parameters, as they only depend on the amount of data and
+the sum of learning rates of all iterations in the convex case. Recall the sum of
+all learning rates is equal to the time we let gradient flow run if we view
+gradient descent as a discretization of this flow.\footnote{
+	They also discuss the strongly convex case with compact parameter set, where
+	one can get rid of this time dependency with the fact that gradient descent
+	has contractive properties, i.e. starting from two different points and
+	making one gradient step results in weights being closer to each other. 
+	In a compact and thus bounded set the length of the path of movement gradient
+	flow takes is thus finite and this is kind of the intuition why the length
+	of time can be discussed away here.
 
-Until now we have always assumed we had access to the expected loss (Risk)
-\(\Loss\) directly. In reality we almost never have. What we can do instead is
-use the stochastic gradient
+	They also discuss the non-convex case where the relation to the time worsens,
+	i.e. the bound is no longer proportional to the time spent in gradient flow
+	but rather worsens faster than our time increases.
+} And it is perhaps not too surprising that if we
+do not run our optimizer for long, we do not get far from the start and thus
+do not have time to overfit. Now the advantage of these types of bounds is that
+we can reuse our data as much as we want and fully optimize with regard to
+\(\Loss_\sample\) without any concern for our sample size. And if we use
+gradient descent on \(\Loss_\sample\) we do not even have another choice.
+Stochastic Gradient Descent provides that choice. Instead of the ``full
+gradient'' \(\nabla\Loss(\weights)\) we are going to use the stochastic
+gradient
 %
 \begin{align*}
-	\nabla_\weights\loss (\weights, X,Y) \qquad (X,Y)\sim\dist.
+	\nabla_\weights\loss (\weights, X,Y) \qquad (X,Y)\sim\dist\text{ or } \dist_\sample.
 \end{align*}
 %
-Its expected value is the Risk again\footnote{
+If we draw from \(\dist\) the expected value of the stochastic gradient is the
+gradient of the Risk \(\Loss\)\footnote{
 	We need to be able to swap the expectation with differentiation. A sufficient 
 	condition is continuity of \(\nabla\loss\) in \(\weights\), which allows us
 	to use the mean value theorem
@@ -99,10 +121,58 @@ Its expected value is the Risk again\footnote{
 	Then we use the boundedness of a continuous function on the compact interval
 	\([\weights, \weights + \stdBasis_k/n]\) to move the limit in using
 	dominated convergence.
-}. To shorten notation we will assume that the gradient is always meant
+}. This will allow us to formulate convergence results which do not require
+splitting the error into an optimization and generalization error as we do not
+optimize with regard to \(\Loss_\sample\) but rather with regard to \(\Loss\)
+directly and thus do not have a generalization error to deal with. But these
+results also require an infinite supply of iid samples from \(\dist\) which
+we generally do not have in practice. So after using up all of our examples
+reusing them implies optimizing with regard to \(\Loss_\sample\) and no longer
+with regard to \(\Loss\). This would force us to use these triangle inequality
+upper bounds. Which (as of writing) are often so much worse, that even when the
+number of iterations go to infinity, our upper bound is worse than if we
+had stopped the iteration at the number of samples \(\sampleSize\) and used the
+bounds without the triangle inequality\footnote{
+	E.g. \textcite{hardtTrainFasterGeneralize2016} use their bounds to prove that
+	the averaging algorithm discussed in Subsec~\ref{subsec: SGD with Averaging}
+	converges with rate
+	\begin{align*}
+		\Loss(\overline{\Weights}_n) - \Loss(\minimum)
+		\le \Loss(\overline{\Weights}_n) - \E[\Loss_\sample(\minimum^{(\sample)})]
+		\le \frac{\|\weights_0 -\minimum^{(\sample)}\|\sqrt{\lipConst^2 + \stdBound^2}}{\sqrt{\sampleSize}}
+		\underbrace{\sqrt{\frac{\sampleSize+2n}{\sampleSize}}}_{\to \sqrt{2} \quad (n\to\infty)}
+	\end{align*}
+}. Of course intuitively, reusing a couple of examples should not harm
+generalization that much. And since all the iterations up to \(\sampleSize\)
+do not overfit in some sense, they might lead us into the vicinity of a well
+generalizing minimum already. And if that is also \emph{a} minimum of \(\Loss_\sample\)
+further optimization with regard to \(\Loss_\sample\) might only barely hurt
+generalization. And since the ``true'' model \(\minimum\) should also perform
+well on \(\Loss_\sample\) this seems very plausible. Empirically it does in fact
+seem that SGD leads to wider\footnote{
+\textcite{hochreiterFlatMinima1997} first suggested that flatter minima might
+	generalize better since they require less precision in the weights (less
+	information entropy) and are thus \emph{simpler} models.
+}
+(better generalizing) minima \parencite{liVisualizingLossLandscape2018}.
+
+So even if it might not be realistic, we are going to assume access to an infinite
+source of independent \(\dist\) distributed random variables \(((X_k,Y_k), k\ge 1)\).
+We can always interpret them as drawn from \(\dist_\sample\) if appropriate.
+Now if one wants to minimize \(\Loss\) then full gradients are not possible in
+the first place, but for \(\Loss_\sample\) one might compare convergence rates
+and deem GD on \(\nabla\Loss_\sample\) more appropriate than SGD. But while it
+is difficult to quantize due to the step change between no-reuse and reuse of
+random variables, using the full gradient \(\nabla\Loss_\sample\) probably hurts
+generalization. We will build intuition for this using mini-batches. Where we
+are going to assume that they are independent within and between each other,
+which is fine for small batch sizes with regard to \(\sampleSize\) but breaks
+down if batch sizes approach full batches. For full batches our analysis would
+only be valid for one gradient step which is obviously ridiculous.
+
+To shorten notation we will assume that the gradient is always meant
 with respect to \(\weights\) unless otherwise stated.
-Sampling an independent sequence \(((X_k,Y_k), k\ge 1)\) from the 
-distribution \(\dist\) results in \emph{Stochastic Gradient Descent}
+We define \emph{Stochastic Gradient Descent} as
 %
 \begin{align*}
 	\Weights_{n+1}
@@ -110,12 +180,9 @@ distribution \(\dist\) results in \emph{Stochastic Gradient Descent}
 	&= \Weights_n - \lr_n\nabla\Loss(\Weights_n)
 	+ \lr_n\underbrace{
 		[\nabla\Loss(\Weights_n) - \nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})]
-	}_{=:\martIncr_{n+1}}
+	}_{=:\martIncr_{n+1}}.
 \end{align*}
 Where \(\martIncr_n\) are martingale increments for the filtration
-% \begin{align*}
-% 	\martingale_n := \martingale_{n-1} + \martIncr_n \qquad \martingale_0:=0
-% \end{align*}
 \begin{align*}
 	\filtration_n :=\sigma((X_k, Y_k): k\le n )
 	\qquad (X_k,Y_k)\stackrel{\text{iid}}{\sim}\dist,
@@ -1203,7 +1270,7 @@ This leads to
 	\E\Big[
 		\Loss\Big(\underbrace{
 			\frac{1}{N}\sum_{n=0}^{N-1}\Weights_n
-		}_{=:\Weights^N}\Big)
+		}_{=:\overline{\Weights}_N}\Big)
 	\Big]-\Loss(\minimum)
 	&\le \frac{
 		\|\weights_0 - \minimum\|^2 + [\lipConst^2+\stdBound^2]N\lr^2
@@ -1218,7 +1285,7 @@ This minimization results in
 \end{align*}
 and convergence rate
 \begin{align*}
-	\E[\Loss(\Weights^N)] -\Loss(\minimum)
+	\E[\Loss(\overline{\Weights}_N)] -\Loss(\minimum)
 	\le \frac{\|\weights_0-\minimum\|\sqrt{\lipConst^2+\stdBound^2}}{\sqrt{N}}.
 \end{align*}
 In particular note that again decreasing \(\stdBound^2\) is (at best) equivalent
