@@ -52,9 +52,9 @@ convergent \(\weights(t)\) nor convergence to \(\inf_\weights
 
 \section{Visualizing the 2nd Taylor Approximation}\label{sec: visualize gd}
 
-To build some intuition what leads to convergence of \(\weights(t)\) let us
-consider more simple cases. For the second order Taylor approximation
-\(T_2\Loss\) of the loss \(\Loss\)
+To build some intuition what leads to convergence of \(\weights_n\)
+(\(\weights(t)\)) let us consider more simple cases. For the second order Taylor
+approximation \(T_2\Loss\) of the loss \(\Loss\)
 %
 \begin{align*}
 	\Loss(\weights+x) \approx T_2\Loss(\weights+x)
@@ -477,6 +477,97 @@ in fact equivalent.
 	\end{description}
 \end{definition}
 
+\section{Types of Convergence}
+
+The strongest type of convergence is ``convergence of the weights''
+\begin{align*}
+	\|\weights_n - \minimum\| \to 0,
+\end{align*}
+which implies ``convergence of the loss'' at a squared rate.
+\begin{lemma}[Weight- implies Loss-Convergence]
+\label{lem: weight implies loss convergence}
+	For a loss \(\Loss\) with Lipschitz continuos gradient, we have
+	\begin{align*}
+		|\Loss(\weights) - \Loss(\minimum)|
+		= \Loss(\weights) - \Loss(\minimum)
+		\le \tfrac{\ubound}{2}\|\weights-\minimum\|^2.
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	The claim follows from Lemma~\ref{lem: Lipschitz Gradient
+	implies taylor inequality} using \(\nabla\Loss(\minimum)=0\):
+	\begin{align*}
+		\Loss(\weights) - \Loss(\minimum)
+		= |\Loss(\weights) - \Loss(\minimum) - \langle \nabla\Loss(\minimum), \weights-\minimum\rangle|
+		&\le \tfrac{\ubound}{2}\|\weights-\minimum\|^2
+		\qedhere
+	\end{align*}
+\end{proof}
+Even weaker is ``convergence of the gradient'', which is implied by convergence of
+the loss
+\begin{lemma}[Loss- implies Gradient-Convergence]
+	\label{lem: loss implies gradient convergence}
+	For a loss \(\Loss\) with Lipschitz continuos gradient, we have
+	\begin{align*}
+		\|\nabla\Loss(\weights)-\overbrace{\nabla\Loss(\minimum)}^{=0}\|^2
+		\le 2\ubound (\Loss(\weights) - \Loss(\minimum)).
+	\end{align*}
+	More generally, we have for all \(\lr\in(0, \tfrac{2}{\ubound})\)
+	\begin{align*}
+		\|\nabla\Loss(\weights)\|^2
+		\le \frac{\Loss(\weights) - \Loss(\weights - \lr\nabla\Loss(\weights))}{
+			\lr(1-\tfrac{\ubound}2 \lr)
+		}
+		\le \frac{\Loss(\weights) - \Loss(\minimum)}{
+			\lr(1-\tfrac{\ubound}2 \lr)
+		}.
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	The first claim is a special case of the second with \(\lr=1/\ubound\). For
+	the second claim we use Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality}
+	\begin{align*}
+		|\Loss(\weights-\lr\nabla\Loss(\weights)) - \Loss(\weights)
+		- \langle \nabla \Loss(\weights), -\lr \nabla \Loss(\weights)\rangle|
+		\le \|\nabla\Loss(\weights)\|^2,
+	\end{align*}
+	and use the fact that in general \(x\le |x|\), to obtain
+	\begin{align*}
+		\Loss(\weights-\lr\nabla\Loss(\weights))
+		&\le \Loss(\weights)
+		+ \langle \nabla \Loss(\weights), -\lr \nabla \Loss(\weights)\rangle
+		+ \tfrac{\ubound}{2}\|\lr\nabla \Loss(\weights)\|^2\\
+		&=\Loss(\weights) - \lr(1-\tfrac{\ubound}2\lr)\|\nabla\Loss(\weights)\|^2.
+	\end{align*}
+	Reordering the terms results in our claim.
+\end{proof}
+
+The weakest form of convergence is virtually always a given
+
+\begin{corollary}
+	For a Loss function with Lipschitz gradient and finite lower bound
+	(i.e. \(\inf_{\weights}\Loss(\weights) >-\infty\)) Gradient Descent induces
+	convergence of the gradient. The convergence rate is at least \(o(1/n)\).
+\end{corollary}
+\begin{proof}
+	Let \(\weights_n\) be generated with gradient descent with learning rate \(\lr\).
+	Then we have	
+	\begin{align*}
+		\sum_{k=0}^n \|\nabla\Loss(\weights_k)\|^2
+		&\xle{\text{Lem. }\ref{lem: loss implies gradient convergence}}
+		\sum_{k=0}^n \frac{\Loss(\weights_k) - \Loss(\weights_{k+1})}{\lr(1-\tfrac{\ubound}2\lr)}
+		= \frac{\Loss(\weights_0) - \Loss(\weights_{n+1})}{\lr(1-\tfrac{\ubound}2\lr)}
+		\\
+		&\le \frac{\Loss(\weights_0) - \inf_{\weights}\Loss(\weights)}{\lr(1-\tfrac{\ubound}2\lr)}
+	\end{align*}
+	Taking \(n\to\infty\) this implies summability and thus convergence of the
+	gradients. Since the harmonic series \(\sum_{k=0}^n 1/k\) is divergent,
+	the gradients must necessarily converge faster.
+\end{proof}
+
+But while we can ensure convergence to a critical point, we can not ensure
+that this is a (global) minimum. For that we need to assume convexity.
+
 \section{Convergence with Convexity}\label{sec: convex convergence theorems}
 
 The upper bound we have can also be understood as a distance penalty
@@ -510,7 +601,7 @@ Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 			\Loss(\weights)+ \langle\nabla \Loss(\weights), \theta-\weights\rangle
 			+ \tfrac{\ubound}{2}\|\theta-\weights\|^2 
 		\} \\ \nonumber
-		&= \Loss(\weights) - \tfrac{1}{2\ubound} \|\nabla \Loss(x)\|^2
+		&= \Loss(\weights) - \tfrac{1}{2\ubound} \|\nabla \Loss(\weights)\|^2
 	\end{align}
 \end{lemma}
 \begin{proof}
@@ -594,7 +685,7 @@ as we will see in the proof of the following theorem.
 	Utilizing convexity again we will prove in Lemma~\ref{lem: bermanDiv lower
 	bound} that
 	\begin{align*}
-		\langle\nabla\Loss(\weights) - \Loss(\minimum), \weights-\minimum\rangle
+		\langle\nabla\Loss(\weights) - \nabla\Loss(\minimum), \weights-\minimum\rangle
 		\ge \tfrac1{\ubound} \|\nabla\Loss(\weights) - \nabla\Loss(\minimum)\|^2.
 	\end{align*}
 	Keeping in mind \(\nabla \Loss(\minimum)=0\) this implies
@@ -641,12 +732,11 @@ as we will see in the proof of the following theorem.
 	Since our upper bound is increasing in \(\Loss(\weights_0)-\Loss(\minimum)\)
 	we can use
 	%
-	\begin{align}\label{eq: weights bound loss}
+	\begin{align*}
 		\Loss(\weights_0) - \Loss(\minimum)
-		&\xle{(\ref{eq: bregman divergence upper and lower bound})}
-		\langle\underbrace{\nabla\Loss(\minimum)}_{=0}, \weights_0 - \minimum\rangle
-		+\frac{\ubound}{2}\|\weights_0-\minimum\|^2
-	\end{align}
+		&\xle{\text{Lem. }\ref{lem: weight implies loss convergence}}
+		\frac{\ubound}{2}\|\weights_0-\minimum\|^2
+	\end{align*}
 	%
 	to get an upper bound only dependent on \(\|\weights_0 - \minimum\|^2\)
 	%
@@ -699,7 +789,7 @@ from the minimum.
 	its Lipschitz continuity. I.e. by Lemma~\ref{lem: smallest upper bound} we know that
 	%
 	\begin{align*}
-		0 = \bregmanDiv{f}(x,x)
+		\bregmanDiv{f}(x,x) = 0
 		\xeq{f\text{ convex}} \min_z\phi(z)
 		\xle{(\ref{eq: min approximation})} \phi(y) - \tfrac{1}{2\ubound}\|\nabla \phi(y)\|^2.
 	\end{align*}
@@ -741,7 +831,12 @@ bound of the gradient using the weight difference directly
 	\label{eq: strong convexity implies PL}
 	&\lxge{\text{strong convexity}} \lbound \|\weights-\minimum\|^2.
 \end{align}
-Using this lower bound on the gradient we can bound our weight iteration
+The resulting lower bound on the gradient 
+\begin{align*}
+	\|\nabla\Loss(\weights)\|\le \lbound\|\weights -\minimum\|
+\end{align*}
+allows us to prove convergence of the weights with convergence of the gradients.
+More specifically we can bound our weight iteration
 \begin{align*}
 	\|\weights_{n+1}-\minimum\|^2
 	\le (1-\lr(\tfrac2{\ubound} -\lr)\lbound)\|\weights_n - \minimum\|^2.
@@ -834,7 +929,7 @@ more work we can actually achieve the same rates.
 	especially for the optimal rates where we max out the learning rate making
 	the term on the right equal to zero. (\ref{eq: gd strong convexity
 	convergence rate 2}) follows from our upper bound on the loss using weights,
-	cf. (\ref{eq: weights bound loss}) 
+	cf. Lemma~\ref{lem: weight implies loss convergence} 
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\minimum)
 		\le \tfrac\ubound{2} \| \weights_n - \minimum\|^2.
@@ -848,10 +943,10 @@ more work we can actually achieve the same rates.
 		\left(1- 4 \frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)
 		= \frac{(\ubound^2 + 2\ubound\lbound + \lbound^2) - 4 \ubound\lbound}{(\ubound+\lbound)^2}
 		= \left(\frac{\ubound-\lbound}{\ubound+\lbound}\right)^2
+		= \left(1-\frac{2\lbound}{\ubound+\lbound}\right)^2
 	\end{align*}
 	To get the representation in (\ref{eq: gd strong convexity optimal rate}) we
-	only have to add and subtract one inside the bracket and cancel out
-	\(\lbound\) from enumerator and denominator.
+	just have to divide both enumerator and denominator by \(\lbound\).
 \end{proof}
 
 Now as promised we still have to show the improved lower bound.
@@ -1090,7 +1185,7 @@ As we can see in (\ref{eq: newton minimum approx}) the method jumps right to the
 vertex of a quadratic function. This is nice if the vertex is a minimum,
 which convexity guarantees, but it is not so nice if the vertex is a saddle point
 or maximum. Additionally the method becomes unstable (impossible) for small 
-(zero) eigenvalues since then the hesse matrix is hard to numerically invert (no
+(zero) eigenvalues, since then the hesse matrix is hard to numerically invert (no
 longer invertible).
 On top of these fundamental problems, the storage of the Hesse matrix requires
 \(O(\dimension^2)\) space already and its inversion takes \(O(\dimension^3)\)
@@ -1149,7 +1244,7 @@ regions so we do not really gain much intuition by this generalization. But
 this generalization highlights the attributes of (strong)-convexity we
 actually need. And we have basically already proven this condition with
 (\ref{eq: strong convexity implies PL}). We only need to use our upper bound on the loss
-using weights (\ref{eq: weights bound loss}).
+using weights (Lemma~\ref{lem: weight implies loss convergence}).
 
 \subsection{Mirror Descent}\label{subsec: mirror descent}
 
