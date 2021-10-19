@@ -496,7 +496,7 @@ in fact equivalent.
 	\end{description}
 \end{definition}
 
-\section{The Role of Lipschitz Continuous Gradient}
+\section{The Role of ``Lipschitz Continuous Gradient''}
 
 Using \(x\le|x|\) on Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality}
 explains Lipschitz continuity of the gradient as a distance penalty
@@ -630,7 +630,7 @@ Since we can not guarantee convergence to a (global) minimum as convergence of
 the gradient only implies convergence to a critical point, it is the weakest
 form of convergence.
 
-\begin{theorem}\label{thm: convergence chain}
+\begin{theorem}[Convergence Chain]\label{thm: convergence chain}
 	If the loss \(\Loss\) has Lipschitz continuos gradient, then
 	\begin{align*}
 		\text{Weight Convergence}
@@ -831,7 +831,7 @@ One way to ensure such a lower bound on the gradient is using convexity.
 	\end{align*}
 	%
 	The convergence rate of such a recursion can be bounded (cf.
-	Lemma~\ref{lem-appendix: diminishing contraction}) to be 
+	Lemma~\ref{lem-appendix: diminishing contraction})\fxnote{move out of appendix} to be 
 	%
 	\begin{align*}
 		\Loss(\weights_n)-\Loss(\minimum)
