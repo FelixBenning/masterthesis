@@ -41,7 +41,7 @@ of statistical learning. In general this distance can be bounded with some
 measure (the Vapnik-Chervonenkis (VC) dimension) of how expressive the
 hypothesis class \(\{\model\}\) is \parencite{vapnikOverviewStatisticalLearning1999}.
 In general the more dimensions our weight vectors \(\weights\) have the larger
-the VC-dimension. Although VC dimensions try to remove ``duplicates'', i.e.
+the VC-dimension, but VC dimensions try to remove ``duplicates'', i.e.
 parameters which do not actually allow for different models, e.g. chaining
 linear functions only results in a linear function and therefore does not
 increase the expressiveness of our hypothesis class. Nevertheless deep learning
@@ -49,10 +49,10 @@ models should still be highly over-parametrized according to this theory and
 have no business generalizing to unseen examples, yet they seem to do.
 
 To solve this mystery one has to make the upper bounds more algorithm specific
-and avoid taking the supremum over all possible parameters for all \(\weights\)
-but rather only for the weights that our algorithm would actually pick. E.g. for
-an algorithm \(\algo\) \textcite{hardtTrainFasterGeneralize2016} use the upper
-bound
+and avoid taking the supremum over \emph{all} possible parameters \(\weights\).
+Instead we want to consider the weights that our algorithm would actually pick.
+E.g. for an algorithm \(\algo\) \textcite{hardtTrainFasterGeneralize2016} use
+the upper bound
 \begin{align*}
 	&\Loss(\algo(\sample)) - \Loss(\minimum)\\
 	&\le \underbrace{\Loss(\algo(\sample)) - \Loss_\sample(\algo(\sample))}_{
@@ -76,7 +76,7 @@ to get rid of the last term and focus on the expected generalization error
 	=\E[\Loss(\algo(\sample)) - \Loss_\sample(\algo(\sample))].
 \end{align*}
 Their bounds are much better in the sense that they are independent of
-the (VC-)dimension of parameters, as they only depend on the amount of data and
+the (VC-)dimension of parameters. They only depend on the amount of data and
 the sum of learning rates of all iterations in the convex case. Recall the sum of
 all learning rates is equal to the time we let gradient flow run if we view
 gradient descent as a discretization of this flow.\footnote{
@@ -93,16 +93,16 @@ gradient descent as a discretization of this flow.\footnote{
 	but rather worsens faster than our time increases.
 } And it is perhaps not too surprising that if we
 do not run our optimizer for long, we do not get far from the start and thus
-do not have time to overfit. Now the advantage of these types of bounds is that
-we can reuse our data as much as we want and fully optimize with regard to
-\(\Loss_\sample\) without any concern for our sample size. And if we use
-gradient descent on \(\Loss_\sample\) we do not even have another choice.
-Stochastic Gradient Descent provides that choice. Instead of the ``full
-gradient'' \(\nabla\Loss(\weights)\) we are going to use the stochastic
-gradient
+do not have time to overfit.
+
+Stochastic Gradient Descent avoids splitting the error into generalization and
+optimization error entirely which will provide us with even tighter bounds. The
+price for this improved bound, is the requirement to never reuse data, i.e. we
+need a source of independent \(\dist\) distributed random variables which we use
+for a stochastic gradient
 %
 \begin{align*}
-	\nabla_\weights\loss (\weights, X,Y) \qquad (X,Y)\sim\dist\text{ or } \dist_\sample.
+	\nabla_\weights\loss (\weights, X,Y) \qquad (X,Y)\sim\dist%\text{ or } \dist_\sample.
 \end{align*}
 %
 If we draw from \(\dist\) the expected value of the stochastic gradient is the
@@ -121,18 +121,15 @@ gradient of the Risk \(\Loss\)\footnote{
 	Then we use the boundedness of a continuous function on the compact interval
 	\([\weights, \weights + \stdBasis_k/n]\) to move the limit in using
 	dominated convergence.
-}. This will allow us to formulate convergence results which do not require
-splitting the error into an optimization and generalization error as we do not
-optimize with regard to \(\Loss_\sample\) but rather with regard to \(\Loss\)
-directly and thus do not have a generalization error to deal with. But these
-results also require an infinite supply of iid samples from \(\dist\) which
-we generally do not have in practice. So after using up all of our examples
-reusing them implies optimizing with regard to \(\Loss_\sample\) and no longer
-with regard to \(\Loss\). This would force us to use these triangle inequality
-upper bounds. Which (as of writing) are often so much worse, that even when the
-number of iterations go to infinity, our upper bound is worse than if we
-had stopped the iteration at the number of samples \(\sampleSize\) and used the
-bounds without the triangle inequality\footnote{
+}.
+
+If we were to reuse data, then we might argue we are really picking samples
+from \(\dist_\sample\) not \(\dist\) and thus our results of convergence would
+apply to \(\Loss_\sample\) instead of \(\Loss\). This would force us to use
+these triangle inequality upper bounds again. Which (as of writing) are often so
+much worse, that (even when the number of iterations go to infinity) our upper
+bound is worse than if we had stopped the iteration at the number of samples
+\(\sampleSize\) and used the bounds without the triangle inequality\footnote{
 	E.g. \textcite{hardtTrainFasterGeneralize2016} use their bounds to prove that
 	the averaging algorithm discussed in Subsec~\ref{subsec: SGD with Averaging}
 	converges with rate
@@ -140,31 +137,37 @@ bounds without the triangle inequality\footnote{
 		\Loss(\overline{\Weights}_n) - \Loss(\minimum)
 		\le \Loss(\overline{\Weights}_n) - \E[\Loss_\sample(\minimum^{(\sample)})]
 		\le \frac{\|\weights_0 -\minimum^{(\sample)}\|\sqrt{\lipConst^2 + \stdBound^2}}{\sqrt{\sampleSize}}
-		\underbrace{\sqrt{\frac{\sampleSize+2n}{\sampleSize}}}_{\to \sqrt{2} \quad (n\to\infty)}
+		\underbrace{\sqrt{\frac{\sampleSize+2n}{n}}}_{\to \sqrt{2} \quad (n\to\infty)}
 	\end{align*}
-}. Of course intuitively, reusing a couple of examples should not harm
+}.
+
+Of course intuitively, reusing a couple of examples should not harm
 generalization that much. And since all the iterations up to \(\sampleSize\)
 do not overfit in some sense, they might lead us into the vicinity of a well
-generalizing minimum already. And if that is also \emph{a} minimum of \(\Loss_\sample\)
+generalizing minimum already. And if that is also a minimum of \(\Loss_\sample\)
 further optimization with regard to \(\Loss_\sample\) might only barely hurt
 generalization. And since the ``true'' model \(\minimum\) should also perform
-well on \(\Loss_\sample\) this seems very plausible. Empirically it does in fact
+well on \(\Loss_\sample\) this seems very plausible.
+
+So even if it might not be realistic, we are going to assume access to an infinite
+source of independent \(\dist\) distributed random variables \(((X_k,Y_k), k\ge 1)\).
+We can always interpret them as drawn from \(\dist_\sample\) if appropriate.
+
+Note that if one wants to minimize \(\Loss\) then full gradients are not possible in
+the first place. But for \(\Loss_\sample\) one might compare convergence rates
+of SGD and GD and deem GD on \(\nabla\Loss_\sample\) more appropriate.
+
+But while it
+is difficult to quantize due to the step change between no-reuse and reuse of
+random variables, using the full gradient \(\nabla\Loss_\sample\) probably hurts
+generalization. Empirically it does in fact
 seem that SGD leads to wider\footnote{
 \textcite{hochreiterFlatMinima1997} first suggested that flatter minima might
 	generalize better since they require less precision in the weights (less
 	information entropy) and are thus \emph{simpler} models.
 }
 (better generalizing) minima \parencite{liVisualizingLossLandscape2018}.
-
-So even if it might not be realistic, we are going to assume access to an infinite
-source of independent \(\dist\) distributed random variables \(((X_k,Y_k), k\ge 1)\).
-We can always interpret them as drawn from \(\dist_\sample\) if appropriate.
-Now if one wants to minimize \(\Loss\) then full gradients are not possible in
-the first place, but for \(\Loss_\sample\) one might compare convergence rates
-and deem GD on \(\nabla\Loss_\sample\) more appropriate than SGD. But while it
-is difficult to quantize due to the step change between no-reuse and reuse of
-random variables, using the full gradient \(\nabla\Loss_\sample\) probably hurts
-generalization. We will build intuition for this using mini-batches. Where we
+We will build intuition for this using mini-batches. Where we
 are going to assume that they are independent within and between each other,
 which is fine for small batch sizes with regard to \(\sampleSize\) but breaks
 down if batch sizes approach full batches. For full batches our analysis would
@@ -291,14 +294,14 @@ we get in Theorem~\ref{thm: distance SGD vs GD}.
 				\nabla\Loss(\weights_n)-\nabla\Loss(\Weights_n)\rangle
 			}_{
 				\le 0 \qquad
-				\text{for convex \(\Loss\) (Lemma~\ref{lem: bermanDiv lower bound}) and }
+				\text{if \(\Loss\) was convex (Lemma~\ref{lem: bermanDiv lower bound}) and }
 				\lr_n<2/\ubound
 			}
 		\end{aligned}
 	\end{align*}
 	But since we do not want to demand convexity of \(\Loss\) just yet, we will
-	have to get rid of these terms in a less elegant fashion using Lipschitz
-	continuity and the Cauchy-Schwarz inequality
+	have to get rid of these terms in a less elegant fashion. Using Lipschitz
+	continuity and the Cauchy-Schwarz inequality we get
 	\begin{align*}
 		\|\nabla\Loss(\weights_n)-\nabla\Loss(\Weights_n)\|^2
 		&\le \ubound^2\|\weights_n-\Weights_n\|^2\\
@@ -330,9 +333,9 @@ we get in Theorem~\ref{thm: distance SGD vs GD}.
 \subsection{Excursion: Stochastic Approximation}
 
 Theorem~\ref{thm: distance SGD vs GD} can feel somewhat unnatural as it requires
-you to restart SGD completely with smaller learning rates to get behavior closer
+you to completely restart SGD with smaller learning rates to get behavior closer
 to GD and its ODE. If the ODE has an attraction point/area/etc. one might
-instead want to prove convergence to that within one run of SGD by selecting a
+instead want to prove convergence to that within one run of SGD using a
 decreasing learning rate sequence. If we have a look at (\ref{eq: unrolled SGD})
 it is quite intuitive that we are going to need
 \begin{align*}
@@ -376,102 +379,102 @@ Learning where we do not get unbiased estimates of some gradients towards the
 minimum, but rather unbiased estimates of a Bellman Operator (Fixed Point 
 Iteration towards the optimum).
 
-\section{Batch Learning}
+% \section{Batch Learning}
 
-Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
-estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
-``batch'' of data \((X^{(i)}_{n+1}, Y^{(i)}_{n+1})_{i=1,\dots,m}\) (independently
-\(\dist\) distributed) instead, i.e.
-\begin{align*}
-	\Weights_{n+1} = \Weights_n
-	-\lr_n \underbrace{\frac1{m}\sum_{i=1}^m\nabla\loss(\Weights_n,X^{(i)}_{n+1}, Y^{(i)}_{n+1})}_{
-		=:\nabla\loss_{n+1}^m(\Weights_n)
-	}.
-\end{align*}
-leading to the modified martingale increment
-\begin{align*}
-	\martIncr_n^{(m)}
-	= \nabla\Loss(\Weights_{n-1})
-	- \nabla\loss_n^m(\Weights_{n-1})
-\end{align*}
-with reduced variance
-\begin{align*}
-	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \stdBound^2.
-\end{align*}
-Now while this variance reduction does reduce our upper bound on the distance
-between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
-comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
-We would incur an equivalent cost, if we reduced our discretization to
-\begin{align*}
-	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}
-\end{align*}
-which increases the number of iterations to reach \(T\) to \(Nm\) which implies
-\(Nm\) gradient evaluations using SGD without batches. And if we have a look
-at the upper bound in Theorem~\ref{thm: distance SGD vs GD} these two actions
-have the same effect on our distance bound between SGD and GD (especially if
-\(\Loss\) is convex as we can then get rid of the exponential term as hinted
-at in the proof of the theorem).
+% Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
+% estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
+% ``batch'' of data \((X^{(i)}_{n+1}, Y^{(i)}_{n+1})_{i=1,\dots,m}\) (independently
+% \(\dist\) distributed) instead, i.e.
+% \begin{align*}
+% 	\Weights_{n+1} = \Weights_n
+% 	-\lr_n \underbrace{\frac1{m}\sum_{i=1}^m\nabla\loss(\Weights_n,X^{(i)}_{n+1}, Y^{(i)}_{n+1})}_{
+% 		=:\nabla\loss_{n+1}^m(\Weights_n)
+% 	}.
+% \end{align*}
+% leading to the modified martingale increment
+% \begin{align*}
+% 	\martIncr_n^{(m)}
+% 	= \nabla\Loss(\Weights_{n-1})
+% 	- \nabla\loss_n^m(\Weights_{n-1})
+% \end{align*}
+% with reduced variance
+% \begin{align*}
+% 	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \stdBound^2.
+% \end{align*}
+% Now while this variance reduction does reduce our upper bound on the distance
+% between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
+% comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
+% We would incur an equivalent cost, if we reduced our discretization to
+% \begin{align*}
+% 	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}
+% \end{align*}
+% which increases the number of iterations to reach \(T\) to \(Nm\) which implies
+% \(Nm\) gradient evaluations using SGD without batches. And if we have a look
+% at the upper bound in Theorem~\ref{thm: distance SGD vs GD} these two actions
+% have the same effect on our distance bound between SGD and GD (especially if
+% \(\Loss\) is convex as we can then get rid of the exponential term as hinted
+% at in the proof of the theorem).
 
-Now of course an upper bound is no guarantee that there is no effect in reality.
-But if we have a look at the term (\ref{eq: mean of martingale increments})
-again which is in some sense the difference between SGD and GD, then we can
-see that these actions have quite a similar effect
-\begin{align*}
-	\lr\sum_{k=1}^N\martIncr_k^{(m)}
-	&=\frac{T}{N}\sum_{k=1}^N
-	\nabla\Loss(\Weights_{k-1})- \nabla\loss_n^m(\Weights_{k-1})\\
-	&=\frac{T}{Nm}\sum_{k=1}^N\sum_{i=1}^m
-	[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X^{(i)}_k, Y^{(i)}_k)]\\
-	&\approx \tilde{\lr} \sum_{k=1}^{Nm}
-	\underbrace{
-		[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X_k, Y_k)]
-	}_{\widetilde{\martIncr}_k}.
-\end{align*}
-The difference is, that batch learning stays on some \(\Weights_k\) and collects
-\(m\) pieces of information before it makes a big step based on this information
-while SGD just makes \(m\) small steps. This also changes the true gradient
-evaluations \(\nabla\Loss(\Weights_k)\) slightly. But since we are only making
-small steps these \(\Weights_k\) will generally be similar. We still can not
-make a definitive assertion which one is better though\footnote{
-	Whether or not you think batch-less SGD is superior might be correlated with
-	whether or not you think that agile software development is a good idea
-}.
+% Now of course an upper bound is no guarantee that there is no effect in reality.
+% But if we have a look at the term (\ref{eq: mean of martingale increments})
+% again which is in some sense the difference between SGD and GD, then we can
+% see that these actions have quite a similar effect
+% \begin{align*}
+% 	\lr\sum_{k=1}^N\martIncr_k^{(m)}
+% 	&=\frac{T}{N}\sum_{k=1}^N
+% 	\nabla\Loss(\Weights_{k-1})- \nabla\loss_n^m(\Weights_{k-1})\\
+% 	&=\frac{T}{Nm}\sum_{k=1}^N\sum_{i=1}^m
+% 	[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X^{(i)}_k, Y^{(i)}_k)]\\
+% 	&\approx \tilde{\lr} \sum_{k=1}^{Nm}
+% 	\underbrace{
+% 		[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X_k, Y_k)]
+% 	}_{\widetilde{\martIncr}_k}.
+% \end{align*}
+% The difference is, that batch learning stays on some \(\Weights_k\) and collects
+% \(m\) pieces of information before it makes a big step based on this information
+% while SGD just makes \(m\) small steps. This also changes the true gradient
+% evaluations \(\nabla\Loss(\Weights_k)\) slightly. But since we are only making
+% small steps these \(\Weights_k\) will generally be similar. We still can not
+% make a definitive assertion which one is better though\footnote{
+% 	Whether or not you think batch-less SGD is superior might be correlated with
+% 	whether or not you think that agile software development is a good idea
+% }.
 
-Assuming they have the same effect on the deviation of SGD from GD we can
-make a few practical considerations:
-\begin{itemize}
-	\item A smaller learning rate benefits GD \emph{and} reduces the distance
-	between GD and SGD while batches only do the latter. If we have little data
-	and want to achieve good results in as few gradient evaluations as possible
-	we should in general choose smaller learning rates over larger batch sizes.
-	\item SGD can not be easily parallelized since one needs the previous weights
-	to calculate the next weights. Making multiple gradient evaluations at
-	the same point is trivially parallelizable on the other hand and only
-	requires broadcasting the result for summation. So if the bottleneck is
-	computation time, it makes sense to select batch sizes equal to the number of
-	threads, or if the broadcasting and summing takes significant time, batch
-	sizes which are multiples of the number of threads.
+% Assuming they have the same effect on the deviation of SGD from GD we can
+% make a few practical considerations:
+% \begin{itemize}
+% 	\item A smaller learning rate benefits GD \emph{and} reduces the distance
+% 	between GD and SGD while batches only do the latter. If we have little data
+% 	and want to achieve good results in as few gradient evaluations as possible
+% 	we should in general choose smaller learning rates over larger batch sizes.
+% 	\item SGD can not be easily parallelized since one needs the previous weights
+% 	to calculate the next weights. Making multiple gradient evaluations at
+% 	the same point is trivially parallelizable on the other hand and only
+% 	requires broadcasting the result for summation. So if the bottleneck is
+% 	computation time, it makes sense to select batch sizes equal to the number of
+% 	threads, or if the broadcasting and summing takes significant time, batch
+% 	sizes which are multiples of the number of threads.
 
-	This is not without caveats though: Increasing the batch size to speed up
-	learning requires a proportional increase in the learning rate to actually
-	have an impact on the time required for optimization. And since GD stops
-	converging if learing rates become too large, there is an upper bound on this.
-	And while batches might be ``free'' in a computational sense due to
-	parallelization, they still increase the sample consumption. And if we only
-	have limited data, this often results in more passes over the same data and
-	thus overfitting.
+% 	This is not without caveats though: Increasing the batch size to speed up
+% 	learning requires a proportional increase in the learning rate to actually
+% 	have an impact on the time required for optimization. And since GD stops
+% 	converging if learing rates become too large, there is an upper bound on this.
+% 	And while batches might be ``free'' in a computational sense due to
+% 	parallelization, they still increase the sample consumption. And if we only
+% 	have limited data, this often results in more passes over the same data and
+% 	thus overfitting.
 	
-	Last but not least there might be other opportunities for parallelization
-	like generating ensemble models by optimizing from different starting points
-	or using different models altogether.
-\end{itemize}
-In summary: If you are concerned about the \emph{quality} of your model you should
-probably choose SGD without batches, while concerns about training time justify
-larger batch sizes in some cases.
+% 	Last but not least there might be other opportunities for parallelization
+% 	like generating ensemble models by optimizing from different starting points
+% 	or using different models altogether.
+% \end{itemize}
+% In summary: If you are concerned about the \emph{quality} of your model you should
+% probably choose SGD without batches, while concerns about training time justify
+% larger batch sizes in some cases.
 
-\fxnote{
-\textcite{hardtTrainFasterGeneralize2016} \textcite{hofferTrainLongerGeneralize2018}
-}
+% \fxnote{
+% \textcite{hardtTrainFasterGeneralize2016} \textcite{hofferTrainLongerGeneralize2018}
+% }
 
 \section{Quadratic Loss Functions}
 
@@ -491,7 +494,7 @@ we can rewrite SGD (by induction using the triviality of \(n=0\)) as
 	&\Weights_{n+1}-\minimum\\
 	\nonumber
 	&= \Weights_n - \minimum - \lr_n H(\Weights_n-\minimum) + \lr_n\martIncr_{n+1}\\
-	\nonumber
+	\label{eq: recursive SGD formula in the quadratic case}
 	&=(1-\lr_n H)\underbrace{(\Weights_n - \minimum)}_{
 		\xeq{\text{ind.}} (\weights_n - \minimum)
 		\mathrlap{+ \sum_{k=0}^{n-1}\lr_k\left(\prod_{i=k+1}^{n-1}(1-\lr_iH)\right)\martIncr_{k+1}}
@@ -522,16 +525,75 @@ we necessarily also have
 \end{align*}
 which implies \(H=\nabla^2\Loss=\identity\). So this case is essentially
 trying to find the expected value of some random variables as quickly as
-possible. Now by (\ref{eq: unrolled SGD weights (general
-quadratic loss case)}) and
+possible.
+
+\subsubsection{Constant Learning Rates}
+
+For constant learning rates \(\lr=T/N<1\) we have
 \begin{align*}
-	\martIncr_n = \nabla\Loss(\Weights_{n-1}) -\nabla\loss(\weights_{n-1}, X_n)
-	= X_n - \E[X]
+	\Weights_n - \minimum
+	&= \underbrace{(1-\lr)^n(\weights_0 -\minimum)}_{=\weights_n-\minimum}
+	+ \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}
+	\smash{\overbrace{\martIncr_{k+1}}^{X_{k+1}-\minimum}}\\
+	&= \left((1-h)^n\weights_0 + \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}X_{k+1}\right)-\minimum.
 \end{align*}
-the \(\Weights_n\) are just an affine transformation of the \(X_n\). And we
-happen to know the best linear unbiased estimator (``BLUE'') of \(\E[X]\)
-which is the mean of the \(X_n\). This means that \(\Weights_n\) can not be
-better than the mean. But with \(\lr_n=\frac1{n+1}\) and by induction
+This implies we do not weight our \(X_k\) equally, but rather use an
+exponential decay giving the most recent data the most weight.
+
+The first interesting thing to highlight is the fact that the convergence
+rate of GD actually worsens with finer discretization \(N\)
+\begin{align*}
+	(1-h)^N = (1-T/N)^N \nearrow \exp(-T) \qquad (N\to\infty).
+\end{align*}
+But it does not worsen by much if the learning rate is small to begin with. A
+learning rater of 1 on the other hand allows instant convergence while Gradient
+Flow only converges for \(T\to\infty\). So even if we would get the additional
+gradient evaluations for free, a finer discretization is worse. Now this is
+similar to the analysis we did when selecting optimal learning rates for GD,
+where the rates of the eigenspaces improved until we moved \(\lr\hesseEV\)
+beyond 1. From then on they start to deteriorate again. And quickly, since we
+do not only increase the absolute value of the factor, but also multiply fewer 
+of them together while in the case below 1 these things counteract each other.
+But this means in general that (at least for quadratic functions) gradient
+descent converges faster than gradient flow!
+
+Secondly, notice how we can reobtain the rates from Theorem~\ref{thm: distance
+SGD vs GD} by throwing the exponential decay away
+\begin{align*}
+	\E\|\Weights_N-\weights_N\|^2
+	&= \E\left\|\sum_{k=0}^{N-1}\lr(1-\lr)^{N-1-k}\martIncr_{k+1}\right\|^2\\
+	&= \sum_{k=0}^{N-1}\lr^2\underbrace{(1-\lr)^{2(N-1-k)}}_{\le1}
+	\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \stdBound^2}\\
+	&\le \lr^2 N \stdBound^2 = \lr T\stdBound^2 = \frac{T^2}{N}\stdBound^2
+\end{align*}
+We can do the same thing with the general case (\ref{eq: unrolled SGD weights
+(general quadratic loss case)}) if we take \(\lr<2/\ubound\) for \(|H|\le\ubound\).
+
+With conditional independence \(\E[\langle \cdot, \martIncr_{n+1}\rangle\mid\filtration_n]=0\)
+we can thus see how we need to increase \(T\) with \(N\) at a roughly
+logarithmic rate
+\begin{align*}
+	\E\|\Weights_N - \minimum\|^2
+	&= \E\|\Weights_N - \weights_N\|^2 +\E\|\weights_N - \minimum\|^2\\
+	&\le \exp(-2T)\|\weights_0 - \minimum\|^2 + \frac{T^2}{N}\stdBound^2
+\end{align*}
+to minimize our \(L^2\) norm for a given \(N\). Therefore our convergence rate
+would be roughly of order
+\begin{align*}
+	O(\log(N)/N).
+\end{align*}
+This is a bit worse than the rate \(O(1/N)\) we can achieve with the mean
+\begin{align*}
+	\E\|\overline{X}_N - \E[X]\|^2 = \frac{\E\|X-\E[X]\|^2}{N},
+\end{align*}
+which is the best linear unbiased estimator (BLUE) for the expected value.
+Making only one step and increasing the batch size to our sample size realizes
+the mean. So is batch learning better? Well if we use a particular learning rate,
+we can actually realize the mean with SGD as well.
+
+\subsubsection{Decreasing Learning Rates}
+
+Using \(\lr_n=\frac1{n+1}\) we get by induction
 \begin{align}
 	\label{eq: getting rid of w_0 first step}
 	\Weights_1 &= \weights_0 - \frac{1}{0+1}(\weights_0 - X_1) = X_1\\
@@ -541,63 +603,377 @@ better than the mean. But with \(\lr_n=\frac1{n+1}\) and by induction
 	\xeq{\text{ind.}}\smash{\underbrace{\left(1-\tfrac1{n+1}\right)}_{=\frac{n}{n+1}}}
 	\frac1n\sum_{k=1}^n X_k + \tfrac{1}{n+1}X_{n+1}\\
 	\nonumber
-	&= \frac{1}{n+1}\sum_{k=1}^{n+1}X_k
+	&= \frac{1}{n+1}\sum_{k=1}^{n+1}X_k.
 \end{align}
-we can also achieve this optimum. For constant learning rates \(\lr=T/N<1\) on the
-other hand one can similarly show that we have
-\begin{align*}
-	\Weights_n = (1-\lr)^n\weights_0 + \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}X_{k+1}
-\end{align*}
-or to highlight the connection to (\ref{eq: unrolled SGD weights (general
-quadratic loss case)})
-\begin{align*}
-	\Weights_n - \minimum
-	= \underbrace{(1-\lr)^n(\weights_0 -\minimum)}_{=\weights_n-\minimum}
-	+ \sum_{k=0}^{n-1}\lr(1-\lr)^{n-1-k}
-	\smash{\overbrace{\martIncr_{k+1}}^{X_{k+1}-\minimum}}.
-\end{align*}
-This implies we do not weight our \(X_k\) equally, but rather use an
-exponential decay giving the most recent data the most weight.
 
-Notice how we can reobtain the rates from Theorem~\ref{thm: distance SGD vs GD}
-by throwing the exponential decay away
-\begin{align*}
-	\E\|\Weights_N-\weights_n\|^2
-	&= \E\left\|\sum_{k=0}^{N-1}\lr(1-\lr)^{N-1-k}\martIncr_{k+1}\right\|^2\\
-	&= \sum_{k=0}^{N-1}\lr^2\underbrace{(1-\lr)^{2(N-1-k)}}_{\le1}
-	\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \stdBound^2}\\
-	&\le \lr^2 N \stdBound^2 = \lr T\stdBound^2.
-\end{align*}
-We can do the same thing with the general case (\ref{eq: unrolled SGD weights
-(general quadratic loss case)}) if we take \(\lr<2/\ubound\) for \(|H|\le\ubound\).
+Okay this is nice and all, but we actually have to guess the correct learning
+rate schedule to get this right. Batch learning on the other hand works just
+fine without. Well this is half true since we need to guess the right learning
+rate.
 
-Throwing away this entire exponential decay might make you a bit anxious about
-the claim that batch learning is worse than SGD in general. But notice how
-keeping this factor actually helps the argument for smaller step sizes as it
-decreases in the number of discretization points \(N\) but is not influenced by
-\(\stdBound^2\). In that sense it supports the argument that smaller learning
-rates are preferable over batches.
+\subsection{Optimal Rates for General Quadratic Functions}
 
-And we also have to keep in mind how special this case is. In (\ref{eq: getting
-rid of w_0 first step}) we can get rid of the initial bias \(\weights_0\)
-completely. This is only possible because our condition number \(\condition\) is
-one which allows one step convergence of GD. If that was not the case then we
-would also have to account for the error of classical GD which is not improved
-by batch sizes at all but by smaller learning rates. Although keep in mind that
-a smaller discretization only do so much for improving classical GD since
+Since we know we can get optimal rates in the case \(\condition=1\). We might
+ask ourselves whether this is possible in the general case as well. So let us
+try. First we are going to use the fact that a basis change to a different
+orthonormal basis is an isometry\footnote{
+	Proof: \(\|x\|^2 = x^Tx = x^TVV^Tx = (V^T x)^T V^Tx = \|V^T x\|^2\)
+}
+and thus
 \begin{align*}
-	\weights_N - \minimum = (1- h)^N (\weights_0 - \minimum)
-	= \underbrace{(1- T/N)^N}_{\to \exp(-T) \mathrlap{\quad (N\to\infty)}}(\weights_0 - \minimum).
+	\E\|\Weights_{n+1} - \minimum\|^2
+	&= \E\|V^T(\Weights_{n+1} - \minimum)\|^2
+	= \sum_{j=1}^\dimension \E\langle\Weights_{n+1}-\minimum, v_j\rangle^2.
 \end{align*}
-This view on the other hand might be too pessimistic. Since we have thrown away
-the exponential decay caused by smaller discretizations we have underestimated
-its benefit. By increasing \(T\) just a little to offset this, 
-we could keep the variance constant while improving the
-convergence of GD. Choosing decreasing learning rates \(\lr_n\sim1/n\)
-has the effect that their sum and thus \(T\) is the harmonic series which is
-roughly equivalent to \(\log(n)\). In other words we might actually be able
-to increase \(T\) while keeping the variance constant. So let us try this
-for condition numbers not equal to one.
+So if \(V\) are the eigenvectors of our hesse matrix \(H\) we get
+\begin{align*}
+	\langle \Weights_{n+1}-\minimum, v_j \rangle
+	&\xeq{(\ref{eq: recursive SGD formula in the quadratic case})} (1-\lr_n\lambda_j)\langle\Weights_n-\minimum, v_j\rangle
+	+ \lr_n\langle\martIncr_{n+1},v_j\rangle
+\end{align*}
+Using conditional independence of \(\Weights_n\) and \(\martIncr_{n+1}\) again we get
+\begin{align}
+	\label{eq: expected square error in quadratic case}
+	\E\|\Weights_{n+1} - \minimum\|^2
+	&= \sum_{j=1}^\dimension (1-\lr_n \hesseEV_j)^2 \E\langle\Weights_{n+1}-\minimum\rangle^2
+	+ \lr_n^2 \E\langle \martIncr_{n+1}, v_j\rangle^2.
+\end{align}
+Now optimizing over \(\lr_n\) by taking the derivative of the term above with
+respect to \(\lr_n\) would result in
+\begin{align*}
+	\lr_n^* &= \frac{
+		\sum_{j=1}^\dimension \hesseEV_j \E\langle \Weights_n-\minimum, v_j\rangle^2
+	}{
+		\sum_{j=1}^\dimension\hesseEV_j^2\E\langle\Weights_n-\minimum, v_j\rangle^2
+		+ \E\langle\martIncr_{n+1}, v_j\rangle^2
+	}\\
+	&= \frac{
+		\E\langle \Weights_n - \minimum, \nabla\Loss(\Weights_n)\rangle
+	}{
+		\E\|\nabla\Loss(\Weights_n)\|^2 + \E\|\martIncr_{n+1}\|^2
+	}
+	= \frac{
+		\E\langle \Weights_n - \minimum, \nabla\Loss(\Weights_n)\rangle
+	}{
+		\E\|\nabla\loss(\Weights_n)\|^2
+	}.
+\end{align*}
+But while we can estimate the divisor, we do not know the scalar product between
+the true gradient and the direction to the minimum. If we knew that we could
+probably get to the minimum much faster.
+
+But we do not, which might be surprising since we got ``optimal'' rates when
+we did the same for the non-stochastic gradient in Subsection~\ref{subsec:
+necessary assumptions in the quadratic case}. But now, even if we assumed
+\(\E\|\martIncr_{n+1}\|^2=0\), we get these weird optimal rates. What happened?
+Well, in Subsection~\ref{subsec: necessary assumptions in the quadratic case}
+we did not actually optimize over the euclidean norm. Instead we looked at the
+reduction factor for every eigenspace and tried to minimize their maximum.
+This does not take the actual size of the eigen-components
+\(\E\langle\Weights_n-\minimum, v_j\rangle^2\) of our distance to the optimum
+\(\minimum\) into account. And if one of these components is very small, then
+we could sacrifice its reduction factor for a smaller factor in the other
+eigenspaces. We did not do that in Subsection~\ref{subsec: necessary assumptions
+in the quadratic case} because we used constant learning rates which would
+sacrifice one eigenspace for another indefinitely. But no matter how big the
+initial difference, if the rate of one eigenspace is smaller than another then
+eventually the error in the eigenspace with the smaller rate will be
+negligible compared to the one with the larger rate. This means that
+asymptotically only the maximum of these factors matter.
+
+Now if we assume rotationally invariant noise, i.e.
+\begin{align*}
+	\E\langle\martIncr_{n+1},v_j\rangle^2 = \E\langle\martIncr_{n+1}, v_i\rangle^2
+	\qquad \forall i,j
+\end{align*}
+then due to
+\begin{align*}
+	(1-\lr_n \hesseEV_j)^2
+	\le \max \{ (1-\lr_n\hesseEV_1)^2, (1-\lr_n\hesseEV_\dimension)^2 \}
+\end{align*}
+the error of the eigenspaces in-between will eventually be negligible. So we 
+only really have a trade off between the smallest and largest eigenvalue again.
+If we would use the learning rates to favour one over the other, then this would
+make up for any differences that might have existed after a finite time and
+from then on both errors would be similar in size which would mean we should
+not treat them differently anymore. This motivates why it is reasonable to
+neglect differences between the size of eigen-components at least for the
+asymptotic rate.
+
+Now we need to translate this intuition into actual mathematics. For that, we are
+going to define a new norm
+\begin{align}
+	\|X\|_{V,\infty}
+	:= \sqrt{\max_{i=1,\dots,\dimension} \E\langle X, v_i\rangle^2}.
+\end{align}
+Note that without the expectation this would just be the infinity norm with regard
+to the basis \(v_1,\dots,v_\dimension\). Now positive definiteness and
+scalability of the norm are trivial, and the triangle inequality follows from the
+triangle inequality of the \(L^2\) norm \(\|X\|_{L^2} := \sqrt{\E\|X\|^2}\)
+\begin{align*}
+	\|X+Y\|_{V,\infty}
+	= \max_{j=1,\dots,\dimension} \|\langle X, v_j\rangle + \langle Y, v_j\rangle\|_{L^2}
+	\le \|X\|_{V,\infty} + \|Y\|_{V,\infty}.
+\end{align*}
+As we have used the \(L^2\) norm until now, let us consider its relation
+to this new norm. Of course the norms are equivalent
+\begin{align*}
+	\|X\|_{V,\infty}^2
+	= \max_{i=1,\dots,\dimension} \E\langle X, v_i\rangle^2
+	\le \sum_{i=1}^\dimension \E\langle X, v_i\rangle^2
+	= \|X\|_{L^2}
+	\le \dimension \|X\|_{V,\infty}^2
+\end{align*}
+but \(\dimension\) is potentially quite large. But as we have argued in the
+limiting case all the eigenspaces except the one with the largest and smallest
+eigenvalue vanish, so then the factor comes closer to \(2\) independent of the
+dimension \(\dimension\).
+
+Armed with this norm, we can now tackle our problem again.
+
+\begin{theorem}
+	Let \(\Loss\) be a quadratic Loss function, and assume
+	\begin{align*}
+		\E\|\martIncr\|^2
+		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension,
+	\end{align*}
+	then we obtain optimal learning rates (w.r.t \(\|\cdot\|_{V,\infty}\)) of
+	\begin{align*}
+		\lr_n^*
+		= \begin{cases}
+			\frac{2}{\hesseEV_1+\hesseEV_\dimension}
+			& \frac{\stdBound^2}{\|\Weights_n - \minimum\|_{V,\infty}^2}
+			\le \frac{\condition-1}{2\condition} \\
+			\frac1{\hesseEV_\dimension(\condition^{-1} + \frac{\stdBound^2}{\|\Weights_n-\minimum\|_{V,\infty}^2})}
+			& \frac{\stdBound^2}{\|\Weights_n - \minimum\|_{V,\infty}^2}
+			\ge \frac{\condition-1}{2\condition}
+		\end{cases}
+	\end{align*}
+	We can interpret this as follows: If the noise is negligible compared to the
+	distance to the minimum, we want to use the same learning rates as in the
+	classical case -- simply ignoring the existence of noise. After this ``transient
+	phase'' we are in the ``noise reduction'' phase and want to select a learning rate
+	which decreases with the distance to the minimum. For the asymptotic rate of
+	convergence only the second case matters but the transient phase might be much
+	more important for practical applications. Only for \(\condition=1\) we are
+	in this asymptotic phase immediately.
+	
+	Assuming that \(n_0\) is the first index where
+	\(\frac{\stdBound^2}{\|\Weights_n - \minimum\|_{V,\infty}^2} \ge
+	\frac{\condition-1}{2\condition}\),
+	then our rates of convergence are
+	\begin{align*}
+		\|\Weights_n-\minimum\|_{V,\infty}^2
+		\le \begin{cases}
+			\left(1-\tfrac{2}{1+\condition}\right)^n\|\Weights_0-\minimum\|_{V,\infty}^2
+			& n \le n_0\\
+			\frac{\stdBound^2\condition(\condition+1)}{(n+1-n_0)(\condition-1)}
+			& n \ge n_0
+		\end{cases}
+	\end{align*}
+\end{theorem}
+\begin{proof}
+	Using the same
+	transformations (in particular conditional independence) as in (\ref{eq:
+	expected square error in quadratic case}), we get
+	\begin{align}
+		\nonumber
+		\|\Weights_{n+1} -\minimum\|_{V,\infty}^2
+		&= \max_{j=1,\dots,\dimension} \E\langle\Weights_{n+1} -\minimum, v_j\rangle^2\\
+		\nonumber
+		&= \max_{j=1,\dots,\dimension} (1-\lr_n\hesseEV_j)^2\E\langle\Weights_n -\minimum, v_j\rangle^2
+		+ \lr_n^2 \E\langle \martIncr_{n+1}, v_j \rangle^2\\
+		\nonumber
+		&\le \max_{j=1,\dots,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
+		+ \lr_n^2 \|\martIncr_{n+1}\|_{V,\infty}^2\\
+		\label{eq: upper bound weird norm weight distance}
+		&= \max_{j=1,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
+		+ \lr_n^2 \underbrace{\|\martIncr_{n+1}\|_{V,\infty}^2}_{\le \tilde{\stdBound}^2}
+	\end{align}
+	if we assume bounded variance. Okay, so let us optimize over this bound. Since
+	we are looking at a maximum over parabolas in \(\lr_n\), the first order
+	condition would be enough as this is a convex function. But while the maximum is
+	continuous we have a discontinuity in the derivative 
+	\begin{align*}
+		\frac{d}{d\lr_n}
+		= \begin{cases}
+		(2\lr_n \hesseEV_1^2 - 2\hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2
+		+ 2 \lr_n \tilde{\stdBound}^2
+		& \lr_n \le \frac{2}{\hesseEV_1+\hesseEV_\dimension}\\
+		(2\lr_n \hesseEV_\dimension^2 - 2\hesseEV_\dimension)\|\Weights_n-\minimum\|_{V,\infty}^2
+		+ 2 \lr_n \tilde{\stdBound}^2
+		& \lr_n \ge \frac{2}{\hesseEV_1+\hesseEV_\dimension}
+		\end{cases},
+	\end{align*}
+	which might prevent the monotonously increasing derivative from ever being equal
+	to zero. In fact we need either
+	\begin{align*}
+		\frac{2}{\hesseEV_1+\hesseEV_\dimension} \xge{!} \lr_n
+		&= \frac{
+			\hesseEV_1 \|\Weights_n-\minimum\|_{V,\infty}^2
+		}{
+			\hesseEV_1^2 \|\Weights_n-\minimum\|_{V,\infty}^2 + \tilde{\stdBound}^2
+		}\\
+		&= \frac{1}{
+			\hesseEV_1 + \frac{\tilde{\stdBound}^2}{
+				\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
+			}
+		}
+	\end{align*}
+	or equivalently
+	\begin{align*}
+		\frac{\tilde{\stdBound}^2}{
+			\|\Weights_n-\minimum\|_{V,\infty}^2
+		}
+		\ge\frac{\hesseEV_1^2(\condition-1)}{2},
+	\end{align*}
+	covering the case \(\condition=1\) allowing us to assume \(\hesseEV_1 <
+	\hesseEV_\dimension\) without loss of generality in the next case.
+ 	Or we want
+	\begin{align*}
+		\frac{2}{\hesseEV_1+\hesseEV_\dimension} \xle{!} \lr_n
+		&= \frac{1}{
+			\hesseEV_\dimension
+			+ \frac{\tilde{\stdBound}^2}{
+				\hesseEV_\dimension\|\Weights_n-\minimum\|_{V,\infty}^2
+			}
+		}
+	\end{align*}
+	which simplifies to
+	\begin{align*}
+		\frac{\hesseEV_1+\hesseEV_\dimension}{2}
+		\xge{!} \hesseEV_\dimension
+		+ \underbrace{\frac{\tilde{\stdBound}^2}{
+			\hesseEV_\dimension\|\Weights_n-\minimum\|_{V,\infty}^2
+		}}_{\ge 0}
+		\ge \hesseEV_\dimension,
+	\end{align*}
+	which is a contradiction for \(\hesseEV_1 < \hesseEV_\dimension\).
+
+	If the first condition is not satisfied either, then the optimal learning
+	rate is at the discontinuity (the same as in the classical case). So in
+	summary we have
+	\begin{align*}
+		\lr_n^* = \begin{cases}
+			\frac{2}{\hesseEV_1+\hesseEV_\dimension}
+			&\frac{\tilde{\stdBound}^2}{
+				\|\Weights_n-\minimum\|_{V,\infty}^2
+			}
+			\le \frac{\hesseEV_1^2(\condition-1)}{2}\\
+			\left(
+				\hesseEV_1 + \frac{\tilde{\stdBound}^2}{
+					\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
+				}
+			\right)^{-1}
+			&\frac{\tilde{\stdBound}^2}{
+				\|\Weights_n-\minimum\|_{V,\infty}^2
+			}
+			\ge \frac{\hesseEV_1^2(\condition-1)}{2}
+		\end{cases}.
+	\end{align*}
+	Plugging in the definition of \(\tilde{\stdBound}\) results in the version
+	of our theorem.
+
+	Before we plug our learning rate into our upper bound (\ref{eq: upper bound
+	weird norm weight distance}), let us do some preparation 
+	\begin{align}
+		\nonumber
+		&\|\Weights_{n+1} -\minimum\|_{V,\infty}^2\\
+		\nonumber
+		&\le \max_{j=1,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
+		+ \lr_n^2 \tilde{\stdBound}^2\\
+		\label{eq: upper bound useful for rate of convergence}
+		&= \max_{j=1,\dimension}\left(1- 2\hesseEV_j\lr_n + \lr_n^2\hesseEV_j^2
+			+\lr_n^2\tfrac{\tilde{\stdBound}^2}{\|\Weights_n-\minimum\|_{V,\infty}^2}
+		\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		\nonumber
+		&= \max_{j=1,\dimension}\Bigg(1- \lr_n \hesseEV_j\Big[2 - \lr_n \left(
+			\hesseEV_j + \tfrac{\tilde{\stdBound}^2}{\hesseEV_j\|\Weights_n-\minimum\|_{V,\infty}^2}
+		\right)\Big] \Bigg)\|\Weights_n-\minimum\|_{V,\infty}^2.
+	\end{align}
+	Since the maximum is attained by the eigenspace with the smallest eigenvalue \(\hesseEV_1\)
+	in the asymptotic case, our bound reduces to
+	\begin{align*}
+		\|\Weights_{n+1} -\minimum\|_{V,\infty}^2
+		&\le (1- \lr_n^* \hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&= \left(1- \tfrac{1}{1+ \tfrac{\tilde{\stdBound}^2}{\hesseEV_1^2\|\Weights_n-\minimum\|^2}}\right)
+		\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&= \left(1- \tfrac{
+			\hesseEV_1^2 \|\Weights_n-\minimum\|_{V,\infty}^2
+		}{
+			\tilde{\stdBound}^2
+			\left(\tfrac{\hesseEV_1^2\|\Weights_n-\minimum\|^2}{\tilde{\stdBound}^2}+1\right)
+		}\right)
+		\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&\le \Bigg(
+		1- \underbrace{\tfrac{
+			\hesseEV_1^2
+		}{
+			\tilde{\stdBound}^2
+			\left(\tfrac{2}{\condition -1}+1\right)
+		}}_{
+			=\tfrac{\hesseEV_1^2(\condition-1)}{\tilde{\stdBound}^2(\condition+1)}
+			\mathrlap{=\tfrac{\condition-1}{\stdBound^2\condition(\condition+1)}}
+		}
+		\|\Weights_n-\minimum\|_{V,\infty}^2
+		\Bigg)
+		\|\Weights_n-\minimum\|_{V,\infty}^2,
+	\end{align*}
+	where we have used our lower bound on the variance-distance fraction
+	\begin{align*}
+		\frac{\tilde{\stdBound}^2}{
+			\hesseEV_1^2\|\Weights_n-\minimum\|_{V,\infty}^2
+		}
+		\ge \frac{\condition-1}{2}
+	\end{align*}
+	characterizing the asymptotic phase. Using Lemma~\ref{lem-appendix: diminishing contraction}
+	this implies our claim.
+	% \begin{align*}
+	% 	\|\Weights_n-\minimum\|_{V,\infty}^2
+	% 	\le \frac{1}{
+	% 		n\tfrac{\hesseEV_1^2(\condition-1)}{\stdBound^2(\condition+1)}
+	% 		+ \tfrac{1}{\|\Weights_0-\minimum\|_{V,\infty}}
+	% 	},
+	% \end{align*}
+	% assuming we have started in the asymptotic phase with \(\Weights_0\).
+	Now in the transient phase we can apply
+	\begin{align*}
+		\frac{\tilde{\stdBound}^2}{
+			\|\Weights_n-\minimum\|_{V,\infty}^2
+		}
+		\le \frac{\hesseEV_1^2(\condition-1)}{2}
+	\end{align*}
+	directly to (\ref{eq: upper bound useful for rate of convergence}) to get
+	\begin{align*}
+		\|\Weights_{n+1}-\minimum\|_{V,\infty}^2
+		&= \max_{j=1,\dimension}\left((1- \hesseEV_j\lr_n)^2
+			+\lr_n^2\tfrac{\tilde{\stdBound}^2}{\|\Weights_n-\minimum\|_{V,\infty}^2}
+		\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&\le \max_{j=1,\dimension}\left((1- \hesseEV_j\lr_n)^2
+			+\lr_n^2\tfrac{\hesseEV_1^2(\condition-1)}{2}
+		\right)\|\Weights_n-\minimum\|_{V,\infty}^2.
+	\end{align*}
+	And for the learning rate \(\lr_n^*=\tfrac{2}{\hesseEV_1+\hesseEV_\dimension}=\tfrac{2}{\hesseEV_1(1+\condition)}\)
+	we have
+	\begin{align*}
+		(1-\hesseEV_\dimension\lr_n^*)^2
+		= (1-\hesseEV_1\lr_n^*)^2
+		= \left(1-\tfrac{2}{1+\condition}\right)^2
+	\end{align*}
+	and therefore
+	\begin{align*}
+		\|\Weights_{n+1}-\minimum\|_{V,\infty}^2
+		&\le \left(\left(1-\tfrac{2}{1+\condition}\right)^2
+			+\left(\tfrac{2}{\hesseEV_1(1+\condition)}\right)^2\tfrac{\hesseEV_1^2(\condition-1)}{2}
+		\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&=\left(
+			\left(\tfrac{\condition-1}{\condition+1}\right)^2 + 2 \tfrac{\condition-1}{(\condition+1)^2}
+		\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&= \tfrac{\condition-1}{(\condition+1)^2}(\condition-1 + 2)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&= \left(1-\tfrac{2}{1+\condition}\right)\|\Weights_n - \minimum\|_{V,\infty}^2.
+		\qedhere
+	\end{align*}
+\end{proof}
 
 \subsection{The Effect of the Condition Number}\label{subsec: condition in quadratic SGD}
 
@@ -694,326 +1070,6 @@ rule out that the detour over the exponential function and logarithm messed
 with our asymptotic rate, so the problem are not our bounds but rather the
 selection of the learning rate \(\lr_n = \tfrac{1}{\hesseEV_\dimension(n+1)}\).
 
-\subsection{Optimal Rates}
-
-So can we select better rates? Let us try to find optimal learning rates somehow.
-First we are going to use the fact that a basis change to a different orthonormal 
-basis is an isometry\footnote{
-	Proof: \(\|x\|^2 = x^Tx = x^TVV^Tx = (V^T x)^T V^Tx = \|V^T x\|^2\)
-}
-and thus
-\begin{align}
-	\nonumber
-	\E\|\Weights_{n+1} - \minimum\|^2
-	&= \E\|V^T(\Weights_{n+1} - \minimum)\|^2
-	= \sum_{j=1} \E\langle\Weights_{n+1}-\minimum, v_j\rangle^2\\
-	\label{eq: expected square error in quadratic case}
-	&= \sum_{j=1}^\dimension (1-\lr_n \hesseEV_j)^2 \E\langle\Weights_{n+1}-\minimum\rangle^2
-	+ \lr_n^2 \E\langle \martIncr_{n+1}, v_j\rangle^2
-\end{align}
-where we have used conditional independence of \(\Weights_n\) and \(\martIncr_{n+1}\)
-for the last equation. Now optimizing over \(\lr_n\) by taking the derivative
-of the term above with respect to \(\lr_n\) would result in
-\begin{align*}
-	\lr_n^* &= \frac{
-		\sum_{j=1}^\dimension \hesseEV_j \E\langle \Weights_n-\minimum, v_j\rangle^2
-	}{
-		\sum_{j=1}^\dimension\hesseEV_j^2\E\langle\Weights_n-\minimum, v_j\rangle^2
-		+ \E\langle\martIncr_{n+1}, v_j\rangle^2
-	}\\
-	&= \frac{
-		\E\langle \Weights_n - \minimum, \nabla\Loss(\Weights_n)\rangle
-	}{
-		\E\|\nabla\Loss(\Weights_n)\|^2 + \E\|\martIncr_{n+1}\|^2
-	}
-	= \frac{
-		\E\langle \Weights_n - \minimum, \nabla\Loss(\Weights_n)\rangle
-	}{
-		\E\|\nabla\loss(\Weights_n)\|^2
-	}.
-\end{align*}
-But while we can estimate the divisor, we do not know the scalar product between
-the true gradient and the direction to the minimum. If we knew that we could
-probably get to the minimum much faster.
-
-But we do not, which might be surprising since we got ``optimal'' rates when
-we did the same for the non-stochastic gradient in Subsection~\ref{subsec:
-necessary assumptions in the quadratic case}. But now, even if we assumed
-\(\E\|\martIncr_{n+1}\|^2=0\), we get these weird optimal rates. What happened?
-Well, in Subsection~\ref{subsec: necessary assumptions in the quadratic case}
-we did not actually optimize over the euclidean norm. Instead we looked at the
-reduction factor for every eigenspace and tried to minimize their maximum.
-This does not take the actual size of the eigen-components
-\(\E\langle\Weights_n-\minimum, v_j\rangle^2\) of our distance to the optimum
-\(\minimum\) into account. And if one of these components is very small, then
-we could sacrifice its reduction factor for a smaller factor in the other
-eigenspaces. We did not do that in Subsection~\ref{subsec: necessary assumptions
-in the quadratic case} because we used constant learning rates which would
-sacrifice one eigenspace for another indefinitely. But no matter how big the
-initial difference, if the rate of one eigenspace is smaller than another then
-eventually the error in the eigenspace with the smaller rate will be
-negligible compared to the one with the larger rate. This means that
-asymptotically only the maximum of these factors matter.
-
-Now if we assume rotationally invariant noise, i.e.
-\begin{align*}
-	\E\langle\martIncr_{n+1},v_j\rangle^2 = \E\langle\martIncr_{n+1}, v_i\rangle^2
-	\qquad \forall i,j
-\end{align*}
-then due to
-\begin{align*}
-	(1-\lr_n \hesseEV_j)^2
-	\le \max \{ (1-\lr_n\hesseEV_1)^2, (1-\lr_n\hesseEV_\dimension)^2 \}
-\end{align*}
-the error of the eigenspaces in-between will eventually be negligible. So we 
-only really have a trade off between the smallest and largest eigenvalue again.
-If we would use the learning rates to favour one over the other, then this would
-make up for any differences that might have existed after a finite time and
-from then on both errors would be similar in size which would mean we should
-not treat them differently anymore. This motivates why it is reasonable to
-neglect differences between the size of eigen-components at least for the
-asymptotic rate.
-
-Now we need to translate this intuition into actual maths. For that, we are
-going to define a new norm
-\begin{align}
-	\|X\|_{V,\infty}
-	:= \sqrt{\max_{i=1,\dots,\dimension} \E\langle X, v_i\rangle^2}.
-\end{align}
-Note that without the expectation this would just be the infinity norm with regard
-to the basis \(v_1,\dots,v_\dimension\). Now positive definiteness and
-scalability of the norm are trivial, and the triangle inequality follows from the
-triangle inequality of the \(L^2\) norm \(\|X\|_{L^2} := \sqrt{\E\|X\|^2}\)
-\begin{align*}
-	\|X+Y\|_{V,\infty}
-	= \max_{j=1,\dots,\dimension} \|\langle X, v_j\rangle + \langle Y, v_j\rangle\|_{L^2}
-	\le \|X\|_{V,\infty} + \|Y\|_{V,\infty}.
-\end{align*}
-As we have used the \(L^2\) norm until now, let us consider its relation
-to this new norm. Of course the norms are equivalent
-\begin{align*}
-	\|X\|_{V,\infty}^2
-	= \max_{i=1,\dots,\dimension} \E\langle X, v_i\rangle^2
-	\le \sum_{i=1}^\dimension \E\langle X, v_i\rangle^2
-	= \|X\|_{L^2}
-	\le \dimension \|X\|_{V,\infty}^2
-\end{align*}
-but \(\dimension\) is potentially quite large. But as we have argued in the
-limiting case all the eigenspaces except the one with the largest and smallest
-eigenvalue vanish, so then the factor comes closer to \(2\) independent of the
-dimension \(\dimension\).
-
-Armed with this norm, we can now tackle our problem again. Using the same
-transformations (in particular conditional independence) as in (\ref{eq:
-expected square error in quadratic case}), we get
-\begin{align}
-	\nonumber
-	\|\Weights_{n+1} -\minimum\|_{V,\infty}^2
-	&= \max_{j=1,\dots,\dimension} \E\langle\Weights_{n+1} -\minimum, v_j\rangle^2\\
-	\nonumber
-	&= \max_{j=1,\dots,\dimension} (1-\lr_n\hesseEV_j)^2\E\langle\Weights_n -\minimum, v_j\rangle^2
-	+ \lr_n^2 \E\langle \martIncr_{n+1}, v_j \rangle^2\\
-	\nonumber
-	&\le \max_{j=1,\dots,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
-	+ \lr_n^2 \|\martIncr_{n+1}\|_{V,\infty}^2\\
-	\label{eq: upper bound weird norm weight distance}
-	&= \max_{j=1,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
-	+ \lr_n^2 \underbrace{\|\martIncr_{n+1}\|_{V,\infty}^2}_{\le \stdBound^2}
-\end{align}
-if we assume bounded variance. Okay, so let us optimize over this bound. Since
-we are looking at a maximum over parabolas in \(\lr_n\), the first order
-condition would be enough as this is a convex function. But while the maximum is
-continuous we have a discontinuity in the derivative 
-\begin{align*}
-	\frac{d}{d\lr_n}
-	= \begin{cases}
-	(2\lr_n \hesseEV_1^2 - 2\hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2
-	+ 2 \lr_n \stdBound^2
-	& \lr_n \le \frac{2}{\hesseEV_1+\hesseEV_\dimension}\\
-	(2\lr_n \hesseEV_\dimension^2 - 2\hesseEV_\dimension)\|\Weights_n-\minimum\|_{V,\infty}^2
-	+ 2 \lr_n \stdBound^2
-	& \lr_n \ge \frac{2}{\hesseEV_1+\hesseEV_\dimension}
-	\end{cases},
-\end{align*}
-which might prevent the monotonously increasing derivative from ever being equal
-to zero. In fact we need either
-\begin{align*}
-	\frac{2}{\hesseEV_1+\hesseEV_\dimension} \xle{!} \lr_n
-	&= \frac{
-		\hesseEV_\dimension \|\Weights_n-\minimum\|_{V,\infty}^2
-	}{
-		\hesseEV_\dimension^2 \|\Weights_n-\minimum\|_{V,\infty}^2 + \stdBound^2
-	}\\
-	&= \frac{1}{
-		\hesseEV_\dimension
-		+ \frac{\stdBound^2}{
-			\hesseEV_\dimension\|\Weights_n-\minimum\|_{V,\infty}^2
-		}
-	}
-\end{align*}
-or equivalently
-\begin{align*}
-	\frac{\hesseEV_1+\hesseEV_\dimension}{2}
-	\xge{!} \hesseEV_\dimension
-	+ \frac{\stdBound^2}{
-		\hesseEV_\dimension\|\Weights_n-\minimum\|_{V,\infty}^2
-	}
-	\ge \hesseEV_\dimension,
-\end{align*}
-which is a contradiction for \(\hesseEV_1 < \hesseEV_\dimension\), as is
-always the case (except when all eigenvalues are equal). Or we want
-\begin{align*}
-	&\frac{2}{\hesseEV_1+\hesseEV_\dimension} \xge{!} \lr_n
-	= \frac{1}{
-		\hesseEV_1 + \frac{\stdBound^2}{
-			\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
-		}
-	}
-	% \\
-	% &\iff 
-	% \frac{\hesseEV_1+\hesseEV_\dimension}{2}
-	% \le \hesseEV_1 + \frac{\stdBound^2}{
-	% 	\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
-	% }\\
-	% &\iff 
-	% \frac{\condition-1}{2\hesseEV_1}=\frac{\hesseEV_\dimension-\hesseEV_1}{2}\le
-	% \frac{\stdBound^2}{
-	% 	\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
-	% }\\
-\end{align*}
-which simplifies to
-\begin{align*}
-	\frac{\stdBound^2}{
-		\|\Weights_n-\minimum\|_{V,\infty}^2
-	}
-	\ge\frac{\hesseEV_1^2(\condition-1)}{2},
-\end{align*}
-covering the case \(\condition=1\) allowing us to assume \(\hesseEV_1 <
-\hesseEV_\dimension\) without loss of generality in the previous case. If
-the condition above is not satisfied, then the optimal learning rate is at the
-discontinuity (the same as in the classical case). So in summary we have
-\begin{align*}
-	\lr_n^* = \begin{cases}
-		\frac{2}{\hesseEV_1+\hesseEV_\dimension}
-		&\frac{\stdBound^2}{
-			\|\Weights_n-\minimum\|_{V,\infty}^2
-		}
-		\le \frac{\hesseEV_1^2(\condition-1)}{2}\\
-		\left(
-			\hesseEV_1 + \frac{\stdBound^2}{
-				\hesseEV_1\|\Weights_n-\minimum\|_{V,\infty}^2
-			}
-		\right)^{-1}
-		&\frac{\stdBound^2}{
-			\|\Weights_n-\minimum\|_{V,\infty}^2
-		}
-		\ge \frac{\hesseEV_1^2(\condition-1)}{2}
-	\end{cases}.
-\end{align*}
-We can interpret this as follows: If the noise is negligible compared to the
-distance to the minimum, we want to use the same learning rates as in the
-classical case -- simply ignoring the existence of noise. After this ``transient
-phase'' we are in the ``noise reduction'' phase and want to select a learning rate
-which decreases with the distance to the minimum. For the asymptotic rate of
-convergence only the second case matters but the transient phase might be much
-more important for practical applications.
-
-In particular for \(\condition=1\) we are in this asymptotic phase immediately.
-Before we plug our learning rate into our upper bound (\ref{eq: upper bound
-weird norm weight distance}), let us do some preparation 
-\begin{align}
-	\nonumber
-	&\|\Weights_{n+1} -\minimum\|_{V,\infty}^2\\
-	\nonumber
-	&\le \max_{j=1,\dimension} (1-\lr_n\hesseEV_j)^2\|\Weights_n -\minimum\|_{V,\infty}^2
-	+ \lr_n^2 \stdBound^2\\
-	\label{eq: upper bound useful for rate of convergence}
-	&= \max_{j=1,\dimension}\left(1- 2\hesseEV_j\lr_n + \lr_n^2\hesseEV_j^2
-		+\lr_n^2\tfrac{\stdBound^2}{\|\Weights_n-\minimum\|_{V,\infty}^2}
-	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	\nonumber
-	&= \max_{j=1,\dimension}\Bigg(1- \lr_n \hesseEV_j\Big[2 - \lr_n \left(
-		\hesseEV_j + \tfrac{\stdBound^2}{\hesseEV_j\|\Weights_n-\minimum\|_{V,\infty}^2}
-	\right)\Big] \Bigg)\|\Weights_n-\minimum\|_{V,\infty}^2.
-\end{align}
-Since the maximum is attained by the eigenspace with the smallest eigenvalue \(\hesseEV_1\)
-in the asymptotic case, our bound reduces to
-\begin{align*}
-	\|\Weights_{n+1} -\minimum\|_{V,\infty}^2
-	&\le (1- \lr_n^* \hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	&= \left(1- \tfrac{1}{1+ \tfrac{\stdBound^2}{\hesseEV_1^2\|\Weights_n-\minimum\|^2}}\right)
-	\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	&= \left(1- \tfrac{
-		\hesseEV_1^2 \|\Weights_n-\minimum\|_{V,\infty}^2
-	}{
-		\stdBound^2
-		\left(\tfrac{\hesseEV_1^2\|\Weights_n-\minimum\|^2}{\stdBound^2}+1\right)
-	}\right)
-	\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	&\le \Bigg(
-	1- \underbrace{\tfrac{
-		\hesseEV_1^2
-	}{
-		\stdBound^2
-		\left(\tfrac{2}{\condition -1}+1\right)
-	}}_{=\tfrac{\hesseEV_1^2(\condition-1)}{\stdBound^2(\condition+1)}}
-	\|\Weights_n-\minimum\|_{V,\infty}^2
-	\Bigg)
-	\|\Weights_n-\minimum\|_{V,\infty}^2,
-\end{align*}
-where we have used our lower bound on the variance-distance fraction
-\begin{align*}
-	\frac{\stdBound^2}{
-		\hesseEV_1^2\|\Weights_n-\minimum\|_{V,\infty}^2
-	}
-	\ge \frac{\condition-1}{2}
-\end{align*}
-characterizing the asymptotic phase. Using Lemma~\ref{lem-appendix: diminishing contraction}
-this implies
-\begin{align*}
-	\|\Weights_n-\minimum\|_{V,\infty}^2
-	\le \frac{1}{
-		n\tfrac{\hesseEV_1^2(\condition-1)}{\stdBound^2(\condition+1)}
-		+ \tfrac{1}{\|\Weights_0-\minimum\|_{V,\infty}}
-	},
-\end{align*}
-assuming we have started in the asymptotic phase with \(\Weights_0\). Now in the
-transient phase we can apply
-\begin{align*}
-	\frac{\stdBound^2}{
-		\|\Weights_n-\minimum\|_{V,\infty}^2
-	}
-	\le \frac{\hesseEV_1^2(\condition-1)}{2}
-\end{align*}
-directly to (\ref{eq: upper bound useful for rate of convergence}) to get
-\begin{align*}
-	\|\Weights_{n+1}-\minimum\|_{V,\infty}^2
-	&= \max_{j=1,\dimension}\left((1- \hesseEV_j\lr_n)^2
-		+\lr_n^2\tfrac{\stdBound^2}{\|\Weights_n-\minimum\|_{V,\infty}^2}
-	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	&\le \max_{j=1,\dimension}\left((1- \hesseEV_j\lr_n)^2
-		+\lr_n^2\tfrac{\hesseEV_1^2(\condition-1)}{2}
-	\right)\|\Weights_n-\minimum\|_{V,\infty}^2.
-\end{align*}
-And for the learning rate \(\lr_n^*=\tfrac{2}{\hesseEV_1+\hesseEV_\dimension}=\tfrac{2}{\hesseEV_1(1+\condition)}\)
-we have
-\begin{align*}
-	(1-\hesseEV_\dimension\lr_n^*)^2
-	= (1-\hesseEV_1\lr_n^*)^2
-	= \left(1-\tfrac{2}{1+\condition}\right)^2
-\end{align*}
-and therefore
-\begin{align*}
-	\|\Weights_{n+1}-\minimum\|_{V,\infty}^2
-	&\le \left(\left(1-\tfrac{2}{1+\condition}\right)^2
-		+\left(\tfrac{2}{\hesseEV_1(1+\condition)}\right)^2\tfrac{\hesseEV_1^2(\condition-1)}{2}
-	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	&=\left(
-		\left(\tfrac{\condition-1}{\condition+1}\right)^2 + 2 \tfrac{\condition-1}{(\condition+1)^2}
-	\right)\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	&= \tfrac{\condition-1}{(\condition+1)^2}(\condition-1 + 2)\|\Weights_n-\minimum\|_{V,\infty}^2\\
-	&= \left(1-\tfrac{2}{1+\condition}\right)\|\Weights_n - \minimum\|_{V,\infty}^2.
-\end{align*}
 
 \section{Expected Square Error Analysis}
 
