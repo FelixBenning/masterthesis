@@ -613,7 +613,7 @@ rate.
 
 \subsection{Optimal Rates for General Quadratic Functions}
 
-Since we know we can get optimal rates in the case \(\condition=1\). We might
+Since we know we can get optimal rates in the case \(\condition=1\), we might
 ask ourselves whether this is possible in the general case as well. So let us
 try. First we are going to use the fact that a basis change to a different
 orthonormal basis is an isometry\footnote{
@@ -732,9 +732,9 @@ dimension \(\dimension\).
 Armed with this norm, we can now tackle our problem again.
 
 \begin{theorem}
-	Let \(\Loss\) be a quadratic Loss function, and assume
+	Let \(\Loss\) be a quadratic Loss function and assume
 	\begin{align*}
-		\E\|\martIncr\|^2
+		\E\|\martIncr\|_{V,\infty}^2
 		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension,
 	\end{align*}
 	then we obtain optimal learning rates (w.r.t \(\|\cdot\|_{V,\infty}\)) of
@@ -758,8 +758,9 @@ Armed with this norm, we can now tackle our problem again.
 	more important for practical applications. Only for \(\condition=1\) we are
 	in this asymptotic phase immediately.
 	
-	Assuming that \(n_0\) is the first index where
-	\(\frac{\stdBound^2}{\|\Weights_n - \minimum\|_{V,\infty}^2} \ge
+	Assuming that \(n_0\) is the time we enter the ``noise reduction'' phase,
+	i.e. the first index where \(\frac{\stdBound^2}{\|\Weights_n -
+	\minimum\|_{V,\infty}^2} \ge
 	\frac{\condition-1}{2\condition}\),
 	then our rates of convergence are
 	\begin{align*}
@@ -974,101 +975,28 @@ Armed with this norm, we can now tackle our problem again.
 		\qedhere
 	\end{align*}
 \end{proof}
+\begin{remark}
+	The condition
+	\begin{align*}
+		\E\|\martIncr\|_{V,\infty}^2
+		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension,
+	\end{align*}
+	might seem strange, but this definition allows \(\stdBound\) to be scale
+	invariant. I.e. when we scale \(\loss(\weights, Z)\) we scale \(\hesseEV_j\)
+	linearly as well as \(\E\|\martIncr_n\|^2\) quadratically. So the
+	bound \(\stdBound\) is scale invariant while \(\tilde{\stdBound}\) is not.
+	And with scale invariance we get convergence rates dependent only on the
+	condition number.
+\end{remark}
 
-\subsection{The Effect of the Condition Number}\label{subsec: condition in quadratic SGD}
-
-By diagonalizing \(H\) and using the fact that
-\begin{align*}
-	&\prod_{k=0}^{n-1} (1-\lr_k V\diag[\hesseEV_1, \dots, \hesseEV_\dimension]V^T)\\
-	&= V \diag\left[
-		\prod_{k=0}^{n-1}(1-\lr_k\hesseEV_1),
-		\dots, \prod_{k=0}^{n-1}(1-\lr_k\hesseEV_\dimension)
-	\right]V^T
-\end{align*}
-we can consider all the eigenspaces of (\ref{eq: unrolled SGD weights (general
-quadratic loss case)}) separately again
-\begin{align*}
-	\langle \Weights_{n+1}-\minimum, v_j \rangle
-	= \begin{aligned}[t]
-		&\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right) \langle \weights_0-\minimum, v_j\rangle\\
-		&+ \sum_{k=0}^n \lr_k \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)\langle\martIncr_{k+1},v_j\rangle.
-	\end{aligned}
-\end{align*}
-With the usual conditional independence argument we get
-\begin{align*}
-	\E\|\Weights_{n+1}-\minimum\|^2
-	&= \E[(V^T [\Weights_{n+1}-\minimum])^T(V^T[\Weights_{n+1}-\minimum])]\\
-	&= \sum_{j=1}^\dimension \E\langle\Weights_{n+1}-\minimum, v_j \rangle^2\\
-	&= \sum_{j=1}^\dimension
-	\begin{aligned}[t]
-		&\Bigg[\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right)^2 \langle \weights_0-\minimum, v_j\rangle^2\\
-		&+ \sum_{k=0}^n \lr_k^2 \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)^2\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg].
-	\end{aligned}
-\end{align*}
-Since the eigenvalues are all different, we can not select \(\lr_n=\frac{1}{\hesseEV(n+1)}\)
-to achieve
-\begin{align*}
-	1-\lr_n\hesseEV = \frac{n}{n+1}
-\end{align*}
-which would be the product equivalent of a telescoping sum as we have used in
-(\ref{eq: telescoping product}). To make the product go away we could use
-\(1+x\le \exp(x)\) inside the square to convert it into a sum. But since \(x\to
-x^2\) is only monotonous for positive \(x\) we need
-\begin{align*}
-	1-\lr_k \hesseEV_j \ge 0 \qquad \forall k\ge 0, \forall j \in\{1,\dots,\dimension\}
-\end{align*}
-So to emulate the optimal learning rate from Subsection~\ref{subsec: variance reduction}
-let us try out \(\lr_k = \tfrac{1}{\hesseEV_\dimension(k+1)}\). With this in
-mind we can show
-\begin{align*}
-	\left(\prod_{i=k+1}^{N-1}(1-\lr_i\hesseEV)\right)
-	&\le\exp\left(-2\sum_{i=k+1}^{N-1}\lr_i\hesseEV_j\right)\\
-	&\le \exp\left(-2\frac{\hesseEV_j}{\hesseEV_\dimension}[\log(N+1)-\log(k+2)]\right)\\
-	&= \left(\frac{N+1}{k+2}\right)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}},
-\end{align*}
-where we have used
-\begin{align*}
-	\hesseEV_\dimension\sum_{i=k}^{n-1} \lr_i
-	= \sum_{i=k+1}^n \frac{1}{i}
-	= \int_{k+1}^{n+1} \frac{1}{\lfloor x\rfloor} dx
-	\ge \int_{k+1}^{n+1} \frac{1}x dx
-	= \log(n+1) - \log(k+1).
-\end{align*}
-Using this detour over the exponential function and back we get
-\begin{align*}
-	&\E\|\Weights_N - \minimum\|^2\\
-	&\le \sum_{j=1}^d \Bigg[ (N+1)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}}\langle\weights_0-\minimum, v_j\rangle^2
-	+ \sum_{k=0}^n \lr_k^2 \left(\tfrac{N+1}{k+2}\right)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}}
-	\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg]\\
-	&\le (N+1)^{-2\frac{\hesseEV_1}{\hesseEV_\dimension}}\|\weights_0-\minimum\|^2
-	+ \sum_{k=0}^{N-1} \lr_k^2 \left(\tfrac{N+1}{k+2}\right)^{-2\frac{\hesseEV_1}{\hesseEV_\dimension}}
-	\E[\|\martIncr_{k+1}\|^2]\\
-	&\le (N+1)^{-2\condition^{-1}}\|\weights_0-\minimum\|^2
-	+ \frac{\stdBound^2}{\hesseEV_d} (N+1)^{-2\condition^{-1}}
-	\underbrace{\sum_{k=0}^{N-1} (k+2)^{-2(1-\condition^{-1})}}_{\sim \int_1^N x^{-2(1-\condition^{-1})}dx}\\
-	&\in O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \stdBound^2 O(N^{-1+2\condition^{-1}} + c) \right].
-\end{align*}
-Now for \(\condition<2\) this simplifies to 
-\begin{align*}
-	O(N^{-2\condition^{-1}})\|\weights_0-\minimum\|^2 + O(N^{-1})\stdBound^2
-	= O(N^{-1})\stdBound^2
-\end{align*}
-which means that first of all it still does not matter whether or not we
-increase \(N\) or decrease our variance \(\stdBound^2\) with batches for the
-variance part, but decreasing the learning rate improves the classical error
-bound although asymptotically only the variance matters. For worse conditions
-the speed of convergence simplifies to
-\begin{align*}
-	O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \stdBound^2 c\right].
-\end{align*}
-In this case whether or not it makes sense to reduce the variance depends on the
-relative size of \(\stdBound^2 c\) in comparison to \(\|\weights_n-\minimum\|^2\),
-but as we will see with the next approach our convergence rate is actually
-worse than it should be. Since the approximation \(1+x\approx\exp(x)\) is
-very good for small \(x\) and our learning rate is decreasing we can
-rule out that the detour over the exponential function and logarithm messed
-with our asymptotic rate, so the problem are not our bounds but rather the
-selection of the learning rate \(\lr_n = \tfrac{1}{\hesseEV_\dimension(n+1)}\).
+Note that increasing the batch size during the transient phase would provide no
+value as the increased batch size would only result in smaller \(\stdBound\)
+which has no effect on the convergence rate. In the ``noise reduction'' phase
+on the other hand, doubling the number of steps or the batch size has the same
+effect for our bounds. Now as we argued leading up to this theorem, the bounds
+we used are quite tight. But guessing the correct learning rates is difficult.
+Before we try to address this guessing problem, let us see if we can even
+generalize this to non-quadratic functions.
 
 
 \section{Expected Square Error Analysis}
@@ -1079,111 +1007,148 @@ proof of the strongly convex case.
 
 \subsection{Strongly Convex Case}
 
-While we are not going to tether ourselves to Gradient Descent \(\weights_n\) in
-this section, we are still going to split off the noise
-\begin{align*}
-	\|\Weights_{n+1} - \minimum\|^2
-	&= \|\Weights_n -\minimum - \lr_n\nabla\Loss(\weights_n) +\lr_n \martIncr_{n+1}\|^2\\
-	&= \begin{aligned}[t]
+\begin{lemma}\label{lem: SGD bound with noise}
+	Let \(\Loss\in\strongConvex{\lbound}{\ubound}\), then we have
+	\begin{align*}
+		\E\|\Weights_{n+1} - \minimum\|^2
+		\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
+		\E\|\Weights_n - \minimum\|^2 + \lr_n^2 \underbrace{\E\|\martIncr_{n+1}\|^2}_{\le\stdBound^2\lbound\ubound}.
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	While we are not going to tether ourselves to Gradient Descent \(\weights_n\) in
+	this section, we are still going to split off the noise
+	\begin{align*}
+		\|\Weights_{n+1} - \minimum\|^2
+		&= \|\Weights_n -\minimum - \lr_n\nabla\Loss(\weights_n) +\lr_n \martIncr_{n+1}\|^2\\
+		&= \begin{aligned}[t]
+			&\|\Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n)\|^2\\
+			&+ 2\langle \Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n), \lr_n \martIncr_{n+1}\rangle\\
+			&+ \lr_n^2 \|\martIncr_{n+1}\|^2
+		\end{aligned}
+	\end{align*}
+	The scalar product will disappear once we apply expectation due to conditional
+	independence again. For the first part we are going to do the same as in the
+	classical case in Theorem~\ref{thm: gd strong convexity convergence rate}:
+	\begin{align}
+		\nonumber
 		&\|\Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n)\|^2\\
-		&+ 2\langle \Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n), \lr_n \martIncr_{n+1}\rangle\\
-		&+ \lr_n^2 \|\martIncr_{n+1}\|^2
-	\end{aligned}
-\end{align*}
-The scalar product will disappear once we apply expectation due to conditional
-independence again. For the first part we are going to do the same as in the
-classical case in Theorem~\ref{thm: gd strong convexity convergence rate}:
-\begin{align}
-	\nonumber
-	&\|\Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n)\|^2\\
-	\label{eq: getting rid of the scalar product (SGD)}
-	&= \|\Weights_n - \minimum\|^2
-	- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\minimum\rangle}_{
-		\xge{\text{Lem.~\ref{lem: bermanDiv lower bound (strongly convex)}}}
-	 	\tfrac{\ubound\lbound}{\ubound+\lbound}\|\Weights_n - \minimum\|^2
-		\mathrlap{+ \tfrac{1}{\ubound+\lbound}\|\nabla\Loss(\Weights_n)\|^2}
-	}
-	+ \lr_n^2 \|\nabla\Loss(\Weights_n)\|^2\\
-	\nonumber
-	&\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
-	\|\Weights_n - \minimum\|^2
-	+ \lr_n(\lr_n - \tfrac{2}{\ubound+\lbound})
-	\|\nabla\Loss(\Weights_n)\|^2
-\end{align}
-For \(\lr_n\le\tfrac{2}{\ubound+\lbound}\) we can drop the gradient again to
-obtain
-\begin{align*}
-	\E\|\Weights_{n+1} - \minimum\|^2
-	\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
-	\E\|\Weights_n - \minimum\|^2 + \lr_n^2 \underbrace{\E\|\martIncr_{n+1}\|^2}_{\le\stdBound^2}.
-\end{align*}
-In the classical case we just wanted to select \(\lr_n\) as large as possible,
-i.e. \(\lr_n=\tfrac{2}{\ubound+\lbound}\). But in the stochastic setting there
-are adverse effects of large learning rates due to noise. Now as our upper bound
-is a convex parabola in \(\lr_n\) we can just use the first order condition
-\begin{align*}
-	\frac{d}{d\lr_n}
-	= -2\tfrac{\ubound\lbound}{\ubound+\lbound}
-	\E\|\Weights_n - \minimum\|^2 + 2\lr_n \stdBound^2
-	\xeq{!} 0
-\end{align*}
-to find the best upper bound
-\begin{align}\label{eq: optimal learning rate SGD}
-	\lr_n
-	= \min\left\{
-		\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)},
-		\frac{2}{\ubound+\lbound}
-	\right\}.
-\end{align}
-So we still want to ``max out our learing rate'' and use
-\(\lr_n=\tfrac{2}{\ubound+\lbound}\) if
-\begin{align*}
-	\frac{2\stdBound^2}{\ubound\lbound} \le \E\|\Weights_n - \minimum\|^2.
-\end{align*}
-In other words: the stochastic variance only becomes a problem once we are
-close to the minimum. Before that we basically want to treat our problem like
-the classical one. This results in two training phases, the \emph{transient}
-phase in which we are still far from the minimum, our learning rate is constant
-and we get a linear convergence rate
-\begin{align*}
-	\E\|\Weights_{n+1} - \minimum\|^2
-	&\le \left(1-2\tfrac{2}{\ubound+\lbound}\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
-	\E\|\Weights_n - \minimum\|^2 + \left(\tfrac{2}{\ubound+\lbound}\right)^2
-	\underbrace{\stdBound^2}_{
-		\le\tfrac{\ubound\lbound}{2} \E\|\Weights_n - \minimum\|^2
-	}\\
-	&\le \underbrace{
-		\left(1-\tfrac{2\ubound\lbound}{(\ubound+\lbound)^2}\right)
-	}_{
-		=1-\frac{2}{(1+\condition^{-1})(1+\condition)}
-	}
-	\E\|\Weights_n - \minimum\|^2.
-\end{align*}
-In the \emph{asymptotic} phase on the other hand, we have to reduce our learning
-rate with the distance to the minimum. The convergence rate is
-\begin{align*}
-	&\E\|\Weights_{n+1} - \minimum\|^2\\
-	&\le \left(1-2
-		\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)}
-		\tfrac{\ubound\lbound}{\ubound+\lbound}
-	\right)
-	\E\|\Weights_n - \minimum\|^2
-	+ \left(
-		\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)}
-	\right)^2
-	\stdBound^2\\
-	&\le \left(1-
-		\left(\tfrac{\ubound\lbound}{\stdBound(\ubound+\lbound)}\right)^2
+		\label{eq: getting rid of the scalar product (SGD)}
+		&= \|\Weights_n - \minimum\|^2
+		- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\minimum\rangle}_{
+			\xge{\text{Lem.~\ref{lem: bermanDiv lower bound (strongly convex)}}}
+			\tfrac{\ubound\lbound}{\ubound+\lbound}\|\Weights_n - \minimum\|^2
+			\mathrlap{+ \tfrac{1}{\ubound+\lbound}\|\nabla\Loss(\Weights_n)\|^2}
+		}
+		+ \lr_n^2 \|\nabla\Loss(\Weights_n)\|^2\\
+		\nonumber
+		&\le \left(1-2\lr_n\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
+		\|\Weights_n - \minimum\|^2
+		+ \lr_n(\lr_n - \tfrac{2}{\ubound+\lbound})
+		\|\nabla\Loss(\Weights_n)\|^2
+	\end{align}
+	For \(\lr_n\le\tfrac{2}{\ubound+\lbound}\) we can drop the gradient again to
+	obtain our claim.
+\end{proof}
+
+Now we can use this recursion to obtain a similar theorem as in the quadratic
+case.
+
+\begin{theorem}[Optimal Rates]
+	For a \(\Loss\in\strongConvex{\lbound}{\ubound}\) with
+	\begin{align*}
+		\E\|\martIncr_n\|^2 \le \stdBound\lbound\ubound
+	\end{align*}
+	optimal learning rates according to the bounds of Lemma~\ref{lem: SGD bound with noise} are
+	\begin{align*}
+		\lr_n
+		= \begin{cases}
+			\frac{2}{\ubound+\lbound}
+			& \stdBound^2 \le \frac{\E\|\Weights_n - \minimum\|}{2}
+			\qquad \text{``transient phase''}\\
+			\frac{\E\|\Weights_n -\minimum\|^2}{\stdBound^2(\ubound+\lbound)}
+			& \stdBound^2 \ge \frac{\E\|\Weights_n - \minimum\|}{2}
+			\qquad \text{ ``asymptotic phase''}
+		\end{cases}.
+	\end{align*}
+	If \(n_0\) is the start of the asymptotic phase, then
+	\begin{align*}
 		\E\|\Weights_n - \minimum\|^2
-	\right)
-	\E\|\Weights_n - \minimum\|^2
-\end{align*}
-Using Lemma~\ref{lem-appendix: diminishing contraction} the recursion above
-implies
-\begin{align*}
-	\E\|\Weights_n - \minimum\|^2
-	\le \frac{\stdBound^2}{n+1} \left(\frac{\ubound+\lbound}{\ubound\lbound}\right)^2
-\end{align*}
+		\le \begin{cases}
+			\left(1-\frac{2}{(1+\condition^{-1})(1+\condition)}\right)^n\E\|\weights_0 -\minimum\|^2
+			& n \le n_0\\
+			\frac{\stdBound^2(1+\condition^{-1})(1+\condition)}{n+1} & n \ge n_0.
+		\end{cases}
+	\end{align*}
+\end{theorem}
+\begin{proof}
+	In the classical case we just wanted to select \(\lr_n\) as large as possible,
+	i.e. \(\lr_n=\tfrac{2}{\ubound+\lbound}\). But in the stochastic setting there
+	are adverse effects of large learning rates due to noise. Now as our upper bound
+	is a convex parabola in \(\lr_n\) we can just use the first order condition
+	\begin{align*}
+		\frac{d}{d\lr_n}
+		= -2\tfrac{\ubound\lbound}{\ubound+\lbound}
+		\E\|\Weights_n - \minimum\|^2 + 2\lr_n \stdBound^2\lbound\ubound
+		\xeq{!} 0
+	\end{align*}
+	to find the best upper bound
+	\begin{align}\label{eq: optimal learning rate SGD}
+		\lr_n
+		= \min\left\{
+			\frac{\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)},
+			\frac{2}{\ubound+\lbound}
+		\right\}.
+	\end{align}
+	So we still want to ``max out our learing rate'' and use
+	\(\lr_n=\tfrac{2}{\ubound+\lbound}\) if
+	\begin{align*}
+		2\stdBound^2 \le \E\|\Weights_n - \minimum\|^2.
+	\end{align*}
+	We find again: the stochastic variance only becomes a problem once we are
+	close to the minimum. Before in the transient phase we basically want to
+	treat our problem like the classical one. Here we get a linear convergence
+	rate
+	\begin{align*}
+		\E\|\Weights_{n+1} - \minimum\|^2
+		&\le \left(1-2\tfrac{2}{\ubound+\lbound}\tfrac{\ubound\lbound}{\ubound+\lbound}\right)
+		\E\|\Weights_n - \minimum\|^2 + \left(\tfrac{2}{\ubound+\lbound}\right)^2
+		\underbrace{\stdBound^2}_{
+			\le\tfrac{\ubound\lbound}{2} \E\|\Weights_n - \minimum\|^2
+		}\\
+		&\le \underbrace{
+			\left(1-\tfrac{2\ubound\lbound}{(\ubound+\lbound)^2}\right)
+		}_{
+			=1-\frac{2}{(1+\condition^{-1})(1+\condition)}
+		}
+		\E\|\Weights_n - \minimum\|^2.
+	\end{align*}
+	In the \emph{asymptotic} phase on the other hand, we have to reduce our learning
+	rate with the distance to the minimum. The convergence rate is
+	\begin{align*}
+		&\E\|\Weights_{n+1} - \minimum\|^2\\
+		&\le \left(1-2
+			\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)}
+			\tfrac{\ubound\lbound}{\ubound+\lbound}
+		\right)
+		\E\|\Weights_n - \minimum\|^2
+		+ \left(
+			\tfrac{\ubound\lbound\E\|\Weights_n - \minimum\|^2}{\stdBound^2(\ubound+\lbound)}
+		\right)^2
+		\stdBound^2\\
+		&\le \left(1-
+			\left(\tfrac{\ubound\lbound}{\stdBound(\ubound+\lbound)}\right)^2
+			\E\|\Weights_n - \minimum\|^2
+		\right)
+		\E\|\Weights_n - \minimum\|^2
+	\end{align*}
+	Using Lemma~\ref{lem-appendix: diminishing contraction} the recursion above
+	implies
+	\begin{align*}
+		\E\|\Weights_n - \minimum\|^2
+		\le \frac{\stdBound^2}{n+1} \left(\frac{\ubound+\lbound}{\ubound\lbound}\right)^2
+	\end{align*}
+\end{proof}
 Which tells us again that it does not matter whether we reduce the variance
 \(\stdBound^2\) with larger batch sizes or decrease the learning rate. In
 particular we can see from the optimal learning rate (\ref{eq: optimal learning rate SGD})
@@ -1239,6 +1204,101 @@ this makes the decisions whether or not to decrease the learning rate in those
 cases difficult. The averaging approach in the next subsection is a possible
 solution to this problem. And it also does away with the strong convexity
 assumption.
+
+% \subsection{The Effect of the Condition Number}\label{subsec: condition in quadratic SGD}
+
+% By diagonalizing \(H\) and using the fact that
+% \begin{align*}
+% 	&\prod_{k=0}^{n-1} (1-\lr_k V\diag[\hesseEV_1, \dots, \hesseEV_\dimension]V^T)\\
+% 	&= V \diag\left[
+% 		\prod_{k=0}^{n-1}(1-\lr_k\hesseEV_1),
+% 		\dots, \prod_{k=0}^{n-1}(1-\lr_k\hesseEV_\dimension)
+% 	\right]V^T
+% \end{align*}
+% we can consider all the eigenspaces of (\ref{eq: unrolled SGD weights (general
+% quadratic loss case)}) separately again
+% \begin{align*}
+% 	\langle \Weights_{n+1}-\minimum, v_j \rangle
+% 	= \begin{aligned}[t]
+% 		&\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right) \langle \weights_0-\minimum, v_j\rangle\\
+% 		&+ \sum_{k=0}^n \lr_k \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)\langle\martIncr_{k+1},v_j\rangle.
+% 	\end{aligned}
+% \end{align*}
+% With the usual conditional independence argument we get
+% \begin{align*}
+% 	\E\|\Weights_{n+1}-\minimum\|^2
+% 	&= \E[(V^T [\Weights_{n+1}-\minimum])^T(V^T[\Weights_{n+1}-\minimum])]\\
+% 	&= \sum_{j=1}^\dimension \E\langle\Weights_{n+1}-\minimum, v_j \rangle^2\\
+% 	&= \sum_{j=1}^\dimension
+% 	\begin{aligned}[t]
+% 		&\Bigg[\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right)^2 \langle \weights_0-\minimum, v_j\rangle^2\\
+% 		&+ \sum_{k=0}^n \lr_k^2 \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)^2\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg].
+% 	\end{aligned}
+% \end{align*}
+% Since the eigenvalues are all different, we can not select \(\lr_n=\frac{1}{\hesseEV(n+1)}\)
+% to achieve
+% \begin{align*}
+% 	1-\lr_n\hesseEV = \frac{n}{n+1}
+% \end{align*}
+% which would be the product equivalent of a telescoping sum as we have used in
+% (\ref{eq: telescoping product}). To make the product go away we could use
+% \(1+x\le \exp(x)\) inside the square to convert it into a sum. But since \(x\to
+% x^2\) is only monotonous for positive \(x\) we need
+% \begin{align*}
+% 	1-\lr_k \hesseEV_j \ge 0 \qquad \forall k\ge 0, \forall j \in\{1,\dots,\dimension\}
+% \end{align*}
+% So to emulate the optimal learning rate from Subsection~\ref{subsec: variance reduction}
+% let us try out \(\lr_k = \tfrac{1}{\hesseEV_\dimension(k+1)}\). With this in
+% mind we can show
+% \begin{align*}
+% 	\left(\prod_{i=k+1}^{N-1}(1-\lr_i\hesseEV)\right)
+% 	&\le\exp\left(-2\sum_{i=k+1}^{N-1}\lr_i\hesseEV_j\right)\\
+% 	&\le \exp\left(-2\frac{\hesseEV_j}{\hesseEV_\dimension}[\log(N+1)-\log(k+2)]\right)\\
+% 	&= \left(\frac{N+1}{k+2}\right)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}},
+% \end{align*}
+% where we have used
+% \begin{align*}
+% 	\hesseEV_\dimension\sum_{i=k}^{n-1} \lr_i
+% 	= \sum_{i=k+1}^n \frac{1}{i}
+% 	= \int_{k+1}^{n+1} \frac{1}{\lfloor x\rfloor} dx
+% 	\ge \int_{k+1}^{n+1} \frac{1}x dx
+% 	= \log(n+1) - \log(k+1).
+% \end{align*}
+% Using this detour over the exponential function and back we get
+% \begin{align*}
+% 	&\E\|\Weights_N - \minimum\|^2\\
+% 	&\le \sum_{j=1}^d \Bigg[ (N+1)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}}\langle\weights_0-\minimum, v_j\rangle^2
+% 	+ \sum_{k=0}^n \lr_k^2 \left(\tfrac{N+1}{k+2}\right)^{-2\frac{\hesseEV_j}{\hesseEV_\dimension}}
+% 	\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg]\\
+% 	&\le (N+1)^{-2\frac{\hesseEV_1}{\hesseEV_\dimension}}\|\weights_0-\minimum\|^2
+% 	+ \sum_{k=0}^{N-1} \lr_k^2 \left(\tfrac{N+1}{k+2}\right)^{-2\frac{\hesseEV_1}{\hesseEV_\dimension}}
+% 	\E[\|\martIncr_{k+1}\|^2]\\
+% 	&\le (N+1)^{-2\condition^{-1}}\|\weights_0-\minimum\|^2
+% 	+ \frac{\stdBound^2}{\hesseEV_d} (N+1)^{-2\condition^{-1}}
+% 	\underbrace{\sum_{k=0}^{N-1} (k+2)^{-2(1-\condition^{-1})}}_{\sim \int_1^N x^{-2(1-\condition^{-1})}dx}\\
+% 	&\in O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \stdBound^2 O(N^{-1+2\condition^{-1}} + c) \right].
+% \end{align*}
+% Now for \(\condition<2\) this simplifies to 
+% \begin{align*}
+% 	O(N^{-2\condition^{-1}})\|\weights_0-\minimum\|^2 + O(N^{-1})\stdBound^2
+% 	= O(N^{-1})\stdBound^2
+% \end{align*}
+% which means that first of all it still does not matter whether or not we
+% increase \(N\) or decrease our variance \(\stdBound^2\) with batches for the
+% variance part, but decreasing the learning rate improves the classical error
+% bound although asymptotically only the variance matters. For worse conditions
+% the speed of convergence simplifies to
+% \begin{align*}
+% 	O(N^{-2\condition^{-1}})\left[\|\weights_0-\minimum\|^2 + \stdBound^2 c\right].
+% \end{align*}
+% In this case whether or not it makes sense to reduce the variance depends on the
+% relative size of \(\stdBound^2 c\) in comparison to \(\|\weights_n-\minimum\|^2\),
+% but as we will see with the next approach our convergence rate is actually
+% worse than it should be. Since the approximation \(1+x\approx\exp(x)\) is
+% very good for small \(x\) and our learning rate is decreasing we can
+% rule out that the detour over the exponential function and logarithm messed
+% with our asymptotic rate, so the problem are not our bounds but rather the
+% selection of the learning rate \(\lr_n = \tfrac{1}{\hesseEV_\dimension(n+1)}\).
 
 \subsection{General Convex Case -- Averaging}\label{subsec: SGD with Averaging}
 
