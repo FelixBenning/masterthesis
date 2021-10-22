@@ -1058,7 +1058,7 @@ generalize this to non-quadratic functions.
 Now we can use this recursion to obtain a similar theorem as in the quadratic
 case.
 
-\begin{theorem}[Optimal Rates]
+\begin{theorem}[Optimal Rates]\label{thm: optimal rates SGD}
 	For a \(\Loss\in\strongConvex{\lbound}{\ubound}\) with
 	\begin{align*}
 		\E\|\martIncr_n\|^2 \le \stdBound^2\ubound\lbound
@@ -1174,7 +1174,8 @@ case.
 
 Another way to interpret Lemma~\ref{lem: SGD bound with noise} is to show
 convergence to an area for constant learning rates
-\begin{theorem}[{\cite{bottouOptimizationMethodsLargeScale2018}}]
+\begin{theorem}[{\cite[Theorem 4.6]{bottouOptimizationMethodsLargeScale2018}}]
+	\label{thm: SGD converges to area}
 	Let \(\Loss\in\strongConvex{\lbound}{\ubound}\) with
 	\begin{align*}
 		\E\|\martIncr_n\|^2 \le \stdBound \ubound\lbound,
@@ -1221,7 +1222,9 @@ is difficult without very good knowledge of the problem which would likely mean
 we do not need to use SGD for optimization. But since we know that the learning
 rate should behave like \(O(1/n)\) we could try to guess it and see what happens.
 
-\begin{theorem}
+\subsection{Diminishing Learning Rate Schedules}
+
+\begin{theorem}\label{thm: convergence rates for diminishing lr schedules}
 	For a quadratic and convex Loss \(\Loss\) selecting the learning rate
 	schedule
 	\begin{align*}
@@ -1230,17 +1233,19 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	for some \(a>0\), \(b\ge a\hesseEV_\dimension\) means SGD behaves like
 	\begin{align*}
 		\E\|\Weights_n - \minimum\|^2 
-		&\in O(N^{-2\hesseEV_1a})\|\weights_0-\minimum\|^2
-		+ \tilde{\stdBound}^2 O(N^{-1} + N^{-2\hesseEV_1 a})
+		&\in O(n^{-2\hesseEV_1a})\|\weights_0-\minimum\|^2
+		+ \tilde{\stdBound}^2 O(n^{-1} + n^{-2\hesseEV_1 a})
 	\end{align*}
 	In particular \(b\) does not matter, and selecting \(a\ge\tfrac{1}{2\hesseEV_1}\),
 	ensures a convergence rate of \(O(1/n)\). A possible selection to
-	achieve \(O(1/n)\) convergence is thus for example
+	achieve \(O(1/n)\) convergence is thus for example (\(a=1/\hesseEV_1\), \(b=a\hesseEV_\dimension\))
 	\begin{align*}
-		\lr_n = \frac{1}{2\hesseEV_1(n+\frac{\condition}{2})}.
+		\lr_n = \frac{1}{\hesseEV_1(n+\condition)}.
 	\end{align*}
+	For \(\hesseEV_1=\hesseEV_\dimension=1\), this results in the mean we found
+	optimal in our expected value search in Subsection~\ref{subsec: variance
+	reduction}
 \end{theorem}
-
 \begin{proof}
 	By diagonalizing \(H\) and using the fact that
 	\begin{align*}
@@ -1286,10 +1291,10 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 
 	Okay so now we enact this idea and use the exponential function bound
 	\begin{align*}
-		\left(\prod_{i=k+1}^{N-1}(1-\lr_i\hesseEV)\right)
-		&\le\exp\left(-2\sum_{i=k+1}^{N-1}\lr_i\hesseEV_j\right)\\
-		&\le \exp\left(-2\hesseEV_j a[\log(N+b)-\log(k+1+b)]\right)\\
-		&= \left(\frac{N+b}{k+b+1}\right)^{-2\hesseEV_j a}.
+		\left(\prod_{i=k+1}^{n-1}(1-\lr_i\hesseEV)\right)
+		&\le\exp\left(-2\sum_{i=k+1}^{n-1}\lr_i\hesseEV_j\right)\\
+		&\le \exp\left(-2\hesseEV_j a[\log(n+b)-\log(k+1+b)]\right)\\
+		&= \left(\frac{n+b}{k+b+1}\right)^{-2\hesseEV_j a}.
 	\end{align*}
 	Here we have used
 	\begin{align*}
@@ -1300,64 +1305,142 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	\end{align*}
 	Using this detour over the exponential function and back we can upper bound
 	our deterministic part by
-	\begin{align*}
+	\begin{align}
+		\nonumber
 		\sum_{j=1}^\dimension\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right)^2
 		\langle \weights_0-\minimum, v_j\rangle^2
-		&\le \sum_{j=1}^\dimension \left(\frac{N+b}{b+1}\right)^{-2\hesseEV_j a}
+		&\le \sum_{j=1}^\dimension \left(\frac{n+b}{b+1}\right)^{-2\hesseEV_j a}
 		\langle\weights_0-\minimum, v_j\rangle^2\\
-		&\le \left(\frac{N+b}{b+1}\right)^{-2\hesseEV_1 a}\|\weights_0-\minimum\|^2\\
-		&\in O(N^{-2\hesseEV_1a})\|\weights_0-\minimum\|^2.
-	\end{align*}
+		\label{eq: upper bound on convergence rate using smallest eigenvalue 1}
+		&\le \left(\frac{n+b}{b+1}\right)^{-2\hesseEV_1 a}\|\weights_0-\minimum\|^2\\
+		\nonumber
+		&\in O(n^{-2\hesseEV_1a})\|\weights_0-\minimum\|^2.
+	\end{align}
 	And our noise by
-	\begin{align*}
+	\begin{align}
+		\nonumber
 		&\sum_{j=1}^\dimension\sum_{k=0}^n \lr_k^2
 		\left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)^2
 		\E[\langle\martIncr_{k+1},v_j\rangle^2]\\
+		\nonumber
 		&\le \sum_{j=1}^d
-			\sum_{k=0}^n \lr_k^2 \left(\tfrac{N+b}{k+b+1}\right)^{-2\hesseEV_j a}
+			\sum_{k=0}^n \lr_k^2 \left(\tfrac{n+b}{k+b+1}\right)^{-2\hesseEV_j a}
 			\E[\langle\martIncr_{k+1},v_j\rangle^2]
 		\\
-		&\le \sum_{k=0}^{N-1} \lr_k^2 \left(\tfrac{N+b}{k+b+1}\right)^{-2\hesseEV_1 a}
+		\label{eq: upper bound on convergence rate using smallest eigenvalue 2}
+		&\le \sum_{k=0}^{n-1} \lr_k^2 \left(\tfrac{n+b}{k+b+1}\right)^{-2\hesseEV_1 a}
 		\underbrace{\E[\|\martIncr_{k+1}\|^2]}_{\le \tilde{\stdBound}^2}
 		\\
+		\nonumber
 		&\le
-		\tilde{\stdBound}^2a^2 (N+b)^{-2\hesseEV_1 a}
-		\underbrace{\sum_{k=0}^{N-1} \frac{(k+b+1)^{2\hesseEV_1 a}}{(k+b)^2}}_{
-			\sim \int_b^{N+b} \frac{(x+1)^{2\hesseEV_1 a}}{x^2}dx} \\
-		&\in \tilde{\stdBound}^2 O(N^{-2\hesseEV_1 a})  O(N^{-1+2\hesseEV_1a} + 1)
-		= \tilde{\stdBound}^2 O(N^{-1} + N^{-2\hesseEV_1 a}).
-	\end{align*}
+		\tilde{\stdBound}^2a^2 (n+b)^{-2\hesseEV_1 a}
+		\underbrace{\sum_{k=0}^{n-1} \frac{(k+b+1)^{2\hesseEV_1 a}}{(k+b)^2}}_{
+			\sim \int_b^{n+b} \frac{(x+1)^{2\hesseEV_1 a}}{x^2}dx} \\
+		\nonumber
+		&\in \tilde{\stdBound}^2 O(n^{-2\hesseEV_1 a})  O(n^{-1+2\hesseEV_1a} + 1)
+		= \tilde{\stdBound}^2 O(n^{-1} + n^{-2\hesseEV_1 a}).
+	\end{align}
 	Putting things together we obtain our claim.
 \end{proof}
+\begin{remark}
+	In equations (\ref{eq: upper bound on convergence rate using smallest eigenvalue 1})
+	and (\ref{eq: upper bound on convergence rate using smallest eigenvalue 1})
+	we bounded the convergence rate of all eigenspaces with the convergence rate
+	of the eigenspace with the smallest eigenvalue \(\hesseEV_1\). If we select
+	our learning rate schedule wrong, the convergence rate in this eigenspace
+	is smaller. But the other eigenspaces might still converge at rate \(O(1/n)\).
+\end{remark}
+\begin{remark}
+	The integral lower bounds on the sum of learning rates could also be upper bounds
+	up to some constant shift, so concerning the asymptotic rate this bound is
+	tight. The only other estimation method we used (except replacing all
+	eigenvalues with the worst) is bounding \(1+x\) by \(\exp(x)\) which is
+	also tight for small \(x\). Since the learning rates are decreasing, this
+	bound becomes better and better and should thus asymptotically be tight.
+\end{remark}
 
-%%% JUNK
-\subsection{JUNK}
+The next Theorem provides a more general statement with uglier requirements on
+the learning rates but with more explicit bounds.
 
-During the second phase it does not matter whether or not the learning rate is decreased
-or batch sizes increased. That is if we get the learning rate right. If we mess
-that up the learning rate might be worse than \(O(N^{-1})\) as we have seen
-in Subsection~\ref{subsec: condition in quadratic SGD}. To circumvent this issue
-some people recommend a piecewise constant learning rate which is only reduced
-when the loss plateaus as the noise becomes to large for the given rate.
-\fxnote{come up with a schedule such that the piecewise constant learning
-rates result in O(1/n) convergence rates?}
+\begin{theorem}[{\cite[cf. Theorem 4.7]{bottouOptimizationMethodsLargeScale2018}}]
+	For \(\Loss\in\strongConvex{\lbound}{\ubound}\) with
+	\begin{align*}
+		\E\|\martIncr_n\|^2 \le \stdBound^2 \ubound\lbound,
+	\end{align*}
+	SGD with step sizes
+	\begin{align*}
+		\lr_n = \frac{\tilde{a}}{n+b},
+		\qquad \tilde{a} =  a\frac{\ubound+\lbound}{2\ubound\lbound},
+		\quad a > 1,
+		\quad b \ge a\frac{(1+\condition)(1+\condition^{-1})}{4}
+	\end{align*}
+	converges at rate
+	\begin{align*}
+		\E\|\Weights_n - \minimum\|^2
+		\le \frac{\nu}{n+b}
+	\end{align*}
+	where
+	\begin{align*}
+		\nu = \max\Bigg\{
+			\frac{\stdBound^2a^2(\condition+1)(1+\condition^{-1})}{a-1},
+			\underbrace{
+				b\|\weights_0 - \minimum\|^2
+			}_{\text{induction start}}
+		\Bigg\}
+	\end{align*}
+\end{theorem}
+\begin{proof}
+	We will prove the statement by induction. The induction start is covered by
+	definition of \(\nu\). For the induction step we ues Lemma~\ref{lem: SGD
+	bound with noise} for which we need \(\lr \ge \tfrac{2}{\ubound+\lbound}\)
+	(which is ensured by our requirement on \(b\)) and define \(\tilde{n}=n+b\)
+	for
+	\begin{align*}
+		\E\|\Weights_{n+1}-\minimum\|^2
+		&\le \left(1-2\lr_n \frac{\ubound\lbound}{\ubound+\lbound}\right)\frac{\nu}{\tilde{n}}
+		+ \lr_n^2 \stdBound^2 \ubound\lbound\\
+		&= \frac{\tilde{n} - a}{\tilde{n}}\frac{\nu}{\tilde{n}}
+		+ \frac{\stdBound^2}{\tilde{n}^2}\frac{a^2(\ubound+\lbound)^2}{\ubound\lbound}\\
+		&= \frac{\tilde{n} - 1}{\tilde{n}^2}\nu
+		- \underbrace{\frac{(a -1)\nu + \stdBound^2 a^2(\condition+1)(1+\condition^{-1})}{\tilde{n}^2}}_{
+			\ge 0\qquad \text{definition of \(\nu\) and } a>1
+		}\\
+		&\le \frac{\tilde{n}-1}{(\tilde{n}+1)(\tilde{n}-1)}\nu = \frac{\nu}{n+1+b}
+		\qedhere
+	\end{align*}
+\end{proof}
 
- They also say about
-temporary plateaus, which could be a sign that the first phase is over since
-we do no longer have a contraction for constant learning rates, that 
-``despite appearing to not make much progress, or even becoming significantly
-non-monotonic, the optimizers were doing something apparently useful over these
-extended periods'' as the final errors observed where lower than when they
-tampered with the system (in their case change the momentum coefficient
-\(\momCoeff\) which we will discuss in chapter~\ref{chap: momentum}).
-Recalling Figure~\ref{fig: visualize saddle point gd} these temporary plateaus
-might be saddlepoints.
+\subsection{Piecewise Constant Learning Rates}
 
-Since it is difficult to discern the second phase from plateaus due to saddlepoints
-this makes the decisions whether or not to decrease the learning rate in those
-cases difficult. The averaging approach in the next subsection is a possible
-solution to this problem. And it also does away with the strong convexity
-assumption.
+As we have seen in Theorem~\ref{thm: optimal rates SGD}, we can achieve
+much better results if we keep the learning rate high during the transient
+phase. If we use the results above we miss out on the exponential reduction that
+constant learning rates provide. So the first idea is to use constant learning
+rates until we ``stop making progress''. I.e. we have converged to an area like
+in Theorem~\ref{thm: SGD converges to area}. But convergence in this theorem is
+exponential meaning we do not actually converge in finite time. And due to
+stochasticity it is difficult to tell when we actually stop making progress.
+Especially because a plateau in the loss could also be due to a saddle point
+region cf. Figure~\ref{fig: visualize saddle point gd}.
+
+Detecting convergence is thus its own research field \parencite[for a recent
+approach including an overview of previous work see
+e.g.][]{pesmeConvergenceDiagnosticBasedStep2020}.\fxnote{expand on this?}
+
+Another problem with diminishing learning rates is: if we reduce learning rates
+too fast (e.g. \(1/(n+1)\) when \(\hesseEV_1=1/4\) requires something like \(2/n+b\)),
+then we have seen in Theorem~\ref{thm: convergence rates for diminishing lr schedules}
+that our convergence rate is reduced below \(O(1/n)\). Since \(\hesseEV_1\) can
+be arbitrarily slow our convergence rate \(O(n^{-2\hesseEV_1 a})\) could be
+arbitrarily slow in fact.
+
+So we want to avoid reducing the learning rate too fast. One possibility is
+choosing a learning rate schedule with \(O(n^{-\alpha}\) where \(1/2<\alpha<1\),
+which sacrifices convergence speed on purpose to avoid it becoming arbitrarily
+bad. Or another idea is to recycle the ``convergence detection'' algorithm we
+need anyway to transition from the transient phase into the asymptotic phase.
+In other words: Use piecewise constant learning rates.
+
 
 \section{General Convex Case -- Averaging}\label{subsec: SGD with Averaging}
 
