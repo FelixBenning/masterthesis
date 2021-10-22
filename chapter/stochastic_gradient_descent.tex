@@ -379,102 +379,6 @@ Learning where we do not get unbiased estimates of some gradients towards the
 minimum, but rather unbiased estimates of a Bellman Operator (Fixed Point 
 Iteration towards the optimum).
 
-% \section{Batch Learning}
-
-% Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
-% estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
-% ``batch'' of data \((X^{(i)}_{n+1}, Y^{(i)}_{n+1})_{i=1,\dots,m}\) (independently
-% \(\dist\) distributed) instead, i.e.
-% \begin{align*}
-% 	\Weights_{n+1} = \Weights_n
-% 	-\lr_n \underbrace{\frac1{m}\sum_{i=1}^m\nabla\loss(\Weights_n,X^{(i)}_{n+1}, Y^{(i)}_{n+1})}_{
-% 		=:\nabla\loss_{n+1}^m(\Weights_n)
-% 	}.
-% \end{align*}
-% leading to the modified martingale increment
-% \begin{align*}
-% 	\martIncr_n^{(m)}
-% 	= \nabla\Loss(\Weights_{n-1})
-% 	- \nabla\loss_n^m(\Weights_{n-1})
-% \end{align*}
-% with reduced variance
-% \begin{align*}
-% 	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \stdBound^2.
-% \end{align*}
-% Now while this variance reduction does reduce our upper bound on the distance
-% between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
-% comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
-% We would incur an equivalent cost, if we reduced our discretization to
-% \begin{align*}
-% 	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}
-% \end{align*}
-% which increases the number of iterations to reach \(T\) to \(Nm\) which implies
-% \(Nm\) gradient evaluations using SGD without batches. And if we have a look
-% at the upper bound in Theorem~\ref{thm: distance SGD vs GD} these two actions
-% have the same effect on our distance bound between SGD and GD (especially if
-% \(\Loss\) is convex as we can then get rid of the exponential term as hinted
-% at in the proof of the theorem).
-
-% Now of course an upper bound is no guarantee that there is no effect in reality.
-% But if we have a look at the term (\ref{eq: mean of martingale increments})
-% again which is in some sense the difference between SGD and GD, then we can
-% see that these actions have quite a similar effect
-% \begin{align*}
-% 	\lr\sum_{k=1}^N\martIncr_k^{(m)}
-% 	&=\frac{T}{N}\sum_{k=1}^N
-% 	\nabla\Loss(\Weights_{k-1})- \nabla\loss_n^m(\Weights_{k-1})\\
-% 	&=\frac{T}{Nm}\sum_{k=1}^N\sum_{i=1}^m
-% 	[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X^{(i)}_k, Y^{(i)}_k)]\\
-% 	&\approx \tilde{\lr} \sum_{k=1}^{Nm}
-% 	\underbrace{
-% 		[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X_k, Y_k)]
-% 	}_{\widetilde{\martIncr}_k}.
-% \end{align*}
-% The difference is, that batch learning stays on some \(\Weights_k\) and collects
-% \(m\) pieces of information before it makes a big step based on this information
-% while SGD just makes \(m\) small steps. This also changes the true gradient
-% evaluations \(\nabla\Loss(\Weights_k)\) slightly. But since we are only making
-% small steps these \(\Weights_k\) will generally be similar. We still can not
-% make a definitive assertion which one is better though\footnote{
-% 	Whether or not you think batch-less SGD is superior might be correlated with
-% 	whether or not you think that agile software development is a good idea
-% }.
-
-% Assuming they have the same effect on the deviation of SGD from GD we can
-% make a few practical considerations:
-% \begin{itemize}
-% 	\item A smaller learning rate benefits GD \emph{and} reduces the distance
-% 	between GD and SGD while batches only do the latter. If we have little data
-% 	and want to achieve good results in as few gradient evaluations as possible
-% 	we should in general choose smaller learning rates over larger batch sizes.
-% 	\item SGD can not be easily parallelized since one needs the previous weights
-% 	to calculate the next weights. Making multiple gradient evaluations at
-% 	the same point is trivially parallelizable on the other hand and only
-% 	requires broadcasting the result for summation. So if the bottleneck is
-% 	computation time, it makes sense to select batch sizes equal to the number of
-% 	threads, or if the broadcasting and summing takes significant time, batch
-% 	sizes which are multiples of the number of threads.
-
-% 	This is not without caveats though: Increasing the batch size to speed up
-% 	learning requires a proportional increase in the learning rate to actually
-% 	have an impact on the time required for optimization. And since GD stops
-% 	converging if learing rates become too large, there is an upper bound on this.
-% 	And while batches might be ``free'' in a computational sense due to
-% 	parallelization, they still increase the sample consumption. And if we only
-% 	have limited data, this often results in more passes over the same data and
-% 	thus overfitting.
-	
-% 	Last but not least there might be other opportunities for parallelization
-% 	like generating ensemble models by optimizing from different starting points
-% 	or using different models altogether.
-% \end{itemize}
-% In summary: If you are concerned about the \emph{quality} of your model you should
-% probably choose SGD without batches, while concerns about training time justify
-% larger batch sizes in some cases.
-
-% \fxnote{
-% \textcite{hardtTrainFasterGeneralize2016} \textcite{hofferTrainLongerGeneralize2018}
-% }
 
 \section{Quadratic Loss Functions}
 
@@ -1093,7 +997,7 @@ case.
 	\end{align*}
 	which is independent of the variance \(\stdBound^2\).
 \end{remark}
-\begin{remark}
+\begin{remark}\label{rem: expected loss is a special case of L2 weight convergence}
 	Note that using Theorem~\ref{thm: convergence chain} we get
 	\begin{align*}
 		\E[\Loss(\Weights_n)]- \Loss(\minimum)
@@ -1342,7 +1246,7 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	\end{align}
 	Putting things together we obtain our claim.
 \end{proof}
-\begin{remark}
+\begin{remark}\label{rem: rate is retained for larger eigenvalues}
 	In equations (\ref{eq: upper bound on convergence rate using smallest eigenvalue 1})
 	and (\ref{eq: upper bound on convergence rate using smallest eigenvalue 1})
 	we bounded the convergence rate of all eigenspaces with the convergence rate
@@ -1435,29 +1339,146 @@ be arbitrarily slow our convergence rate \(O(n^{-2\hesseEV_1 a})\) could be
 arbitrarily slow in fact.
 
 So we want to avoid reducing the learning rate too fast. One possibility is
-choosing a learning rate schedule with \(O(n^{-\alpha}\) where \(1/2<\alpha<1\),
+choosing a learning rate schedule with \(O(n^{-\alpha})\) where \(1/2<\alpha<1\),
 which sacrifices convergence speed on purpose to avoid it becoming arbitrarily
-bad. Or another idea is to recycle the ``convergence detection'' algorithm we
+bad. Another idea is to recycle the ``convergence detection'' algorithm we
 need anyway to transition from the transient phase into the asymptotic phase.
 In other words: Use piecewise constant learning rates.
 
+\textcite{smithDonDecayLearning2018} argue that there is another benefit to
+piecewise constant learning rates: ``we note that it is well known in the
+physical sciences that slowly annealing the temperature (noise scale) helps the
+system to converge to the global minimum, which may be sharp. Meanwhile
+annealing the temperature in a series of discrete steps can trap the system in a
+“robust” minimum whose cost may be higher but whose curvature is lower. We
+suspect a similar intuition may hold in deep learning.''
+In other words: for a constant learning rate the area to which SGD can converge
+to has a minimal size. So it will disregard all holes (local minima) which are
+smaller than this size. Sharply decreasing the learning rate while over a larger
+crater will keep SGD in this general area.
+
+We will now borrow an argument from \textcite[pp. 27-28]{bottouOptimizationMethodsLargeScale2018}
+which proves that piecewise constant learning rates can achieve the optimal
+convergence rate of \(O(1/n)\). Although we will show it for the \(L^2\) distance
+of the weights and not the expected loss which is a special case (cf.
+Remark~\ref{rem: expected loss is a special case of L2 weight convergence}).
+
+Recall from Theorem~\ref{thm: SGD converges to area} that for learning rate
+\begin{align*}
+	\lr = \frac{2^{-r}}{\ubound+\lbound}
+\end{align*}
+SGD converges to
+\begin{align*}
+	\limsup_{n}\E\|\Weights_n - \minimum\|^2
+	\le \stdBound^2 \lr \frac{\ubound+\lbound}{2} = \frac{\stdBound^2}{2^{r+1}}.
+\end{align*}
+As convergence takes an infinite amount of time we are only going to wait until
+\begin{align*}
+	\E\|\Weights_n -\minimum\|^2 \le \frac{\stdBound^2}{2^r},
+\end{align*}
+when we half the learning rate. More precisely we are going to select 
+\begin{align}\label{eq: piecewise constant learning rates}
+	\lr_n := \frac{2^{-r_n}}{\ubound+\lbound}
+	\qquad	
+	r_n := \max\left\{k\in\naturals : \E\|\Weights_n-\minimum\|^2 \le 2^{1-k}\stdBound^2\right\}.
+\end{align}
+Let the points where we half the learning rate
+\(2^{-r}/(\ubound+\lbound)\) be 
+\begin{align*}
+	N(r) := \min\{k\in\naturals : r_k \ge r\}.
+\end{align*}
+
+\begin{theorem}[Piecewise Constant Learning Rates]
+	If we select learning rates of SGD according to (\ref{eq: piecewise constant
+	learning rates}) for \(\Loss\in\strongConvex{\lbound}{\ubound}\) with
+	\begin{align*}
+		\E\|\martIncr_n\|^2\le \stdBound^2\ubound\lbound
+	\end{align*}
+	then we get a convergence rate at the ``halving points'' of
+	\begin{align*}
+		\E\|\Weights_{N(r)} - \minimum\|^2 \le \frac{c(\condition)\stdBound^2}{N(r)}
+	\end{align*}
+	where \(c\) is a constant roughly linear in the condition \(\condition\).
+\end{theorem}
+\begin{proof}
+	Applying the recursion from Theorem~\ref{thm: SGD converges to area} we get
+	\begin{align*}
+		\frac{\stdBound^2}{2^r} - \frac{\stdBound^2}{2^{r+1}}
+		&\le\E\|\Weights_{N(r+1)-1} - \minimum\|^2 - \frac{\stdBound^2}{2^{r+1}}\\
+		&\le \left(1-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)^{N(r+1)-1-N(r)}
+		\Bigg[
+			\underbrace{\E\|\Weights_{N(r)}-\minimum\|^2}_{\le 2^{1-r}\stdBound^2} - \frac{\stdBound^2}{2^r}
+		\Bigg].
+	\end{align*}
+	Dividing by \(\tfrac{\stdBound^2}{2^r}\) we get
+	\begin{align*}
+		\frac{1}{2}
+		&\le \left(1-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)^{N(r+1)-1-N(r)}
+	\end{align*}
+	and therefore
+	\begin{align*}
+		\log(1/2)
+		&\le (N(r+1)-N(r)-1)\log\left(1-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)\\
+		&\le (N(r+1)-N(r)-1)\left(-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)
+	\end{align*}
+	due to \(\log(1+x)\le x\), which finally implies
+	\begin{align*}
+		N(r+1)-N(r)-1
+		\le \frac{\log(1/2)}{-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}}
+		= \frac{\log(2)(\ubound+\lbound)^2}{\ubound\lbound}2^{r-1}
+	\end{align*}
+	therefore we have
+	\begin{align*}
+		N(r) &= \sum_{k=0}^{r-1} N(k+1)-N(k)
+		\le r + \frac{\log(2)(\ubound+\lbound)^2}{\ubound\lbound}
+		\underbrace{\sum_{k=0}^{r-1} 2^{k-1}}_{=2^r-1}\\
+		&=r+\log(2)(\condition+1)(1+\condition^{-1})(2^r-1) \in O(2^r).
+	\end{align*}
+	I.e. halving the error (and step size) takes double the time. Now with
+	\begin{align*}
+		N(r) \le c2^r \implies \frac{\log(N(r)) - \log(c)}{\log(2)} \le r
+	\end{align*}
+	and \(r_{N(r)} = r\), we get
+	\begin{align*}
+		\E\|\Weights_{N(r)}-\minimum\|^2 
+		&\le 2^{1-r_{N(r)}}\stdBound^2\\
+		&= \exp\left((1-r_{N(r)})\log(2)\right)\stdBound^2\\
+		&\le \exp[\log(2)- (\log(N(r)) - \log(c))]\stdBound^2\\
+		&=  \frac{2c(\condition)\stdBound^2}{N(r)}
+	\end{align*}
+	where \(c(\condition)\) highlights the dependence of \(c\) on the condition
+	\(\condition\).
+\end{proof}
+
+This approach retains the convergence rate of \(O(1/n)\) even if we wait too long.
+E.g. if we wait not until we are at twice the asymptotic bound, but \(1.5\)
+times the asymptotic bound, then this represents a halving of the distance to
+the asymptotic bound which (due to exponential convergence to this bound) should
+take roughly double the amount of time. If we spend double the amount of time in
+every learning rate, then the amount of time to reach some level \(r\) doubles.
+This simply halves our rate of convergence but does not change the fact it is
+\(O(1/n)\).
+
+This reinforces the notion that it is better to keep learning rates high,
+than reduce them too fast which slows progress down below \(O(1/n)\).
 
 \section{General Convex Case -- Averaging}\label{subsec: SGD with Averaging}
 
 Since the noise prevents us from using Lemma~\ref{lem: bermanDiv lower bound} in
 place of Lemma~\ref{lem: bermanDiv lower bound (strongly convex)} to ensure a
 decreasing distance from the optimum, we can not use the same approach we used
-in the classical convex loss function setting (Section~\ref{sec: convex convergence theorems}).
+in the classical convex loss function setting (Section~\ref{sec: convex convergence theorems})
+as we did in Lemma~\ref{lem: SGD bound with noise} for strongly convex functions.
 
-But since we know that the best asymptotic rates we can get will be
-\(O(1/\sqrt{n})\) due to the averaging example in Subsection~\ref{subsec:
-variance reduction} we are going to use the technique developed to show
-convergence for the subgradient method (cf. Subsection~\ref{subsec: subgradient
-method}).
-In particular we are going to assume \(\Loss \in
-\lipGradientSet[0,0]{\lipConst}\). And instead of the Lemmas mentioned above we
-are going to simply use the (subgradient)
-definition of convexity
+\textcite{nemirovskiRobustStochasticApproximation2009} showed that the approach
+developed to deal with non lipschitz continuous gradients and subgradients (cf.
+Subsection~\ref{subsec: subgradient method}) can be applied directly to the
+stochastic setting. The price for this generality is a greatly reduced
+convergence speed.
+
+In this setting we are going to assume \(\Loss \in \lipGradientSet[0,0]{\lipConst}\).
+And instead of the Lemmas mentioned above we are going to simply use the
+(subgradient) definition of convexity
 \begin{align*}
 	\Loss(\minimum)
 	\ge \Loss(\Weights_n) + 
@@ -1537,18 +1558,23 @@ This leads to
 Where minimizing over \(\lr\) for a constant number of steps \(N\) now tunes the
 ODE time \(T\) of which an increase entails larger discretizations but also
 allows for more time following the ODE.
-This minimization results in
-\begin{align*}
-	\lr_* = \frac{\|\weights_0-\minimum\|}{\sqrt{\lipConst^2+\stdBound^2}\sqrt{N}}
-\end{align*}
-and convergence rate
-\begin{align*}
-	\E[\Loss(\overline{\Weights}_N)] -\Loss(\minimum)
-	\le \frac{\|\weights_0-\minimum\|\sqrt{\lipConst^2+\stdBound^2}}{\sqrt{N}}.
-\end{align*}
-In particular note that again decreasing \(\stdBound^2\) is (at best) equivalent
-to increasing \(N\) and only if \(\lipConst\) is negligible. This matches our
-theory that SGD without batches is preferable.
+This minimization results in the following theorem
+\begin{theorem}
+	If we use SGD with learning rate
+	\begin{align*}
+		\lr_* = \frac{\|\weights_0-\minimum\|}{\sqrt{\lipConst^2+\stdBound^2}\sqrt{N}}
+	\end{align*}
+	on \(\Loss\in\lipGradientSet[0,0]{\lipConst}\) with
+	\begin{align*}
+		\E\|\martIncr_n\|^2 \le \stdBound^2	
+	\end{align*}
+	then we get a convergence rate of
+	\begin{align*}
+		\E[\Loss(\overline{\Weights}_N)] -\Loss(\minimum)
+		\le \frac{\|\weights_0-\minimum\|\sqrt{\lipConst^2+\stdBound^2}}{\sqrt{N}}
+	\end{align*}
+	for the weight average \(\overline{\Weights}_N\).
+\end{theorem}
 
 While this approach helps us lose the strong convexity assumption, which might
 ensure decent convergence rates along eigenspaces of the hesse matrix with
@@ -1557,16 +1583,121 @@ of the loss function \(\Loss\) as our averaging of weights is only a
 guaranteed improvement because of it. While Gradient Descent should work
 intuitively on non-convex functions as well for finding a local minimum (only with
 worse rates of convergence in eigenspaces with small eigenvalues, cf.
-Subsection~\ref{subsec: condition in quadratic SGD}), this averaging technique
-will generally not play nicely with non-convex functions.
+Remark~\ref{rem: rate is retained for larger eigenvalues}), this averaging
+technique will generally not play nicely with non-convex functions.
 
 Although if we moved into a convex area relatively quickly and stayed there for
-most of our learning time then the first few weights outside this convex
+most of our learning time, then the first few weights outside this convex
 area will be negligible for the average.
 But it might still make sense to wait with the averaging until the time it is
 actually needed to resume convergence especially since the rate of convergence
-is also much worse. \textcite{bachNonstronglyconvexSmoothStochastic2013}
-recover the convergence rate \(O(1/N)\) only for a very specific model.
+is so much worse\footnote{
+	as far as we know -- \textcite{bachNonstronglyconvexSmoothStochastic2013}
+	recover the convergence rate \(O(1/N)\) only for a very specific model
+}.
+
+\section{Batch Learning}
+
+In particular note that again decreasing \(\stdBound^2\) is (at best) equivalent
+to increasing \(N\) and only if \(\lipConst\) is negligible. This matches our
+theory that SGD without batches is preferable.
+% \section{Batch Learning}
+
+% Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
+% estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
+% ``batch'' of data \((X^{(i)}_{n+1}, Y^{(i)}_{n+1})_{i=1,\dots,m}\) (independently
+% \(\dist\) distributed) instead, i.e.
+% \begin{align*}
+% 	\Weights_{n+1} = \Weights_n
+% 	-\lr_n \underbrace{\frac1{m}\sum_{i=1}^m\nabla\loss(\Weights_n,X^{(i)}_{n+1}, Y^{(i)}_{n+1})}_{
+% 		=:\nabla\loss_{n+1}^m(\Weights_n)
+% 	}.
+% \end{align*}
+% leading to the modified martingale increment
+% \begin{align*}
+% 	\martIncr_n^{(m)}
+% 	= \nabla\Loss(\Weights_{n-1})
+% 	- \nabla\loss_n^m(\Weights_{n-1})
+% \end{align*}
+% with reduced variance
+% \begin{align*}
+% 	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \stdBound^2.
+% \end{align*}
+% Now while this variance reduction does reduce our upper bound on the distance
+% between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
+% comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
+% We would incur an equivalent cost, if we reduced our discretization to
+% \begin{align*}
+% 	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}
+% \end{align*}
+% which increases the number of iterations to reach \(T\) to \(Nm\) which implies
+% \(Nm\) gradient evaluations using SGD without batches. And if we have a look
+% at the upper bound in Theorem~\ref{thm: distance SGD vs GD} these two actions
+% have the same effect on our distance bound between SGD and GD (especially if
+% \(\Loss\) is convex as we can then get rid of the exponential term as hinted
+% at in the proof of the theorem).
+
+% Now of course an upper bound is no guarantee that there is no effect in reality.
+% But if we have a look at the term (\ref{eq: mean of martingale increments})
+% again which is in some sense the difference between SGD and GD, then we can
+% see that these actions have quite a similar effect
+% \begin{align*}
+% 	\lr\sum_{k=1}^N\martIncr_k^{(m)}
+% 	&=\frac{T}{N}\sum_{k=1}^N
+% 	\nabla\Loss(\Weights_{k-1})- \nabla\loss_n^m(\Weights_{k-1})\\
+% 	&=\frac{T}{Nm}\sum_{k=1}^N\sum_{i=1}^m
+% 	[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X^{(i)}_k, Y^{(i)}_k)]\\
+% 	&\approx \tilde{\lr} \sum_{k=1}^{Nm}
+% 	\underbrace{
+% 		[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X_k, Y_k)]
+% 	}_{\widetilde{\martIncr}_k}.
+% \end{align*}
+% The difference is, that batch learning stays on some \(\Weights_k\) and collects
+% \(m\) pieces of information before it makes a big step based on this information
+% while SGD just makes \(m\) small steps. This also changes the true gradient
+% evaluations \(\nabla\Loss(\Weights_k)\) slightly. But since we are only making
+% small steps these \(\Weights_k\) will generally be similar. We still can not
+% make a definitive assertion which one is better though\footnote{
+% 	Whether or not you think batch-less SGD is superior might be correlated with
+% 	whether or not you think that agile software development is a good idea
+% }.
+
+% Assuming they have the same effect on the deviation of SGD from GD we can
+% make a few practical considerations:
+% \begin{itemize}
+% 	\item A smaller learning rate benefits GD \emph{and} reduces the distance
+% 	between GD and SGD while batches only do the latter. If we have little data
+% 	and want to achieve good results in as few gradient evaluations as possible
+% 	we should in general choose smaller learning rates over larger batch sizes.
+% 	\item SGD can not be easily parallelized since one needs the previous weights
+% 	to calculate the next weights. Making multiple gradient evaluations at
+% 	the same point is trivially parallelizable on the other hand and only
+% 	requires broadcasting the result for summation. So if the bottleneck is
+% 	computation time, it makes sense to select batch sizes equal to the number of
+% 	threads, or if the broadcasting and summing takes significant time, batch
+% 	sizes which are multiples of the number of threads.
+
+% 	This is not without caveats though: Increasing the batch size to speed up
+% 	learning requires a proportional increase in the learning rate to actually
+% 	have an impact on the time required for optimization. And since GD stops
+% 	converging if learing rates become too large, there is an upper bound on this.
+% 	And while batches might be ``free'' in a computational sense due to
+% 	parallelization, they still increase the sample consumption. And if we only
+% 	have limited data, this often results in more passes over the same data and
+% 	thus overfitting.
+	
+% 	Last but not least there might be other opportunities for parallelization
+% 	like generating ensemble models by optimizing from different starting points
+% 	or using different models altogether.
+% \end{itemize}
+% In summary: If you are concerned about the \emph{quality} of your model you should
+% probably choose SGD without batches, while concerns about training time justify
+% larger batch sizes in some cases.
+
+% \fxnote{
+% \textcite{hardtTrainFasterGeneralize2016} \textcite{hofferTrainLongerGeneralize2018}
+% }
+
 
 \section{SDE View}
 
