@@ -1649,71 +1649,76 @@ This notion is reflected in the upper bound in Theorem~\ref{thm: distance SGD vs
 GD} where these two actions have the same effect on our distance bound between SGD and
 GD (especially if \(\Loss\) is convex as we can then get rid of the exponential
 term as hinted at in the proof of the theorem). But as we have seen in the
-following section (\ref{subsec: variance reduction}) for constant learning
-rates, halving them is ever so slightly worse than simply reducing the variance
+Subsection \ref{subsec: variance reduction} for constant learning rates, halving
+them is ever so slightly worse than simply reducing the variance
 with batches as GD converges faster than Gradient Flow. Although as GD converges
 to Gradient Flow, this effect is less pronounced for smaller learning rates.
-In the same section we also see, that for diminishing learning rates we get
-the same improvements on the variance as increasing the batch size incurs.
 
-Note that instead of running GD for the same ``time'' in Gradient Flow and
-reducing the discretization size we would actually increase this ``time''
-logarithmically (i.e. harmonic sum of learning rates) if we increase the number
-of steps in the diminishing-learning-rate case. This effect can be best seen
-in Theorem~\ref{thm: convergence rates for diminishing lr schedules} where
-increasing the number of steps improves the ``GD part'' as well as the variance
-reduction part, while decreasing the variance only has (the same) effect on the
-variance.
+In the same section we also see, that for diminishing learning rates we get
+equivalent improvements on the variance.
+In that case, instead of running GD for the same ``time'' in Gradient Flow and
+reducing the discretization size, we would actually increase this ``time''
+logarithmically\footnote{\(\sum_{k=0}^n\tfrac{1}{k}\approx\log(n)\)}. This effect
+can be best seen in Theorem~\ref{thm: convergence rates for diminishing lr
+schedules} where increasing the number of steps improves the ``GD part'' as well
+as the variance reduction part, while decreasing the variance only, has the same
+effect only on the variance. In other words: increasing the number of steps
+continuous optimization as well as reduce variance, while batches \emph{only}
+reduce variance.
 
 What is more, in the transient case we found in Theorem~\ref{thm:
 optimal rates quadratic case} and \ref{thm: optimal rates SGD} the variance is
 completely irrelevant and increasing the batch size has no positive effect at
 all. And while the second of the two phases of SGD \parencite[first observed
 by][]{darkenFasterStochasticGradient1991} determines the asymptotic properties
-of SGD  ``in practice it seems that for deeper networks in particular, the first
+of SGD,  ``in practice it seems that for deeper networks in particular, the first
 phase dominates overall computation time as long as the second phase is cut off
 before the remaining potential gains become either insignificant or entirely
 dominated by overfitting (or both)''  
 \parencite{sutskeverImportanceInitializationMomentum2013}.
 
-So in the transient phase, a larger batch size only requires more computation
+So in this transient phase, a larger batch size only causes more computation
 time (which might be hidden by parallelization as batch learning is easier to
-parallelize than SGD) and more samples. If we assume independent identically
-distributed data this means we have to stop training much earlier as we have
-used up our sample set or risk overfitting.
+parallelize than SGD) and requires more samples. If we assume independent
+identically distributed data this means we have to stop training much earlier as
+we have used up our sample set or risk overfitting.
 
 In the asymptotic phase the situation is less clear. With (optimal) diminishing
 learning rates the same claim would apply. But correctly selecting those rates
 is difficult. Increasing the batch size is no miracle cure though as we still
 have to select (different) learning rates here. In theory they would have to
 be \(m\) times larger than the learning rate without batches for a batch
-size of \(m\). If we use too little learning rates during batch learning, then
-this is similar to reducing the learning rate too fast in the diminishing case
-as we are using up our resources more quickly without making full use of them.
-In both cases we would therefore get a reduced convergence rate.
+size of \(m\). If the selected learning rates during batch learning are too
+small, then this mirrors reducing the learning rate too quickly in the diminishing
+case. As we are using up our resources more quickly without making full use of
+them. In both cases we would therefore get a reduced convergence rate.
 
-Our solution in Section~\ref{sec: simplified learning rate schedules} was
-using piecewise constant learning rates. But as we have found, in
-Subsection~\ref{subsec: variance reduction}, halving the learning rate is
-ever so slightly worse than doubling the batch size. So the idea by
-\textcite{smithDonDecayLearning2018}, of doubling the batch size (instead of
-halving the learning rate) whenever progress stalls, is probably optimal.
+Our solution in Section~\ref{sec: simplified learning rate schedules} to the
+learning rate selection problem were piecewise constant learning rates. But
+as we have found, in Subsection~\ref{subsec: variance reduction}, halving the
+learning rate is ever so slightly worse than doubling the batch size. So the
+idea by \textcite{smithDonDecayLearning2018}, of doubling the batch size
+(instead of halving the learning rate) whenever progress stalls, is probably
+optimal.
 
 In the general convex case where we apply averaging on the other hand, SGD
-without batches is the clear winner. Only if \(\lipConst^2\) is negligible
-compared to \(\stdBound^2\), is reducing \(\stdBound^2\) roughly equivalent to
+without batches is the clear winner. Only when \(\lipConst^2\) is negligible
+compared to \(\stdBound^2\) is reducing \(\stdBound^2\) roughly equivalent to
 increasing the number of steps \(N\) in Theorem~\ref{thm: optimal averaging rates}.
 Without optimal rates not only \(\lipConst^2\) has to be negligible, but
 \(\|\weights_0 -\minimum\|^2\) as we can see in the statements leading up to
 to this theorem.
 
-Batch learning is finally a good idea, if we have a virtually infinite amount of
-supply of data (i.e. we do not have to worry about overfitting), and we do not
-feel the cost of batches due to parallelization. In that case the computational
-speed stays the same whether we use batches or not, and we do not have to worry
-running out of data, so we might as well use them.
+Lastly, batch learning is always a good idea, if we have a virtually infinite
+amount of supply of data (i.e. we do not have to worry about overfitting), and
+we do not feel the cost of batches due to parallelization. In that case the
+computational speed stays the same whether we use batches or not, and we do not
+have to worry running out of data, so we might as well use them. But in general
+there should be better uses for parallelization. One could for example train
+the same model with different weight initializations (or entirely different
+models) to generate ensemble models with (e.g. bagging, boosting, etc.).
 
-\section{SDE View}
+\section{Outlook}
 
 While we got bounds on \(\E\|\Weights_n - \minimum\|^2\) which entails a
 distributional bound using something like Chebyshev's inequality, we only
