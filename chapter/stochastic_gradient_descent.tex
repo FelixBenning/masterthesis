@@ -639,7 +639,7 @@ dimension \(\dimension\).
 
 Armed with this norm, we can now tackle our problem again.
 
-\begin{theorem}
+\begin{theorem}\label{thm: optimal rates quadratic case}
 	Let \(\Loss\) be a quadratic Loss function and assume
 	\begin{align*}
 		\E\|\martIncr\|_{V,\infty}^2
@@ -904,20 +904,7 @@ Armed with this norm, we can now tackle our problem again.
 	variance reduction}.
 \end{remark}
 
-Note that increasing the batch size during the transient phase would provide no
-value as the increased batch size would only result in smaller \(\stdBound\)
-which has no effect on the convergence rate. And while the second of the two
-phases of SGD \parencite[first observed
-by][]{darkenFasterStochasticGradient1991} determines the asymptotic properties
-of SGD  ``in practice it seems that for deeper networks in particular, the first
-phase dominates overall computation time as long as the second phase is cut off
-before the remaining potential gains become either insignificant or entirely
-dominated by overfitting (or both)''  
-\parencite{sutskeverImportanceInitializationMomentum2013}.
-
-In the asymptotic phase on the other hand, doubling the number of steps or the
-batch size has the same
-effect for our bounds. Now as we argued leading up to this theorem, the bounds
+As we argued leading up to this theorem, the bounds
 we used are quite tight. But guessing the correct learning rates is difficult.
 Before we try to address this guessing problem, let us see if we can even
 generalize this to non-quadratic functions.
@@ -1127,7 +1114,7 @@ convergence to an area for constant learning rates
 \end{proof}
 
 
-\section{Simplified Learning Rate Schedules}
+\section{Simplified Learning Rate Schedules}\label{sec: simplified learning rate schedules}
 
 Selecting a learning rate
 \begin{align*}
@@ -1610,106 +1597,121 @@ is so much worse\footnote{
 
 \section{Batch Learning}
 
-In particular note that again decreasing \(\stdBound^2\) is (at best) equivalent
-to increasing \(N\) and only if \(\lipConst\) is negligible. This matches our
-theory that SGD without batches is preferable.
-% \section{Batch Learning}
+Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
+estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
+``batch'' of data \((X^{(i)}_{n+1}, Y^{(i)}_{n+1})_{i=1,\dots,m}\) (independently
+\(\dist\) distributed) instead, i.e.
+\begin{align*}
+	\Weights_{n+1} = \Weights_n
+	-\lr_n \underbrace{\frac1{m}\sum_{i=1}^m\nabla\loss(\Weights_n,X^{(i)}_{n+1}, Y^{(i)}_{n+1})}_{
+		=:\nabla\loss_{n+1}^m(\Weights_n)
+	}.
+\end{align*}
+leading to the modified martingale increment
+\begin{align*}
+	\martIncr_n^{(m)}
+	= \nabla\Loss(\Weights_{n-1})
+	- \nabla\loss_n^m(\Weights_{n-1})
+\end{align*}
+with reduced variance
+\begin{align*}
+	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \stdBound^2.
+\end{align*}
+Now while this variance reduction does reduce our upper bound on the distance
+between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
+comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
+We would incur an equivalent cost, if we reduced our discretization to
+\begin{align*}
+	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}
+\end{align*}
+which increases the number of iterations to reach \(T\) to \(Nm\) which implies
+\(Nm\) gradient evaluations using SGD without batches.
 
-% Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
-% estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
-% ``batch'' of data \((X^{(i)}_{n+1}, Y^{(i)}_{n+1})_{i=1,\dots,m}\) (independently
-% \(\dist\) distributed) instead, i.e.
-% \begin{align*}
-% 	\Weights_{n+1} = \Weights_n
-% 	-\lr_n \underbrace{\frac1{m}\sum_{i=1}^m\nabla\loss(\Weights_n,X^{(i)}_{n+1}, Y^{(i)}_{n+1})}_{
-% 		=:\nabla\loss_{n+1}^m(\Weights_n)
-% 	}.
-% \end{align*}
-% leading to the modified martingale increment
-% \begin{align*}
-% 	\martIncr_n^{(m)}
-% 	= \nabla\Loss(\Weights_{n-1})
-% 	- \nabla\loss_n^m(\Weights_{n-1})
-% \end{align*}
-% with reduced variance
-% \begin{align*}
-% 	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \stdBound^2.
-% \end{align*}
-% Now while this variance reduction does reduce our upper bound on the distance
-% between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
-% comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
-% We would incur an equivalent cost, if we reduced our discretization to
-% \begin{align*}
-% 	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}
-% \end{align*}
-% which increases the number of iterations to reach \(T\) to \(Nm\) which implies
-% \(Nm\) gradient evaluations using SGD without batches. And if we have a look
-% at the upper bound in Theorem~\ref{thm: distance SGD vs GD} these two actions
-% have the same effect on our distance bound between SGD and GD (especially if
-% \(\Loss\) is convex as we can then get rid of the exponential term as hinted
-% at in the proof of the theorem).
+So which one is better?  If we have a look at the term (\ref{eq: mean of
+martingale increments}) again which is in some sense the difference between SGD
+and GD, then we can see that these actions have quite a similar effect
+\begin{align*}
+	\lr\sum_{k=1}^N\martIncr_k^{(m)}
+	&=\frac{T}{N}\sum_{k=1}^N
+	\nabla\Loss(\Weights_{k-1})- \nabla\loss_n^m(\Weights_{k-1})\\
+	&=\frac{T}{Nm}\sum_{k=1}^N\sum_{i=1}^m
+	[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X^{(i)}_k, Y^{(i)}_k)]\\
+	&\approx \tilde{\lr} \sum_{k=1}^{Nm}
+	\underbrace{
+		[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X_k, Y_k)]
+	}_{\widetilde{\martIncr}_k}.
+\end{align*}
+The difference is, that batch learning stays on some \(\Weights_k\) and collects
+\(m\) pieces of information before it makes a big step based on this information
+while SGD just makes \(m\) small steps.
 
-% Now of course an upper bound is no guarantee that there is no effect in reality.
-% But if we have a look at the term (\ref{eq: mean of martingale increments})
-% again which is in some sense the difference between SGD and GD, then we can
-% see that these actions have quite a similar effect
-% \begin{align*}
-% 	\lr\sum_{k=1}^N\martIncr_k^{(m)}
-% 	&=\frac{T}{N}\sum_{k=1}^N
-% 	\nabla\Loss(\Weights_{k-1})- \nabla\loss_n^m(\Weights_{k-1})\\
-% 	&=\frac{T}{Nm}\sum_{k=1}^N\sum_{i=1}^m
-% 	[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X^{(i)}_k, Y^{(i)}_k)]\\
-% 	&\approx \tilde{\lr} \sum_{k=1}^{Nm}
-% 	\underbrace{
-% 		[\nabla\Loss(\Weights_{k-1})-\nabla\loss(\Weights_{k-1},X_k, Y_k)]
-% 	}_{\widetilde{\martIncr}_k}.
-% \end{align*}
-% The difference is, that batch learning stays on some \(\Weights_k\) and collects
-% \(m\) pieces of information before it makes a big step based on this information
-% while SGD just makes \(m\) small steps. This also changes the true gradient
-% evaluations \(\nabla\Loss(\Weights_k)\) slightly. But since we are only making
-% small steps these \(\Weights_k\) will generally be similar. We still can not
-% make a definitive assertion which one is better though\footnote{
-% 	Whether or not you think batch-less SGD is superior might be correlated with
-% 	whether or not you think that agile software development is a good idea
-% }.
+This notion is reflected in the upper bound in Theorem~\ref{thm: distance SGD vs
+GD} where these two actions have the same effect on our distance bound between SGD and
+GD (especially if \(\Loss\) is convex as we can then get rid of the exponential
+term as hinted at in the proof of the theorem). But as we have seen in the
+following section (\ref{subsec: variance reduction}) for constant learning
+rates, halving them is ever so slightly worse than simply reducing the variance
+with batches as GD converges faster than Gradient Flow. Although as GD converges
+to Gradient Flow, this effect is less pronounced for smaller learning rates.
+In the same section we also see, that for diminishing learning rates we get
+the same improvements on the variance as increasing the batch size incurs.
 
-% Assuming they have the same effect on the deviation of SGD from GD we can
-% make a few practical considerations:
-% \begin{itemize}
-% 	\item A smaller learning rate benefits GD \emph{and} reduces the distance
-% 	between GD and SGD while batches only do the latter. If we have little data
-% 	and want to achieve good results in as few gradient evaluations as possible
-% 	we should in general choose smaller learning rates over larger batch sizes.
-% 	\item SGD can not be easily parallelized since one needs the previous weights
-% 	to calculate the next weights. Making multiple gradient evaluations at
-% 	the same point is trivially parallelizable on the other hand and only
-% 	requires broadcasting the result for summation. So if the bottleneck is
-% 	computation time, it makes sense to select batch sizes equal to the number of
-% 	threads, or if the broadcasting and summing takes significant time, batch
-% 	sizes which are multiples of the number of threads.
+Note that instead of running GD for the same ``time'' in Gradient Flow and
+reducing the discretization size we would actually increase this ``time''
+logarithmically (i.e. harmonic sum of learning rates) if we increase the number
+of steps in the diminishing-learning-rate case. This effect can be best seen
+in Theorem~\ref{thm: convergence rates for diminishing lr schedules} where
+increasing the number of steps improves the ``GD part'' as well as the variance
+reduction part, while decreasing the variance only has (the same) effect on the
+variance.
 
-% 	This is not without caveats though: Increasing the batch size to speed up
-% 	learning requires a proportional increase in the learning rate to actually
-% 	have an impact on the time required for optimization. And since GD stops
-% 	converging if learing rates become too large, there is an upper bound on this.
-% 	And while batches might be ``free'' in a computational sense due to
-% 	parallelization, they still increase the sample consumption. And if we only
-% 	have limited data, this often results in more passes over the same data and
-% 	thus overfitting.
-	
-% 	Last but not least there might be other opportunities for parallelization
-% 	like generating ensemble models by optimizing from different starting points
-% 	or using different models altogether.
-% \end{itemize}
-% In summary: If you are concerned about the \emph{quality} of your model you should
-% probably choose SGD without batches, while concerns about training time justify
-% larger batch sizes in some cases.
+What is more, in the transient case we found in Theorem~\ref{thm:
+optimal rates quadratic case} and \ref{thm: optimal rates SGD} the variance is
+completely irrelevant and increasing the batch size has no positive effect at
+all. And while the second of the two phases of SGD \parencite[first observed
+by][]{darkenFasterStochasticGradient1991} determines the asymptotic properties
+of SGD  ``in practice it seems that for deeper networks in particular, the first
+phase dominates overall computation time as long as the second phase is cut off
+before the remaining potential gains become either insignificant or entirely
+dominated by overfitting (or both)''  
+\parencite{sutskeverImportanceInitializationMomentum2013}.
 
-% \fxnote{
-% \textcite{hardtTrainFasterGeneralize2016} \textcite{hofferTrainLongerGeneralize2018}
-% }
+So in the transient phase, a larger batch size only requires more computation
+time (which might be hidden by parallelization as batch learning is easier to
+parallelize than SGD) and more samples. If we assume independent identically
+distributed data this means we have to stop training much earlier as we have
+used up our sample set or risk overfitting.
 
+In the asymptotic phase the situation is less clear. With (optimal) diminishing
+learning rates the same claim would apply. But correctly selecting those rates
+is difficult. Increasing the batch size is no miracle cure though as we still
+have to select (different) learning rates here. In theory they would have to
+be \(m\) times larger than the learning rate without batches for a batch
+size of \(m\). If we use too little learning rates during batch learning, then
+this is similar to reducing the learning rate too fast in the diminishing case
+as we are using up our resources more quickly without making full use of them.
+In both cases we would therefore get a reduced convergence rate.
+
+Our solution in Section~\ref{sec: simplified learning rate schedules} was
+using piecewise constant learning rates. But as we have found, in
+Subsection~\ref{subsec: variance reduction}, halving the learning rate is
+ever so slightly worse than doubling the batch size. So the idea by
+\textcite{smithDonDecayLearning2018}, of doubling the batch size (instead of
+halving the learning rate) whenever progress stalls, is probably optimal.
+
+In the general convex case where we apply averaging on the other hand, SGD
+without batches is the clear winner. Only if \(\lipConst^2\) is negligible
+compared to \(\stdBound^2\), is reducing \(\stdBound^2\) roughly equivalent to
+increasing the number of steps \(N\) in Theorem~\ref{thm: optimal averaging rates}.
+Without optimal rates not only \(\lipConst^2\) has to be negligible, but
+\(\|\weights_0 -\minimum\|^2\) as we can see in the statements leading up to
+to this theorem.
+
+Batch learning is finally a good idea, if we have a virtually infinite amount of
+supply of data (i.e. we do not have to worry about overfitting), and we do not
+feel the cost of batches due to parallelization. In that case the computational
+speed stays the same whether we use batches or not, and we do not have to worry
+running out of data, so we might as well use them.
 
 \section{SDE View}
 
