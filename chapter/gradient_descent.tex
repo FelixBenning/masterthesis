@@ -830,14 +830,14 @@ One way to ensure such a lower bound on the gradient is using convexity.
 		}_{\text{diminishing contraction}}
 	\end{align*}
 	%
-	The convergence rate of such a recursion can be bounded (cf.
-	Lemma~\ref{lem-appendix: diminishing contraction})\fxnote{move out of appendix} to be 
+	The convergence rate of such a recursion can be bounded (which we will do in
+	Lemma~\ref{lem: upper bound on diminishing contraction}). This results in 
 	%
 	\begin{align*}
 		\Loss(\weights_n)-\Loss(\minimum)
 		&\le \frac{1}{
 			\frac{1}{\Loss(\weights_0)-\Loss(\minimum)} + \tfrac{\xi}{\|\weights_0-\minimum\|^2}n
-		}
+		}.
 	\end{align*}
 	%
 	Since our upper bound is increasing in \(\Loss(\weights_0)-\Loss(\minimum)\)
@@ -914,6 +914,45 @@ from the minimum.
 	The second inequality follows from adding \(\bregmanDiv{f}(x,y)\) to
 	\(\bregmanDiv{f}(y,x)\).
 \end{proof}
+
+\begin{lemma}[Diminishing Contraction]
+	\label{lem: upper bound on diminishing contraction}
+	Let \(a_0 \in [0, 1/q]\) for \(q>0\), and assume
+	\begin{align*}
+		0\le a_{n+1} \le (1-q a_n)a_n \quad \forall n \ge 0
+	\end{align*}
+	then we have
+	\begin{align*}
+		a_n \le \frac{1}{nq + \frac1{a_0}}\le\frac1{(n+1)q}
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	The proof is an adaptation of a technique used in \textcite[Theorem
+	2.1.14]{nesterovLecturesConvexOptimization2018}. We start by dividing the
+	reordered equation
+	\begin{align*}
+		a_n \ge a_{n+1} + qa_n^2
+	\end{align*}
+	by \(a_na_{n+1}\) resulting in
+	\begin{align*}
+		\frac1{a_{n+1}}
+		\ge \frac1{a_n} + q \underbrace{\frac{a_n}{a_{n+1}}}_{\ge 1}
+		\ge \frac1{a_n} + q
+	\end{align*}
+	where we have used that the sequence is monotonously decreasing which
+	can be proven by induction. This allows us to lower bound the telescoping
+	sum
+	\begin{align*}
+		\frac1{a_n} - \frac1{a_0}
+		= \sum_{k=0}^{n-1} \frac1{a_{k+1}} - \frac1{a_k}
+		\ge nq
+	\end{align*}
+	which (after some reordering) results in the first inequality of our claim.
+	The second inequality follows from \(a_0 \le 1/q\).
+\end{proof}
+\begin{remark}
+	This bound is tight, see appendix Lemma~\ref{lem-appendix: diminishing contraction}.
+\end{remark}
 
 \subsection{Discussion}
 
