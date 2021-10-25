@@ -1235,18 +1235,8 @@ Now while Algorithm~\ref{algo: optimal nesterov momentum} eliminates another
 hyperparameter, we still need to somehow know the Lipschitz constant \(\ubound\)
 of the gradient and the condition number \(\condition\).
 
-\fxnote{backtracking/armijo's condition?}
-The Lipschitz constant could be estimated with the fact that Gradient Descent
-stops converging if the learning rate exceeds \(2/\ubound\). Similarly
-Nesterov's Momentum stops converging if the learning rate is just a bit higher
-than \(1/\ubound\) (cf. Figure~\ref{fig: annotated nesterov rates}). Since
-the gradient is also Lipschitz continuous for higher constants, convergence
-does not break if we guess \(\ubound\) too high. But the convergence rate
-will take a hit accordingly. So generally we would want to increase our
-learning rate as much as possible and see when it stops converging and then
-back off a bit.
-
-With the condition number we could just be conservative and set
+The Lipschitz constant can be estimated with Backtracking (Section~\ref{sec:
+backtracking}). With the condition number we could just be conservative and set
 \(\condition^{-1}=0\). This sacrifices linear convergence, but in view of the
 asymptotic convergence rates stochasticity causes, this might not be so bad. But
 in situations where the ``transient phase'' (before stochasticity kills fast
@@ -1485,6 +1475,8 @@ Okay so using the same detour over the exponential as in the SGD chapter we get
 	&\lxle{(\ref{eq: detour over exponential bound})}
 	\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a}.
 \end{align*}
+\fxnote{Due to \(\lrSq^2\) this is not the same argument as we then have \(1/n^4\) in the
+variance sum. Does this result in better than BLUE convergence? If yes, what is wrong?}
 The same arguments as in Theorem~\ref{thm: convergence rates for diminishing lr schedules}
 now result in
 \begin{theorem}
