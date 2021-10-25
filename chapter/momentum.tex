@@ -245,7 +245,7 @@ Reordering the eigenvalues to
 reorders the transformation matrix of the eigenspace to
 %
 \begin{align}\label{eq: eigenspace momentum transformation}
-	\Sigma := \begin{pmatrix}
+	\momMatrix := \begin{pmatrix}
 		0 & 1 \\
 		-\momCoeff & 1+\momCoeff - \lrSq\hesseEV_1 & \\
 		& & \ddots & \\
@@ -253,23 +253,23 @@ reorders the transformation matrix of the eigenspace to
 		& & & -\momCoeff & 1+\momCoeff - \lrSq\hesseEV_\dimension \\
 	\end{pmatrix}
 	= \begin{pmatrix}
-		\Sigma_1 \\
+		\momMatrix_1 \\
 		& \ddots\\
-		&& \Sigma_\dimension
+		&& \momMatrix_\dimension
 	\end{pmatrix}
 \end{align}
 %
 So in contrast to Section~\ref{sec: visualize gd} we do not get a diagonal
 matrix immediately. To achieve a similar eigenvalue analysis as in
 Section~\ref{sec: visualize gd} we first have to determine the eigenvalues
-\(\sigma_{i1},\sigma_{i2}\) of each \(\Sigma_i\) and then ensure that
+\(\momEV_{i1},\momEV_{i2}\) of each \(\momMatrix_i\) and then ensure that
 \begin{align}
-	\max_{i=1,\dots, \dimension} \max\{|\sigma_{i1}|,|\sigma_{i2}|\} < 1.
+	\max_{i=1,\dots, \dimension} \max\{|\momEV_{i1}|,|\momEV_{i2}|\} < 1.
 \end{align}
-Using the p-q formula on the characteristic polynomial of \(\Sigma_i\)
+Using the p-q formula on the characteristic polynomial of \(\momMatrix_i\)
 results in 
 \begin{align*}
-	\sigma_{i1/2}
+	\momEV_{i1/2}
 	= \tfrac12 \left(
 		1+\momCoeff-\lrSq\hesseEV_i
 		\pm \sqrt{(1+\momCoeff-\lrSq\hesseEV_i)^2 - 4\momCoeff}
@@ -284,9 +284,9 @@ appendix. We will only cover the result here.
 	\def\svgwidth{1\textwidth}
 	\input{media/annotated_heavy_ball_rates.pdf_tex}
 	\caption{
-		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Heavy Ball Momentum.
+		Heat plot of \(\max\{|\momEV_1|,|\momEV_2|\}\) for the Heavy Ball Momentum.
 		Strictly speaking the ``Monotonic'' (M) and ``Oscillation'' (O) areas should not
-		extend into negative \(\momCoeff\) since \(\sigma_{1/2}\)
+		extend into negative \(\momCoeff\) since \(\momEV_{1/2}\)
 		have opposite signs there, but it still describes the behavior of the
 		dominating eigenvalue. The third label in the legend corresponds to the
 		remarkably sharp border of the ``Ripples'' area which I did not want to
@@ -300,14 +300,14 @@ appendix. We will only cover the result here.
 	\label{thm: momentum - stable set of parameters}
 	Let
 	\begin{align*}
-		\sigma_{1/2}
+		\momEV_{1/2}
 		= \tfrac12 \left(
 			1+\momCoeff-\lrSq\hesseEV \pm \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
 		\right)
 	\end{align*}
 	then 
 	\begin{enumerate}
-		\item \(\max\{|\sigma_1|,|\sigma_2|\}<1\) if and only if
+		\item \(\max\{|\momEV_1|,|\momEV_2|\}<1\) if and only if
 		\begin{align*}
 			0<\lrSq\hesseEV < 2(1+\momCoeff) \qquad \text{and} \qquad |\momCoeff|<1
 		\end{align*}
@@ -319,7 +319,7 @@ appendix. We will only cover the result here.
 		\begin{align*}
 			(1-\sqrt{\momCoeff})^2 < \lrSq\hesseEV < (1+\sqrt{\momCoeff})^2,
 		\end{align*}
-		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\momCoeff}\).
+		for which we have \(|\momEV_1|=|\momEV_2|=\sqrt{\momCoeff}\).
 		
 		As complex
 		eigenvalues imply a rotation, this can be viewed as rotating the distance
@@ -327,11 +327,11 @@ appendix. We will only cover the result here.
 		a pendulum where the friction causes it to eventually end up in the
 		minimum. Looking at the distance to the minimum only, we will therefore
 		observe a sinus wave (``Ripples'').
-		\item In the real case we have \(\sigma_1>\sigma_2\) and
+		\item In the real case we have \(\momEV_1>\momEV_2\) and
 		\begin{align}
-			\max\{|\sigma_1|, |\sigma_2|\} = \begin{cases}
-				|\sigma_1|=\sigma_1 & \lrSq\hesseEV < 1+\momCoeff \\
-				|\sigma_2|=-\sigma_2 & \lrSq\hesseEV \ge 1+\momCoeff.
+			\max\{|\momEV_1|, |\momEV_2|\} = \begin{cases}
+				|\momEV_1|=\momEV_1 & \lrSq\hesseEV < 1+\momCoeff \\
+				|\momEV_2|=-\momEV_2 & \lrSq\hesseEV \ge 1+\momCoeff.
 			\end{cases}
 		\end{align}
 		Restricted to \(1>\momCoeff>0\) this results in two different	
@@ -339,12 +339,12 @@ appendix. We will only cover the result here.
 		\begin{align*}
 			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
 		\end{align*}
-		we have \(1>\sigma_1 > \sigma_2 > 0\) which results in a monotonic
+		we have \(1>\momEV_1 > \momEV_2 > 0\) which results in a monotonic
 		linear convergence (``Monotonic'' case). For
 		\begin{align*}
 			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
 		\end{align*}
-		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\) which implies 
+		on the other hand, we get \(-1 < \momEV_2 < \momEV_1 < 0\) which implies 
 		an oscillating convergence (``Oscillation''). In contrast to the ``Ripples''
 		we switch the side of the distance to the minimum in every iteration.
 	\end{enumerate}
@@ -367,19 +367,19 @@ convergence? Since the plot looks quite symmetric it is quite intuitive that
 we only have to consider the largest and smallest eigenvalue. For now we
 can consider it as a lower bound:
 \begin{align}\label{eq: lower bound best heavy ball rates}
-	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 	\ge \min_{\lrSq}\min_{\momCoeff}
-	\max_{i=1,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 \end{align}
 Now let us consider the inner minimum first. Let us inspect the claim
 \begin{align}
-	\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 	= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}
 \end{align}\label{eq: optimal heavy ball momentum - ev representation}
 In that case we are still (barely) in the complex case, therefore the rate
 of convergence is equal to \(\sqrt{\momCoeff}\), i.e.
 \begin{align*}
-	\min_{\momCoeff}\max_{i=1,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 	= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}
 \end{align*}
 Now let us wiggle around \(\momCoeff\) a bit. If we would increase it, then
@@ -398,7 +398,7 @@ case, we know that all eigenvalues in between must also be in the complex case
 which means that (\ref{eq: lower bound best heavy ball rates}) is an equality
 and
 \begin{align*}
-	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\sigma_{i1}|,|\sigma_{i2}|\}
+	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 	= \min_{\lrSq}\max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}.
 \end{align*}
 Now we are just doing our balancing act  again, only with 
@@ -535,7 +535,7 @@ easily obtain the analog eigenspace transformation to (\ref{eq: eigenspace
 momentum transformation})
 %
 \begin{align*}
-	\Sigma_i = \begin{pmatrix}
+	\momMatrix_i = \begin{pmatrix}
 		0 & 1\\
 		-\momCoeff(1-\lrSq\hesseEV_i) & (1+\momCoeff)(1-\lrSq\hesseEV_i).
 	\end{pmatrix}	
@@ -546,7 +546,7 @@ which curiously reduces to the heavy ball version if we use
 	\tilde{\momCoeff}_i = \momCoeff(1-\lrSq\hesseEV_i)
 \end{align}
 We therefore immediately get from Theorem~\ref{thm: momentum - stable set of
-parameters} that \(\max\{|\sigma_{i1}|,|\sigma_{i2}|\}<1\) if and only if
+parameters} that \(\max\{|\momEV_{i1}|,|\momEV_{i2}|\}<1\) if and only if
 \begin{align*}
 	0<\lrSq\hesseEV_i < 2(1+\tilde{\momCoeff}_i)
 	\quad \text{and} \quad
@@ -565,7 +565,7 @@ which after some transformations is itself equivalent to
 	\def\svgwidth{1\textwidth}
 	\input{media/annotated_nesterov_rates.pdf_tex}
 	\caption{
-		Heat plot of \(\max\{|\sigma_1|,|\sigma_2|\}\) for the Nesterov Momentum.
+		Heat plot of \(\max\{|\momEV_1|,|\momEV_2|\}\) for the Nesterov Momentum.
 		``M'' and ``O'' stand for the ``Monotonic'' and ``Oscillating'' types of 
 		real eigenvalues. Note that the separating line of these cases
 		\(\lrSq\hesseEV=1+\tilde{\momCoeff}=1+\momCoeff(1-\lrSq\hesseEV)\)

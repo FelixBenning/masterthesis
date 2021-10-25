@@ -203,14 +203,14 @@
 	\label{thm-appdx: momentum - stable set of parameters}
 	Let
 	\begin{align*}
-		\sigma_{1/2}
+		\momEV_{1/2}
 		= \tfrac12 \left(
 			1+\momCoeff-\lrSq\hesseEV \pm \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
 		\right)
 	\end{align*}
 	then 
 	\begin{enumerate}
-		\item \(\max\{|\sigma_1|,|\sigma_2|\}<1\) if and only if
+		\item \(\max\{|\momEV_1|,|\momEV_2|\}<1\) if and only if
 		\begin{align*}
 			0<\lrSq\hesseEV < 2(1+\momCoeff) \qquad \text{and} \qquad |\momCoeff|<1
 		\end{align*}
@@ -222,13 +222,13 @@
 		\begin{align*}
 			(1-\sqrt{\momCoeff})^2 < \lrSq\hesseEV < (1+\sqrt{\momCoeff})^2,
 		\end{align*}
-		for which we have \(|\sigma_1|=|\sigma_2|=\sqrt{\momCoeff}\).
+		for which we have \(|\momEV_1|=|\momEV_2|=\sqrt{\momCoeff}\).
 		
-		\item In the real case we have \(\sigma_1>\sigma_2\) and
+		\item In the real case we have \(\momEV_1>\momEV_2\) and
 		\begin{align}\label{eq: when does sigma_1 or sigma_2 dominate?}
-			\max\{|\sigma_1|, |\sigma_2|\} = \begin{cases}
-				|\sigma_1|=\sigma_1 & \lrSq\hesseEV < 1+\momCoeff \\
-				|\sigma_2|=-\sigma_2 & \lrSq\hesseEV \ge 1+\momCoeff.
+			\max\{|\momEV_1|, |\momEV_2|\} = \begin{cases}
+				|\momEV_1|=\momEV_1 & \lrSq\hesseEV < 1+\momCoeff \\
+				|\momEV_2|=-\momEV_2 & \lrSq\hesseEV \ge 1+\momCoeff.
 			\end{cases}
 		\end{align}
 		Restricted to \(1>\momCoeff>0\) this results in two different	
@@ -236,11 +236,11 @@
 		\begin{align*}
 			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
 		\end{align*}
-		we have \(1>\sigma_1 > \sigma_2 > 0\). For
+		we have \(1>\momEV_1 > \momEV_2 > 0\). For
 		\begin{align*}
 			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
 		\end{align*}
-		on the other hand, we get \(-1 < \sigma_2 < \sigma_1 < 0\).
+		on the other hand, we get \(-1 < \momEV_2 < \momEV_1 < 0\).
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -250,7 +250,7 @@
 		&:= (1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff\\
 		&= \momCoeff^2 - 2(1+\lrSq\hesseEV)\momCoeff + (1-\lrSq\hesseEV)^2
 	\end{align*}
-	then \(\sigma_{1/2}\) is complex iff \(\Delta(\momCoeff)<0\). Since it is a
+	then \(\momEV_{1/2}\) is complex iff \(\Delta(\momCoeff)<0\). Since it is a
 	convex parabola this implies that \(\momCoeff\) needs to be between the roots
 	\begin{align*}
 		\momCoeff_{1/2}
@@ -263,31 +263,31 @@
 	of \(\Delta\). Assuming those roots are real which requires \(\lrSq\hesseEV>0\).
 	But if \(\lrSq\hesseEV\le0\) then we would have
 	\begin{align*}
-		\sigma_1
+		\momEV_1
 		= \tfrac12 \Big(
 			\underbrace{1+\momCoeff+|\lrSq\hesseEV|}_{\ge 1+\momCoeff}
 			+ \sqrt{\underbrace{(1+\momCoeff+|\lrSq\hesseEV|)^2 - 4\momCoeff}_{\smash{\ge (1-\momCoeff)^2}}}
 		\Big)
 		\ge \frac{1+\momCoeff + |1-\momCoeff|}2 \ge 1
 	\end{align*}
-	which means that \(\max\{|\sigma_1|,|\sigma_2|\}<1\) implies \(\lrSq\hesseEV>0\).
+	which means that \(\max\{|\momEV_1|,|\momEV_2|\}<1\) implies \(\lrSq\hesseEV>0\).
 	The roots \(\momCoeff_{1/2}\) are therefore real no matter the direction we
 	wish to prove.
 	\begin{description}[wide, labelindent=0pt]
 	\item[Complex Case:]
-		\(\sigma_{1/2}\) are complex iff	
+		\(\momEV_{1/2}\) are complex iff	
 		\begin{align}\label{eq: complex case}
 			0 < (1-\sqrt{\lrSq\hesseEV})^2 < \momCoeff < (1+\sqrt{\lrSq\hesseEV})^2.
 		\end{align}
 		In that case we have
 		\begin{align*}
-			|\sigma_1| = |\sigma_2|
-			&= \sqrt{|\Re(\sigma_1)|^2 + |\Im(\sigma_1)|^2}\\
+			|\momEV_1| = |\momEV_2|
+			&= \sqrt{|\Re(\momEV_1)|^2 + |\Im(\momEV_1)|^2}\\
 			&= \tfrac12 \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 + 4\momCoeff - (1+\momCoeff-\lrSq\hesseEV)^2}
 			= \sqrt{\momCoeff}.
 		\end{align*}
 		So in this complex case the condition
-		\(\momCoeff<1\) is necessary and sufficient for \(\max\{|\sigma_1|,|\sigma_2|\}<1\).
+		\(\momCoeff<1\) is necessary and sufficient for \(\max\{|\momEV_1|,|\momEV_2|\}<1\).
 		And since we have seen that \(\lrSq\hesseEV>0\) is necessary and \(0<\momCoeff\)
 		from (\ref{eq: complex case}) implies the condition \(|\momCoeff|<1\), we only
 		need to show that \(\lrSq\hesseEV <2(1+\momCoeff)\) is necessary in the complex
@@ -301,12 +301,12 @@
 
 		The remaining characterization of the complex case follows from
 		restricting (\ref{eq: complex case}) to \(\momCoeff<1\) and reordering.
-		\item[Real Case:] Since we have \(\sigma_2 \le \sigma_1\),
-		\(\max\{|\sigma_1|,|\sigma_2|\}<1\) is equivalent to
+		\item[Real Case:] Since we have \(\momEV_2 \le \momEV_1\),
+		\(\max\{|\momEV_1|,|\momEV_2|\}<1\) is equivalent to
 		\begin{align*}
-			-1 < \sigma_2 \qquad \text{and} \qquad \sigma_1 < 1
+			-1 < \momEV_2 \qquad \text{and} \qquad \momEV_1 < 1
 		\end{align*}
-		By subtracting the part before the "\(\pm\)" from the equation \(\sigma_1<1\)
+		By subtracting the part before the "\(\pm\)" from the equation \(\momEV_1<1\)
 		after multiplying it by two, we get
 		\begin{align}\label{eq: sigma1 condition}
 			0\xle{\text{Real Case}} \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 -4\momCoeff} < 1-\momCoeff +\lrSq\hesseEV.
@@ -336,7 +336,7 @@
 		Which is a given for positive learning rates in the convex	
 		case. This is not surprising if one remembers the proof from gradient
 		descent. The real issue is not overshooting \(-1\) with large learning
-		rates. So multiplying \(-1<\sigma_2\) by two, adding 2 and moving the
+		rates. So multiplying \(-1<\momEV_2\) by two, adding 2 and moving the
 		root to the other side we get
 		\begin{align}\label{eq: from -1<sigma_2 followed}
 			0 \xle{\text{Real Case}} \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
@@ -357,7 +357,7 @@
 		which is the important requirement on the learning rate we are looking for.
 		Now for \(\momCoeff<1\) this requirement is actually stronger than
 		\(\lrSq\hesseEV <3+\momCoeff\) which means that we have proven that our
-		requirements are sufficient for \(\max\{|\sigma_1|,|\sigma_2|\}<1\).
+		requirements are sufficient for \(\max\{|\momEV_1|,|\momEV_2|\}<1\).
 		What is left to show is that \(|\momCoeff|<1\) is also necessary in the real
 		case. Now from (\ref{eq: momentum upper bound derivation}) we immediately
 		get
@@ -396,19 +396,19 @@
 			1+\momCoeff-\lrSq\hesseEV = \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2}
 			> \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
 		\end{align*}
-		ensures that \(\sigma_2 >0\). On the other hand for \(\momCoeff>0\)
+		ensures that \(\momEV_2 >0\). On the other hand for \(\momCoeff>0\)
 		and \(\lrSq\hesseEV > (1-\sqrt{\momCoeff})^2> 1+\momCoeff\)
 		\begin{align*}
 			- (1+\momCoeff-\lrSq\hesseEV) = \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2}
 			> \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
 		\end{align*}
-		implies \(\sigma_1 < 0\). \qedhere
+		implies \(\momEV_1 < 0\). \qedhere
  \end{description}
 \end{proof}
 
 \begin{lemma}\label{lem-appdx: just at the border of complex case is best beta}
 	\begin{align*}
-		\frac{d}{d\momCoeff}\max\{|\sigma_1|,|\sigma_2|\} < 0 \qquad
+		\frac{d}{d\momCoeff}\max\{|\momEV_1|,|\momEV_2|\} < 0 \qquad
 		\forall -1<\momCoeff <(1-\sqrt{\lrSq\hesseEV})^2
 	\end{align*}
 \end{lemma}
@@ -416,10 +416,10 @@
 	Using the characterizations of the real case
 	from Theorem~\ref{thm: momentum - stable set of parameters} we get
 	\begin{align*}
-		\frac{d}{d\momCoeff}\max\{|\sigma_1|,|\sigma_2|\}
+		\frac{d}{d\momCoeff}\max\{|\momEV_1|,|\momEV_2|\}
 		= \begin{cases}
-			\frac{d\sigma_1}{d\momCoeff} & \momCoeff \ge \lrSq\hesseEV -1 \\
-			-\frac{d\sigma_2}{d\momCoeff} & \momCoeff \le \lrSq\hesseEV -1 
+			\frac{d\momEV_1}{d\momCoeff} & \momCoeff \ge \lrSq\hesseEV -1 \\
+			-\frac{d\momEV_2}{d\momCoeff} & \momCoeff \le \lrSq\hesseEV -1 
 		\end{cases}
 	\end{align*}
 	This allows us to treat those cases separately. For the first case we use
@@ -428,9 +428,9 @@
 	\begin{align*}
 		\Delta'(\momCoeff) = 2(1+\momCoeff-\lrSq\hesseEV)	-4
 	\end{align*}
-	allows us to represent \(\sigma_1\) as
+	allows us to represent \(\momEV_1\) as
 	\begin{align*}
-		1>\sigma_1
+		1>\momEV_1
 		= 1 + \frac{\Delta'(\momCoeff)}{4} + \tfrac12 \sqrt{\Delta(\momCoeff)},
 	\end{align*}
 	which results in the inequality
@@ -441,15 +441,15 @@
 	We can now use this inequality to show that\footnote{
 		I want to apologize for the lack of insight in this proof upon which I
 		stumbled by accident playing around with the \(\Delta(\momCoeff)\)
-		representation of \(\sigma_{1/2}\). Its only redeeming merit is its brevity.
+		representation of \(\momEV_{1/2}\). Its only redeeming merit is its brevity.
 	}
 	\begin{align*}
-		\frac{d\sigma_1}{d\momCoeff}
+		\frac{d\momEV_1}{d\momCoeff}
 		= \frac12 + \frac14 \frac{\Delta'(\momCoeff)}{\sqrt{\Delta(\momCoeff)}} < 0.
 	\end{align*}
 	The second case on the other hand requires us to show that
 	\begin{align*}
-		\frac{d\sigma_2}{d\momCoeff}
+		\frac{d\momEV_2}{d\momCoeff}
 		= \frac12 - \frac14 \frac{\Delta'(\momCoeff)}{\sqrt{\Delta(\momCoeff)}} > 0
 		\iff 2 > \frac{\Delta'(\momCoeff)}{\sqrt{\Delta(\momCoeff)}}.
 	\end{align*}
