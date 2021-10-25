@@ -380,7 +380,7 @@ minimum, but rather unbiased estimates of a Bellman Operator (Fixed Point
 Iteration towards the optimum).
 
 
-\section{Quadratic Loss Functions}
+\section{Quadratic Loss Functions}\label{sec: quadratic loss SGD}
 
 While we have proven SGD behaves roughly like GD for small learning rates, we
 are not really that interested in how close SGD is to GD but rather how good it
@@ -1166,7 +1166,9 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 			&+ \sum_{k=0}^n \lr_k \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)\langle\martIncr_{k+1},v_j\rangle.
 		\end{aligned}
 	\end{align*}
-	With the usual conditional independence argument we get
+	As the first summand is deterministic and the martingale increments are
+	pairwise independent we can use our usual conditional independence argument
+	to get
 	\begin{align*}
 		\E\|\Weights_{n+1}-\minimum\|^2
 		&= \E[(V^T [\Weights_{n+1}-\minimum])^T(V^T[\Weights_{n+1}-\minimum])]\\
@@ -1192,12 +1194,15 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	Which is why we need the requirement \(b\ge a\hesseEV_\dimension\).
 
 	Okay so now we enact this idea and use the exponential function bound
-	\begin{align*}
-		\left(\prod_{i=k+1}^{n-1}(1-\lr_i\hesseEV)\right)
+	\begin{align}
+		\nonumber
+		\left(\prod_{i=k+1}^{n-1}(1-\lr_i\hesseEV_j)\right)
 		&\le\exp\left(-2\sum_{i=k+1}^{n-1}\lr_i\hesseEV_j\right)\\
+		\nonumber
 		&\le \exp\left(-2\hesseEV_j a[\log(n+b)-\log(k+1+b)]\right)\\
+		\label{eq: detour over exponential bound}
 		&= \left(\frac{n+b}{k+b+1}\right)^{-2\hesseEV_j a}.
-	\end{align*}
+	\end{align}
 	Here we have used
 	\begin{align*}
 		\sum_{i=k}^{n-1} \lr_i
@@ -1732,13 +1737,6 @@ stochastic differential equation (SDE).
 [\textcite{simsekliTailIndexAnalysisStochastic2019}]
 
 
-\section{Heuristics}
-
-\subsection{Adagrad}
-
-\subsection{Adadelta}
-
-\subsection{RMSProp}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
