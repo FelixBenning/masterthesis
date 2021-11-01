@@ -1855,10 +1855,10 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 	\begin{subequations}
 	\begin{align}
 		\|\weights_n - \minimum\|
-		&\ge \left(1-\frac2{1+\condition}\right)^n \|\weights_0 - \minimum\| \\
+		&\ge \left(1-\frac2{1+\sqrt{\condition}}\right)^n \|\weights_0 - \minimum\| \\
 		\Loss(\weights_n) - \Loss(\minimum)
 		&\ge \tfrac{\lbound}{2}
-		\left(1-\frac2{1+\condition}\right)^{2n} \|\weights_0 - \minimum\|^2
+		\left(1-\frac2{1+\sqrt{\condition}}\right)^{2n} \|\weights_0 - \minimum\|^2
 	\end{align}
 	\end{subequations}
 	where \(\minimum\) is the unique minimum of \(\Loss\).
