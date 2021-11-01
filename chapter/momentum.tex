@@ -366,6 +366,7 @@ So how much do we gain? In other words what are the optimal rates of
 convergence? 
 
 \begin{lemma}[Optimal Parameter Selection]
+	\label{lem: optimal hb parameter selection}
 	For a given learning rate we have
 	\begin{align*}
 		\min_{\momCoeff}\max_{i=1,\dots, \dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
@@ -1353,16 +1354,18 @@ SGD with Averaging}.
 \subsection{Quadratic Functions}
 
 \begin{theorem}
-	For a quadratic convex Loss \(\Loss\) with
+	For a quadratic convex Loss \(\Loss\) with bounded
+	loss evaluation error variances
 	\begin{align*}
-		\E\|\martIncr_n\|\le \tilde{\stdBound}^2,
+		\E\|\martIncr_n\|^2 \le \tilde{\stdBound}^2,
 	\end{align*} 
-	selecting the learning rate and momentum
-	schedule
+	where we denote the sorted (increasing) eigenvalues of the Hesse matrix
+	\(\nabla^2\Loss\) by \(\hesseEV_i\),
+	selecting the learning rate and momentum schedule
 	\begin{align*}
 		\lrSq_n = \lr_n^2 = \frac{a^2}{(n+b)^2}, \qquad \momCoeff_n=(1-\sqrt{\lrSq_n\hesseEV_1})^2
 	\end{align*}
-	results in a convergence rate of 
+	results in a convergence rate of
 	\begin{align*}
 		\E\|\Weights_n -\minimum\|^2 \in O(n^{-2\sqrt{\hesseEV_1}a})\|\weights_0 - \minimum\|^2
 		+ \tilde{\stdBound}^2 O(n^{-3}+n^{-2\sqrt{\hesseEV_1} a}).
@@ -1486,8 +1489,8 @@ SGD with Averaging}.
 	\end{align*}
 	we can apply the eigenvalue analysis of
 	Theorem~\ref{thm: momentum - stable set of parameters} to this case. As we have
-	found (\ref{eq: optimal heavy ball momentum - ev representation}) it is optimal
-	to select \(\momCoeff_n\) equal to
+	found in the subsequent Lemma~\ref{lem: optimal hb parameter selection} it is
+	optimal to select \(\momCoeff_n\) equal to
 	\begin{align*}
 		\max\{(1-\sqrt{\lrSq_n\hesseEV_1})^2, (1-\sqrt{\lrSq_n\hesseEV_\dimension})^2\}.
 	\end{align*}
@@ -1505,9 +1508,9 @@ SGD with Averaging}.
 		\right\}\\
 		&= \left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right) \qquad \text{ for } n \gg 0.
 	\end{align*}
-	Okay so using the same detour over the exponential as in the SGD chapter
-	(\ref{eq: detour over exponential bound}) we get
-	\begin{align*}
+	Using the same detour over the exponential as in the SGD case
+	(i.e. equation (\ref{eq: detour over exponential bound})),
+	we get \begin{align*}
 		\Bigg\|\prod_{j=k}^{n-1}\tilde{\momMatrix}\ \Bigg\|^2
 		&\le \left(\prod_{j=k}^{n-1} \left(1-\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\right)^2
 		\qquad \text{ for } n \gg 0\\
@@ -1522,7 +1525,7 @@ SGD with Averaging}.
 	\begin{align*}
 		&\E\|\Weights_n-\minimum\|^2\\
 		&\le\underbrace{
-			\left(\frac{n+b}{b}\right)^{-2\sqrt{\hesseEV_1}a}\|\weights_0 - \minimum\|^2
+			2\left(\frac{n+b}{b}\right)^{-2\sqrt{\hesseEV_1}a}\|\weights_0 - \minimum\|^2
 		}_{
 			=O(n^{-2\sqrt{\hesseEV_1}a})\|\weights_0-\minimum\|^2
 		}
@@ -1530,15 +1533,29 @@ SGD with Averaging}.
 		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2
 	\end{align*}
 	With similar arguments as in Theorem~\ref{thm: convergence rates for diminishing lr schedules}
-	now result in we can bound the variance
+	we can bound the variance term
+	\begin{align*}
+		&\sum_{k=0}^{n-1}\lrSq_k^2 
+		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2\\
+		&=\sum_{k=0}^{n-1}\left(\frac{a}{k+b}\right)^4 
+		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2\\
+		&= \tilde{\stdBound}^2 a^4 (n+b)^{-2\sqrt{\hesseEV_1}a}
+		\underbrace{
+			\sum_{k=0}^{n-1}\frac{1}{(k+b)^4}(k+b+1)^{2\sqrt{\hesseEV_1} a}
+		}_{
+			\sim\int_b^{n+b}\frac{(x+1)^{2\sqrt{\hesseEV_1}a}}{x^4}dx
+		}\\
+		&\in O(n^{-3} + n^{-2\sqrt{\hesseEV_1}a})\tilde{\stdBound}^2.
+	\end{align*}
 \end{proof}
-\begin{remark}
-	While we do not get faster convergence, we get safer convergence as \(\hesseEV_1\)
-	is much smaller than \(\sqrt{\hesseEV_1}\) in general. And since momentum
-	is just a linear combination of gradients, we can not achieve anything better
-	than the BLUE for the expected value which converges at this rate. So
-	faster convergence is impossible.
-\end{remark}
+
+% \begin{remark}
+% 	While we do not get faster convergence, we get safer convergence as \(\hesseEV_1\)
+% 	is much smaller than \(\sqrt{\hesseEV_1}\) in general. And since momentum
+% 	is just a linear combination of gradients, we can not achieve anything better
+% 	than the BLUE for the expected value which converges at this rate. So
+% 	faster convergence is impossible.
+% \end{remark}
 
 
 
