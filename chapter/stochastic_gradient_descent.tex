@@ -1196,7 +1196,7 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	Okay so now we enact this idea and use the exponential function bound
 	\begin{align}
 		\nonumber
-		\left(\prod_{i=k}^{n-1}(1-\lr_i\hesseEV_j)\right)
+		\left(\prod_{i=k}^{n-1}(1-\lr_i\hesseEV_j)\right)^2
 		&\le\exp\left(-2\sum_{i=k}^{n-1}\lr_i\hesseEV_j\right)\\
 		\nonumber
 		&\le \exp\left(-2\hesseEV_j a[\log(n+b)-\log(k+b)]\right)\\
