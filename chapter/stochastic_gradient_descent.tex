@@ -1170,13 +1170,13 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	pairwise independent we can use our usual conditional independence argument
 	to get
 	\begin{align*}
-		\E\|\Weights_{n+1}-\minimum\|^2
-		&= \E[(V^T [\Weights_{n+1}-\minimum])^T(V^T[\Weights_{n+1}-\minimum])]\\
-		&= \sum_{j=1}^\dimension \E\langle\Weights_{n+1}-\minimum, v_j \rangle^2\\
+		\E\|\Weights_n-\minimum\|^2
+		&= \E[(V^T [\Weights_n-\minimum])^T(V^T[\Weights_n-\minimum])]\\
+		&= \sum_{j=1}^\dimension \E\langle\Weights_n-\minimum, v_j \rangle^2\\
 		&= \sum_{j=1}^\dimension
 		\begin{aligned}[t]
-			&\Bigg[\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right)^2 \langle \weights_0-\minimum, v_j\rangle^2\\
-			&+ \sum_{k=0}^n \lr_k^2 \left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)^2\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg].
+			&\Bigg[\left(\prod_{k=0}^{n-1}(1-\lr_k\hesseEV_j)\right)^2 \langle \weights_0-\minimum, v_j\rangle^2\\
+			&+ \sum_{k=0}^{n-1} \lr_k^2 \left(\prod_{i=k+1}^{n-1}(1-\lr_i\hesseEV_j)\right)^2\E[\langle\martIncr_{k+1},v_j\rangle^2]\Bigg].
 		\end{aligned}
 	\end{align*}
 	Note that since the eigenvalues are all different, we can not select \(\lr_n=\frac{1}{\hesseEV(n+1)}\)
@@ -1196,14 +1196,14 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	Okay so now we enact this idea and use the exponential function bound
 	\begin{align}
 		\nonumber
-		\left(\prod_{i=k+1}^{n-1}(1-\lr_i\hesseEV_j)\right)
-		&\le\exp\left(-2\sum_{i=k+1}^{n-1}\lr_i\hesseEV_j\right)\\
+		\left(\prod_{i=k}^{n-1}(1-\lr_i\hesseEV_j)\right)
+		&\le\exp\left(-2\sum_{i=k}^{n-1}\lr_i\hesseEV_j\right)\\
 		\nonumber
-		&\le \exp\left(-2\hesseEV_j a[\log(n+b)-\log(k+1+b)]\right)\\
+		&\le \exp\left(-2\hesseEV_j a[\log(n+b)-\log(k+b)]\right)\\
 		\label{eq: detour over exponential bound}
-		&= \left(\frac{n+b}{k+b+1}\right)^{-2\hesseEV_j a}.
+		&= \left(\frac{n+b}{k+b}\right)^{-2\hesseEV_j a},
 	\end{align}
-	Here we have used
+	where we have used
 	\begin{align*}
 		\sum_{i=k}^{n-1} \lr_i
 		= \int_{k}^{n} \frac{a}{\lfloor x\rfloor+b} dx
@@ -1214,24 +1214,24 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	our deterministic part by
 	\begin{align}
 		\nonumber
-		\sum_{j=1}^\dimension\left(\prod_{k=0}^n(1-\lr_k\hesseEV_j)\right)^2
+		\sum_{j=1}^\dimension\left(\prod_{k=0}^{n-1}(1-\lr_k\hesseEV_j)\right)^2
 		\langle \weights_0-\minimum, v_j\rangle^2
-		&\le \sum_{j=1}^\dimension \left(\frac{n+b}{b+1}\right)^{-2\hesseEV_j a}
+		&\le \sum_{j=1}^\dimension \left(\frac{n+b}{b}\right)^{-2\hesseEV_j a}
 		\langle\weights_0-\minimum, v_j\rangle^2\\
 		\label{eq: upper bound on convergence rate using smallest eigenvalue 1}
-		&\le \left(\frac{n+b}{b+1}\right)^{-2\hesseEV_1 a}\|\weights_0-\minimum\|^2\\
+		&\le \left(\frac{n+b}{b}\right)^{-2\hesseEV_1 a}\|\weights_0-\minimum\|^2\\
 		\nonumber
 		&\in O(n^{-2\hesseEV_1a})\|\weights_0-\minimum\|^2.
 	\end{align}
 	And our noise by
 	\begin{align}
 		\nonumber
-		&\sum_{j=1}^\dimension\sum_{k=0}^n \lr_k^2
-		\left(\prod_{i=k+1}^n(1-\lr_i\hesseEV_j)\right)^2
+		&\sum_{j=1}^\dimension\sum_{k=0}^{n-1} \lr_k^2
+		\left(\prod_{i=k+1}^{n-1}(1-\lr_i\hesseEV_j)\right)^2
 		\E[\langle\martIncr_{k+1},v_j\rangle^2]\\
 		\nonumber
 		&\le \sum_{j=1}^d
-			\sum_{k=0}^n \lr_k^2 \left(\tfrac{n+b}{k+b+1}\right)^{-2\hesseEV_j a}
+			\sum_{k=0}^{n-1} \lr_k^2 \left(\tfrac{n+b}{k+1+b}\right)^{-2\hesseEV_j a}
 			\E[\langle\martIncr_{k+1},v_j\rangle^2]
 		\\
 		\label{eq: upper bound on convergence rate using smallest eigenvalue 2}
