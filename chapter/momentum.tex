@@ -363,72 +363,86 @@ largest eigenvalue are far apart (i.e. the condition number \(\condition\) is
 high) this should be very useful.
 
 So how much do we gain? In other words what are the optimal rates of
-convergence? Since the plot looks quite symmetric it is quite intuitive that
-we only have to consider the largest and smallest eigenvalue. For now we
-can consider it as a lower bound:
-\begin{align}\label{eq: lower bound best heavy ball rates}
-	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-	\ge \min_{\lrSq}\min_{\momCoeff}
-	\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-\end{align}
-Now let us consider the inner minimum first. Let us inspect the claim
-\begin{align}\label{eq: optimal heavy ball momentum - ev representation}
-	\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-	= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}
-\end{align}
-In that case we are still (barely) in the complex case, therefore the rate
-of convergence is equal to \(\sqrt{\momCoeff}\), i.e.
-\begin{align*}
-	\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-	= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}
-\end{align*}
-Now let us wiggle around \(\momCoeff\) a bit. If we would increase it, then
-we are obviously increasing our rate since it is then still equal to
-\(\sqrt{\momCoeff}\) as we just expanded the size of the complex case. Now the
-question is what happens if we decrease it. Now by our selection of \(\momCoeff\)
-either the smallest or largest eigenvalue sits right at the edge of the real 
-case. If we can show that our absolute eigenvalue maximum is increasing if
-we move further into the real case (decrease \(\momCoeff\)), we would have
-proven that we can only become worse off doing so. This is annoyingly technical
-so it is covered in Lemma~\ref{lem-appdx: just at the border of complex case is
-best beta} in the appendix.
+convergence? 
 
-Now since both the largest and smallest eigenvalue are included in the complex
-case, we know that all eigenvalues in between must also be in the complex case
-which means that (\ref{eq: lower bound best heavy ball rates}) is an equality
-and
-\begin{align*}
-	\min_{\lrSq,\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-	= \min_{\lrSq}\max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}.
-\end{align*}
-Now we are just doing our balancing act  again, only with 
-\(\sqrt{\hesseEV_1},\sqrt{\hesseEV_\dimension}\) instead of
-\(\hesseEV_1,\hesseEV_\dimension\). But we know the solution to that already
-from (\ref{eq: optimal SGD lr eigenvalue representation}),
-which is
-\begin{align*}
-	\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}}
-\end{align*}
-%
-Since this makes both of them equally bad, we can plug this learning rate into
-either equation from (\ref{eq: optimal heavy ball momentum - ev representation})
-to get
-%
-\begin{align*}
-	\momCoeff_*=\left(1-\frac{2}{1+\sqrt{\kappa}}\right)^2
-\end{align*}
-%
-which results in the optimal rate of convergence of
-%
-\begin{align*}
-	\sqrt{\momCoeff_*} = 1-\frac{2}{1+\sqrt{\kappa}}.
-\end{align*}
-%
-And this is in fact \emph{equal} to our lower bound (not even up to a constant!) in
-Theorem~\ref{thm: strong convexity complexity bound}. So on quadratic functions
-we can not do any better without violating our assumptions about possible
-optimizing algorithms (Assumption~ \ref{assmpt: parameter in generalized linear
-hull of gradients}).
+\begin{lemma}[Optimal Parameter Selection]
+	For a given learning rate we have
+	\begin{align*}
+		\min_{\momCoeff}\max_{i=1,\dots, \dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+		= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}
+	\end{align*}
+	with 
+	\begin{align*}
+		\arg\min_{\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}
+	\end{align*}
+	Optimizing over the learning rate \(\lrSq\) as well we get the optimal rate
+	\begin{align*}
+		\sqrt{\momCoeff_*} = 1-\frac{2}{1+\sqrt{\kappa}}.
+	\end{align*}
+	for parameters
+	\begin{align*}
+		\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}}
+		\qquad
+		\momCoeff_*=\left(1-\frac{2}{1+\sqrt{\kappa}}\right)^2
+	\end{align*}
+\end{lemma}
+
+\begin{proof}
+	Since the plot looks quite symmetric it is quite intuitive that
+	we only have to consider the largest and smallest eigenvalue. For now we
+	can consider it as a lower bound:
+	\begin{align}\label{eq: lower bound best heavy ball rates}
+		\min_{\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+		\ge \min_{\momCoeff}
+		\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+	\end{align}
+	Let us inspect the claim
+	\begin{align}\label{eq: optimal heavy ball momentum - ev representation}
+		\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}
+	\end{align}
+	In that case we are still (barely) in the complex case, therefore the rate
+	of convergence is equal to \(\sqrt{\momCoeff}\), i.e.
+	\begin{align*}
+		\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+		= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}
+	\end{align*}
+	Now let us wiggle around \(\momCoeff\) a bit. If we would increase it, then
+	we are obviously increasing our rate since it is then still equal to
+	\(\sqrt{\momCoeff}\) as we just expanded the size of the complex case. Now the
+	question is what happens if we decrease it. Now by our selection of \(\momCoeff\)
+	either the smallest or largest eigenvalue sits right at the edge of the real 
+	case. If we can show that our absolute eigenvalue maximum is increasing if
+	we move further into the real case (decrease \(\momCoeff\)), we would have
+	proven that we can only become worse off doing so. This is annoyingly technical,
+	so it is covered in Lemma~\ref{lem-appdx: just at the border of complex case is
+	best beta} in the appendix.
+
+	Now since both the largest and smallest eigenvalue are included in the complex
+	case, we know that all eigenvalues in between must also be in the complex case
+	which means that (\ref{eq: lower bound best heavy ball rates}) is an equality
+	proving the first two claims.
+
+	Now we have to optimize over the learning rate \(\lrSq\). Doing our balancing
+	act again, only with \(\sqrt{\hesseEV_1},\sqrt{\hesseEV_\dimension}\) instead
+	of \(\hesseEV_1,\hesseEV_\dimension\) we get the same result as in
+	(\ref{eq: optimal SGD lr eigenvalue representation}), i.e.
+	\begin{align*}
+		\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}}
+	\end{align*}
+	%
+	Since this makes both of them equally bad. We can plug this learning rate into
+	either equation from (\ref{eq: optimal heavy ball momentum - ev representation})
+	to get the remaining claims about the optimal momentum \(\momCoeff_*\) and optimal
+	convergence rate \(\sqrt{\momCoeff_*}\).
+\end{proof}
+
+And this convergence rate is in fact \emph{equal} to our lower bound  in
+Theorem~\ref{thm: strong convexity complexity bound} (not even up to a
+constant!). So on quadratic functions we can not do any better without violating
+our assumptions about possible optimizing algorithms (Assumption~ \ref{assmpt:
+parameter in generalized linear hull of gradients}).
 
 \subsection{Why Consider Alternatives?}
 
@@ -449,8 +463,8 @@ gradient descent on the other hand the contraction factor is \(|1-\lr_*\hesseEV_
 for the eigenspace \(i\), which can be considerably better than the worst
 contraction factor 
 \[|1-\lr_*\hesseEV_\dimension|=|1-\lr_*\hesseEV_1|.\]
-To improve the convergence rate of the worst eigenspaces we have therefore
-sacrificed the (possibly excellent) convergence rate of all other eigenspaces.
+To improve the convergence rates of the worst eigenspaces we have therefore
+sacrificed the (possibly excellent) convergence rates of all other eigenspaces.
 
 \subsubsection{No General Convergence at these Rates}
 
@@ -486,7 +500,7 @@ Figure~\ref{fig: heavy ball counterexample}, we know the parameters \(\lrSq_*\)
 and \(\momCoeff_*\) which they used to explicitly write out the momentum recursion
 with \(\weights_{n+1}, \weights_{n}, \weights_{n-1}\). Assuming a three-cycle
 this left them with just three linear equations which results in the three-cycle
-displayed in the Figure. Since we start with zero momentum, one now just has to
+displayed in the Figure. Since we start with zero momentum, we just have to
 find a point to enter this cycle. Additional to solving this initialization
 problem, \textcite[pp. 93-94]{lessardAnalysisDesignOptimization2016} also show
 that this cycle is stable under noise (attractive).
@@ -1374,7 +1388,7 @@ SGD with Averaging}.
 		\end{pmatrix}
 		= \underbrace{\begin{pmatrix}
 			0 & 1\\
-			-\momCoeff_n & 1-\lrSq_n H + \momCoeff_n
+			-\momCoeff_n & 1 + \momCoeff_n -\lrSq_n H
 		\end{pmatrix}}_{=:\tilde{\momMatrix}_n}
 		\begin{pmatrix}
 			\theta_{n-1}\\
@@ -1385,23 +1399,7 @@ SGD with Averaging}.
 			\martIncr_{n+1}
 		\end{pmatrix}
 	\end{align*}
-	where the matrix is the same as without stochasticity. Interlacing the eigenspaces
-	of \(\theta_{n-1}\) with the eigenspaces of \(\theta_n\) again
-	\begin{align*}
-		V = \begin{pmatrix}
-			v_1 & 0 & \cdots & v_d & 0 \\
-			0 & v_1 & \cdots & 0 & v_d
-		\end{pmatrix},
-	\end{align*}
-	we therefore get
-	\begin{align*}
-		\tilde{\momMatrix}_n
-		= V \underbrace{\diag\left[\begin{pmatrix}
-			0 & 1 \\
-			-\momCoeff_n & 1+\momCoeff_n - \lrSq_n\hesseEV_i	
-		\end{pmatrix}_{i=1,\dots,\dimension}\right]}_{=\momMatrix_n}V^T
-		= \diag(R_n^{(1)}, \dots, R_n^{(\dimension)}).
-	\end{align*}
+	where the matrix is the same as without stochasticity.
 	Unrolling the iteration results in
 	\begin{align*}
 		\begin{pmatrix}
@@ -1453,16 +1451,35 @@ SGD with Averaging}.
 		+ \sum_{k=0}^n \lrSq_k^2 \left\|\prod_{j=k+1}^n \tilde{\momMatrix}_j\right\|^2
 		\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \tilde{\stdBound}^2}.
 	\end{align}
-	Using the fact that the operator norm is equal to its largest eigenvalue\footnote{
+	Interlacing the eigenspaces of \(\theta_{n-1}\) with the eigenspaces of
+	\(\theta_n\) again
+	\begin{align*}
+		V = \begin{pmatrix}
+			v_1 & 0 & \cdots & v_d & 0 \\
+			0 & v_1 & \cdots & 0 & v_d
+		\end{pmatrix},
+	\end{align*}
+	we get
+	\begin{align*}
+		\tilde{\momMatrix}_n
+		= V \underbrace{\diag\left[\begin{pmatrix}
+			0 & 1 \\
+			-\momCoeff_n & 1+\momCoeff_n - \lrSq_n\hesseEV_i	
+		\end{pmatrix}_{i=1,\dots,\dimension}\right]}_{=\momMatrix_n}V^T
+		= \diag(R_n^{(1)}, \dots, R_n^{(\dimension)}).
+	\end{align*}
+	So using the fact that the operator norm is equal to its largest eigenvalue\footnote{
 		Proof: \(
 			\|A\|
 			= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}
 			= \sup_{\|x\| =1} \sqrt{\sum_{i=1}^\dimension \hesseEV_i^2 x_i^2},
 			= \max_{i=1,\dots,\dimension} |\hesseEV_i|
 		\)
-	} and since the isometry property of an orthonormal basis change\footnote{
-		Proof: \(\|x\|^2 = x^Tx = x^TVV^Tx = (V^T x)^T V^Tx = \|V^T x\|^2\)
-	} transfers to operator norms, i.e.
+	}
+	% and since the isometry property of an orthonormal basis change\footnote{
+	% 	Proof: \(\|x\|^2 = x^Tx = x^TVV^Tx = (V^T x)^T V^Tx = \|V^T x\|^2\)
+	% } transfers to operator norms, i.e.
+	we get
 	\begin{align*}
 		\|\tilde{\momMatrix}_n\|=\|\momMatrix_n\|
 		=\max_{i=1,\dots, \dimension} \max\{|\momEV^{(i1)}|,|\momEV^{(i2)}|\},
@@ -1488,26 +1505,32 @@ SGD with Averaging}.
 		\right\}\\
 		&= \left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right) \qquad \text{ for } n \gg 0.
 	\end{align*}
-	Okay so using the same detour over the exponential as in the SGD chapter we get
+	Okay so using the same detour over the exponential as in the SGD chapter
+	(\ref{eq: detour over exponential bound}) we get
 	\begin{align*}
-		\Bigg\|\prod_{j=k+1}^n\tilde{\momMatrix}\ \Bigg\|^2
-		&\le \prod_{j=k+1}^n \left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right)
+		\Bigg\|\prod_{j=k}^{n-1}\tilde{\momMatrix}\ \Bigg\|^2
+		&\le \left(\prod_{j=k}^{n-1} \left(1-\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\right)^2
 		\qquad \text{ for } n \gg 0\\
-		&\lxle{(\ref{eq: detour over exponential bound})}
-		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a}.
+		&\le \exp\left(-2\sum_{j=k}^{n-1}\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\\
+		&\le \exp(-2a\sqrt{\hesseEV_1}[\log(n+b)-\log(k+b)])\\
+		&\le \left(\frac{n+b}{k+b}\right)^{-2\sqrt{\hesseEV_1} a}.
 	\end{align*}
 	\fxnote{Due to \(\lrSq^2\) this is not the same argument as we then have \(1/n^4\) in the
 	variance sum. Does this result in better than BLUE convergence? If yes, what is wrong?}
 	Plugging this inequality into (\ref{eq: mom recursion upper bound}) we
 	get
 	\begin{align*}
-		\E\|\Weights_{n+1}-\minimum\|^2
-		\le\left(\frac{n+b}{b+1}\right)^{-2\sqrt{\hesseEV_1}a}\|\weights_0 - \minimum\|^2
-		+ \sum_{k=0}^n\lrSq^2 
+		&\E\|\Weights_n-\minimum\|^2\\
+		&\le\underbrace{
+			\left(\frac{n+b}{b}\right)^{-2\sqrt{\hesseEV_1}a}\|\weights_0 - \minimum\|^2
+		}_{
+			=O(n^{-2\sqrt{\hesseEV_1}a})\|\weights_0-\minimum\|^2
+		}
+		+ \sum_{k=0}^{n-1}\lrSq_k^2 
 		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2
 	\end{align*}
-	The same arguments as in Theorem~\ref{thm: convergence rates for diminishing lr schedules}
-	now result in
+	With similar arguments as in Theorem~\ref{thm: convergence rates for diminishing lr schedules}
+	now result in we can bound the variance
 \end{proof}
 \begin{remark}
 	While we do not get faster convergence, we get safer convergence as \(\hesseEV_1\)
