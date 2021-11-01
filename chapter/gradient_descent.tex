@@ -3,7 +3,7 @@
 \chapter{Gradient Descent (GD)}\label{chap: gradient descent}
 
 One relatively obvious way to utilize the gradient information
-\(\nabla\Loss(\weights)\) provided by first order oracles, is to incrementally
+\(\nabla\Loss(\weights)\) provided by first order oracles is to incrementally
 move in the direction of steepest descent
 \parencite{cauchyMethodeGeneralePour1847}, i.e.
 %
@@ -19,12 +19,12 @@ equation (ODE)\footnote{
 %
 \begin{align*}
 	\dot{\weights}_n \approx \frac{\weights_{n+1} - \weights_n}{\lr}
-	= - \nabla \Loss(\weights_n).
+	= - \nabla \Loss(\weights_n),
 \end{align*}
 %
-If we view the learning rate as a time delta between times
-\(t_n\) and \(t_{n+1}\), which implies \(t_n = n\lr\). Then for
-\(\lr\to\infty\), we arrive at the ODE in time \(t\)
+if we view the learning rate as a time delta between times
+\(t_n\) and \(t_{n+1}\) with \(t_n = n\lr\). As then for
+\(\lr\to 0\) we arrive at the ODE in time \(t\)
 %
 \begin{align}\label{eq: velocity is gradient}
 	\tag{Gradient Flow}
@@ -32,7 +32,7 @@ If we view the learning rate as a time delta between times
 \end{align}
 %
 If you are familiar with Lyapunov functions you will not be surprised by the
-next argument:
+next argument, following from the Gradient Flow equation
 %
 \begin{align}\label{eq: gradient integral}
 	\Loss(\weights(t_1)) - \Loss(\weights(t_0))
@@ -48,11 +48,10 @@ which immediately implies
 \end{align*}
 implying convergence of \(\Loss(\weights(t))\). But it does not necessitate a
 convergent \(\weights(t)\) nor convergence to \(\inf_\weights
-\Loss(\weights)\).
-
-Before we begin let us note the three types of convergence we are interested in
+\Loss(\weights)\). This highlights why there are three different types of
+convergence we are interested in
 \begin{description}
-	\item[Convergence of the Weights]
+	\item[Convergence of the Weights] to a (the) minimum \(\minimum\)
 	\begin{align*}
 		\|\weights_n - \minimum\| \to 0,
 	\end{align*}
@@ -64,7 +63,7 @@ Before we begin let us note the three types of convergence we are interested in
 	\item[Convergence of the Gradient]
 	\begin{align*}
 		\|\nabla\Loss(\weights_n)\|
-		= \|\nabla\Loss(\weights_n) - \nabla\Loss(\minimum)\| \to 0
+		= \|\nabla\Loss(\weights_n) - \nabla\Loss(\minimum)\| \to 0.
 	\end{align*}
 \end{description}
 
@@ -85,13 +84,13 @@ using only the first order condition, i.e. by setting the first derivative to ze
 	\nabla T_2\Loss(\weights+x) = \nabla \Loss(\weights) + \nabla^2\Loss(\weights) x \xeq{!} 0
 \end{align}
 %
-we can find the minimum 
+we find the minimum 
 %
 \begin{align}\label{eq: newton minimum approx relative coords}
-	\hat{x} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights),
+	\hat{x} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights).
 \end{align}
 %
-if we assume our Hesse matrix \(\nabla^2 \Loss(\weights)\) exists and is
+If we assume our Hesse matrix \(\nabla^2 \Loss(\weights)\) exists and is
 positive definite (all eigenvalues positive) which also means it is invertible.
 The next equation explains itself if you plug (\ref{eq: newton minimum approx
 relative coords}) into it and compare it to (\ref{eq: Taylor approx derivative})
