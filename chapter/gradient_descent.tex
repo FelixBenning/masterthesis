@@ -7,18 +7,18 @@ One relatively obvious way to utilize the gradient information
 move in the direction of steepest descent
 \parencite{cauchyMethodeGeneralePour1847}, i.e.
 %
-\begin{align*}
+\begin{align}
+	\label{eq: gradient descent}
+	\tag{Gradient Descent}
 	\weights_{n+1} = \weights_n - \lr\nabla \Loss(\weights_n).
-\end{align*}
+\end{align}
 %
 Where \(\lr\) denotes the ``learning rate''. A useful way to look at this
 equation is to notice that it is the discretization of an ordinary differential
-equation (ODE)\footnote{
-	Using Newton's (dot) notation for the derivative.
-}
+equation (ODE)
 %
 \begin{align*}
-	\dot{\weights}_n \approx \frac{\weights_{n+1} - \weights_n}{\lr}
+	\frac{d}{dt}\weights_n \approx \frac{\weights_{n+1} - \weights_n}{\lr}
 	= - \nabla \Loss(\weights_n),
 \end{align*}
 %
@@ -28,11 +28,12 @@ if we view the learning rate as a time delta between times
 %
 \begin{align}\label{eq: velocity is gradient}
 	\tag{Gradient Flow}
-	\dot{\weights}(t) = -\nabla \Loss(\weights(t)).
+	\dot{\weights}(t) = \frac{d}{dt}\weights(t)= -(\nabla_\weights \Loss)(\weights(t)).
 \end{align}
 %
-If you are familiar with Lyapunov functions you will not be surprised by the
-next argument, following from the Gradient Flow equation
+That we are taking the gradient with respect to \(\weights\) will from now on be
+implied. If you are familiar with Lyapunov functions you will not be surprised
+by the next argument, following from the Gradient Flow equation
 %
 \begin{align}\label{eq: gradient integral}
 	\Loss(\weights(t_1)) - \Loss(\weights(t_0))
@@ -53,12 +54,12 @@ convergence we are interested in
 \begin{description}
 	\item[Convergence of the Weights] to a (the) minimum \(\minimum\)
 	\begin{align*}
-		\|\weights_n - \minimum\| \to 0,
+		\|\weights_n - \minimum\| \to 0 \qquad (n\to\infty),
 	\end{align*}
 	\item[Convergence of the Loss]
 	\begin{align*}
 		|\Loss(\weights) - \Loss(\minimum)|
-		=\Loss(\weights_n) - \Loss(\minimum) \to 0
+		=\Loss(\weights_n) - \Loss(\minimum) \to 0,
 	\end{align*}
 	\item[Convergence of the Gradient]
 	\begin{align*}
@@ -90,7 +91,7 @@ we find the minimum
 	\hat{x} = -(\nabla^2 \Loss(\weights))^{-1}\nabla \Loss(\weights).
 \end{align}
 %
-Assuming our Hesse matrix \(\nabla^2 \Loss(\weights)\) exists and is
+Assuming our Hessian \(\nabla^2 \Loss(\weights)\) exists and is
 positive definite (all eigenvalues are positive), which also means it is invertible.
 Plugging (\ref{eq: newton minimum approx relative coords}) into the
 following equation and comparing it to (\ref{eq: Taylor approx derivative})
@@ -152,7 +153,7 @@ that the diagonizability of \(\nabla^2 \Loss(\weights)\)
 %
 \begin{align}\label{eq: diagnalization of the Hesse matrix}
 	V \nabla^2 \Loss(\weights) V^T
-	= \diag(\hesseEV_1,\dots,\hesseEV_d), \qquad V=(v_1,\dots, v_d)
+	= \diag(\hesseEV_1,\dots,\hesseEV_\dimension), \qquad V=(v_1,\dots, v_\dimension)
 \end{align}
 %
 implies, that once we have selected the center \(\hat{\weights}\) and the
@@ -170,17 +171,17 @@ In that case the eigenvalues might be negative as well as positive representing
 a saddle point (cf. Figure~\ref{fig: visualize saddle point gd}), or all
 negative representing a maximum.
 
-Using the representation (\ref{paraboloid approximation of L}) of \(\Loss\) we
-can write the gradient at \(\weights\) as
+Taking the derivative of the representation (\ref{paraboloid approximation of
+L}) of \(\Loss\) we can write the gradient at \(\weights\) as
 %
 \begin{align}\label{eq: hesse representation of gradient}
 	\nabla \Loss(\weights)
 	=  \nabla^2 \Loss(\weights)(\weights-\hat{\weights})
-	\ (= -\nabla^2 \Loss(\weights)\hat{x})
+	\ (= -\nabla^2 \Loss(\weights)\hat{x}).
 \end{align}
 %
-But note that \(\hat{\weights}\) depends on \(\weights\), so we need to index both
-by \(n\) to rewrite gradient descent:
+But note that the vertex \(\hat{\weights}\) depends on \(\weights\), so we need
+to index both by \(n\) to rewrite gradient descent
 %
 \begin{align*}
 	\weights_{n+1} &= \weights_n - \lr\nabla \Loss(\weights_n)
@@ -192,34 +193,35 @@ transformation
 %
 \begin{align}\label{eq: Matrix GD Formulation}
 	\weights_{n+1} - \hat{\weights}_n
-	&= (\identity - \lr\nabla^2 \Loss(\weights_n) ) (\weights_n - \hat{\weights}_n).
+	&= (\identity - \lr\nabla^2 \Loss(\weights_n) ) (\weights_n - \hat{\weights}_n),
 \end{align}
-%
+where \(\identity\) denotes the identity.
 Taking a closer look at this transformation matrix we can use (\ref{eq:
-diagnalization of the Hesse matrix}) to see
+diagnalization of the Hessian}) to see
 %
 \begin{align*}
 	\identity - \lr\nabla^2 \Loss(\weights_n)
-	&= V(\identity - \lr\cdot\diag(\hesseEV_1,\dots,\hesseEV_d) )V^T \\
-	&= V\cdot\diag(1-\lr\hesseEV_1, \dots,1-\lr\hesseEV_d)V^T.
+	&= V(\identity - \lr\cdot\diag(\hesseEV_1,\dots,\hesseEV_\dimension) )V^T \\
+	&= V\cdot\diag(1-\lr\hesseEV_1, \dots,1-\lr\hesseEV_\dimension)V^T.
 \end{align*}
 %
-Now if we assume like \textcite{gohWhyMomentumReally2017}, that the second
-taylor approximation is accurate and thus that \(\nabla^2 \Loss(\weights)=H\) is a
-constant, then \(\hat{\weights}_n = \minimum\) is the real minimum and we get
+Now, if we assume like \textcite{gohWhyMomentumReally2017} that the second
+taylor approximation is accurate, and thus that \(\nabla^2 \Loss(\weights)=H\) is a
+constant, then \(\hat{\weights}_n = \minimum\) is the true minimum (if all
+eigenvalues are positive). And by induction we get
 %
 \begin{align}
 	\weights_n - \minimum
-	= V\cdot\diag[(1-\lr\hesseEV_1)^n,\dots,(1-\lr\hesseEV_d)^n] V^T (\weights_0 - \minimum)
+	= V\cdot\diag[(1-\lr\hesseEV_1)^n,\dots,(1-\lr\hesseEV_\dimension)^n] V^T (\weights_0 - \minimum).
 \end{align}
 %
-by induction. Decomposing the distance to the minimum \(\weights - \minimum\)
-into the eigenspaces of \(H\) we can see that each component scales
-exponentially on its own 
+Decomposing the distance to the minimum \(\weights - \minimum\) into the
+eigenspaces of \(H\), we can see that each component scales exponentially on its
+own 
 %
 \begin{align*}
 	\langle \weights_n -\minimum, v_i\rangle
-	= (1-\lr\hesseEV_i)^n \langle \weights_0 - \minimum, v_i\rangle
+	= (1-\lr\hesseEV_i)^n \langle \weights_0 - \minimum, v_i\rangle.
 \end{align*}
 %
 This is beautifully illustrated with interactive graphs in
@@ -229,30 +231,34 @@ This is beautifully illustrated with interactive graphs in
 
 \subsection{Negative Eigenvalues}\label{subsec: Negative Eigenvalues}
 
-Now if \(\hesseEV_i<0\), then \(1-\lr\hesseEV_i\) would be greater
-than one which would repel this component \(\langle \weights_0 - \minimum,
-v_i\rangle\) away from \(\minimum\). This is a good thing, since \(\minimum\)
-is a maximum in this component. This means we will walk down local minima and
-saddle points no matter the learning rate assuming  this component  was not
-zero to begin with. In case of a maximum this would mean that we would start
-right on top of the maximum, in case of a saddle point it implies starting on
-the rim such that one can not roll down either side.
+If our eigenvalues are not all positive and \(\hesseEV_i<0\), then
+\(1-\lr\hesseEV_i\) is greater than one. Which repels this component
+\(\langle \weights_0 - \minimum, v_i\rangle\) away from our vertex \(\minimum\).
+This is a good thing, since \(\minimum\) is a maximum in this component. This
+means we will walk down local minima and saddle points no matter the learning
+rate, assuming this component was not zero to begin with. In case of a maximum
+this would mean that we would start right on top of the maximum, in case of a
+saddle point it implies starting on the rim such that one can not roll down
+either side.
 
-But since we are ultimately interested in stochastic loss functions, the
-stochasticity would push us off these narrow equilibria. So being right on
-top of them is of little concern. But being close to zero in such a component
-still means slow movement away, since we are multiplying by it. This
-(Figure~\ref{fig: visualize saddle point gd}) is a possible explanation for the
-common observation in deep learning of ``long
-plateaus on the way down when the error hardly change[s], followed
-by sharp drops'' \parencite{sejnowskiUnreasonableEffectivenessDeep2020} when
-the exponential factor ramps up.
+Assuming a stochastic initialization (with zero probability on zero measure
+sets) we would start in these narrow equilibria with probability zero. So
+being right on top of them is of little concern. But being close to zero in such
+a component still means slow movement away from these equilibria, since we are
+merely multiplying factors to this initially small distance. This fact,
+illustrated by Figure~\ref{fig: visualize saddle point gd}, is a possible
+explanation for the common observation in deep learning of ``long plateaus on
+the way down when the error hardly change[s], followed by sharp drops''
+\parencite{sejnowskiUnreasonableEffectivenessDeep2020} when the exponential
+factor ramps up.
 %
 \begin{figure}[h]
 	\centering
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_saddlepoint.pdf_tex}
-	\caption{Start=\(0.001v_1+4v_2\), \(\hesseEV_1=-1, \hesseEV_2=2\), learning rate\(=0.34\)}
+	\caption{Losssurface of \(\Loss\) with vertex at zer and eigenvalues of its
+	Hessian being \(\hesseEV_1=-1, \hesseEV_2=2\). GD with start
+	\(0.001v_1+4v_2\) and learning rate \(\lr=0.34\)}
 	\label{fig: visualize saddle point gd}
 \end{figure}
 
@@ -263,60 +269,61 @@ Since negative eigenvalues repel, let us consider strictly positive eigenvalues
 now and assume that our eigenvalues are already sorted
 %
 \begin{align}
-	0 < \hesseEV_1 \le \dots \le \hesseEV_d.
+	0 < \hesseEV_1 \le \dots \le \hesseEV_\dimension.
 \end{align}
 %
-Then for positive learning rates all exponentiation bases are smaller than one
+Then for positive learning rates \(\lr\) all exponentiation bases are smaller
+than one
 %
 \begin{align*}
-	1-\lr\hesseEV_d \le \dots \le 1-\lr\hesseEV_1 \le 1.
+	1-\lr\hesseEV_\dimension \le \dots \le 1-\lr\hesseEV_1 \le 1.
 \end{align*}
 %
 But to ensure convergence we also need that all of them are larger than \(-1\).
 This leads us to the condition
 \begin{align}\label{eq: learning rate restriction (eigenvalue)}
-	0< \lr < 2/\hesseEV_d
+	0< \lr < \tfrac{2}{\hesseEV_\dimension}.
 \end{align}
 %
-Selecting \(\lr = 1/\hesseEV_d\) reduces the exponentiation base (``rate'') of the
-corresponding eigenspace to zero ensuring convergence in one step.
-But if we want to maximize the convergence rate of \(\weights_n\), this is not
-the best selection.
+Selecting \(\lr = \tfrac{1}{\hesseEV_\dimension}\) reduces the exponentiation
+base (``rate'') of the corresponding eigenspace to zero ensuring convergence in
+one step. But if we want to maximize the convergence rate of \(\weights_n\),
+this is not the best selection.
 
-We can reduce the rates of the other eigenspaces if we
-increase the learning rate further, getting them closer to zero. At this point
-we are of course overshooting zero with the largest eigenvalue, so we only
-continue with this until we get closer to \(-1\) with the largest eigenvalue
-than we are to \(1\) with the smallest:
+We can reduce the rates of the other eigenspaces if we increase the learning
+rate further, getting their rates closer to zero. At this point we are of course
+overshooting zero with the largest eigenvalue, so we only continue with this
+until we get closer to \(-1\) with the largest eigenvalue than we are to \(1\)
+with the smallest. In other words the overall convergence rate is
 %
 \begin{align*}
-	\rate(\lr)=\max_{i} |1-\lr\hesseEV_i| = \max\{|1-\lr\hesseEV_1|, |1-\lr\hesseEV_d|\}.
+	\rate(\lr)=\max_{i} |1-\lr\hesseEV_i| = \max\{|1-\lr\hesseEV_1|, |1-\lr\hesseEV_\dimension|\}.
 \end{align*}
 %
 This is minimized when
 %
 \begin{align*}
-	1-\lr\hesseEV_1 = \lr\hesseEV_d -1,
+	1-\lr\hesseEV_1 = \lr\hesseEV_\dimension -1,
 \end{align*}
 %
-implying an optimal learning rate
+implying an optimal learning rate of
 %
 \begin{align}\label{eq: optimal SGD lr eigenvalue representation}
-	\lr^* = \frac{2}{\hesseEV_1 + \hesseEV_d}.
+	\lr^* = \frac{2}{\hesseEV_1 + \hesseEV_\dimension}.
 \end{align}
 %
-If \(\hesseEV_1\) is much smaller than \(\hesseEV_d\), this leaves \(\lr\)
+If \(\hesseEV_1\) is much smaller than \(\hesseEV_\dimension\), this leaves \(\lr\)
 at the upper end of the interval in (\ref{eq: learning rate restriction
-(eigenvalue)}). And the optimal convergence rate
+(eigenvalue)}). The optimal convergence rate
 %
 \begin{align*}
 	\rate(\lr^*)
 	% &= 1-\lr^* \hesseEV_1
 	= 1 - \frac{2}{1+\condition}
-	\qquad \condition:=\hesseEV_d/\hesseEV_1 \ge 1
+	\qquad \condition:=\hesseEV_\dimension/\hesseEV_1 \ge 1
 \end{align*}
 %
-becomes close to one if the condition number \(\condition\) is large.
+becomes close to one if the ``condition number'' \(\condition\) is large.
 If all the eigenvalues are the same on the other hand, the condition number
 becomes one and the rate is zero, implying instant convergence. This is not
 surprising if we recall our visualization in Figure~\ref{fig: 2d paraboloid}.
@@ -325,19 +332,19 @@ the gradient points right at the center.
 
 \subsection{Generalizing Assumptions}
 
-To prove convergence in a more general setting we need to formulate the assumptions
-we made about the eigenvalues of the hesse matrix without actually requiring
-the existence of a hesse matrix if possible. 
+To prove convergence in a more general setting, we need to formulate the assumptions
+we made about the eigenvalues of the Hessian without actually requiring
+the existence of a Hessian if possible. 
 \begin{definition}
 	We call a matrix \(A\) ``positive definite'', if
 	\begin{align*}
 		\langle x, Ax \rangle \ge 0 \quad \forall x
 	\end{align*}
-	which is equivalent to \(A\) having only positive eigenvalues, as can be seen
+	which is equivalent to \(A\) having only non-negative eigenvalues, as can be seen
 	by testing the definition with eigenvectors and utilizing linearity to generalize.
 	We denote
 	\begin{align*}
-		A \precsim B \iff B-A \text{ is positive definite}
+		A \precsim B :\iff B-A \text{ is positive definite}.
 	\end{align*}
 \end{definition}
 
@@ -348,28 +355,31 @@ not require the existence of a hesse matrix but is equivalent to its positive
 definiteness (non-negative eigenvalues) if it exists.
 %
 \begin{definition}[Convexity]\label{def: convexity}
-	A function \(f:\reals^\dimension\to \reals\) is called \emph{convex}, if 
+	A function \(f:\reals^\dimension\to \reals\) is called ``convex'', if 
 	\begin{align}\label{eq: convex combination definition}
 		f(x + \hesseEV(y-x)) \le f(x) + \hesseEV (f(y)-f(x))
 		\qquad \forall x,y\in\reals^\dimension,\ \forall\hesseEV\in[0,1].
 	\end{align}
-	It can be shown \parencite[e.g.][Prop. 1.1]{bubeckConvexOptimizationAlgorithms2015} that this
-	definition is equivalent to non-emptyness of the set of subgradients for all \(x\)
+	It can be shown \parencite[e.g.][Prop.
+	1.1]{bubeckConvexOptimizationAlgorithms2015} that this definition is
+	equivalent to non-emptyness of the set of subgradients for all \(x\)
 	\begin{align}\label{eq: subgradient definition}
-		\partial f(x) = \{
-			G \in\reals^\dimension: f(x) + \langle G, y-x\rangle \le f(y)
+		\partial f(x) \coloneqq \{
+			g \in\reals^\dimension: f(x) + \langle g, y-x\rangle \le f(y)
 			\quad \forall y\in\reals^\dimension
 		\}.
 	\end{align}
 	If \(f\) is differentiable and convex, then the gradient \(\nabla f\) is in
 	this set of subgradients \parencite[e.g.][Prop.
-	1.1]{bubeckConvexOptimizationAlgorithms2015} and therefore makes it nonempty.
-	Which means that for differentiable \(f\) the statement
+	1.1]{bubeckConvexOptimizationAlgorithms2015} and therefore makes it non-empty.
+	This means that for differentiable \(f\) the statement
 	\begin{align*}
 		f(x) + \langle\nabla f(x), y-x\rangle \le f(y)\qquad \forall x,y\in\reals^\dimension
 	\end{align*}
-	is another possible definition. If \(f\) is twice differentiable then another
-	equivalent statement is \parencite[e.g.][Theorem 2.1.4]{nesterovLecturesConvexOptimization2018}
+	is another possible definition. If \(f\) is twice differentiable, then another
+	equivalent statement \parencite[e.g.][Theorem
+	2.1.4]{nesterovLecturesConvexOptimization2018} is the positive definiteness
+	of \(\nabla^2 f\)
 	\begin{align*}
 		0\precsim\nabla^2 f.
 	\end{align*}
@@ -380,8 +390,9 @@ definiteness (non-negative eigenvalues) if it exists.
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_convexity.pdf_tex}
 	\caption{
-		Visualize Convexity Definitions: We can see that a linear combination
-		of two function values will stay above the linear combination of its inputs
+		A visualization of convexity definitions for a function plotted in blue.
+		We can see that a convex combination of two function values will stay
+		above the convex combination of its inputs
 		(\ref{eq: convex combination definition}) and that there is a slope inducing
 		a line which touches the function in some point and stays below it
 		(\ref{eq: subgradient definition}).
@@ -391,21 +402,21 @@ definiteness (non-negative eigenvalues) if it exists.
 %
 \subsubsection{Strong Convexity and Lipschitz Continuous Gradient}
 
-If you recall how the rate of convergence was related to the condition number
-\(\hesseEV_\dimension/\hesseEV_1 =\condition\), then it is not surprising that
+If you recall how the rate of convergence is related to the condition number
+\(\condition:=\hesseEV_\dimension/\hesseEV_1\), then it is not surprising that
 the lack of a lower and upper bound will have us struggle to get convergence as
 \(\hesseEV_\dimension\) can be arbitrarily large and \(\hesseEV_1\) arbitrarily
 small. To get similar convergence results we have to assume something like
 %
 \begin{align}\label{eq: upper lower bound on hesse matrix}
-	\lbound \identity \precsim \nabla^2 \Loss(\weights) \precsim \ubound \identity.
+	\lbound \identity \precsim \nabla^2 \Loss(\weights) \precsim \ubound \identity, \qquad \lbound,\ubound >0.
 \end{align}
 %
 We will see that the lower bound is not necessary to get convergence of the
 loss function, but it is necessary to get convergence of the weights. It is
 also necessary for a linear\footnote{
-	In the Numerical Analysis, exponential rate of
-	convergence is called ``linear convergence'' because the relationship
+	In numerical analysis  ``exponential rate of convergence'' is usually called
+	``linear convergence'' because the relationship
 	\[
 		\|\weights_{n+1} - \minimum\| \le c \|\weights_n - \minimum\|
 	\]
@@ -416,17 +427,19 @@ also necessary for a linear\footnote{
 	\]
 	This is likely because quadratic convergence (\(q=2\)) already results in an ``actual
 	rate of convergence'' of \(c^{\left(2^n\right)}\) which is double exponential and
-	repeated application of \(\exp\) is annoying to write, so writers prefer the
-	recursive notation above which motivates this seemingly peculiar naming.
-	Slower convergence orders are referred to as ``sub-linear'' convergence.
+	repeated application of the exponential function is annoying to write, so
+	writers prefer the recursive notation above which motivates this seemingly
+	peculiar naming. Slower convergence orders are referred to as ``sub-linear''
+	convergence.
 }
 rate of convergence. When it comes to the upper bound on the other hand recall
-that we have used it to bound the learning rate, ensuring that
+that we use it to bound the learning rate, ensuring that
 \(1-\lr\hesseEV_\dimension\) is larger than \(-1\). If we did not have an upper
-bound then we could not guarantee this ``stability'' of gradient descent. Now
-we do not want to assume the hesse matrix exists so let us integrate (\ref{eq:
+bound, then we could not guarantee this ``stability'' of gradient descent.
+
+As we do not want to assume the Hessian exists let us integrate (\ref{eq:
 upper lower bound on hesse matrix}) and use the constants to make sure that we
-have equality of the functions and derivatives in \(\weights\), then we get
+have equality of the functions and derivatives in \(\weights\). Then we get
 \begin{align}\label{eq: bregman divergence upper and lower bound}
 	\frac{\lbound}{2}\| \theta - \weights\|^2
 	\le \underbrace{
@@ -435,15 +448,15 @@ have equality of the functions and derivatives in \(\weights\), then we get
 	\le \frac{\ubound}{2}\| \theta - \weights\|^2.
 \end{align}
 The ``Bregman Divergence'' is the distance between the real function and its first
-taylor approximation. If we would move the first taylor approximation from the
+Taylor approximation. If we move the first Taylor approximation from the
 middle to the sides on the other hand, this represents a quadratic upper and lower
 bound on \(\Loss\) as illustrated in Figure~\ref{fig: visualize strong
-convexity}. For \(\lbound=0\) we get the definition of convexity back.
+convexity}. For \(\lbound=0\) we get the definition of convexity again.
 \begin{definition}\label{def: strong convexity}
 	A function \(\Loss\) is \(\lbound\)-\emph{strongly convex} for some
-	\(\lbound>0\), if for all \(x,y\)
+	\(\lbound>0\), if for all \(x,y\in\reals^\dimension\)
 	\begin{align*}
-		\Loss(x) + \langle \nabla \Loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \Loss(y)
+		\Loss(x) + \langle \nabla \Loss(x), y-x\rangle + \frac{\lbound}{2}\|y-x\|^2 \le \Loss(y).
 	\end{align*}
 \end{definition}
 
@@ -453,7 +466,7 @@ the operator norm is equal to the largest absolute eigenvalue
 	\|A\| := \sup_{\|x\| =1} \|Ax\|
 	= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}
 	= \sup_{\|x\| =1} \sqrt{\sum_{i=1}^\dimension \hesseEV_i^2 x_i^2},
-	= \max_{i=1,\dots,\dimension} |\hesseEV_i|
+	= \max_{i=1,\dots,\dimension} |\hesseEV_i|,
 \end{align*}
 where we have used the orthonormal basis of eigenvectors \((v_i)_i\) with
 eigenvalues \((\hesseEV_i)_i\) of a (symmetric) matrix A to represent a point
@@ -464,7 +477,7 @@ eigenvalues \((\hesseEV_i)_i\) of a (symmetric) matrix A to represent a point
 As we have no negative eigenvalues in the convex case, the upper bound on the
 hesse matrix is equivalent to a bound on its operator norm. And since a
 bounded derivative is equivalent to Lipschitz continuity of the function itself
-(cf. Lemma~\ref{lem-appendix: lipschitz and bounded derivative}) another way
+(cf. Lemma~\ref{lem-appendix: lipschitz and bounded derivative}), another way
 to express our upper bound is by requiring Lipschitz continuity of the gradient
 \(\nabla \Loss\). Under convexity Lipschitz continuity and our upper bound are
 in fact equivalent.
@@ -498,7 +511,7 @@ in fact equivalent.
 		differentiable, convex functions with an \(\ubound\)-Lipschitz continuous
 		\(p\)-th derivative
 		\item[{\(\strongConvex[q,p]{\lbound}{\ubound}\)}] the \(\lbound\)-strongly convex
-		functions from \(\lipGradientSet[q,p]{\ubound}\).
+		functions from \(\lipGradientSet[q,p]{\ubound}\)
 	\end{description}
 \end{definition}
 
@@ -990,7 +1003,7 @@ That such a convex region exists follows from the existence of a minimum of
 eigenvalues. And continuity of the second derivative allows us to extend that to 
 a local ball around the minimum. Eigenvalues equal to zero
 are a bit of an issue, but if they become negative in some epsilon ball
-then moving in that direction would lead us further down. Which is a contradiction
+then moving in that direction would lead us further down. This is a contradiction
 to our assumption that we created a ball around the minimum of \(\Loss\).
 
 The statement that we are being pushed out of the non-convex regions is a bit
@@ -1388,11 +1401,11 @@ vertex of a quadratic function. This is nice if the vertex is a minimum
 or maximum. Additionally the method becomes unstable (impossible) for small 
 (zero) eigenvalues, since then the hesse matrix is hard to numerically invert (no
 longer invertible).
-On top of these fundamental problems, the storage of the Hesse matrix requires
+On top of these fundamental problems, the storage of the Hessian requires
 \(O(\dimension^2)\) space already and its inversion takes \(O(\dimension^3)\)
 time which is infeasible for high dimensional data, considering that gradient
 descent will do \(O(\dimension^2)\) steps while the Newton-Raphson method does
-one inversion. Lastly there are issues obtaining the Hesse matrix in a stochastic
+one inversion. Lastly there are issues obtaining the Hessian in a stochastic
 setting.
 
 So the difficulty in creating a second order method lies in addressing all these
