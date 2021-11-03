@@ -385,7 +385,7 @@ Iteration towards the optimum).
 While we have proven SGD behaves roughly like GD for small learning rates, we
 are not really that interested in how close SGD is to GD but rather how good it
 is at optimizing \(\Loss\). So to build some intuition let us consider a
-quadratic Loss function again before we get to general convex functions.
+quadratic loss function again before we get to general convex functions.
 Using the same trick we used in Section~\ref{sec: visualize gd} 
 \begin{align*}
 	\nabla\Loss(\weights)
@@ -530,7 +530,7 @@ and thus
 	&= \E\|V^T(\Weights_{n+1} - \minimum)\|^2
 	= \sum_{j=1}^\dimension \E\langle\Weights_{n+1}-\minimum, v_j\rangle^2.
 \end{align*}
-So if \(V\) are the eigenvectors of our hesse matrix \(H\) we get
+So if \(V\) are the eigenvectors of our Hessian \(H\) we get
 \begin{align*}
 	\langle \Weights_{n+1}-\minimum, v_j \rangle
 	&\xeq{(\ref{eq: recursive SGD formula in the quadratic case})} (1-\lr_n\lambda_j)\langle\Weights_n-\minimum, v_j\rangle
@@ -640,7 +640,7 @@ dimension \(\dimension\).
 Armed with this norm, we can now tackle our problem again.
 
 \begin{theorem}\label{thm: optimal rates quadratic case}
-	Let \(\Loss\) be a quadratic Loss function and assume
+	Let \(\Loss\) be a quadratic loss function and assume
 	\begin{align*}
 		\E\|\martIncr\|_{V,\infty}^2
 		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension,
@@ -900,7 +900,7 @@ Armed with this norm, we can now tackle our problem again.
 \end{remark}
 \begin{remark}
 	For \(\condition=1\) we enter the asymptotic phase immediately as GD would
-	converge in one step. This is the the case in Subsection~\ref{subsec:
+	converge in one step. This is the case in Subsection~\ref{subsec:
 	variance reduction}.
 \end{remark}
 
@@ -1023,7 +1023,7 @@ case.
 			\frac{2}{\ubound+\lbound}
 		\right\}.
 	\end{align}
-	So we still want to ``max out our learing rate'' and use
+	So we still want to ``max out our learning rate'' and use
 	\(\lr_n=\tfrac{2}{\ubound+\lbound}\) if
 	\begin{align*}
 		2\stdBound^2 \le \E\|\Weights_n - \minimum\|^2.
@@ -1127,7 +1127,7 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 \subsection{Diminishing Learning Rate Schedules}
 
 \begin{theorem}\label{thm: convergence rates for diminishing lr schedules}
-	For a quadratic and convex Loss \(\Loss\) selecting the learning rate
+	For a quadratic and convex loss \(\Loss\) selecting the learning rate
 	schedule
 	\begin{align*}
 		\lr_n = \frac{a}{n+b}	
@@ -1298,7 +1298,7 @@ the learning rates but with more explicit bounds.
 \end{theorem}
 \begin{proof}
 	We will prove the statement by induction. The induction start is covered by
-	definition of \(\nu\). For the induction step we ues Lemma~\ref{lem: SGD
+	definition of \(\nu\). For the induction step we use Lemma~\ref{lem: SGD
 	bound with noise} for which we need \(\lr \ge \tfrac{2}{\ubound+\lbound}\)
 	(which is ensured by our requirement on \(b\)) and define \(\tilde{n}=n+b\)
 	for
@@ -1475,7 +1475,7 @@ in the classical convex loss function setting (Section~\ref{sec: convex converge
 as we did in Lemma~\ref{lem: SGD bound with noise} for strongly convex functions.
 
 \textcite{nemirovskiRobustStochasticApproximation2009} showed that the approach
-developed to deal with non lipschitz continuous gradients and subgradients (cf.
+developed to deal with non Lipschitz continuous gradients and subgradients (cf.
 Subsection~\ref{subsec: subgradient method}) can be applied directly to the
 stochastic setting. The price for this generality is a greatly reduced
 convergence speed.
@@ -1581,7 +1581,7 @@ This minimization results in the following theorem
 \end{theorem}
 
 While this approach helps us lose the strong convexity assumption, which might
-ensure decent convergence rates along eigenspaces of the hesse matrix with
+ensure decent convergence rates along eigenspaces of the Hessian with
 small or zero eigenvalues, it is in a sense much more dependent on the convexity
 of the loss function \(\Loss\) as our averaging of weights is only a
 guaranteed improvement because of it. While Gradient Descent should work

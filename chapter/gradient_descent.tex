@@ -58,7 +58,7 @@ convergence we are interested in
 	\end{align*}
 	\item[Convergence of the Loss]
 	\begin{align*}
-		|\Loss(\weights) - \Loss(\minimum)|
+		|\Loss(\weights_n) - \Loss(\minimum)|
 		=\Loss(\weights_n) - \Loss(\minimum) \to 0,
 	\end{align*}
 	\item[Convergence of the Gradient]
@@ -232,7 +232,7 @@ This is beautifully illustrated with interactive graphs in
 \subsection{Negative Eigenvalues}\label{subsec: Negative Eigenvalues}
 
 If our eigenvalues are not all positive and \(\hesseEV_i<0\), then
-\(1-\lr\hesseEV_i\) is greater than one. Which repels this component
+\(1-\lr\hesseEV_i\) is greater than one. This repels this component
 \(\langle \weights_0 - \minimum, v_i\rangle\) away from our vertex \(\minimum\).
 This is a good thing, since \(\minimum\) is a maximum in this component. This
 means we will walk down local minima and saddle points no matter the learning
@@ -279,7 +279,7 @@ than one
 	1-\lr\hesseEV_\dimension \le \dots \le 1-\lr\hesseEV_1 \le 1.
 \end{align*}
 %
-But to ensure convergence we also need that all of them are larger than \(-1\).
+But to ensure convergence we also need all of them to be larger than \(-1\).
 This leads us to the condition
 \begin{align}\label{eq: learning rate restriction (eigenvalue)}
 	0< \lr < \tfrac{2}{\hesseEV_\dimension}.
@@ -499,8 +499,11 @@ in fact equivalent.
 	\centering
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_strong_convexity.pdf_tex}
-	\caption{Strong convexity provides a tighter lower bound than convexity
-	while Lipschitz continuity of the gradient provides an upper bound.}
+	\caption{
+		Strong convexity provides a tighter lower bound than convexity
+		while Lipschitz continuity of the gradient provides an upper bound, visualized
+		for a function plotted in blue.
+	}
 	\label{fig: visualize strong convexity}
 \end{figure}
 %
@@ -1011,7 +1014,7 @@ dubious as we could start right on top of local maxima or rims of saddle points.
 But as we are ultimately interested in stochastic gradient descent, these zero
 measure areas are of little concern. But as we already found out in
 Subsection~\ref{subsec: Negative Eigenvalues}, starting close to such a feature
-increases the amount of time it takes for us to escape that area. Which means
+increases the amount of time it takes for us to escape that area. This means
 we can not really provide an upper bound on the time it takes to end up in
 a locally convex area, as we can arbitrarily increase the escape time by
 setting the starting point closer and closer to the local maxima or rim of a
@@ -1047,7 +1050,7 @@ Since we can not guarantee a monotonic decrease with subgradients, the name
 average all the weights. You can either look into \textcite[Section
 2.2.3]{nesterovLecturesConvexOptimization2018} or \textcite[Section
 2.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
-treatment or wait til Section~\ref{sec: SGD with Averaging} where we use
+treatment or wait until Section~\ref{sec: SGD with Averaging} where we use
 the same proof technique in a more general stochastic setting. The convergence
 rate decreases to
 \begin{align*}
@@ -1067,7 +1070,7 @@ well. But the lower bound on our gradient uses the current loss delta. And if
 our loss function is really flat, then the loss difference might already be
 really small even if we are still far away in parameter space.
 
-Strong Convexity prevents this by requiring a minimum of curvature (cf.
+Strong convexity prevents this by requiring a minimum of curvature (cf.
 Figure~\ref{fig: visualize strong convexity}). With it we can provide a lower
 bound of the gradient using the weight difference directly
 \begin{align}
@@ -1184,10 +1187,10 @@ more work we can actually achieve the same rates.
 		\le \tfrac\ubound{2} \| \weights_n - \minimum\|^2.
 	\end{align*}
 	To get (\ref{eq: gd strong convexity optimal rate}) we simply have to plug
-	in the presumed optimal learning rate \(\lr=2/(\ubound+\lbound)\) into
-	our general rate and show that the rate is still positive which means that
+	in the assumed optimal learning rate \(\lr=2/(\ubound+\lbound)\) into
+	our general rate and show that the rate is still positive. This means that
 	we have not overshot zero, which means that the upper bound on our learning
-	rate which we presume to be optimal is binding:
+	rate, we assume to be optimal, is binding:
 	\begin{align*}
 		\left(1- 4 \frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)
 		= \frac{(\ubound^2 + 2\ubound\lbound + \lbound^2) - 4 \ubound\lbound}{(\ubound+\lbound)^2}
@@ -1836,7 +1839,7 @@ the sign)
 	+ 1  && i <d
 \end{align*}
 %
-Which means that for a solution \(\) of the quadratic equation
+This means that for a solution \(\) of the quadratic equation
 \begin{align}\label{eq: coloring solution quadratic equation}
 	0&= x^2 - 2\frac{\condition+1}{\condition -1}x + 1,
 \end{align}
@@ -1851,7 +1854,7 @@ Unfortunately neither of the solutions
 	&= \frac{(\sqrt{\condition}\pm 1)^2}{(\sqrt{\condition}-1)(\sqrt{\condition}+1)}
 \end{align*}
 %
-is a solution to the last equation. Which is why we are going to formulate the
+is a solution to the last equation. This is why we are going to formulate the
 following theorem only for \(\dimension=\infty\)\footnote{
 	For large dimensions the real solution seems to be almost
 	indistinguishable from the limiting case (e.g. \(\dimension=40,
