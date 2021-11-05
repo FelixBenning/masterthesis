@@ -126,11 +126,12 @@ of which the expected value is the gradient of the Risk \(\Loss\)\footnote{
 If we were to reuse data, then we might argue we are really picking samples
 from \(\dist_\sample\) not \(\dist\) and thus our results of convergence would
 apply to \(\Loss_\sample\) instead of \(\Loss\). This would force us to use
-these triangle inequality upper bounds again. Which, as of writing, are often so
-much worse, that (even when the number of iterations go to infinity) our upper
-bound is worse than if we had stopped the iteration at the number of samples
-\(\sampleSize\) and used the bounds without the triangle inequality\footnote{
-	E.g. \textcite{hardtTrainFasterGeneralize2016} use their bounds to prove that
+these triangle inequality upper bounds again. Which, as of writing, are often
+much worse. For example so much worse, that (even when the number of iterations go to
+infinity) the upper bound is worse than if we had stopped the iteration at the
+number of samples \(\sampleSize\) and used the bounds without the triangle
+inequality\footnote{
+	\textcite{hardtTrainFasterGeneralize2016} use their bounds to prove that
 	the averaging algorithm discussed in Section~\ref{sec: SGD with Averaging}
 	Theorem~\ref{thm: optimal averaging rates} converges with rate
 	\begin{align*}
@@ -175,16 +176,18 @@ only be valid for one gradient step which is obviously ridiculous.
 
 To shorten notation we will assume that the gradient is always meant
 with respect to \(\weights\) unless otherwise stated.
-We define \emph{Stochastic Gradient Descent} as
+We define ``Stochastic Gradient Descent'' as
 %
-\begin{align*}
+\begin{align}
+	\tag{SGD}
 	\Weights_{n+1}
 	&= \Weights_n - \lr_n\nabla\loss(\Weights_n, X_{n+1},Y_{n+1})\\
+	\nonumber
 	&= \Weights_n - \lr_n\nabla\Loss(\Weights_n)
 	+ \lr_n\underbrace{
 		[\nabla\Loss(\Weights_n) - \nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})]
 	}_{=:\martIncr_{n+1}}.
-\end{align*}
+\end{align}
 Where \(\martIncr_n\) are martingale increments for the filtration
 \begin{align*}
 	\filtration_n :=\sigma((X_k, Y_k): k\le n )
@@ -205,7 +208,7 @@ integral equation
 \begin{align*}
 	\weights(t) =  \weights_0 -\int_{0}^{t}\nabla\Loss(\weights(s))ds.
 \end{align*}
-Its Euler discretization is gradient descent 
+Recall its Euler discretization is gradient descent 
 \begin{align*}
 	\weights_{t_{n+1}}:=\weights_{n+1}
 	= \weights_n - \lr_n \nabla\Loss(\weights_n),
@@ -213,9 +216,9 @@ Its Euler discretization is gradient descent
 where
 \begin{align*}
 	0=t_0 \le \dots \le t_N= T \quad \text{with} \quad t_{n+1}-t_n=\lr_n
-	\quad \text{and}\quad \lr:=\max_n \lr_n
+	\quad \text{and}\quad \lr:=\max_n \lr_n.
 \end{align*}
-and constant learning rate \(\lr\) represents an equidistant discretization.
+A constant learning rate \(\lr\) represents an equidistant discretization.
 Since \(\nabla\Loss\) is Lipschitz continuous, the local discretization error
 \begin{align*}
 	\|\weights(\lr)  - \weights_\lr \|
@@ -353,7 +356,7 @@ and therefore ends up in its attraction areas. So we also need
 \(\lr_k \to 0\). How fast it needs to vanish depends on the amount of (bounded)
 moments we have on \(\martIncr_k\) \parencite[p. 110]{kushnerStochasticApproximationAlgorithms1997}.
 If we only have bounded second moments as we have assumed in Theorem~\ref{thm:
-distance SGD vs GD} then we get the classic Stochastic Approximation conditions
+distance SGD vs GD}, then we get the classic Stochastic Approximation conditions
 on the learning rate
 \begin{align*}
 	\sum_{n=0}^\infty \lr_n = \infty \qquad \text{and} \qquad \sum_{n=0}^\infty \lr_n^2 <\infty
@@ -376,15 +379,16 @@ Note that \(g\) can be, but needs not be a gradient (we have not used that in
 Theorem~\ref{thm: distance SGD vs GD} either). And this direction of
 generalization is necessary to craft convergence proofs for Reinforcement
 Learning where we do not get unbiased estimates of some gradients towards the
-minimum, but rather unbiased estimates of a Bellman Operator (Fixed Point 
-Iteration towards the optimum).
+minimum, but rather unbiased estimates of a coordinate of the Bellman Operator
+(Fixed Point Iteration towards the optimum). See also ``coordinate descent''
+\parencite[e.g.][Section~7.3]{bottouOptimizationMethodsLargeScale2018}.
 
 
 \section{Quadratic Loss Functions}\label{sec: quadratic loss SGD}
 
 While we have proven SGD behaves roughly like GD for small learning rates, we
 are not really that interested in how close SGD is to GD but rather how good it
-is at optimizing \(\Loss\). So to build some intuition let us consider a
+is at optimizing \(\Loss\). To build some intuition let us consider a
 quadratic loss function again before we get to general convex functions.
 Using the same trick we used in Section~\ref{sec: visualize gd} 
 \begin{align*}
@@ -454,10 +458,12 @@ rate of GD actually worsens with finer discretization \(N\)
 But it does not worsen by much if the learning rate is small to begin with. A
 learning rater of 1 on the other hand allows instant convergence while Gradient
 Flow only converges for \(T\to\infty\). So even if we would get the additional
-gradient evaluations for free, a finer discretization is worse. Now this is
-similar to the analysis we did when selecting optimal learning rates for GD,
-where the rates of the eigenspaces improved until we moved \(\lr\hesseEV\)
-beyond 1. From then on they start to deteriorate again\footnote{
+gradient evaluations for free, a finer discretization is worse. 
+
+Another view to make this more intuitive is the analysis we did when selecting
+optimal learning rates for GD, where the rates of the eigenspaces improved until
+we moved \(\lr\hesseEV\) beyond one. From then on they start to deteriorate
+again\footnote{
 	and quickly, since we
 	do not only increase the absolute value of the factor, but also multiply fewer 
 do not only increase the absolute value of the factor, but also multiply fewer 
@@ -584,7 +590,7 @@ eigenspaces.
 We did not do that in Subsection~\ref{subsec: necessary assumptions
 in the quadratic case} because we used constant learning rates which would
 sacrifice one eigenspace for another indefinitely. But no matter how big the
-initial difference, if the rate of one eigenspace is smaller than another then
+initial difference, if the rate of one eigenspace is smaller than another, then
 eventually the error in the eigenspace with the smaller rate will be
 negligible compared to the one with the larger rate. This means that
 asymptotically only the maximum of these factors matter.
@@ -640,10 +646,11 @@ dimension \(\dimension\).
 Armed with this norm, we can now tackle our problem again.
 
 \begin{theorem}\label{thm: optimal rates quadratic case}
-	Let \(\Loss\) be a quadratic loss function and assume
+	Let \(\Loss\) be a quadratic loss function and assume bounded variance
 	\begin{align*}
-		\E\|\martIncr\|_{V,\infty}^2
-		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension,
+		\E\|\martIncr_n\|_{V,\infty}^2
+		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension
+		\qquad \forall n\in\naturals,
 	\end{align*}
 	then we obtain optimal learning rates (w.r.t \(\|\cdot\|_{V,\infty}\)) of
 	\begin{align*}
@@ -958,7 +965,10 @@ generalize this to non-quadratic functions.
 \end{proof}
 
 Now we can use this recursion to obtain a similar theorem as in the quadratic
-case.
+case. This theorem was inspired by
+\textcite{nemirovskiRobustStochasticApproximation2009} but introduces the split
+in transient and asymptotic phase and improves the rate of convergence with the
+application of Lemma~\ref{lem: bermanDiv lower bound (strongly convex)}.
 
 \begin{theorem}[Optimal Rates]\label{thm: optimal rates SGD}
 	For a \(\Loss\in\strongConvex{\lbound}{\ubound}\) with
@@ -1149,6 +1159,14 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 	reduction}
 \end{theorem}
 \begin{proof}
+	First recall that for quadratic loss functions we derived the explicit
+	representation
+	\begin{align*}
+	&\Weights_{n+1}-\minimum\\
+	&\lxeq{(\ref{eq: unrolled SGD weights (general quadratic loss case)})}
+	\left(\prod_{k=0}^n(1-\lr_kH)\right)(\weights_0-\minimum)
+	+ \sum_{k=0}^n\lr_k\left(\prod_{i=k+1}^n(1-\lr_iH)\right)\martIncr_{k+1}.
+	\end{align*}
 	By diagonalizing \(H\) and using the fact that
 	\begin{align*}
 		&\prod_{k=0}^{n-1} (1-\lr_k V\diag[\hesseEV_1, \dots, \hesseEV_\dimension]V^T)\\
@@ -1157,8 +1175,7 @@ rate should behave like \(O(1/n)\) we could try to guess it and see what happens
 			\dots, \prod_{k=0}^{n-1}(1-\lr_k\hesseEV_\dimension)
 		\right]V^T
 	\end{align*}
-	we can consider all the eigenspaces of (\ref{eq: unrolled SGD weights (general
-	quadratic loss case)}) separately again
+	we can consider all the eigenspaces separately again
 	\begin{align*}
 		\langle \Weights_{n+1}-\minimum, v_j \rangle
 		= \begin{aligned}[t]
@@ -1325,7 +1342,7 @@ phase. If we use the results above we miss out on the exponential reduction that
 constant learning rates provide. So the first idea is to use constant learning
 rates until we ``stop making progress''. I.e. we have converged to an area like
 in Theorem~\ref{thm: SGD converges to area}. But convergence in this theorem is
-exponential meaning we do not actually converge in finite time. And due to
+exponential, meaning we do not actually converge in finite time. And due to
 stochasticity it is difficult to tell when we actually stop making progress.
 Especially because a plateau in the loss could also be due to a saddle point
 region cf. Figure~\ref{fig: visualize saddle point gd}.
@@ -1360,7 +1377,7 @@ to has a minimal size. So it will disregard all holes (local minima) which are
 smaller than this size. Sharply decreasing the learning rate while over a larger
 crater will keep SGD in this general area.
 
-We will now borrow an argument from \textcite[pp. 27-28]{bottouOptimizationMethodsLargeScale2018}
+We will now follow a proof by \textcite[pp. 27-28]{bottouOptimizationMethodsLargeScale2018}
 which proves that piecewise constant learning rates can achieve the optimal
 convergence rate of \(O(1/n)\). The proof is a slight improvement as we will
 show it for the \(L^2\) distance of the weights and not the expected loss, which
