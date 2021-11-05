@@ -22,7 +22,7 @@ equation (ODE)
 	= - \nabla \Loss(\weights_n),
 \end{align*}
 %
-if we view the learning rate as a time delta between times
+if we view the learning rate \(\lr\) as a time delta between times
 \(t_n\) and \(t_{n+1}\) with \(t_n = n\lr\). As then for
 \(\lr\to 0\) we arrive at the ODE in time \(t\)
 %
@@ -32,17 +32,19 @@ if we view the learning rate as a time delta between times
 \end{align}
 %
 That we are taking the gradient with respect to \(\weights\) will from now on be
-implied. If you are familiar with Lyapunov functions you will not be surprised
-by the next argument, following from the Gradient Flow equation
+implied. With the Gradient Flow equation and the fundamental theorem of
+analysis we get\footnote{
+	if you are familiar with Lyapunov functions you probably recognize this argument
+}
 %
 \begin{align}\label{eq: gradient integral}
 	\Loss(\weights(t_1)) - \Loss(\weights(t_0))
 	&= \int_{t_0}^{t_1} \nabla \Loss(\weights(s)) \cdot \dot{\weights}(s) ds
 	= \int_{t_0}^{t_1} -\|\nabla \Loss(\weights(s))\|^2 ds
-	\le 0
+	\le 0,
 \end{align}
 %
-which immediately implies
+which implies a decreasing loss sequence
 %
 \begin{align*}
 	\Loss(\weights(t_0)) \ge \Loss(\weights(t_1)) \ge \dots \ge \inf_\weights \Loss(\weights) \ge 0
@@ -233,9 +235,9 @@ This is beautifully illustrated with interactive graphs in
 
 If our eigenvalues are not all positive and \(\hesseEV_i<0\), then
 \(1-\lr\hesseEV_i\) is greater than one. This repels this component
-\(\langle \weights_0 - \minimum, v_i\rangle\) away from our vertex \(\minimum\).
-This is a good thing, since \(\minimum\) is a maximum in this component. This
-means we will walk down local minima and saddle points no matter the learning
+\(\langle \weights_0 - \minimum, v_i\rangle\) away from our vertex \(\minimum\),
+which is a good thing, since \(\minimum\) is a maximum in this component. Therefore
+we will walk down local minima and saddle points no matter the learning
 rate, assuming this component was not zero to begin with. In case of a maximum
 this would mean that we would start right on top of the maximum, in case of a
 saddle point it implies starting on the rim such that one can not roll down
@@ -351,7 +353,7 @@ the existence of a Hessian if possible.
 \subsubsection{Convexity}
 
 Instead of non-negative eigenvalues we can demand ``convexity'' which does
-not require the existence of a hesse matrix but is equivalent to its positive
+not require the existence of a hesse matrix, but is equivalent to its positive
 definiteness (non-negative eigenvalues) if it exists.
 %
 \begin{definition}[Convexity]\label{def: convexity}
@@ -420,8 +422,7 @@ also necessary for a linear\footnote{
 	\[
 		\|\weights_{n+1} - \minimum\| \le c \|\weights_n - \minimum\|
 	\]
-	is linear. In
-	general convergence order \(q\) implies 
+	for some constant \(c\) is linear. In general convergence order \(q\) implies
 	\[
 		\|\weights_{n+1} -\minimum\| \le c\|\weights_n - \minimum\|^q.
 	\]
@@ -482,7 +483,7 @@ to express our upper bound is by requiring Lipschitz continuity of the gradient
 \(\nabla \Loss\). Under convexity Lipschitz continuity and our upper bound are
 in fact equivalent.
 %
-\begin{lemma}[\cite{nesterovLecturesConvexOptimization2018}]
+\begin{lemma}[{\cite[Lemma~1.2.3,2.1.5]{nesterovLecturesConvexOptimization2018}}]
 	\label{lem: Lipschitz Gradient implies taylor inequality}
 	If \(\nabla \Loss\) is \(\ubound\)-Lipschitz continuous, then
 	\begin{align*}
@@ -539,7 +540,8 @@ move farther away from our current point. Our limit on the change of the gradien
 allows us to create this worst case upper bound though.
 Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 %
-\begin{lemma}\label{lem: smallest upper bound}
+\begin{lemma}[{\cite[Theorem~2.1.5]{nesterovLecturesConvexOptimization2018}}]
+	\label{lem: smallest upper bound}
 	Let \(\nabla \Loss\) be \(\ubound\)-Lipschitz continuous, then for any \(\weights\in\reals^d\)
 	\begin{align}
 		\weights - \tfrac{1}{\ubound}\nabla \Loss(\weights) 
@@ -621,7 +623,8 @@ Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 
 \subsection{Convergence of the Gradient}
 
-\begin{theorem}\label{thm: convergence of the gradient (only lip cont)}
+\begin{theorem}[{\cite[Theorem~4.10]{bottouOptimizationMethodsLargeScale2018}}]
+	\label{thm: convergence of the gradient (only lip cont)}
 	For a Loss function with \(\ubound\)-Lipschitz gradient and finite lower bound
 	(i.e. \(\inf_{\weights}\Loss(\weights) >-\infty\)) Gradient Descent with
 	learning rate \(\lr\in(0,2/\ubound)\) induces convergence of the gradient.
@@ -687,7 +690,7 @@ form of convergence.
 
 \subsection{Discussion}
 
-Lipschitz Continuity of the Gradient provides us with a ``Trust Bound''
+Lipschitz continuity of the gradient provides us with a ``trust bound''
 \(\lr\in(0,1/\ubound)\) on the gradient. It limits the rate of change of the
 gradient and thus allows us to
 formulate and optimize over an upper bound of the loss function resulting in
@@ -785,7 +788,7 @@ the loss decreases at a reasonable speed.
 
 One way to ensure such a lower bound on the gradient is using convexity.
 
-\begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
+\begin{theorem}[{\cite[Theorem~2.1.14]{nesterovLecturesConvexOptimization2018}}]
 	\label{thm: convex function GD loss upper bound}
 	Let \(\Loss\in\lipGradientSet{\ubound}\), let \(\minimum\) be the unique minimum.
 	Then Gradient Descent with learning rate \(0 < \lr < 2/\ubound\) results in
@@ -889,7 +892,7 @@ One way to ensure such a lower bound on the gradient is using convexity.
 Now to the Lemma we promised to ensure that our weights do not move further away
 from the minimum.
 %
-\begin{lemma}\label{lem: bermanDiv lower bound}
+\begin{lemma}[{\cite[Theorem~2.1.5]{nesterovLecturesConvexOptimization2018}}]\label{lem: bermanDiv lower bound}
 	Let \(f\in\lipGradientSet{\ubound}\)
 	\begin{subequations}
 	\begin{align}
@@ -980,8 +983,8 @@ from the minimum.
 
 Convexity allows us to find explicit rates not just limiting rates. In case
 of Theorem~\ref{thm: convergence of the gradient (only lip cont)} we do not
-know how many times the gradients got really low being close to a saddle
-point for example until they actually stay low. This is all eaten up by the
+know how many times the gradients got really low (e.g. close to a saddle
+point) until they actually stay low. This is all eaten up by the
 constant in \(o(1/n)\).
 
 As we have seen in Subsection~\ref{subsec: Negative Eigenvalues}, negative
@@ -990,8 +993,8 @@ Matrix GD Formulation}) from being a contraction and pushing us into convex
 regions.
 
 More specifically if we assume that our loss function \(\Loss\) goes to infinity when
-our parameters go to infinity, then using the fact that we are descending down
-the loss we get a bounded (compact) area 
+our parameters go to infinity, then (using the fact that we are descending down
+the loss) we get a bounded (compact) area 
 %
 \begin{align*}
 	\{\weights : \Loss(\weights) \le \Loss(\weights_0)\} = \Loss^{-1}([0, \Loss(\weights_0)])
@@ -1104,7 +1107,7 @@ upper bound}) results in \(\lr=1/\ubound\) and convergence rate
 which is in the same ballpark as we got in the quadratic problem. But with a bit
 more work we can actually achieve the same rates.
 %
-\begin{theorem}[\cite{nesterovLecturesConvexOptimization2018}]
+\begin{theorem}[{\cite[Theorem~2.1.15]{nesterovLecturesConvexOptimization2018}}]
 	\label{thm: gd strong convexity convergence rate}
 	If \(\Loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
 	\[0 \le \lr \le \tfrac{2}{\ubound+\lbound}\]
@@ -1143,7 +1146,7 @@ more work we can actually achieve the same rates.
 	\end{subequations}
 	where \(\condition=\ubound/\lbound\) is the condition number.
 \end{theorem}
-\begin{proof}[Proof {\parencite[Theorem 2.1.15]{nesterovLecturesConvexOptimization2018}}]
+\begin{proof}
 	This proof starts like the proof for convex functions, cf. (\ref{eq:
 	decreasing weight difference})
  \begin{align*}
@@ -1155,10 +1158,10 @@ more work we can actually achieve the same rates.
 	\end{align*}
 	But now we need to find a better lower bound for the scalar product in the
 	middle. Previously we used the lower bound on the Bregman Divergence from
-	Lemma~\ref{lem: bermanDiv lower bound}. Now we could also use the lower bound
-	from the strong convexity property directly. But we can not use both which
-	seems like we are loosing sharpness in our bound. And indeed this bound can
-	be improved to be
+	Lemma~\ref{lem: bermanDiv lower bound}. Now the lower bound
+	from the strong convexity property is also available. But we can not use
+	both, which suggests we are loosing sharpness in our bound. And indeed this
+	bound can be improved to be
  	\begin{align*}
 		&\langle \nabla\Loss(\weights_n) -\nabla\Loss(\minimum), \weights_n - \minimum\rangle	\\
 		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \minimum\|^2
@@ -1179,7 +1182,7 @@ more work we can actually achieve the same rates.
 	1}) using induction. Note that we could additionally use our lower bound on the
 	gradient. But this does not represent a significant improvement,
 	especially for the optimal rates where we max out the learning rate making
-	the term on the right equal to zero. (\ref{eq: gd strong convexity
+	the term on the right equal to zero. Equation~(\ref{eq: gd strong convexity
 	convergence rate 2}) follows from our upper bound on the loss using weights,
 	cf. Theorem~\ref{thm: convergence chain} (\ref{eq: weight implies loss convergence})
 	\begin{align*}
@@ -1203,7 +1206,7 @@ more work we can actually achieve the same rates.
 
 Now as promised we still have to show the improved lower bound.
 
-\begin{lemma}
+\begin{lemma}[{\cite[Theorem~2.1.12]{nesterovLecturesConvexOptimization2018}}]
 	\label{lem: bermanDiv lower bound (strongly convex)}
 	If \(f\in\strongConvex{\lbound}{\ubound}\), then for any
 	\(x,y\in\reals^\dimension\) we have
@@ -1320,8 +1323,12 @@ Polyak-\L{}ojasiewicz condition
 	\label{eq: PL condition}\tag{PL}
 	\|\nabla \Loss(\weights) \|^2 \ge c(\Loss(\weights)-\inf_{\theta}\Loss(\theta)).
 \end{align}
-This condition does not require convexity but rather ``invexity'' of which
-convexity is a special case. Considering Lemma~\ref{lem: smallest upper bound}
+This condition does not require convexity but ``invexity'', i.e.
+\begin{align*}
+	\Loss(\theta) \ge \Loss(\weights) + \nabla\Loss(\weights)\eta(\weights, \theta)
+\end{align*}
+for some vector valued function \(\eta\). Convexity is a special case for \(\eta(\weights,
+\theta)=\weights-\theta\). Considering Lemma~\ref{lem: smallest upper bound}
 and Theorem~\ref{thm: convergence chain} it is perhaps not too surprising that a
 lower bound on the gradient for a given distance we want to cover allows for
 convergence proofs. In fact the convergence proof is just two lines:
@@ -1392,24 +1399,24 @@ Section~\ref{sec: SGD with Averaging}).
 
 \subsection{Second Order Methods}
 
-The assumption of strong convexity can lead people to suggest using second order
-methods. In particular the Newton-Raphson method which has much better convergence
-guarantees. But while we do assume convexity to be able to bound convergence
-rates, we still want to use our method on non-convex functions. And the
-Newton-Raphson method has a bunch of issues in this case.
+The assumption of strong convexity makes some people suggest second order
+methods. In particular the Newton-Raphson method which has much better
+convergence guarantees. But while we do assume convexity to be able to bound
+convergence rates, we still want to use our method on non-convex functions. And
+the Newton-Raphson method has a bunch of issues in this case.
 
-As we can see in (\ref{eq: newton minimum approx}) the method jumps right to the
+As we can see in Equation~(\ref{eq: newton minimum approx}), the method jumps right to the
 vertex of a quadratic function. This is nice if the vertex is a minimum
 (which convexity guarantees) but it is not so nice if the vertex is a saddle point
 or maximum. Additionally the method becomes unstable (impossible) for small 
 (zero) eigenvalues, since then the hesse matrix is hard to numerically invert (no
 longer invertible).
-On top of these fundamental problems, the storage of the Hessian requires
+On top of these fundamental problems the storage of the Hessian requires
 \(O(\dimension^2)\) space already and its inversion takes \(O(\dimension^3)\)
-time which is infeasible for high dimensional data, considering that gradient
-descent will do \(O(\dimension^2)\) steps while the Newton-Raphson method does
-one inversion. Lastly there are issues obtaining the Hessian in a stochastic
-setting.
+time, which is infeasible for high dimensional data. Especially considering that
+gradient descent will do \(O(\dimension^2)\) steps while the Newton-Raphson
+method does one inversion. Lastly there are issues obtaining the Hessian in a
+stochastic setting.
 
 So the difficulty in creating a second order method lies in addressing all these
 concerns at once. One approach by \textcite{martensDeepLearningHessianfree2010},
@@ -1451,7 +1458,7 @@ And since we are in the class of first order optimization methods where we are
 only provided with the function evaluation itself and the gradient, an obvious
 assumption for a class of optimization methods would be
 %
-\begin{assumption}[\citeauthor{nesterovLecturesConvexOptimization2018}]
+\begin{assumption}[{\cite[Assumption 2.1.4]{nesterovLecturesConvexOptimization2018}}]
 	\label{assmpt: parameter in linear hull of gradients}
 	The \(n\)-th iterate of the optimization method is contained in the span of all
 	previous gradients shifted by the initial starting point
@@ -1532,7 +1539,8 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\parencite[Chapter 12]{suttonReinforcementLearningIntroduction2018}
 	are an attempt to speed this process up.
 \end{remark}
-\begin{theorem}\label{thm: convex function complexity bound}
+\begin{theorem}[{\cite[Theorem~2.1.7]{nesterovLecturesConvexOptimization2018}}]
+	\label{thm: convex function complexity bound}
 	For any \(\weights_0\in\reals^d\), any \(n\) such that 
 	\[0\le n\le \tfrac12 (d-1),\]
 	there exists \(\Loss\in\lipGradientSet[\infty,1]{\ubound}\)
@@ -1949,7 +1957,8 @@ not change the fact that \(\weights_n\) is contained in subspace \(\reals^n\).
 Since we only use this fact, one could thus generalize Assumption~\ref{assmpt:
 parameter in linear hull of gradients} to
 %
-\begin{assumption}\label{assmpt: parameter in generalized linear hull of gradients}
+\begin{assumption}[{\cite{gohWhyMomentumReally2017}}]
+	\label{assmpt: parameter in generalized linear hull of gradients}
 	The \(n\)-th iterate of the optimization method can be expressed as
 	\begin{align*}
 		\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k)
