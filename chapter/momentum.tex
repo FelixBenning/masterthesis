@@ -32,14 +32,27 @@ velocity is gradient}), we want to set the acceleration equal to our gradient
 	\ddot{\weights} = -\nabla \Loss(\weights).
 \end{align*}
 %
-But without friction we are going to massively overshoot the minimum, so we are
-also going to add a ``friction force'' inversely proportional to our current
-velocity
+But without friction any potential (height) energy we have would be conserved.
+In other words: when we reach the bottom we have so much velocity, that we are
+going to massively overshoot the minimum. To dissipate this energy, we are also
+going to add a ``friction force'' inversely proportional to our current velocity
 %
 \begin{align}\label{eq: acceleration is gradient + friction}
 	\ddot{\weights} = -\nabla \Loss(\weights) - \friction \dot{\weights}.
 \end{align}
-%
+Note that we can only lose as much energy as we dissipate with friction, so in
+some sense we want to make it as high as possible to quicken convergence. But
+if it is too high, we are not moving fast enough on shallow slopes.
+
+If our friction \(\friction\) is low enough (our momentum parameter \(\beta\)
+we will introduce later high enough), then we will find for heavy ball momentum,
+that the convergence rate in every eigenspace is only determined by the friction
+(i.e. the rate we dissipate energy with). If our friction is higher than some
+critical value dependent on learning rate and eigenvalues of the Hessian, then
+the eigenvalues matter again. And it will turn out that the optimal momentum
+parameter is right at that critical point \parencite[see also ``critical
+dampening'', e.g.][]{gohWhyMomentumReally2017}.
+
 The standard way to discretize a second order ODE is to convert it into a first
 order ODE
 %
@@ -82,7 +95,7 @@ equation (\ref{eq: naive momentum move}) we get
 This means we are using gradient information from \(\weights_{n-1}\) to update
 \(\weights_{n+1}\). If we instead use the most up to date information
 \(\momentum_{n+1}\) instead of \(\momentum_n\) for the \(\weights_{n+1}\) update,
-we get the well known \emph{heavy ball method} (momentum method) first proposed
+we get the well known ``heavy ball method'' (also known as momentum method) first proposed
 by \textcite{polyakMethodsSpeedingConvergence1964} and wonderfully illustrated
 by \textcite{gohWhyMomentumReally2017}.
 
@@ -325,7 +338,11 @@ appendix. We will only cover the result here.
 		to the minimum of the quadratic function into the momentum and back like 
 		a pendulum where the friction causes it to eventually end up in the
 		minimum. Looking at the distance to the minimum only, we will therefore
-		observe a sinus wave (``Ripples'').
+		observe a sinus wave (``Ripples'') as the potential energy is transferred
+		into velocity and back. In this high momentum case convergence depends
+		only on the amount of energy we dissipate through friction and the rate is
+		thus equal to the square root of the momentum coefficient \(\beta\)
+		regardless of the curvature of the eigenspace.
 		\item In the real case we have \(\momEV_1>\momEV_2\) and
 		\begin{align}
 			\max\{|\momEV_1|, |\momEV_2|\} = \begin{cases}
@@ -443,6 +460,147 @@ Theorem~\ref{thm: strong convexity complexity bound} (not even up to a
 constant!). So on quadratic functions we can not do any better without violating
 our assumptions about possible optimizing algorithms (Assumption~ \ref{assmpt:
 parameter in generalized linear hull of gradients}).
+
+\subsection{From Spectral Radius to Operator Norm}
+
+As the Hessian is symmetric the matrix,
+\begin{align*}
+	1-\lr \nabla^2\Loss
+\end{align*}
+is symmetric as well. And since we can find an orthonormal basis \((v_1,\dots,
+v_\dimension)\) which diagonalizes the matrix, the operator norm is equal
+to the spectral radius
+\begin{align*}
+	\rho(A)
+	:= \max_{i=1,\dots,\dimension} |\hesseEV_i|,
+\end{align*}
+for eigenvalues \(\hesseEV_i\) of matrix \(A\), because of
+\begin{align*}
+	\|A\| = \sup_{\|x\| =1} \|Ax\|
+	= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}
+	= \sup_{\|x\| =1} \sqrt{\sum_{i=1}^\dimension \hesseEV_i^2 x_i^2},
+	= \rho(A)
+\end{align*}
+where \(x=\sum_{k=1}^\dimension x_i v_i\). The eigenvalue analysis was therefore
+sufficient for the gradient descent case. In the momentum case on the other
+hand our transformation matrix \(R\) (\ref{eq: eigenspace momentum transformation})
+is not symmetric. But the eigenvalue analysis is still useful due to Gelfand's Formula
+\parencite{gelfandNormierteRinge1941} i.e.
+\begin{align*}
+	\rho(R) = \lim_{n\to\infty}\sqrt[n]{\|R^n\|}
+\end{align*}
+This formula is used by \textcite[p. 38, Lemma 1]{polyakIntroductionOptimization1987}
+to argue, that we have for all \(\epsilon>0\)
+\begin{align*}
+	\|R^n\|\le \text{const } (\rho(R) + \epsilon)^n.
+\end{align*}
+This still provides exponential convergence to zero for any spectral radius
+\(\rho(R)\) smaller one. Therefore the eigenvalue analysis is still useful.
+
+For much tighter bounds with explicit constants see
+\textcite{kozyakinAccuracyApproximationSpectral2009}. More precisely we can use
+their bounds for two dimensional matrices as the orthogonality argument still
+applies between blocks, so we can consider the operator norm of one block and
+take the maximum over all blocks
+\begin{align*}
+	\|R\| = \max_{i=1,\dots,\dimension}\|R_i\|
+	= \max_{i=1,\dots,\dimension}\left\|
+	\begin{pmatrix}
+		0 & 1 \\
+		-\momCoeff & 1+\momCoeff-\lrSq\hesseEV_i
+	\end{pmatrix}
+	\right\|.
+\end{align*}
+
+To build some intuition, notice how \(\lrSq\hesseEV_i=1\) and \(\momCoeff=1\)
+lead to
+\begin{align*}
+	R_i
+	=\begin{pmatrix}
+		0 & 1 \\
+		0 & 0
+	\end{pmatrix}
+\end{align*}
+of which both eigenvalues are zero, but the operator norm is one as the vector
+\((0, 1)^T\) does not change in length. Notice how we simply move the more
+recent weight up into the older weight slot. If we would apply the matrix again
+our weights would fully disappear. In other words: The problem are the cyclical
+eigenspaces, in the jordan normal form. In fact, considering we can find some
+basis change \(U\) such that
+\begin{align*}
+	R_i^n
+	= \left(U 
+		\begin{pmatrix}
+			r_{i1} & \delta\\
+			0 & r_{i2}
+		\end{pmatrix}
+	U^{-1}\right)^n
+	= U 
+	\begin{pmatrix}
+		r_{i1} & \delta\\
+		0 & r_{i2}
+	\end{pmatrix}^n
+	 U^{-1}
+\end{align*}
+where \(\delta\) is zero when \(r_{i1}\neq r_{i2}\) and can be zero or one if
+they are equal. Now if they are both equal to some value \(r_i\), then we
+can write
+\begin{align*}
+	\begin{pmatrix}
+		r_i & \delta\\
+		0 & r_i
+	\end{pmatrix}^n
+	&= \left(r_i\identity + 
+	\begin{pmatrix}
+		0 & \delta\\
+		0 & 0 
+	\end{pmatrix}\right)^n
+	= \sum_{k=0}^n {n\choose k} r_i^k \begin{pmatrix}
+		0 & \delta \\
+		0 & 0
+	\end{pmatrix}^{n-k}\\
+	&= r_i^n\identity + n r_i^{n-1}\begin{pmatrix}
+		0 & \delta \\
+		0 & 0
+	\end{pmatrix}
+	= \begin{pmatrix}
+		r_i^n & \delta n r_i^{n-1} \\
+		0 & r_i^n
+	\end{pmatrix}.
+\end{align*}
+
+So together with the case \(\delta=0\), we get
+\begin{align*}
+	R_i^n = U\begin{pmatrix}
+		r_{i1}^n & \delta n r_{i1}^n\\
+		0 & r_{i2}^n
+	\end{pmatrix}U^{-1},
+\end{align*}
+Which results in
+\begin{align*}
+	\|R_i^n\|
+	&\le \|U\|
+	\left\| \begin{pmatrix}
+		r_{i1}^n & \delta n r_{i1}^n\\
+		0 & r_{i2}^n
+	\end{pmatrix} \right\|
+	\|U^{-1}\|\\
+	&\le \|U\|\|U^{-1}\|
+	\left(
+	\left\| \begin{pmatrix}
+		r_{i1}^n & 0\\
+		0 & r_{i2}^n
+	\end{pmatrix} \right\|
+	+ \delta
+	\left\| \begin{pmatrix}
+		0 &  n r_{i1}^n\\
+		0 & 0
+	\end{pmatrix} \right\|
+	\right)\\
+	&= \|U\|\|U^{-1}\| (\rho(R_i)^n+ \delta n |r_{i1}|^n)\\
+	&= \|U\|\|U^{-1}\| (1+ \delta n)\rho(R_i)^n.
+\end{align*}
+
 
 \subsection{Why Consider Alternatives?}
 
