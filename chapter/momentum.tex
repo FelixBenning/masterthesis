@@ -581,7 +581,7 @@ Which results in
 	\|R_i^n\|
 	&\le \|U\|
 	\left\| \begin{pmatrix}
-		r_{i1}^n & \delta n r_{i1}^n\\
+		r_{i1}^n & \delta n r_{i1}^{n-1}\\
 		0 & r_{i2}^n
 	\end{pmatrix} \right\|
 	\|U^{-1}\|\\
@@ -593,12 +593,12 @@ Which results in
 	\end{pmatrix} \right\|
 	+ \delta
 	\left\| \begin{pmatrix}
-		0 &  n r_{i1}^n\\
+		0 &  n r_{i1}^{n-1}\\
 		0 & 0
 	\end{pmatrix} \right\|
 	\right)\\
-	&= \|U\|\|U^{-1}\| (\rho(R_i)^n+ \delta n |r_{i1}|^n)\\
-	&= \|U\|\|U^{-1}\| (1+ \delta n)\rho(R_i)^n.
+	&= \|U\|\|U^{-1}\| (\rho(R_i)^n+ \delta n |r_{i1}|^{n-1})\\
+	&= \|U\|\|U^{-1}\| (\rho(R_i)+ \delta n)\rho(R_i)^{n-1}.
 \end{align*}
 
 
