@@ -601,6 +601,205 @@ Which results in
 	&= \|U\|\|U^{-1}\| (\rho(R_i)+ \delta n)\rho(R_i)^{n-1}\\
 	&\in O(n\rho(R_i)^{n}) \subset O((\rho(R_i)+\epsilon)^n).
 \end{align*}
+%
+Of course we do not have any bounds for \(\|U\|\|U^{-1}\|\) so this is still
+not explicit enough. And the fact that \(\delta\) jumps from zero to one once the
+eigenvalues are not equal anymore does not inspire confidence in the continuity
+of \(U\). In fact \textcite[Section 7.1.5]{golubMatrixComputations2013} claim
+that ``any matrix [...] that diagonalizes
+\begin{align*}
+	\begin{pmatrix}
+		1+\epsilon & 1 \\
+		0 & 1-\epsilon
+	\end{pmatrix},
+	\qquad \epsilon \ll 1,
+\end{align*}
+has a 2-norm condition of order \(1/\epsilon\)''. Now this is not the same matrix,
+but similar. And since we try to select our learning rate \(\lrSq\) and momentum
+coefficient \(\momCoeff\) in such a way that we are right on the complex border
+(Lemma~\ref{lem: optimal hb parameter selection}), we do in fact strive for the
+term inside the square root to be zero
+\begin{align*}
+	\momEV_{i1/2}
+	= \tfrac12 \left(
+		1+\momCoeff-\lrSq\hesseEV_i
+		\pm \sqrt{(1+\momCoeff-\lrSq\hesseEV_i)^2 - 4\momCoeff}
+	\right),
+\end{align*}
+and should therefore assume to be very close to \(r_{i1}=r_{i2}\).
+
+Instead of the Jordan Normal form, we therefore want to use a numerically more
+stable transformation, the ``Schur decomposition''.
+
+\begin{theorem}[Schur decomposition, {\cite[Theorem 7.1.3]{golubMatrixComputations2013}}]
+	If \(A\in\complex^{\dimension\times \dimension}\), then there exists a unitary
+	\(Q\in\complex^{\dimension\times \dimension}\) such that
+	\begin{align*}
+		Q^* A Q = \diag(\hesseEV_1, \dots, \hesseEV_\dimension) + N
+	\end{align*}
+	where \(N\) is strictly upper triangular and \(Q^*\) is the conjugate
+	transpose of \(Q\).
+\end{theorem}
+
+The neat thing about this is, that unitary matrices are isometries for the
+euclidean norm.
+
+\begin{lemma}[Unitary Matrices are Isometries]
+	\label{lem: unitary matrices are isometries}
+	Unitary matrices \(Q\) are isometries with regard to the euclidean norm
+	\begin{align*}
+		\|Qx\|_2 = \|x\|_2 \qquad \forall x\in\complex^\dimension
+	\end{align*}	
+	and also with regard to the induced operator norm
+	\begin{align*}
+		\|QA\| = \|A\| \quad \text{and} \quad \|AQ\| = \|A\|
+		\qquad \forall A \in\complex^{\dimension\times\dimension}
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	\begin{align*}
+		\|Qx\|^2 = \langle Qx, Qx\rangle = x^* Q^* Q x = x^* x = \|x\|^2,
+	\end{align*}
+	which easily translates to them being isometries for the induced operator norm
+	on matrices, since
+	\begin{align*}
+		\|QA\| = \sup_{\|x\|=1} \|QAx\| = \sup_{\|x\|=1} \|Ax\|
+	\end{align*}
+	and
+	\begin{align*}
+		\|AQ\|
+		&= \sup_{x} \frac{\|AQx\|}{\|x\|} = \sup_{x} \frac{\|AQx\|}{\|Qx\|}
+		= \sup_{y} \frac{\|Ay\|}{\|y\|} = \|A\|.
+		\qedhere
+	\end{align*}
+\end{proof}
+
+This lemma allows us to completely disregard them in our problem of estimating
+the operator norm of \(R\). And as we are only concerned with \(2\times 2\)
+matrices, strictly upper triangular still means only one entry. So we can deal
+with it very similarly as with the jordan normal form. The only issue is, we
+need to actually know the entry in the upper right corner to create an upper
+bound. But as it turns out, calculating the Schur decomposition for \(2\times 2\)
+matrices is very simple. We just need one normalized eigenvector and (any of the
+two) normalized vectors in its orthogonal complement.
+
+\begin{lemma}[Explicit Schur Decomposition for Specific Matrix]
+	For a real matrix of the form
+	\begin{align*}
+		R = \begin{pmatrix}
+			0 & 1 \\
+			-\momCoeff & \xi
+		\end{pmatrix},
+	\end{align*}
+	the unitary operator	
+	\begin{align*}
+		Q:=\frac{1}{\sqrt{1+|r_1|^2}} \begin{pmatrix}
+		1 & \overline{r}_1 \\
+		r_1 & -1
+	\end{pmatrix}
+	\end{align*}
+	where
+	\(
+		r_{1/2}
+		= \tfrac12 \left(
+			\xi \pm \sqrt{\xi^2 - 4\momCoeff}
+		\right)
+	\)
+	are the eigenvalues of \(R\), results in the Schur Decomposition
+	\begin{align*}
+		Q^* R Q
+		&=\begin{pmatrix}
+			r_1
+			& -\frac{(1+\momCoeff)(1+\overline{r}_1^2)}{1+|r_1|^2} \\
+			0 &  \frac{\momCoeff\overline{r}_1 + r_2}{1+|r_1|^2}
+		\end{pmatrix}.
+	\end{align*}
+	For complex eigenvalues, more specifically \(4\momCoeff\ge\xi^2\), we have
+	\begin{align*}
+		Q^* R Q
+		&=\begin{pmatrix}
+			r_1
+			& -(1+\overline{r}_1^2) \\
+			0 & \overline{r}_1 
+		\end{pmatrix}.
+	\end{align*}
+	Note that \(r_1\) and \(r_2\) could always be swapped to achieve a more favorable result.
+\end{lemma}
+\begin{proof}
+	Since
+	\begin{align*}
+		\frac{1}{\sqrt{1+|r_1|^2}} \begin{pmatrix}
+			1 \\
+			r_1
+		\end{pmatrix}
+	\end{align*}
+	is a normalized eigenvector for eigenvalue \(r_1\) of \(R\), there are
+	only two options for an orthonormal second vector, which results in \(Q\).
+
+	Recall that any eigenvalue of \(R\), in particular \(r_1\) and
+	\(\overline{r}_1\in\{r_1, r_2\}\), is a root of the characteristic polynomial
+	\begin{align}\label{eq: property of eigenvalues of R}
+		\det (r\identity - R) = r^2 - r\xi + \momCoeff = 0.
+	\end{align}
+	Now we can calculate the Schur decomposition of \(R\):
+	\begin{align*}
+		Q^* R Q
+		&= \frac{1}{1+|r_1|^2} \begin{pmatrix}
+			1 & \overline{r}_1 \\
+			r_{1} & -1
+		\end{pmatrix}
+		\begin{pmatrix}
+			0 & 1 \\
+			-\momCoeff & \xi
+		\end{pmatrix}
+		\begin{pmatrix}
+			1 & \overline{r}_1 \\
+			r_1 & -1
+		\end{pmatrix}\\
+		&= \frac{1}{1+|r_{1}|^2} \begin{pmatrix}
+			1 & \overline{r}_1 \\
+			r_1 & -1
+		\end{pmatrix}
+		\begin{pmatrix}
+			r_1 & -1 \\
+			\smash{\underbrace{-\momCoeff + \xi r_1}_{
+				=r_1^2 \ (\ref{eq: property of eigenvalues of R})
+			}}
+			& -\momCoeff \overline{r}_1 - \xi
+		\end{pmatrix}
+		\vphantom{\underbrace{\begin{pmatrix}1\\1\end{pmatrix}}_{=2}}
+		\\
+		&=\frac{1}{1+|r_{1}|^2}\begin{pmatrix}
+			r_1(1+|r_1|^2)
+			& -\momCoeff \overline{r}_1^2  + (1+\xi \overline{r}_1) \\
+			0 &  \momCoeff\overline{r}_1 + \xi - r_1
+		\end{pmatrix}\\
+		&\lxeq{(\ref{eq: property of eigenvalues of R})}\begin{pmatrix}
+			r_1
+			& -\frac{\momCoeff \overline{r}_1^2 + 1+ (\overline{r}_1^2 + \momCoeff)}{1+|r_1|^2} \\
+			0 &  \frac{\momCoeff\overline{r}_1 + \xi - r_1}{1+|r_1|^2}
+		\end{pmatrix}\\
+		&=\begin{pmatrix}
+			r_1
+			& -\frac{(1+\momCoeff)(1+\overline{r}_1^2)}{1+|r_1|^2} \\
+			0 &  \frac{\momCoeff\overline{r}_1 + r_2}{1+|r_1|^2}
+		\end{pmatrix}
+	\end{align*}
+	where we have used \(\xi - r_1 = r_2\) in the last equation. Now in the complex
+	case (and the case \(4\momCoeff = \xi^2\)) we have
+	\(|r_1|=|r_2|=\sqrt{\momCoeff}\) and \(\overline{r_1} = r_2\) which results
+	in
+	\begin{align*}
+		Q^* R Q
+		&=\begin{pmatrix}
+			r_1
+			& -(1+\overline{r}_1^2) \\
+			0 & \overline{r}_1 
+		\end{pmatrix}.
+		\qedhere
+	\end{align*}
+\end{proof}
+
 
 
 \subsection{Why Consider Alternatives?}
