@@ -461,7 +461,7 @@ constant!). So on quadratic functions we can not do any better without violating
 our assumptions about possible optimizing algorithms (Assumption~ \ref{assmpt:
 parameter in generalized linear hull of gradients}).
 
-\subsection{From Spectral Radius to Operator Norm}
+\section{From Spectral Radius to Operator Norm}
 
 As the Hessian is symmetric the matrix,
 \begin{align*}
@@ -515,7 +515,7 @@ one block and take the maximum over all blocks
 	\right\|.
 \end{align*}
 
-\subsubsection{Actually Explicit Bounds}
+\subsection{Actually Explicit Bounds}
 
 To build some intuition, notice how \(\lrSq\hesseEV_i=1\) and \(\momCoeff=1\)
 lead to
@@ -900,15 +900,18 @@ complement.
 \end{proof}
 
 
-\subsection{Why Consider Alternatives?}
+\section{Why Consider Alternatives?}
 
-Now while Nesterov's Momentum breaks this assumption as it uses gradients at a
+Now while Nesterov's Momentum breaks Assumption~\ref{assmpt: parameter in
+generalized linear hull of gradients} as it uses gradients at a
 different point than the iterates, it does not break it fundamentally. The
 assumption applies to the intermediate states \(y_n\) which are not too far
 from our actual iterates and would thus allow us to make similar statements
 about them with a bit of work.
 
-So why should we even considering Nesterov's Momentum then?
+And while Heavy Ball Momentum can already almost achieve the optimal convergence
+rate of our complexity bounds up to some issues with the operator norm, there
+are more issues with it besides this particular sticking point.
 
 \subsubsection{Weakest Link Contraction Factor}
 
