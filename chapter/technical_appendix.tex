@@ -195,6 +195,51 @@
 	\end{align*}
 \end{proof}
 
+\subsection{Operators}
+
+\begin{lemma}[Absolute Values Inside Operator Norms]
+	\label{lem-appdx: absolute value inside operator norms}
+	For complex matrices \(A^{(1)},\dots,A^{(n)}\in\complex^{\dimension\times\dimension}\)
+	we define \(B^{(1)},\dots,B^{(n)}\in\complex^{\dimension\times\dimension}\)
+	with
+	\begin{align*}
+		B^{(k)}_{ij} := |A^{(k)}_{ij}| \qquad \forall k,i,j.
+	\end{align*}
+	Then we have
+	\begin{align*}
+		\Bigg\|\prod_{k=1}^n A^{(k)}\Bigg\| \le \Bigg\|\prod_{k=1}^n B^{(k)}\Bigg\|.
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	Let \(x\in\complex^\dimension\) be an arbitrary vector and define \(y\in\complex^\dimension\)
+	with
+	\begin{align*}
+		y_i = |x_i| \qquad \forall i=1,\dots,\dimension.
+	\end{align*}
+	Then we have
+	\begin{align*}
+		\Bigg\| \prod_{k=1}^n A^{(k)} x \Bigg\|
+		&= \sum_{j=1}^{d} \Big| \sum_{1\le i_1,\dots, i_n \le d}
+		A^{(1)}_{j i_1} A^{(2)}_{i_1 i_2} \dots A^{(n)}_{i_{n-1} i_n} x_{i_n} \Big|^2
+		\\
+		&\le \sum_{j=1}^{d} \Big| \sum_{1\le i_1,\dots, i_n \le d}
+		B^{(1)}_{j i_1} B^{(2)}_{i_1 i_2} \dots B^{(n)}_{i_{n-1} i_n} y_{i_n} \Big|^2
+		\\
+		&= \Bigg\| \prod_{k=1}^n B^{(k)} y \Bigg\|
+	\end{align*}
+	Since we have \(\|x\|=\|y\|\) as the norm takes the absolute value anyway, we
+	get our claim
+	\begin{align*}
+		\Bigg\|\prod_{k=1}^n A^{(k)}\Bigg\|
+		&= \sup_{\|x\|=1}
+		\Bigg\|\prod_{k=1}^n A^{(k)} x\Bigg\|
+		\le \sup_{\|y\|=1}
+		\Bigg\|\prod_{k=1}^n B^{(k)} y\Bigg\|
+		= \Bigg\|\prod_{k=1}^n B^{(k)}\Bigg\|.
+		\qedhere
+	\end{align*}
+\end{proof}
+
 \section{Momentum Convergence}
 
 \subsection{Eigenvalue Analysis}

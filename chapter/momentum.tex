@@ -497,11 +497,14 @@ to argue, that we have for all \(\epsilon>0\)
 This still provides exponential convergence to zero for any spectral radius
 \(\rho(R)\) smaller one. Therefore the eigenvalue analysis is still useful.
 
-For much tighter bounds with explicit constants see
-\textcite{kozyakinAccuracyApproximationSpectral2009}. More precisely we can use
-their bounds for two dimensional matrices as the orthogonality argument still
-applies between blocks, so we can consider the operator norm of one block and
-take the maximum over all blocks
+\textcite{kozyakinAccuracyApproximationSpectral2009} already provides much tighter
+bounds with more explicit constants, but they still depend on the unknown quantity
+\begin{align*}
+	\max_{i=1,\dots,\dimension}\frac{\|R_i^2\|}{\|R_i\|^2}.
+\end{align*}
+Where we can use their bounds for two dimensional matrices as the orthogonality
+argument still applies between blocks, so we can consider the operator norm of
+one block and take the maximum over all blocks
 \begin{align*}
 	\|R\| = \max_{i=1,\dots,\dimension}\|R_i\|
 	= \max_{i=1,\dots,\dimension}\left\|
@@ -511,6 +514,8 @@ take the maximum over all blocks
 	\end{pmatrix}
 	\right\|.
 \end{align*}
+
+\subsubsection{Actually Explicit Bounds}
 
 To build some intuition, notice how \(\lrSq\hesseEV_i=1\) and \(\momCoeff=1\)
 lead to
@@ -525,7 +530,7 @@ of which both eigenvalues are zero, but the operator norm is one as the vector
 \((0, 1)^T\) does not change in length. Notice how we simply move the more
 recent weight up into the older weight slot. If we would apply the matrix again
 our weights would fully disappear. In other words: The problem are the cyclical
-eigenspaces, in the jordan normal form. In fact, considering we can find some
+eigenspaces, in the jordan normal form. More precisely, we can find some
 basis change \(U\) such that
 \begin{align*}
 	R_i^n
@@ -568,7 +573,6 @@ can write
 		0 & r_i^n
 	\end{pmatrix}.
 \end{align*}
-
 So together with the case \(\delta=0\), we get
 \begin{align*}
 	R_i^n = U\begin{pmatrix}
@@ -614,11 +618,11 @@ that ``any matrix [...] that diagonalizes
 	\end{pmatrix},
 	\qquad \epsilon \ll 1,
 \end{align*}
-has a 2-norm condition of order \(1/\epsilon\)''. Now this is not the same matrix,
-but similar. And since we try to select our learning rate \(\lrSq\) and momentum
-coefficient \(\momCoeff\) in such a way that we are right on the complex border
-(Lemma~\ref{lem: optimal hb parameter selection}), we do in fact strive for the
-term inside the square root to be zero
+has a 2-norm condition of order \(1/\epsilon\)''. Now this is not the same matrix
+but this example shows that we have to be careful. Especially since we try to select
+our learning rate \(\lrSq\) and momentum coefficient \(\momCoeff\) in such a way
+that we are right on the complex border (Lemma~\ref{lem: optimal hb parameter
+selection}). So we do in fact strive for the term inside the square root to be zero
 \begin{align*}
 	\momEV_{i1/2}
 	= \tfrac12 \left(
@@ -631,6 +635,8 @@ and should therefore assume to be very close to \(r_{i1}=r_{i2}\).
 Instead of the Jordan Normal form, we therefore want to use a numerically more
 stable transformation, the ``Schur decomposition''.
 
+\subsubsection{Schur Decomposition}
+
 \begin{theorem}[Schur decomposition, {\cite[Theorem 7.1.3]{golubMatrixComputations2013}}]
 	If \(A\in\complex^{\dimension\times \dimension}\), then there exists a unitary
 	\(Q\in\complex^{\dimension\times \dimension}\) such that
@@ -641,7 +647,7 @@ stable transformation, the ``Schur decomposition''.
 	transpose of \(Q\).
 \end{theorem}
 
-The neat thing about this is, that unitary matrices are isometries for the
+The neat thing about this result is that unitary matrices are isometries for the
 euclidean norm.
 
 \begin{lemma}[Unitary Matrices are Isometries]
@@ -657,10 +663,11 @@ euclidean norm.
 	\end{align*}
 \end{lemma}
 \begin{proof}
+	It is straightforward to show the isometry on euclidean norms
 	\begin{align*}
-		\|Qx\|^2 = \langle Qx, Qx\rangle = x^* Q^* Q x = x^* x = \|x\|^2,
+		\|Qx\|^2 = \langle Qx, Qx\rangle = x^* Q^* Q x = x^* x = \|x\|^2.
 	\end{align*}
-	which easily translates to them being isometries for the induced operator norm
+	This then translates to them being isometries for the induced operator norm
 	on matrices, since
 	\begin{align*}
 		\|QA\| = \sup_{\|x\|=1} \|QAx\| = \sup_{\|x\|=1} \|Ax\|
@@ -674,16 +681,18 @@ euclidean norm.
 	\end{align*}
 \end{proof}
 
-This lemma allows us to completely disregard them in our problem of estimating
-the operator norm of \(R\). And as we are only concerned with \(2\times 2\)
-matrices, strictly upper triangular still means only one entry. So we can deal
-with it very similarly as with the jordan normal form. The only issue is, we
-need to actually know the entry in the upper right corner to create an upper
-bound. But as it turns out, calculating the Schur decomposition for \(2\times 2\)
-matrices is very simple. We just need one normalized eigenvector and (any of the
-two) normalized vectors in its orthogonal complement.
+This lemma allows us to completely disregard the basis change matrices  in our
+problem of estimating the operator norm of \(R\). And as we are only concerned
+with \(2\times 2\) matrices, ``strictly upper triangular'' still means only one
+entry. So we can deal with it very similarly as with the jordan normal form. The
+only issue is, we need to actually know the entry in the upper right corner to
+create an upper bound. But as it turns out, calculating the Schur decomposition
+for \(2\times 2\) matrices is very simple. We just need one normalized
+eigenvector and (any of the two) normalized vectors in its orthogonal
+complement.
 
 \begin{lemma}[Explicit Schur Decomposition for Specific Matrix]
+	\label{lem: explicit schur decomposition}
 	For a real matrix of the form
 	\begin{align*}
 		R = \begin{pmatrix}
@@ -694,7 +703,7 @@ two) normalized vectors in its orthogonal complement.
 	the unitary operator	
 	\begin{align*}
 		Q:=\frac{1}{\sqrt{1+|r_1|^2}} \begin{pmatrix}
-		1 & \overline{r}_1 \\
+		1 & \conjugate{r}_1 \\
 		r_1 & -1
 	\end{pmatrix}
 	\end{align*}
@@ -710,8 +719,8 @@ two) normalized vectors in its orthogonal complement.
 		Q^* R Q
 		&=\begin{pmatrix}
 			r_1
-			& -\frac{(1+\momCoeff)(1+\overline{r}_1^2)}{1+|r_1|^2} \\
-			0 &  \frac{\momCoeff\overline{r}_1 + r_2}{1+|r_1|^2}
+			& -\frac{(1+\momCoeff)(1+\conjugate{r}_1^2)}{1+|r_1|^2} \\
+			0 &  \frac{\momCoeff\conjugate{r}_1 + r_2}{1+|r_1|^2}
 		\end{pmatrix}.
 	\end{align*}
 	For complex eigenvalues, more specifically \(4\momCoeff\ge\xi^2\), we have
@@ -719,8 +728,8 @@ two) normalized vectors in its orthogonal complement.
 		Q^* R Q
 		&=\begin{pmatrix}
 			r_1
-			& -(1+\overline{r}_1^2) \\
-			0 & \overline{r}_1 
+			& -(1+\conjugate{r}_1^2) \\
+			0 & \conjugate{r}_1 
 		\end{pmatrix}.
 	\end{align*}
 	Note that \(r_1\) and \(r_2\) could always be swapped to achieve a more favorable result.
@@ -737,7 +746,7 @@ two) normalized vectors in its orthogonal complement.
 	only two options for an orthonormal second vector, which results in \(Q\).
 
 	Recall that any eigenvalue of \(R\), in particular \(r_1\) and
-	\(\overline{r}_1\in\{r_1, r_2\}\), is a root of the characteristic polynomial
+	\(\conjugate{r}_1\in\{r_1, r_2\}\), is a root of the characteristic polynomial
 	\begin{align}\label{eq: property of eigenvalues of R}
 		\det (r\identity - R) = r^2 - r\xi + \momCoeff = 0.
 	\end{align}
@@ -745,7 +754,7 @@ two) normalized vectors in its orthogonal complement.
 	\begin{align*}
 		Q^* R Q
 		&= \frac{1}{1+|r_1|^2} \begin{pmatrix}
-			1 & \overline{r}_1 \\
+			1 & \conjugate{r}_1 \\
 			r_{1} & -1
 		\end{pmatrix}
 		\begin{pmatrix}
@@ -753,11 +762,11 @@ two) normalized vectors in its orthogonal complement.
 			-\momCoeff & \xi
 		\end{pmatrix}
 		\begin{pmatrix}
-			1 & \overline{r}_1 \\
+			1 & \conjugate{r}_1 \\
 			r_1 & -1
 		\end{pmatrix}\\
 		&= \frac{1}{1+|r_{1}|^2} \begin{pmatrix}
-			1 & \overline{r}_1 \\
+			1 & \conjugate{r}_1 \\
 			r_1 & -1
 		\end{pmatrix}
 		\begin{pmatrix}
@@ -765,41 +774,130 @@ two) normalized vectors in its orthogonal complement.
 			\smash{\underbrace{-\momCoeff + \xi r_1}_{
 				=r_1^2 \ (\ref{eq: property of eigenvalues of R})
 			}}
-			& -\momCoeff \overline{r}_1 - \xi
+			& -\momCoeff \conjugate{r}_1 - \xi
 		\end{pmatrix}
 		\vphantom{\underbrace{\begin{pmatrix}1\\1\end{pmatrix}}_{=2}}
 		\\
 		&=\frac{1}{1+|r_{1}|^2}\begin{pmatrix}
 			r_1(1+|r_1|^2)
-			& -\momCoeff \overline{r}_1^2  + (1+\xi \overline{r}_1) \\
-			0 &  \momCoeff\overline{r}_1 + \xi - r_1
+			& -\momCoeff \conjugate{r}_1^2  + (1+\xi \conjugate{r}_1) \\
+			0 &  \momCoeff\conjugate{r}_1 + \xi - r_1
 		\end{pmatrix}\\
 		&\lxeq{(\ref{eq: property of eigenvalues of R})}\begin{pmatrix}
 			r_1
-			& -\frac{\momCoeff \overline{r}_1^2 + 1+ (\overline{r}_1^2 + \momCoeff)}{1+|r_1|^2} \\
-			0 &  \frac{\momCoeff\overline{r}_1 + \xi - r_1}{1+|r_1|^2}
+			& -\frac{\momCoeff \conjugate{r}_1^2 + 1+ (\conjugate{r}_1^2 + \momCoeff)}{1+|r_1|^2} \\
+			0 &  \frac{\momCoeff\conjugate{r}_1 + \xi - r_1}{1+|r_1|^2}
 		\end{pmatrix}\\
 		&=\begin{pmatrix}
 			r_1
-			& -\frac{(1+\momCoeff)(1+\overline{r}_1^2)}{1+|r_1|^2} \\
-			0 &  \frac{\momCoeff\overline{r}_1 + r_2}{1+|r_1|^2}
+			& -\frac{(1+\momCoeff)(1+\conjugate{r}_1^2)}{1+|r_1|^2} \\
+			0 &  \frac{\momCoeff\conjugate{r}_1 + r_2}{1+|r_1|^2}
 		\end{pmatrix}
 	\end{align*}
 	where we have used \(\xi - r_1 = r_2\) in the last equation. Now in the complex
 	case (and the case \(4\momCoeff = \xi^2\)) we have
-	\(|r_1|=|r_2|=\sqrt{\momCoeff}\) and \(\overline{r_1} = r_2\) which results
+	\(|r_1|=|r_2|=\sqrt{\momCoeff}\) and \(\conjugate{r_1} = r_2\) which results
 	in
 	\begin{align*}
 		Q^* R Q
 		&=\begin{pmatrix}
 			r_1
-			& -(1+\overline{r}_1^2) \\
-			0 & \overline{r}_1 
+			& -(1+\conjugate{r}_1^2) \\
+			0 & \conjugate{r}_1 
 		\end{pmatrix}.
 		\qedhere
 	\end{align*}
 \end{proof}
 
+\begin{theorem}[Upper Bound on Operator Norm]
+	Assuming our momentum coefficient is large enough but smaller one, i.e.
+	\begin{align*}
+		1>\momCoeff
+		\ge \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\},
+	\end{align*}
+	we are in the complex case, i.e. \(\rho(R) = \sqrt{\momCoeff}\) and
+	\begin{align*}
+		\|R^n\|
+		&\le \rho(R)^{n-1}(\rho(R)+n[1+\rho(R)^2])\\
+		&\le 3n\rho(R)^{n-1} \qquad \forall n\ge 1.
+	\end{align*}
+	For all \(\epsilon>0\) we therefore have
+	\begin{align*}
+		\|R^n\|
+		&\le \frac{3\exp(1)/\rho(R)}{\log(\rho(R)+\epsilon)-\log(\rho(R))}
+		[\rho(R)+\epsilon]^n
+		\\
+		&\in O([\rho(R)+\epsilon]^n).
+	\end{align*}
+\end{theorem}
+\begin{proof}
+	First we apply our Lemmas to get
+	\begin{align*}
+		\|R^n\|
+		&=\max_{i=1,\dots,\dimension}	\|R_i^n\|
+		\xeq{\ref{lem: unitary matrices are isometries},\ \ref{lem: explicit schur decomposition}}
+		\max_{i=1,\dots,\dimension}\left\|\begin{pmatrix}
+			r_{i1} & -(1+\conjugate{r}_{i1}^2)\\
+			0 & \conjugate{r}_{i1}
+		\end{pmatrix}^n\right\|.
+	\end{align*}
+	Then we use Lemma~\ref{lem-appdx: absolute value inside operator norms} to
+	turn the entries into their absolute values which makes the diagonal entries
+	equal. As the diagonal now commutes with the nilpotent matrix we can apply the
+	binomial theorem 
+	\begin{align*}
+		\|R^n\|
+		&=\max_{i=1,\dots,\dimension}
+		\Bigg\|\left(
+		\begin{pmatrix}
+			|r_{i1}| & 0\\
+			0 & |r_{i1}|
+		\end{pmatrix}
+		+ \begin{pmatrix}
+			0 & |1+\conjugate{r}_{i1}^2|\\
+			0 & 0
+		\end{pmatrix}
+		\right)^n\Bigg\|\\
+		&\le \max_{i=1,\dots,\dimension}
+		\Bigg\|
+		\sum_{k=0}^n {n \choose k}
+				|r_{i1}|^{n-k}
+			\underbrace{
+				\left(
+				|1+\conjugate{r}_{i1}^2|
+				\begin{pmatrix}
+					0 & 1\\
+					0 & 0
+				\end{pmatrix}
+				\right)^k
+			}_{=0 \ \forall k>1}
+		\Bigg\|\\
+		&\le \max_{i=1,\dots,\dimension}
+		|r_{i1}|^n \|\identity\| + n |r_{i1}|^{n-1}(|1|+|r_{i1}^2|)
+		\underbrace{
+			\Bigg\|
+				\begin{pmatrix}
+					0 & 1\\
+					0 & 0
+				\end{pmatrix}
+			\Bigg\|
+		}_{=1}
+		\\
+		&\le \max_{i=1,\dots,\dimension}
+		\rho(R_i)^n + n \rho(R_i)^{n-1}(1+\rho(R_i)^2)\\
+		&=	\rho(R)^{n-1}(\rho(R) + n [1+\rho(R)^2]).
+	\end{align*}
+	For the second claim let \(\epsilon>0\), then we have
+	\begin{align*}
+		\frac{\|R^n\|}{[\rho(R)+\epsilon]^n}
+		&\le \frac{3n\rho(R)^{n-1}}{[\rho(R)+\epsilon]^n}\\
+		&= \frac{3}{\rho(R)}\exp(\log(n) + n[\log(\rho(R))-\log(\rho(R)+\epsilon)])\\
+		&\le \frac{3}{\rho(R)}\exp
+		\left(\log\left(\frac{1}{[\log(\rho(R)+\epsilon)-\log(\rho(R))]}\right) + 1\right)\\
+		&= \frac{3\exp(1)/\rho(R)}{\log(\rho(R)+\epsilon)-\log(\rho(R))}.
+	\end{align*}
+	Here we simply maximized over \(n\) to obtain the last inequality.
+\end{proof}
 
 
 \subsection{Why Consider Alternatives?}
@@ -952,8 +1050,13 @@ In a sense Nesterov's Momentum provides every eigenspace with its own
 heavy ball momentum \(\tilde{\momCoeff}_i\) which is a good sign if we want
 to avoid the ``Weakest Link Contraction Factor'' issue we had in heavy ball
 momentum. And if we are in the complex case the convergence rate is
-\(\sqrt{\momCoeff(1-\lrSq\hesseEV_i)}\) which looks like the root of the gradient
-descent convergence rate multiplied by a factor we could make smaller than one.
+\(\sqrt{\momCoeff(1-\lrSq\hesseEV_i)}\) which looks like the root of the
+gradient descent convergence rate multiplied by a factor we could make smaller
+than one.
+
+As we have reduced our problem to the heavy ball problem again, we can also use
+the same arguments to bound the operator norm. We will therefore ignore that
+problem henceforth.
 
 To ensure all eigenspaces are in the complex case, we first need to ensure that
 all \(\tilde{\momCoeff}_i\) are positive which requires
