@@ -1709,11 +1709,11 @@ is therefore reasonable.
 
 \subsection{Practical Hyperparameter Selection}
 
-Now while Algorithm~\ref{algo: optimal nesterov momentum} eliminates another
+While Algorithm~\ref{algo: optimal nesterov momentum} eliminates another
 hyperparameter, we still need to somehow know the Lipschitz constant \(\ubound\)
 of the gradient and the condition number \(\condition\).
 
-The Lipschitz constant can be estimated with Backtracking (Section~\ref{sec:
+The lipschitz constant can be estimated with Backtracking (Section~\ref{sec:
 backtracking}). With the condition number we could just be conservative and set
 \(\condition^{-1}=0\). This sacrifices linear convergence, but in view of the
 asymptotic convergence rates stochasticity causes, this might not be so bad. But
@@ -1737,7 +1737,7 @@ progression) is significant, this might not be a satisfactory answer.
 	\label{fig: momentum gamma plot}
 \end{figure}
 
-From our eigenvalue analysis we know that generally smaller eigenvalues will
+From our eigenvalue analysis we know that smaller eigenvalues will generally
 still converge (even if we neglect them) although at a slower rate. So we
 could just guess a condition and see how it goes. And if we have a look at
 Figure~\ref{fig: momentum gamma plot} a condition guess will simply stop the
@@ -1787,7 +1787,7 @@ resets momentum back to a lower level).
 
 Last but not least recall that \(\lrSq=1/\ubound\) is the \emph{squared}
 discretization \(\lr^2\) of the ODE which can deceive you into thinking that the
-discretization is similar given that Gradient Descent converges for \(\lr \in
+discretization is similar given that \ref{eq: gradient descent} converges for \(\lr \in
 (0,2/\ubound)\). But the implied discretization \(\lr=1/\sqrt{\ubound}\) of
 Nesterov's Momentum much larger in general. Providing some more intuition where the
 speedup comes from.

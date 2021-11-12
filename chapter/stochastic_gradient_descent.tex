@@ -96,7 +96,7 @@ gradient descent as a discretization of this flow.\footnote{
 do not run our optimizer for long, we do not get far from the start and thus
 do not have time to overfit.
 
-Stochastic Gradient Descent avoids splitting the error into generalization and
+Stochastic gradient descent avoids splitting the error into generalization and
 optimization error entirely which will provide us with even tighter bounds. The
 price for this improved bound, is the requirement to never reuse data, i.e. we
 need a source of independent \(\dist\) distributed random variables which we use
@@ -176,7 +176,7 @@ only be valid for one gradient step which is obviously ridiculous.
 
 To shorten notation we will assume that the gradient is always meant
 with respect to \(\weights\) unless otherwise stated.
-We define ``Stochastic Gradient Descent'' as
+We define ``stochastic gradient descent'' as
 %
 \begin{align}
 	\tag{SGD}
@@ -929,7 +929,7 @@ generalize this to non-quadratic functions.
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	While we are not going to tether ourselves to Gradient Descent \(\weights_n\) in
+	While we are not going to tether ourselves to \ref{eq: gradient descent} \(\weights_n\) in
 	this section, we are still going to split off the noise
 	\begin{align*}
 		\|\Weights_{n+1} - \minimum\|^2
@@ -1601,7 +1601,7 @@ While this approach helps us lose the strong convexity assumption, which might
 ensure decent convergence rates along eigenspaces of the Hessian with
 small or zero eigenvalues, it is in a sense much more dependent on the convexity
 of the loss function \(\Loss\) as our averaging of weights is only a
-guaranteed improvement because of it. While Gradient Descent should work
+guaranteed improvement because of it. While \ref{eq: gradient descent} should work
 intuitively on non-convex functions as well, with worse rates of convergence in
 eigenspaces with small eigenvalues (cf. Remark~\ref{rem: rate is retained for
 larger eigenvalues}) this averaging technique will generally not play nicely
