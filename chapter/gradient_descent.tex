@@ -9,7 +9,7 @@ move in the direction of steepest descent
 %
 \begin{align}
 	\label{eq: gradient descent}
-	\tag{Gradient Descent}
+	\tag{gradient descent}
 	\weights_{n+1} = \weights_n - \lr\nabla \Loss(\weights_n).
 \end{align}
 %
@@ -26,13 +26,13 @@ if we view the learning rate \(\lr\) as a time delta between times
 \(t_n\) and \(t_{n+1}\) with \(t_n = n\lr\). As then for
 \(\lr\to 0\) we arrive at the ODE in time \(t\)
 %
-\begin{align}\label{eq: velocity is gradient}
-	\tag{Gradient Flow}
+\begin{align}\label{eq: gradient flow}
+	\tag{gradient flow}
 	\dot{\weights}(t) = \frac{d}{dt}\weights(t)= -(\nabla_\weights \Loss)(\weights(t)).
 \end{align}
 %
 That we are taking the gradient with respect to \(\weights\) will from now on be
-implied. With the Gradient Flow equation and the fundamental theorem of
+implied. With the \ref{eq: gradient flow} equation and the fundamental theorem of
 analysis we get\footnote{
 	if you are familiar with Lyapunov functions you probably recognize this argument
 }
@@ -183,7 +183,7 @@ L}) of \(\Loss\) we can write the gradient at \(\weights\) as
 \end{align}
 %
 But note that the vertex \(\hat{\weights}\) depends on \(\weights\), so we need
-to index both by \(n\) to rewrite gradient descent
+to index both by \(n\) to rewrite \ref{eq: gradient descent}
 %
 \begin{align*}
 	\weights_{n+1} &= \weights_n - \lr\nabla \Loss(\weights_n)
@@ -436,7 +436,7 @@ also necessary for a linear\footnote{
 rate of convergence. When it comes to the upper bound on the other hand recall
 that we use it to bound the learning rate, ensuring that
 \(1-\lr\hesseEV_\dimension\) is larger than \(-1\). If we did not have an upper
-bound, then we could not guarantee this ``stability'' of gradient descent.
+bound, then we could not guarantee this ``stability'' of \ref{eq: gradient descent}.
 
 As we do not want to assume the Hessian exists let us integrate (\ref{eq:
 upper lower bound on hesse matrix}) and use the constants to make sure that we
@@ -538,7 +538,7 @@ explains Lipschitz continuity of the gradient as a distance penalty
 penalizing the fact that we do not have enough information about the loss if we
 move farther away from our current point. Our limit on the change of the gradient
 allows us to create this worst case upper bound though.
-Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
+\ref{eq: gradient descent} with learning rate \(\frac1\ubound\) minimizes this upper bound.
 %
 \begin{lemma}[{\cite[Theorem~2.1.5]{nesterovLecturesConvexOptimization2018}}]
 	\label{lem: smallest upper bound}
@@ -569,19 +569,22 @@ Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 	length separately. Now the Cauchy-Schwarz inequality implies the optimal
 	direction is along the gradient vector:
 	\begin{align*}
-		\langle \nabla\Loss(\weights),-\tfrac{r}{\|\nabla\Loss(\weights)\|}\nabla\Loss(\weights)\rangle
+		\big\langle 
+			\nabla\Loss(\weights),
+			-\tfrac{r}{\|\nabla\Loss(\weights)\|}\nabla\Loss(\weights)
+		\big\rangle
 		&= - \|\Loss(\weights)\| r\\
-		&\lxle{\text{CS.}}
+		&\lxle{\text{C.S.}}
 		\min_{\theta} \{\langle \nabla \Loss(\weights), \theta-\weights \rangle : \|\theta-\weights\|=r \}.
 	\end{align*}
-	Now we only need to find the right step size to optimize the entire equation
+	So we only need to find the right step size to optimize the entire equation
 	\begin{align*}
 		&\min_{\theta} \{
 			\Loss(\weights)+ \langle\nabla \Loss(\weights), \theta-\weights\rangle
 			+ \tfrac{\ubound}{2}\|\theta-\weights\|^2 
 		\} \\
 		&= \min_{\lr} \{ \Loss(\weights) + \langle \nabla \Loss(\weights), -\lr \nabla \Loss(\weights)\rangle
-		+ \tfrac{\ubound}{2}\|\lr\nabla \Loss(\weights)\|^2\}
+		+ \tfrac{\ubound}{2}\|\lr\nabla \Loss(\weights)\|^2\}.
 	\end{align*}
 	And a simple expansion of terms results in
 	\begin{align*}
@@ -595,16 +598,16 @@ Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 	\begin{align*}
 		\lr=\tfrac{2}{\ubound}\alpha\qquad \alpha \in (0,1).
 	\end{align*}
-	Therefore the learning rate \(\lr=1/\ubound\) right in the middle of the
-	interval \((0, 2/\ubound)\) of guaranteed decrease minimizes our upper bound.
+	Therefore the learning rate \(\lr=\tfrac1\ubound\), right in the middle of the
+	interval \((0, \tfrac2\ubound)\) of guaranteed decrease, minimizes our upper bound.
 \end{proof}
 \begin{remark}[Markovian Optimality of GD]
-	What we have seen is that gradient descent is optimal in a ``markovian''
-	sense with regard to a certain upper bound. As every step optimizes the
-	decrease of our upper bound regardless of the history leading up to this
-	point. But it is not optimal over \emph{multiple} steps as it might sometimes
-	be sensible to incorporate past gradient information into our current step
-	(Chapter~\ref{chap: momentum} Momentum).
+	What we have seen is that \ref{eq: gradient descent} is optimal in a ``Markovian''
+	(history independent) sense with regard to a certain upper bound. As every
+	step optimizes the decrease of our upper bound regardless of the history
+	leading up to this point. But it is not optimal over \emph{multiple} steps as
+	it might sometimes be sensible to incorporate past gradient information into
+	our current step (Chapter~\ref{chap: momentum} Momentum).
 \end{remark}
 
 \begin{remark}[Mirror Descent]\label{rem: mirror descent}
@@ -617,7 +620,7 @@ Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 		&= \min_y \{f(x) + \langle f(x), y-x\rangle +\bregmanDiv{f}(y,x)\} \\
 		&\le \min_y\{f(x) + \langle f(x), y-x\rangle +\tfrac{\ubound}{2} \|y-x\|^2\},
 	\end{align*}
-	then we could also improve on gradient descent by taking the minimum of this
+	then we could also improve on \ref{eq: gradient descent} by taking the minimum of this
 	improved upper bound.
 \end{remark}
 
@@ -625,44 +628,45 @@ Gradient Descent with learning rate \(1/\ubound\) minimizes this upper bound.
 
 \begin{theorem}[{\cite[Theorem~4.10]{bottouOptimizationMethodsLargeScale2018}}]
 	\label{thm: convergence of the gradient (only lip cont)}
-	For a Loss function with \(\ubound\)-Lipschitz gradient and finite lower bound
-	(i.e. \(\inf_{\weights}\Loss(\weights) >-\infty\)) Gradient Descent with
-	learning rate \(\lr\in(0,2/\ubound)\) induces convergence of the gradient.
-	The convergence rate is at least \(o(1/n)\). More precisely the average
-	gradient converges with rate \(O(1/n)\)
+	For a loss function with \(\ubound\)-Lipschitz gradient and finite lower bound
+	(i.e. \(\inf_{\weights}\Loss(\weights) >-\infty\)) \ref{eq: gradient descent} with
+	learning rate \(\lr\in(0,\tfrac2\ubound)\) induces convergence of the gradient.
+	The convergence rate is at least \(o(\tfrac1n)\). More precisely, the average
+	gradient converges with rate \(O(\tfrac1n)\)
 	\begin{align*}
 		\frac1{n}\sum_{k=0}^n \|\nabla\Loss(\weights_k)\|^2
 		&\le \frac{\Loss(\weights_0) - \inf_{\weights}\Loss(\weights)}{n\lr(1-\tfrac{\ubound}2\lr)}.
 	\end{align*} 
 \end{theorem}
 \begin{proof}
-	Let \(\weights_n\) be generated with gradient descent with learning rate \(\lr\).
+	Let the weights \(\weights_n\) be generated with \ref{eq: gradient descent} with learning rate \(\lr\).
 	Then we have	
 	\begin{align*}
 		\sum_{k=0}^n \|\nabla\Loss(\weights_k)\|^2
 		&\xle{(\ref{eq: loss implies gradient convergence})}
 		\sum_{k=0}^n \frac{\Loss(\weights_k) - \Loss(\weights_{k+1})}{\lr(1-\tfrac{\ubound}2\lr)}
-		= \frac{\Loss(\weights_0) - \Loss(\weights_{n+1})}{\lr(1-\tfrac{\ubound}2\lr)}
+		\xeq{\text{telescoping}} \frac{\Loss(\weights_0) - \Loss(\weights_{n+1})}{\lr(1-\tfrac{\ubound}2\lr)}
 		\\
-		&\le \frac{\Loss(\weights_0) - \inf_{\weights}\Loss(\weights)}{\lr(1-\tfrac{\ubound}2\lr)}
+		&\le \frac{\Loss(\weights_0)
+		- \inf_{\weights}\Loss(\weights)}{\lr(1-\tfrac{\ubound}2\lr)}.
 	\end{align*}
-	Taking \(n\to\infty\) this implies summability and thus convergence of the
-	gradients. Since the harmonic series \(\sum_{k=0}^n 1/k\) is divergent,
+	Taking \(n\to\infty\) this implies summability, and thus convergence of the
+	gradients. Since the harmonic series \(\sum_{k=0}^n \tfrac1{k}\) is divergent,
 	the gradients must necessarily converge faster.
 \end{proof}
 
-Since we can not guarantee convergence to a (global) minimum as convergence of
+Since we cannot guarantee convergence to a (global) minimum as convergence of
 the gradient only implies convergence to a critical point, it is the weakest
 form of convergence.
 
 \begin{theorem}[Convergence Chain]\label{thm: convergence chain}
-	If the loss \(\Loss\) has Lipschitz continuos gradient, then
+	If the loss \(\Loss\) has Lipschitz continuos gradient, then we have
 	\begin{align*}
-		\text{Weight Convergence}
-		\implies \text{Loss Convergence}
-		\implies \text{Gradient Convergence}
+		\text{weight convergence}
+		\implies \text{loss convergence}
+		\implies \text{gradient convergence}.
 	\end{align*}
-	more precisely
+	More precisely,
 	\begin{align}
 	\label{eq: weight implies loss convergence}
 		\tfrac{1}{2\ubound}\|\nabla\Loss(\weights)\|^2
@@ -691,15 +695,13 @@ form of convergence.
 \subsection{Discussion}
 
 Lipschitz continuity of the gradient provides us with a ``trust bound''
-\(\lr\in(0,1/\ubound)\) on the gradient. It limits the rate of change of the
-gradient and thus allows us to
-formulate and optimize over an upper bound of the loss function resulting in
-learning rate \(1/\ubound\).
+\(\lr\in(0,\frac{1}{\ubound})\) on the gradient. It limits the rate of change of the
+gradient, and thus allows us to formulate and optimize over an upper bound of
+the loss function, resulting in learning rate \(\frac{1}{\ubound}\).
 
 If the gradient can change faster, we can trust it less and have to take smaller
-steps. Even with infinitesimal steps (i.e. in the \ref{eq: velocity is
-gradient} case) we need at least uniform continuity of \(\nabla\Loss\) such that
-the inequality
+steps. Even with infinitesimal steps (i.e. in the \ref{eq: gradient flow} case)
+we need at least uniform continuity of \(\nabla\Loss\) such that the inequality
 \begin{align}\label{eq: bounded gradient integral}
 	\int_{t_0}^\infty \|\nabla \Loss(\weights(s))\|^2 ds
 	&= \Loss(\weights(t_0)) - \lim_{t\to\infty} \Loss(\weights(t)) \\
@@ -707,34 +709,35 @@ the inequality
 \end{align}
 %
 derived from (\ref{eq: gradient integral}) is sufficient for a convergent
-\(\|\nabla \Loss(\weights(t))\|\) otherwise the gradients could be arbitrarily
+\(\|\nabla \Loss(\weights(t))\|\), otherwise the gradients could be arbitrarily
 large or small. The discrete version of this integral inequality is the inequality
 from Theorem~\ref{thm: convergence of the gradient (only lip cont)}
 \begin{align*}
 	\frac1{n}\sum_{k=0}^n \|\nabla\Loss(\weights_k)\|^2
 	&\le \frac{\Loss(\weights_0) - \inf_{\weights}\Loss(\weights)}{n\lr(1-\tfrac{\ubound}2\lr)}.
 \end{align*} 
-Notice that if we use \(\tfrac{1}{\ubound}\) as the time increment \(\lr\)
-between the \(\weights_k\), we only lose the factor \(1/2\) in our
+Note that if we use \(\tfrac{1}{\ubound}\) as the time increment \(\lr\)
+between the \(\weights_k\), we only lose the factor \(\tfrac12\) in our
 discretization of the continuos version (\ref{eq: bounded gradient integral}) so
 the bound is quite tight.
 
 Another motivation for Lipschitz continuity is the fact that the gradient defines
-the \ref{eq: velocity is gradient} ODE, and it is very common to use Lipschitz
+the \ref{eq: gradient flow} ODE, and it is very common to use Lipschitz
 continuity to argue for existence, uniqueness and stability of ODEs.
 
-If the gradient does not converge neither can the weights, since their updates
-are proportional to the difference between \(\weights_{n+1}\) and \(\weights_n\)
-is proportional to the gradient.
+If the gradient does not converge, neither can the weights, since their updates
+(i.e., the difference between \(\weights_{n+1}\) and \(\weights_n\))
+are proportional to the gradient. So convergence of the gradient is necessary.
 
 \subsubsection{Gradient Convergence does not imply Weight Convergence}
 
 If we only have that the derivative \(\dot{\weights}(t) = -\nabla \Loss(\weights(t))\)
-converges, then the logarithm is an obvious example where this goes wrong.
-Convergence of the gradient is therefore necessary but not sufficient.
+converges, then the logarithm is an obvious example where the other direction
+is wrong. Convergence of the gradient is therefore necessary but not
+sufficient.
 
 If the series of unsquared gradient norms were finite as well on the other hand,
-the \(\weights_n\) would be a cauchy sequence
+the \(\weights_n\) would be a Cauchy sequence, i.e.
 %
 \begin{align*}
 	\|\weights_n - \weights_m \|
@@ -744,23 +747,28 @@ the \(\weights_n\) would be a cauchy sequence
 %
 This provides us with some intuition how a situation might look like when the
 gradient converges but not the sequence of \(\weights_n\). The gradient would
-behave something like the harmonic series, as its squares converges and the
+behave something like the harmonic series as its squares converges and the weights
 \(\weights_n\) would behave like the partial sums of the harmonic series which
-behaves like the logarithm in the limit. So for
+behaves like the logarithm in the limit\footnote{
+\(
+	\log(n+1) = \int_1^{n+1} \tfrac{1}x dx \le \sum_{k=0}^n \tfrac1k \le 1+ \log(n)
+\)
+}.
+So for
 %
 \begin{align*}
 	\Loss(\weights) = \exp(-\weights)
 \end{align*}
 %
-the Gradient Flow ODE is solved by
+the \ref{eq: gradient flow} ODE is solved by
 %
 \begin{align*}
-	\weights(t) &= \log(t)\\
-	\nabla \Loss(t) &= -\tfrac1t
+	\weights(t) &= \log(t),\\
+	\nabla \Loss(t) &= -\tfrac1t,
 \end{align*}
 %
 which provides intuition how ``flat'' a minima has to be to cause such behavior.
-The minimum at \(\infty\) has an infinitely wide basin which flattens out
+The minimum at infinity has an infinitely wide basin which flattens out
 more and more. If we wanted such an example in a bounded space we would have
 to try and coil up such an infinite slope into a spiral, which spirals outwards
 to avoid convergence. A spiral is of course not convex, so this hints
@@ -768,15 +776,15 @@ at why we are going to need a notion of increasing or infinite dimensions to
 provide complexity bounds in Section~\ref{sec: complexity bounds} essentially
 spiralling through the dimensions.
 
-Since our example is one dimensional we can also immediately see the ``eigenvalue''
+Since our example is one dimensional, we can also immediately see the eigenvalue
 %
 \begin{align*}
-	\nabla^2 \Loss(\weights(t)) = \exp(-\weights(t)) = 1/t
+	\nabla^2 \Loss(\weights(t)) = \exp(-\weights(t)) = \tfrac1{t}
 \end{align*}
 %
-which decreases towards zero, stalling the movement towards the minimum.
-We also have convexity in this example so we can get convergence of the loss
-as we will see in the next section.
+which decreases towards zero as \(t\to\infty\), stalling the movement towards
+the minimum.  We also have convexity in this example so we can get convergence
+of the loss as we will see in the next section.
 
 \section{Convergence with Convexity}\label{sec: convex convergence theorems}
 
@@ -791,10 +799,10 @@ One way to ensure such a lower bound on the gradient is using convexity.
 \begin{theorem}[{\cite[Theorem~2.1.14]{nesterovLecturesConvexOptimization2018}}]
 	\label{thm: convex function GD loss upper bound}
 	Let \(\Loss\in\lipGradientSet{\ubound}\), let \(\minimum\) be the unique minimum.
-	Then Gradient Descent with learning rate \(0 < \lr < 2/\ubound\) results in
+	Then \ref{eq: gradient descent} with learning rate \(0 < \lr < 2/\ubound\) results in
 	\begin{align}\label{eq: convex function loss upper bound}
 		\Loss(\weights_n) - \Loss(\minimum)
-		\le \frac{2\ubound\|\weights_0 - \minimum\|}{4 + n\ubound\lr(2-\ubound\lr)}
+		\le \frac{2\ubound\|\weights_0 - \minimum\|}{4 + n\ubound\lr(2-\ubound\lr)}.
 	\end{align}
 	The optimal rate of convergence 
 	\begin{align*}
@@ -802,14 +810,14 @@ One way to ensure such a lower bound on the gradient is using convexity.
 		\le \frac{2\ubound\|\weights_0-\minimum\|}{4+n}
 		\in O\Big(\frac{\ubound\|\weights_0-\minimum\|}{n}\Big)
 	\end{align*}
-	is achieved for \(\lr=1/\ubound\).
+	is achieved for \(\lr=\tfrac1{\ubound}\).
 \end{theorem}
 \begin{proof}
-	To lower bound our gradient we use convexity and Cauchy-Schwarz
+	To lower bound our gradient we use convexity and the Cauchy-Schwarz inequality
 	\begin{align*}
 		\Loss(\weights_n)-\Loss(\minimum)
 		\xle{\text{convexity}} -\langle \nabla\Loss(\weights_n), \minimum-\weights_n\rangle
-		\xle{\text{C-S}} \|\weights_n - \minimum\| \|\nabla\Loss(\weights_n)\|.
+		\xle{\text{C.S.}} \|\weights_n - \minimum\| \|\nabla\Loss(\weights_n)\|.
 	\end{align*}
 	This provides us with a lower bound 
 	\begin{align}\label{eq: lower bound gradient size}
@@ -824,10 +832,12 @@ One way to ensure such a lower bound on the gradient is using convexity.
 		\langle\nabla\Loss(\weights) - \nabla\Loss(\minimum), \weights-\minimum\rangle
 		\ge \tfrac1{\ubound} \|\nabla\Loss(\weights) - \nabla\Loss(\minimum)\|^2.
 	\end{align*}
-	Keeping in mind \(\nabla \Loss(\minimum)=0\) this implies
+	Plugging the recursive definition of \ref{eq: gradient descent} into \(\weights_{n+1}\)
+	with \(\nabla \Loss(\minimum)=0\) in mind results in
 	\begin{align}
 		\nonumber
 		\|\weights_{n+1} - \minimum\|^2
+		&=\|\weights_n -\lr\nabla\Loss(\weights_n) - \minimum\|^2\\
 		&= \|\weights_n - \minimum\|^2
 		- 2\lr\underbrace{
 			\langle \nabla\Loss(\weights_n), \weights_n - \minimum\rangle
@@ -847,12 +857,12 @@ One way to ensure such a lower bound on the gradient is using convexity.
 	\begin{align*}
 		\Loss(\weights_{n+1}) - \Loss(\minimum)
 		&\le \Loss(\weights_n)-\Loss(\minimum)
-		- \overbrace{\lr(1-\lr\ubound/2)}^{=:\xi} \|\nabla \Loss(\weights_n)\|^2\\
+		- \overbrace{\lr(1-\lr\tfrac{\ubound}2)}^{=:\xi} \|\nabla \Loss(\weights_n)\|^2\\
 		&\lxle{(\ref{eq: lower bound gradient size})}
 		\Loss(\weights_n)-\Loss(\minimum)
 		\underbrace{
 			\left(1 - \tfrac{\xi}{\|\weights_0-\minimum\|^2}(\Loss(\weights_n)-\Loss(\minimum))\right)
-		}_{\text{diminishing contraction}}
+		}_{\text{``diminishing contraction term''}}.
 	\end{align*}
 	%
 	The convergence rate of such a recursion can be bounded (which we will do in
@@ -893,14 +903,14 @@ Now to the Lemma we promised to ensure that our weights do not move further away
 from the minimum.
 %
 \begin{lemma}[{\cite[Theorem~2.1.5]{nesterovLecturesConvexOptimization2018}}]\label{lem: bermanDiv lower bound}
-	Let \(f\in\lipGradientSet{\ubound}\)
+	For \(f\in\lipGradientSet{\ubound}\) we have
 	\begin{subequations}
 	\begin{align}
 		\bregmanDiv{f}(y,x)
-		&\ge \tfrac{1}{2\ubound}\|\nabla f(x) - \nabla f(y)\|^2\\
+		&\ge \tfrac{1}{2\ubound}\|\nabla f(x) - \nabla f(y)\|^2,\\
 		\label{eq: bregmanDiv lower bound b}
 		\langle \nabla f(x) - \nabla f(y), x-y\rangle
-		&\ge \tfrac{1}{\ubound}\|\nabla f(x) - \nabla f(y)\|^2
+		&\ge \tfrac{1}{\ubound}\|\nabla f(x) - \nabla f(y)\|^2.
 	\end{align}	
 	\end{subequations}	
 \end{lemma}
@@ -918,9 +928,9 @@ from the minimum.
 	\end{align}
 	%
 	This gradient is equal to the change of gradient from \(x\) to \(y\) and 
-	therefore represents the error ``rate'' we are making assuming a constant gradient
+	therefore represents the error rate we are making assuming a constant gradient
 	and linearly approximating \(f\), which is by definition the derivative of the size of
-	\(\bregmanDiv{f}(y,x)\). Now this error ``rate'' can be translated
+	\(\bregmanDiv{f}(y,x)\). Now this error rate can be translated
  	back into a real error using the stickiness of the gradient due to
 	its Lipschitz continuity. I.e. by Lemma~\ref{lem: smallest upper bound} we know that
 	%
@@ -942,19 +952,20 @@ from the minimum.
 
 \begin{lemma}[Diminishing Contraction]
 	\label{lem: upper bound on diminishing contraction}
-	Let \(a_0 \in [0, 1/q]\) for \(q>0\), and assume
+	Let \(a_0 \in [0, \frac{1}{q}]\) for \(q>0\), and assume for a sequence
+	\((a_n)_{n\in\naturals_0}\)
+	\begin{align}\label{eq: diminishing contraction}
+		0\le a_{n+1} \le (1-q a_n)a_n \quad \forall n \ge 0.
+	\end{align}
+	Then we have
 	\begin{align*}
-		0\le a_{n+1} \le (1-q a_n)a_n \quad \forall n \ge 0
-	\end{align*}
-	then we have
-	\begin{align*}
-		a_n \le \frac{1}{nq + \frac1{a_0}}\le\frac1{(n+1)q}
+		a_n \le \frac{1}{nq + \frac1{a_0}}\le\frac1{(n+1)q}.
 	\end{align*}
 \end{lemma}
 \begin{proof}
 	The proof is an adaptation of a technique used in \textcite[Theorem
 	2.1.14]{nesterovLecturesConvexOptimization2018}. We start by dividing the
-	reordered equation
+	reordered contraction (\ref{eq: diminishing contraction}), i.e.
 	\begin{align*}
 		a_n \ge a_{n+1} + qa_n^2
 	\end{align*}
@@ -973,7 +984,7 @@ from the minimum.
 		\ge nq
 	\end{align*}
 	which (after some reordering) results in the first inequality of our claim.
-	The second inequality follows from \(a_0 \le 1/q\).
+	The second inequality follows from our assumption \(a_0 \le \frac{1}{q}\).
 \end{proof}
 \begin{remark}
 	This bound is tight (see appendix Lemma~\ref{lem-appendix: diminishing contraction}).
@@ -985,7 +996,7 @@ Convexity allows us to find explicit rates not just limiting rates. In case
 of Theorem~\ref{thm: convergence of the gradient (only lip cont)} we do not
 know how many times the gradients got really low (e.g. close to a saddle
 point) until they actually stay low. This is all eaten up by the
-constant in \(o(1/n)\).
+constant in \(o(\tfrac1n)\).
 
 As we have seen in Subsection~\ref{subsec: Negative Eigenvalues}, negative
 eigenvalues act as a repelling force, preventing the transformation (\ref{eq:
@@ -1012,13 +1023,13 @@ are a bit of an issue, but if they become negative in some epsilon ball
 then moving in that direction would lead us further down. This is a contradiction
 to our assumption that we created a ball around the minimum of \(\Loss\).
 
-The statement that we are being pushed out of the non-convex regions is a bit
-dubious as we could start right on top of local maxima or rims of saddle points.
+The statement that we are pushed out of the non-convex regions is a bit
+dubious, as we could start right on top of local maxima or rims of saddle points.
 But as we are ultimately interested in stochastic gradient descent, these zero
-measure areas are of little concern. But as we already found out in
+measure areas are of little concern. On the other hand we already found out in
 Subsection~\ref{subsec: Negative Eigenvalues}, starting close to such a feature
 increases the amount of time it takes for us to escape that area. This means
-we can not really provide an upper bound on the time it takes to end up in
+we cannot really provide an upper bound on the time it takes to end up in
 a locally convex area, as we can arbitrarily increase the escape time by
 setting the starting point closer and closer to the local maxima or rim of a
 saddle point.
@@ -1027,13 +1038,14 @@ So the best we can do without actually getting into probability theory is to
 hand-wave this starting phase away with the unlikelihood of it taking too long
 due to the exponential repulsion from negative eigenvalues. The probability
 theory to make more precise statements is still in active development and will
-require a metastability analysis of the SDE induced by stochastic gradient descent
+require a metastability analysis of the stochastic differential equation (SDE)
+induced by stochastic gradient descent
 \parencite[e.g.][]{bovierMetastabilityPotentialTheoreticApproach2015,nguyenFirstExitTime2019}
 resulting in exit time bounds as well as an upper bound on the distance of SGD
 to this limiting SDE
 \parencite[e.g.][]{liStochasticModifiedEquations2017,ankirchnerApproximatingStochasticGradient2021}.
 
-This difficulty is the reason why we like to skip this starting phase and only
+This difficulty is the reason why we skip this starting phase and only
 provide a convergence analysis once we enter the final convex area.
 
 \subsection{Convergence without Lipschitz Continuous Gradient}\label{subsec: subgradient method}
@@ -1045,16 +1057,16 @@ case it turns out that we can even get convergence of the loss if we only assume
 convexity and \(\lipConst\)-Lipschitz continuity of \(\Loss\) itself
 (boundedness of the gradient), i.e.
 \begin{align*}
-	\Loss \in \lipGradientSet[0,0]{\lipConst}
+	\Loss \in \lipGradientSet[0,0]{\lipConst}.
 \end{align*}
 %
 Since we can not guarantee a monotonic decrease with subgradients, the name
 ``descent'' is generally avoided and we have to keep a running minimum or
-average all the weights. You can either look into \textcite[Section
+average all the weights. A proper treatment is provided in \textcite[Section
 2.2.3]{nesterovLecturesConvexOptimization2018} or \textcite[Section
-2.1]{bubeckConvexOptimizationAlgorithms2015} for a proper
-treatment or wait until Section~\ref{sec: SGD with Averaging} where we use
-the same proof technique in a more general stochastic setting. The convergence
+2.1]{bubeckConvexOptimizationAlgorithms2015}. But we will also use the same proof
+technique in a more general stochastic setting in Section~\ref{sec: SGD with
+Averaging} where this deterministic setting is a special case. The convergence
 rate decreases to
 \begin{align*}
 	O\Big(\frac{\|\weights_0-\weights_*\|\lipConst}{\sqrt{n}}\Big).
@@ -1079,7 +1091,7 @@ bound of the gradient using the weight difference directly
 \begin{align}
 	\nonumber
 	\|\nabla\Loss(\weights)\|\|\weights -\minimum\|
-	&\lxge{\text{C-S}} \langle \nabla\Loss(\weights) -\nabla\Loss(\minimum), \weights - \minimum \rangle\\
+	&\lxge{\text{C.S.}} \langle \nabla\Loss(\weights) -\nabla\Loss(\minimum), \weights - \minimum \rangle\\
 	\nonumber
 	&= \bregmanDiv{\Loss}(\weights, \minimum) + \bregmanDiv{\Loss}(\minimum, \weights)\\
 	\label{eq: strong convexity implies PL}
@@ -1097,7 +1109,7 @@ More specifically we can bound our weight iteration (\ref{eq: weight iteration})
 \end{align*}
 In other words we are closing the loop of Theorem~\ref{thm: convergence chain}.
 Optimizing over the learning rate \(\lr\) (similarly to Lemma~\ref{lem: smallest
-upper bound}) results in \(\lr=1/\ubound\) and convergence rate
+upper bound}) results in \(\lr=\tfrac1\ubound\) and convergence rate
 \begin{align*}
 	\|\weights_{n+1}-\minimum\|^2
 	\le (1-\tfrac{\lbound}{2\ubound})\|\weights_n - \minimum\|^2
@@ -1111,7 +1123,7 @@ more work we can actually achieve the same rates.
 	\label{thm: gd strong convexity convergence rate}
 	If \(\Loss\in\strongConvex{\lbound}{\ubound}\), then for learning rate
 	\[0 \le \lr \le \tfrac{2}{\ubound+\lbound}\]
-	Gradient Descent generates a sequence \(\weights_n\) satisfying
+	\ref{eq: gradient descent} generates a sequence \(\weights_n\) satisfying
 	\begin{subequations}
 	\begin{align}
 		\label{eq: gd strong convexity convergence rate 1}
@@ -1414,7 +1426,7 @@ longer invertible).
 On top of these fundamental problems the storage of the Hessian requires
 \(O(\dimension^2)\) space already and its inversion takes \(O(\dimension^3)\)
 time, which is infeasible for high dimensional data. Especially considering that
-gradient descent will do \(O(\dimension^2)\) steps while the Newton-Raphson
+\ref{eq: gradient descent} will do \(O(\dimension^2)\) steps while the Newton-Raphson
 method does one inversion. Lastly there are issues obtaining the Hessian in a
 stochastic setting.
 
@@ -1438,10 +1450,10 @@ not repel from saddle points as it attempts to estimate the real hessian.
 
 \section{Complexity Bounds}\label{sec: complexity bounds}
 
-Now that we found convergence rates for gradient descent on (strongly) convex
+Now that we found convergence rates for \ref{eq: gradient descent} on (strongly) convex
 problems, the question is can we do better? I.e. how fast could an algorithms
 possibly be? To tackle this problem let us first make an assumption about what
-this algorithm can do. Unrolling our gradient descent algorithm
+this algorithm can do. Unrolling our \ref{eq: gradient descent} algorithm
 %
 \begin{align*}
 	\weights_n = \weights_0 - \lr\sum_{k=0}^{n-1} \nabla \Loss(\weights_k)
@@ -1478,8 +1490,8 @@ which I further modify into the following example.
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_coloring_problem.pdf_tex}
 	\caption{Even after \(\dimension\) steps (when all tiles have a non-zero value)
-	gradient descent is still far off from the solution even using the optimal
-	learning rate \(1/\ubound\)}
+	\ref{eq: gradient descent} is still far off from the solution even using the optimal
+	learning rate \(\tfrac1\ubound\)}
 	\label{fig: visualize coloring problem}
 \end{figure}
 %
@@ -1517,7 +1529,7 @@ For the loss function
 	+ \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 \end{align}
 %
-this is just the gradient descent recursion. Now here is the crucial insight:
+this is just the \ref{eq: gradient descent} recursion. Now here is the crucial insight:
 
 Since any weight (parameter component) is only affected once its neighbors are
 affected, the second weight can not be affected before the second step since
@@ -1926,10 +1938,10 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 	\end{align*}
 \end{proof}
 
-In view of Lemma~\ref{lem: smallest upper bound} which states that gradient
-descent is in some sense optimal (minimizes the upper bound induced by
+In view of Lemma~\ref{lem: smallest upper bound} which states that \ref{eq:
+gradient descent} is in some sense optimal (minimizes the upper bound induced by
 Lipschitz continuity of the gradient), it might be surprising how far away
-Gradient Descent is from these lower bounds. Maybe these lower bounds are not
+\ref{eq: gradient descent} is from these lower bounds. Maybe these lower bounds are not
 tight enough? This is not the case. In Chapter~\ref{chap: momentum} we will get
 to know a family of methods which do achieve these rates of convergence.
 
@@ -1978,7 +1990,7 @@ be possible to find better bounds.
 \section{Backtracking}\label{sec: backtracking}
 
 In general we do not know the parameters \(\ubound\) or \(\lbound\). While
-the learning rate \(1/\ubound\) might not be optimal as it treats the largest
+the learning rate \(\tfrac1\ubound\) might not be optimal as it treats the largest
 eigenvalue preferential over the smallest, it results in decent progress and
 is much more stable as we will find out in Section~\ref{sec: nesterov momentum convergence}.
 

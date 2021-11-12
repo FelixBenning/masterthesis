@@ -186,11 +186,21 @@ order methods extensively but does not consider stochasticity.
 
 In Chapter~\ref{chap: gradient descent} we will review the well
 established method of gradient descent which can minimize deterministic
-functions. While this method is applicable to \(\Loss_\sample\), i.e. allows us
+functions. It might be tempting to skip this chapter, but note that this chapter 
+mostly introduces building blocks we will use in subsequent chapters. We mostly
+prove convergence of gradient descent as motivation for these building blocks.
+The actual proofs for convergence are actually very short. What can be skipped
+are the complexity bounds in Section~\ref{sec: complexity bounds}. The
+Loss Surface analysis in Section~\ref{sec: loss surface} and Backtracking
+in Section~\ref{sec: backtracking} are not required to understand the following
+chapters, but they motivate the assumptions we will make.
+
+While gradient descent is applicable to \(\Loss_\sample\), i.e. allows us
 to minimize empirical risk (\ref{eq: empirical risk}), we will question this
 approach in Chapter~\ref{chap: sgd} where we show that it is possible to
 minimize \(\Loss\) itself provided we have an infinite supply of samples. If we
 start to reuse samples we would just end up minimizing \(\Loss_\sample\) again.
+
 In Chapter~\ref{chap: momentum} we will discuss methods to speed up
 gradient descent.
 

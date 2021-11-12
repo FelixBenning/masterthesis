@@ -24,18 +24,18 @@
 	\begin{align*}
 		\|\nabla f(x_0)\|
 		&\equiv \sup_{v} \frac{\|\nabla f(x_0)v\|}{\|v\|}
-		= \sup_{v} \lim_{v\to 0}\frac{\|\nabla f(x_0)v\|}{\|v\|}\\
-		&\lxle{\Delta}\sup_{v} \lim_{v\to 0}
+		= \sup_{v} \lim_{\lambda\to 0}\frac{|\lambda|\|\nabla f(x_0) v\|}{|\lambda|\|v\|}\\
+		&\lxle{\Delta}\sup_{v} \lim_{\lambda\to 0}
 		(
 			\underbrace{
-				\tfrac{\|f(x_0 + v) - f(x_0) \|}{\|v\|}
-			}_{
-				\le \lipConst 
-			}
-			+ \underbrace{
-				\tfrac{\|\nabla f(x_0)v + f(x_0) - f(x_0 +v)\|}{\|v\|}
+				\tfrac{\|\nabla f(x_0)\lambda v + f(x_0) - f(x_0 +\lambda v)\|}{\|\lambda v\|}
 			}_{
 				\to 0 \text{ (derivative definition)}
+			}
+			+ \underbrace{
+				\tfrac{\|f(x_0 + \lambda v) - f(x_0) \|}{\|\lambda v\|}
+			}_{
+				\le \lipConst 
 			}
 		)
 	\end{align*}
@@ -103,8 +103,7 @@
 	we have equality. Thereby it becomes a discrete version of L'Hôpital's
 	rule.
 \end{theorem}
-\begin{proof}
-	\fxnote{cite \cite{IMOmathHopitalTheorem}}
+\begin{proof}[{Proof \parencite{IMOmathHopitalTheorem}}]
 	To show the first inequality let us assume we have
 	\begin{align*}
 		\gamma < \liminf_n \frac{\Delta x_n}{\Delta y_n}.
