@@ -5,12 +5,129 @@
 
 \section{Heuristics}
 
-\subsection{Adagrad}
+There are a number of very successful heuristics which are provided in the
+default optimizer selection of machine learning frameworks such as Tensorflow.
 
-\subsection{Adadelta}
+As we have only covered \ref{eq: gradient descent} and momentum so far, we have
+quite a bit of ground to cover. But at the same time most of the remaining
+common optimizer \parencite[as reviewed by e.g.][]{ruderOverviewGradientDescent2017}
+can be motivated in a similar way, which might or might not be new, as I did not
+properly search previous work for this idea.
 
-\subsection{RMSProp}
-\subsection{Adam \& Nadam}
+Recall that the \ref{eq: newton minimum approx}
+\begin{align*}
+	\weights_{n+1}	= \weights_n - (\nabla^2\Loss(\weights_n))^{-1}\nabla\Loss(\weights_n)
+\end{align*}
+finds the vertex of a quadratic loss function \(\Loss\) immediately, because we
+have
+\begin{align*}
+	\nabla\Loss(\weights_n) = \nabla^2\Loss(\weights_n)[\weights_n - \hat{\weights}_n],
+\end{align*}
+where \(\hat{\weights}_n\) was the vertex of the second Taylor approximation.
+To better understand how that works, note that for
+\begin{align*}
+	\nabla^2\Loss(\weights_n) = V \diag(\hesseEV_1,\dots,\hesseEV_\dimension)V^T
+\end{align*}
+we have
+\begin{align*}
+	\nabla^2\Loss(\weights_n)^{-1}
+	= V \diag(\tfrac1\hesseEV_1,\dots,\tfrac1\hesseEV_\dimension)V^T.
+\end{align*}
+To simplify things, let us assume a quadratic loss function
+\(H=\nabla^2\Loss(\weights_n)\) now.  In this case we found that every
+eigenspace scales independently
+\begin{align*}
+	\langle \weights_{n+1} - \minimum, v_i \rangle
+	\le (1-\lr \hesseEV_i)\langle \weights_n - \minimum, v_i \rangle
+\end{align*}
+So the \ref{eq: newton minimum approx} rescales the steps by dividing every
+eigenspace through its respective eigenvalue. For positive eigenvalues is all
+nice and dandy. But for negative eigenvalues, which represent a maximum in their
+eigenspace, the \ref{eq: newton minimum approx} multiplies by a negative value
+\(\tfrac1{\hesseEV_i}\) and therefore causes movement towards this eigenvalue.
+
+Okay, now that we remembered these crucial problems, let us make one egregious
+assumption. Let us assume that the standard basis are already the eigenvectors,
+i.e. \(V=\identity\). Then the components of the gradient of our loss function
+are proportional to their respective eigenvalues
+\begin{align*}
+	\nabla\Loss(\weights_n)^{(i)}
+	= \hesseEV_i [\weights_n - \minimum]^{(i)}.
+\end{align*}
+If we define
+\begin{align*}
+	G_n^{(i)} = \sum_{k=0}^n [\nabla\Loss(\weights_n)^{(i)}]^2 \qquad i=1,\dots,\dimension,
+\end{align*}
+then the algorithm
+\begin{align}
+	\label{eq: almost adagrad}
+	\weights_{n+1}^{(i)}
+	&= \weights_n^{(i)} - \frac{\lr_n}{\sqrt{G_{n-1}^{(i)}}}\nabla\Loss(\weights_n)^{(i)}\\
+	\nonumber
+	&= \weights_n^{(i)} - \frac{\lr_n}{
+		\sqrt{\cancel{\hesseEV_i^2}\sum_{k=0}^{n-1}([\weights_k - \minimum]^{(i)})^2}
+	}
+	\cancel{\hesseEV_i}[\weights_n - \minimum]^{(i)}
+\end{align}
+also cancels out the eigenvalues. But as we divide through the absolute value of
+the eigenvalues in contrast to the \ref{eq: newton minimum approx}, we get to
+keep the sign
+\begin{align}\label{eq: adagrad motivation contraction}
+	[\weights_{n+1}-\minimum]^{(i)} = \left(1-\frac{\lr_n\sign(\hesseEV_i)}{
+			\sqrt{\sum_{k=0}^{n-1}([\weights_k - \minimum]^{(i)})^2}
+		}\right)[\weights_n - \minimum]^{(i)}.
+\end{align}
+Of course the notion that the standard basis vectors are already the eigenvectors
+is pretty ridiculous. But for some reason the following algorithms seem to
+work. And they are basically based on this notion of reweighting the components
+by dividing them through the squared past gradients in some sense. The intuition
+provided by \textcite{ruderOverviewGradientDescent2017} is, that
+``It adapts the learning rate to the parameters, performing smaller updates
+(i.e. low learning rates) for parameters associated with frequently occurring
+features, and larger updates (i.e. high learning rates) for parameters
+associated with infrequent features.''
+But I am not sure if I buy that.
+
+
+\begin{description}
+	\item[AdaGrad] \parencite{duchiAdaptiveSubgradientMethods2011}
+	We have basically already motivated AdaGrad in (\ref{eq: almost adagrad}).
+	We are going to use the stochastic gradients though
+	\begin{align*}
+		G_n^{(i)} := \sum_{k=0}^n [\nabla\loss(\weights_n, Z_n)^{(i)}]^2 \qquad i=1,\dots,\dimension,
+	\end{align*}
+	and introduce a small \parencite[i.e. \(\approx 10^{-8}\)][]{ruderOverviewGradientDescent2017}
+	term \(\epsilon\) to avoid numerical instability due to dividing through zero.
+	This result in the ``AdaGrad'' algorithm
+	\begin{align*}
+		\weights_{n+1}^{(i)}
+		&= \weights_n^{(i)}
+		- \frac{\lr_n}{\sqrt{G_{n-1}^{(i)}+\epsilon}}\nabla\Loss(\weights_n)^{(i)}
+		\qquad i=1,\dots,\dimension.
+	\end{align*}
+	If we were to divide the sum of squared gradients by the number of summands,
+	we would get an estimator for the second moment. This second moment consists
+	not only of the average squares of the actual loss function, but also of a
+	variance estimator. This means that high variance can also reduce the learning
+	rate. This is an additional benefit, as we have found when looking at SGD, that we
+	need to reduce the learning rate when the variance starts to dominate.
+
+	\item[RMSProp]\parencite[unpublished, see][]{ruderOverviewGradientDescent2017} Now as the sum of squares increases monotonically, we can see 
+	in (\ref{eq: adagrad motivation contraction}) that this essentially reduces
+	the learning rate of AdaGrad in every step. So RMSProp actually uses an
+	estimator for the second moments. But to avoid calculations it uses a recursive
+	exponential average
+	\begin{align*}
+		\hat{\E}[\nabla\Loss(\weights_{n+1})^{(i)}]^2
+		:= \gamma \hat{\E}[\nabla\Loss(\weights_n)^{(i)}]^2
+		+ (1-\gamma)[\nabla\Loss(\weights_n)^{(i)}]^2
+	\end{align*}
+
+	\item[Adadelta] \parencite{zeilerADADELTAAdaptiveLearning2012}
+	\item[Adam]
+	\item[NAdam]
+\end{description}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
