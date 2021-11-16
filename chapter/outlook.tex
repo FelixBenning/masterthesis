@@ -5,7 +5,7 @@
 
 \section{Heuristics}
 
-There are a number of very successful heuristics which are provided in the
+There are a number of widely used heuristics which are provided in the
 default optimizer selection of machine learning frameworks such as Tensorflow.
 
 As we have only covered \ref{eq: gradient descent} and momentum so far, we have
@@ -62,10 +62,10 @@ then the algorithm
 \begin{align}
 	\label{eq: almost adagrad}
 	\weights_{n+1}^{(i)}
-	&= \weights_n^{(i)} - \frac{\lr_n}{\sqrt{G_{n-1}^{(i)}}}\nabla\Loss(\weights_n)^{(i)}\\
+	&= \weights_n^{(i)} - \frac{\lr_n}{\sqrt{G_n^{(i)}}}\nabla\Loss(\weights_n)^{(i)}\\
 	\nonumber
 	&= \weights_n^{(i)} - \frac{\lr_n}{
-		\sqrt{\cancel{\hesseEV_i^2}\sum_{k=0}^{n-1}([\weights_k - \minimum]^{(i)})^2}
+		\sqrt{\cancel{\hesseEV_i^2}\sum_{k=0}^n([\weights_k - \minimum]^{(i)})^2}
 	}
 	\cancel{\hesseEV_i}[\weights_n - \minimum]^{(i)}
 \end{align}
@@ -74,7 +74,7 @@ the eigenvalues in contrast to the \ref{eq: newton minimum approx}, we get to
 keep the sign
 \begin{align}\label{eq: adagrad motivation contraction}
 	[\weights_{n+1}-\minimum]^{(i)} = \left(1-\frac{\lr_n\sign(\hesseEV_i)}{
-			\sqrt{\sum_{k=0}^{n-1}([\weights_k - \minimum]^{(i)})^2}
+			\sqrt{\sum_{k=0}^n([\weights_k - \minimum]^{(i)})^2}
 		}\right)[\weights_n - \minimum]^{(i)}.
 \end{align}
 Of course the notion that the standard basis vectors are already the eigenvectors
@@ -100,32 +100,98 @@ But I am not sure if I buy that.
 	term \(\epsilon\) to avoid numerical instability due to dividing through zero.
 	This result in the ``AdaGrad'' algorithm
 	\begin{align*}
-		\weights_{n+1}^{(i)}
-		&= \weights_n^{(i)}
-		- \frac{\lr_n}{\sqrt{G_{n-1}^{(i)}+\epsilon}}\nabla\Loss(\weights_n)^{(i)}
+		\Weights_{n+1}^{(i)}
+		&= \Weights_n^{(i)}
+		- \frac{\lr_n}{\sqrt{G_n^{(i)}+\epsilon}}\nabla\loss(\Weights_n, Z_n)^{(i)}
 		\qquad i=1,\dots,\dimension.
 	\end{align*}
-	If we were to divide the sum of squared gradients by the number of summands,
-	we would get an estimator for the second moment. This second moment consists
-	not only of the average squares of the actual loss function, but also of a
-	variance estimator. This means that high variance can also reduce the learning
-	rate. This is an additional benefit, as we have found when looking at SGD, that we
-	need to reduce the learning rate when the variance starts to dominate.
+	If we were to divide the sum of squared gradients \(G_n^{(i)}\) by the number
+	of summands, we would get an estimator for the second moment. This second
+	moment consists not only of the average squares of the actual loss function,
+	but also of a variance estimator. This means that high variance can also
+	reduce the learning rate. This is an additional benefit, as we have found
+	when looking at SGD, that we need to reduce the learning rate when the
+	variance starts to dominate.
 
-	\item[RMSProp]\parencite[unpublished, see][]{ruderOverviewGradientDescent2017} Now as the sum of squares increases monotonically, we can see 
+	\item[RMSProp]\parencite[lecture 6e]{hintonNeuralNetworksMachine2012} Now as the sum of squares increases monotonically, we can see 
 	in (\ref{eq: adagrad motivation contraction}) that this essentially reduces
 	the learning rate of AdaGrad in every step. So RMSProp actually uses an
-	estimator for the second moments. But to avoid calculations it uses a recursive
-	exponential average
+	estimator for the second moments, i.e. divides \(G_n^{(i)}\) by \(n\). Well,
+	that is a bit of a lie. To avoid calculations it uses a recursive exponential
+	average
 	\begin{align*}
-		\hat{\E}[\nabla\Loss(\weights_{n+1})^{(i)}]^2
-		:= \gamma \hat{\E}[\nabla\Loss(\weights_n)^{(i)}]^2
-		+ (1-\gamma)[\nabla\Loss(\weights_n)^{(i)}]^2
+		\hat{\E}[(\nabla\loss(\Weights_n)^{(i)})^2]
+		:= \gamma \hat{\E}[(\nabla\loss(\Weights_{n-1})^{(i)})^2]
+		+ (1-\gamma)(\nabla\loss(\Weights_n, Z_n)^{(i)})^2.
+	\end{align*}
+	Another benefit of this exponential average is, that we weigh more recent
+	gradients higher. If we do not work on a quadratic function, as we assumed in
+	our motivation, the motivation only works locally. So it is probably a good
+	idea to discount older gradients further away. Anyway, the algorithm ``RMSProp''
+	is defined as
+	\begin{align*}
+		\Weights_{n+1}^{(i)}
+		&= \Weights_n^{(i)}
+		- \frac{\lr_n}{\text{RMS}(\nabla\loss)_n}\nabla\loss(\Weights_n, Z_n)^{(i)}
+		\qquad i=1,\dots,\dimension,
+	\end{align*}
+	where we denote
+	\begin{align*}
+		\text{RMS}(\nabla\loss)_n := \sqrt{\hat{\E}[\nabla\loss(\Weights_n)^{(i)}]^2+\epsilon}.
 	\end{align*}
 
-	\item[Adadelta] \parencite{zeilerADADELTAAdaptiveLearning2012}
-	\item[Adam]
-	\item[NAdam]
+	\item[AdaDelta] \parencite{zeilerADADELTAAdaptiveLearning2012} The motivation
+	for the independently developed AdaDelta starts exactly like RMSProp, but
+	there is one additional step.
+	``When considering the parameter updates, [\(\Delta \weights\)], being applied to
+	[\(\weights\)], the units should match. That is, if the parameter had some
+	hypothetical units, the changes to the parameter should be changes in those
+	units as well. When considering SGD, Momentum, or ADAGRAD, we can see that
+	this is not the case'' \parencite[p. 3]{zeilerADADELTAAdaptiveLearning2012}.
+	They also note that the \ref{eq: newton minimum approx} does have matching
+	units. So they consider the case where the Hessian is diagonal (the case we
+	have been considering where the eigenvectors are the standard basis), and
+	somehow deduce that one should use a similar estimator
+	\(\text{RMS}(\Delta\Weights)\) for \(\sqrt{\E[\Delta\Weights^2]}\) as for
+	\(\sqrt{\E[\nabla\loss^2]}\) to obtain ``AdaDelta''
+	\begin{align*}
+		\Weights_{n+1}^{(i)} = \Weights_n^{(i)}
+		-\lr_n\frac{\text{RMS}(\Delta\Weights)_{n-1}}{\text{RMS}(\nabla\loss)_n}
+		\nabla\loss(\Weights_n, Z_n)^{(i)}.
+	\end{align*}
+
+	\item[Adam] \parencite{kingmaAdamMethodStochastic2017} applies the same idea
+	as RMSProp to the momentum update, i.e.
+	\begin{align*}
+		\Weights_{n+1} = \Weights_n + \frac{\lr_n}{\text{RMS}(\nabla\loss)_n} \momentum_{n+1}
+	\end{align*}
+	where we recall that momentum was defined as
+	\begin{align*}
+		\momentum_{n+1} = \underbrace{(1-\friction \lr_n)}_{\momCoeff_n} \momentum_n - \lr_n\nabla\Loss(\Weights_n).
+	\end{align*}
+	Additional to this idea, the paper also introduces the idea of a correction term
+	as we have to initialize our exponential averages of the momentum term \(\momentum_n\)
+	and \(\text{RMS}(\nabla\loss)_n\). Since these initializations usually are zero
+	we have a bias towards zero, which Adam tries to compensate by multiplying
+	the term \(\momentum_n\) with \(\frac{1}{1-\momCoeff^n}\) assuming a constant
+	momentum coefficient, and similarly for \(\text{RMS}(\nabla\loss)_n\). Then
+	this modified momentum and second moment estimator of the gradients are
+	used for the update instead.
+
+
+	\item[NAdam] \parencite{dozatIncorporatingNesterovMomentum2016}
+	uses the same idea as Adam just with Nesterov momentum instead of heavy ball
+	momentum.
+
+	\item[AdaMax] \parencite{kingmaAdamMethodStochastic2017} In the same paper
+	as Adam, the authors also note that \(\text{RMS}(\nabla\loss)\) is basically
+	a \(2\)-norm and one could use a different norm for the gradients as well.
+	Recall that we essentially want the absolute eigenvalue of the hesse matrix
+	in the end. For that, squaring the gradient components works just as well as
+	taking the absolute value (i.e. using the maximum norm). This idea results in
+	the ``AdaMax'' algorithm.
+
+	\item[AMSGrad] 
 \end{description}
 
 
