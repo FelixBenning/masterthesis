@@ -1827,203 +1827,203 @@ to get GD again), it provides a bit more freedom to play with. In particular
 momentum parameters to the averaging GD we have discussed in Section~\ref{sec:
 SGD with Averaging}.
 
-\subsection{Quadratic Functions}
+% \subsection{Quadratic Functions}
 
-\begin{theorem}
-	For a quadratic convex Loss \(\Loss\) with bounded
-	loss evaluation error variances
-	\begin{align*}
-		\E\|\martIncr_n\|^2 \le \tilde{\stdBound}^2,
-	\end{align*} 
-	where we denote the sorted (increasing) eigenvalues of the Hesse matrix
-	\(\nabla^2\Loss\) by \(\hesseEV_i\),
-	selecting the learning rate and momentum schedule
-	\begin{align*}
-		\lrSq_n = \lr_n^2 = \frac{a^2}{(n+b)^2}, \qquad \momCoeff_n=(1-\sqrt{\lrSq_n\hesseEV_1})^2
-	\end{align*}
-	results in a convergence rate of
-	\begin{align*}
-		\E\|\Weights_n -\minimum\|^2 \in O(n^{-2\sqrt{\hesseEV_1}a})\|\weights_0 - \minimum\|^2
-		+ \tilde{\stdBound}^2 O(n^{-3}+n^{-2\sqrt{\hesseEV_1} a}).
-	\end{align*}
-	for Heavy Ball Momentum with stochastic gradients.
-\end{theorem}
-\begin{proof}
-	Similar to the analysis of Quadratic Functions in SGD (Section~\ref{sec: quadratic loss SGD})
-	we can write Stochastic Momentum as
-	\begin{align*}
-		\Weights_{n+1} - \minimum
-		&= \underbrace{\Weights_n - \minimum}_{=:\theta_n}
-		+ \momCoeff_n(\Weights_n - \Weights_{n-1})
-		- \lrSq_n \nabla\loss(\Weights_n, Z_n)\\
-		&= \underbrace{\theta_n + \momCoeff_n(\theta_n-\theta_{n-1}) - \lrSq_n H\theta_n}_{\text{classical part}}
-		+ \lrSq_n \martIncr_{n+1}.
-	\end{align*}
-	We can now deal with the classical part as in Section~\ref{sec: heavy ball convergence}. I.e.
-	\begin{align*}
-		\begin{pmatrix}
-			\theta_n \\
-			\theta_{n+1}
-		\end{pmatrix}
-		= \underbrace{\begin{pmatrix}
-			0 & 1\\
-			-\momCoeff_n & 1 + \momCoeff_n -\lrSq_n H
-		\end{pmatrix}}_{=:\tilde{\momMatrix}_n}
-		\begin{pmatrix}
-			\theta_{n-1}\\
-			\theta_n
-		\end{pmatrix}
-		+ \lrSq_n \begin{pmatrix}
-			0\\
-			\martIncr_{n+1}
-		\end{pmatrix}
-	\end{align*}
-	where the matrix is the same as without stochasticity.
-	Unrolling the iteration results in
-	\begin{align*}
-		\begin{pmatrix}
-			\theta_n \\
-			\theta_{n+1}
-		\end{pmatrix}
-		= \prod_{k=0}^n \tilde{\momMatrix}_k
-		\begin{pmatrix}
-			\theta_{-1}\\
-			\theta_0
-		\end{pmatrix}
-		+ \sum_{k=0}^n \lrSq_k\left(\prod_{j=k+1}^n \tilde{\momMatrix}_j\right)
-		\begin{pmatrix}
-			0\\
-			\martIncr_{k+1}
-		\end{pmatrix}.
-	\end{align*}
-	With the same conditional independence arguments as in SGD (i.e. the first
-	summand is deterministic, the remaining ones are linear functions of pairwise
-	independent martingale increments), we get
-	\begin{align}
-		\nonumber
-		&\E\|\Weights_{n+1} - \minimum\|^2
-		\le \E\left\|\begin{pmatrix}
-			\Weights_n - \minimum \\
-			\Weights_{n+1} - \minimum
-		\end{pmatrix}\right\|^2
-		=\E\left\|\begin{pmatrix}
-			\theta_n \\
-			\theta_{n+1}
-		\end{pmatrix}\right\|^2\\
-		\nonumber
-		&= \left\|\prod_{k=0}^n \tilde{\momMatrix}_k
-		\begin{pmatrix}
-			\theta_{-1}\\
-			\theta_0
-		\end{pmatrix}\right\|^2
-		+ \sum_{k=0}^n \lrSq_k^2 \E\left\|\left(\prod_{j=k+1}^n \tilde{\momMatrix}_j\right)
-		\begin{pmatrix}
-			0\\
-			\martIncr_{k+1}
-		\end{pmatrix}\right\|^2\\
-		\label{eq: mom recursion upper bound}
-		&\le \left\|\prod_{k=0}^n \tilde{\momMatrix}_k\right\|^2
-		\underbrace{\left\|\begin{pmatrix}
-			\theta_{-1}\\
-			\theta_0
-		\end{pmatrix}\right\|^2}_{=2\|\weights_0-\minimum\|^2 \mathrlap{\text{ for } \weights_{-1}=\weights_0}}
-		+ \sum_{k=0}^n \lrSq_k^2 \left\|\prod_{j=k+1}^n \tilde{\momMatrix}_j\right\|^2
-		\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \tilde{\stdBound}^2}.
-	\end{align}
-	Interlacing the eigenspaces of \(\theta_{n-1}\) with the eigenspaces of
-	\(\theta_n\) again
-	\begin{align*}
-		V = \begin{pmatrix}
-			v_1 & 0 & \cdots & v_d & 0 \\
-			0 & v_1 & \cdots & 0 & v_d
-		\end{pmatrix},
-	\end{align*}
-	we get
-	\begin{align*}
-		\tilde{\momMatrix}_n
-		= V \underbrace{\diag\left[\begin{pmatrix}
-			0 & 1 \\
-			-\momCoeff_n & 1+\momCoeff_n - \lrSq_n\hesseEV_i	
-		\end{pmatrix}_{i=1,\dots,\dimension}\right]}_{=\momMatrix_n}V^T
-		= \diag(R_n^{(1)}, \dots, R_n^{(\dimension)}).
-	\end{align*}
-	So using the fact that the operator norm is equal to its largest eigenvalue\footnote{
-		Proof: \(
-			\|A\|
-			= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}
-			= \sup_{\|x\| =1} \sqrt{\sum_{i=1}^\dimension \hesseEV_i^2 x_i^2},
-			= \max_{i=1,\dots,\dimension} |\hesseEV_i|
-		\)
-	}
-	% and since the isometry property of an orthonormal basis change\footnote{
-	% 	Proof: \(\|x\|^2 = x^Tx = x^TVV^Tx = (V^T x)^T V^Tx = \|V^T x\|^2\)
-	% } transfers to operator norms, i.e.
-	we get
-	\begin{align*}
-		\|\tilde{\momMatrix}_n\|=\|\momMatrix_n\|
-		=\max_{i=1,\dots, \dimension} \max\{|\momEV^{(i1)}|,|\momEV^{(i2)}|\},
-	\end{align*}
-	we can apply the eigenvalue analysis of
-	Theorem~\ref{thm: momentum - stable set of parameters} to this case. As we have
-	found in the subsequent Lemma~\ref{lem: optimal hb parameter selection} it is
-	optimal to select \(\momCoeff_n\) equal to
-	\begin{align*}
-		\max\{(1-\sqrt{\lrSq_n\hesseEV_1})^2, (1-\sqrt{\lrSq_n\hesseEV_\dimension})^2\}.
-	\end{align*}
-	So if we assume learning rates
-	\begin{align*}
-		\lrSq_n = \lr_n^2 = \frac{a^2}{(n+b)^2},
-	\end{align*}
-	then we get operator norms of 
-	\begin{align*}
-		\|\momMatrix_n\| = \sqrt{\momCoeff_n}
-		&= \max\{(1-\sqrt{\lrSq_n\hesseEV_1}), (1-\sqrt{\lrSq_n\hesseEV_\dimension})\}\\
-		&= \max\left\{
-			\left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right),
-			\left(1-\frac{a\sqrt{\hesseEV_\dimension}}{n+b}\right)
-		\right\}\\
-		&= \left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right) \qquad \text{ for } n \gg 0.
-	\end{align*}
-	Using the same detour over the exponential as in the SGD case
-	(i.e. equation (\ref{eq: detour over exponential bound})),
-	we get \begin{align*}
-		\Bigg\|\prod_{j=k}^{n-1}\tilde{\momMatrix}\ \Bigg\|^2
-		&\le \left(\prod_{j=k}^{n-1} \left(1-\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\right)^2
-		\qquad \text{ for } n \gg 0\\
-		&\le \exp\left(-2\sum_{j=k}^{n-1}\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\\
-		&\le \exp(-2a\sqrt{\hesseEV_1}[\log(n+b)-\log(k+b)])\\
-		&\le \left(\frac{n+b}{k+b}\right)^{-2\sqrt{\hesseEV_1} a}.
-	\end{align*}
-	\fxnote{Due to \(\lrSq^2\) this is not the same argument as we then have \(1/n^4\) in the
-	variance sum. Does this result in better than BLUE convergence? If yes, what is wrong?}
-	Plugging this inequality into (\ref{eq: mom recursion upper bound}) we
-	get
-	\begin{align*}
-		&\E\|\Weights_n-\minimum\|^2\\
-		&\le\underbrace{
-			2\left(\frac{n+b}{b}\right)^{-2\sqrt{\hesseEV_1}a}\|\weights_0 - \minimum\|^2
-		}_{
-			=O(n^{-2\sqrt{\hesseEV_1}a})\|\weights_0-\minimum\|^2
-		}
-		+ \sum_{k=0}^{n-1}\lrSq_k^2 
-		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2
-	\end{align*}
-	With similar arguments as in Theorem~\ref{thm: convergence rates for diminishing lr schedules}
-	we can bound the variance term
-	\begin{align*}
-		&\sum_{k=0}^{n-1}\lrSq_k^2 
-		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2\\
-		&=\sum_{k=0}^{n-1}\left(\frac{a}{k+b}\right)^4 
-		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2\\
-		&= \tilde{\stdBound}^2 a^4 (n+b)^{-2\sqrt{\hesseEV_1}a}
-		\underbrace{
-			\sum_{k=0}^{n-1}\frac{1}{(k+b)^4}(k+b+1)^{2\sqrt{\hesseEV_1} a}
-		}_{
-			\sim\int_b^{n+b}\frac{(x+1)^{2\sqrt{\hesseEV_1}a}}{x^4}dx
-		}\\
-		&\in O(n^{-3} + n^{-2\sqrt{\hesseEV_1}a})\tilde{\stdBound}^2.
-	\end{align*}
-\end{proof}
+% \begin{theorem}
+% 	For a quadratic convex Loss \(\Loss\) with bounded
+% 	loss evaluation error variances
+% 	\begin{align*}
+% 		\E\|\martIncr_n\|^2 \le \tilde{\stdBound}^2,
+% 	\end{align*} 
+% 	where we denote the sorted (increasing) eigenvalues of the Hesse matrix
+% 	\(\nabla^2\Loss\) by \(\hesseEV_i\),
+% 	selecting the learning rate and momentum schedule
+% 	\begin{align*}
+% 		\lrSq_n = \lr_n^2 = \frac{a^2}{(n+b)^2}, \qquad \momCoeff_n=(1-\sqrt{\lrSq_n\hesseEV_1})^2
+% 	\end{align*}
+% 	results in a convergence rate of
+% 	\begin{align*}
+% 		\E\|\Weights_n -\minimum\|^2 \in O(n^{-2\sqrt{\hesseEV_1}a})\|\weights_0 - \minimum\|^2
+% 		+ \tilde{\stdBound}^2 O(n^{-3}+n^{-2\sqrt{\hesseEV_1} a}).
+% 	\end{align*}
+% 	for Heavy Ball Momentum with stochastic gradients.
+% \end{theorem}
+% \begin{proof}
+% 	Similar to the analysis of Quadratic Functions in SGD (Section~\ref{sec: quadratic loss SGD})
+% 	we can write Stochastic Momentum as
+% 	\begin{align*}
+% 		\Weights_{n+1} - \minimum
+% 		&= \underbrace{\Weights_n - \minimum}_{=:\theta_n}
+% 		+ \momCoeff_n(\Weights_n - \Weights_{n-1})
+% 		- \lrSq_n \nabla\loss(\Weights_n, Z_n)\\
+% 		&= \underbrace{\theta_n + \momCoeff_n(\theta_n-\theta_{n-1}) - \lrSq_n H\theta_n}_{\text{classical part}}
+% 		+ \lrSq_n \martIncr_{n+1}.
+% 	\end{align*}
+% 	We can now deal with the classical part as in Section~\ref{sec: heavy ball convergence}. I.e.
+% 	\begin{align*}
+% 		\begin{pmatrix}
+% 			\theta_n \\
+% 			\theta_{n+1}
+% 		\end{pmatrix}
+% 		= \underbrace{\begin{pmatrix}
+% 			0 & 1\\
+% 			-\momCoeff_n & 1 + \momCoeff_n -\lrSq_n H
+% 		\end{pmatrix}}_{=:\tilde{\momMatrix}_n}
+% 		\begin{pmatrix}
+% 			\theta_{n-1}\\
+% 			\theta_n
+% 		\end{pmatrix}
+% 		+ \lrSq_n \begin{pmatrix}
+% 			0\\
+% 			\martIncr_{n+1}
+% 		\end{pmatrix}
+% 	\end{align*}
+% 	where the matrix is the same as without stochasticity.
+% 	Unrolling the iteration results in
+% 	\begin{align*}
+% 		\begin{pmatrix}
+% 			\theta_n \\
+% 			\theta_{n+1}
+% 		\end{pmatrix}
+% 		= \prod_{k=0}^n \tilde{\momMatrix}_k
+% 		\begin{pmatrix}
+% 			\theta_{-1}\\
+% 			\theta_0
+% 		\end{pmatrix}
+% 		+ \sum_{k=0}^n \lrSq_k\left(\prod_{j=k+1}^n \tilde{\momMatrix}_j\right)
+% 		\begin{pmatrix}
+% 			0\\
+% 			\martIncr_{k+1}
+% 		\end{pmatrix}.
+% 	\end{align*}
+% 	With the same conditional independence arguments as in SGD (i.e. the first
+% 	summand is deterministic, the remaining ones are linear functions of pairwise
+% 	independent martingale increments), we get
+% 	\begin{align}
+% 		\nonumber
+% 		&\E\|\Weights_{n+1} - \minimum\|^2
+% 		\le \E\left\|\begin{pmatrix}
+% 			\Weights_n - \minimum \\
+% 			\Weights_{n+1} - \minimum
+% 		\end{pmatrix}\right\|^2
+% 		=\E\left\|\begin{pmatrix}
+% 			\theta_n \\
+% 			\theta_{n+1}
+% 		\end{pmatrix}\right\|^2\\
+% 		\nonumber
+% 		&= \left\|\prod_{k=0}^n \tilde{\momMatrix}_k
+% 		\begin{pmatrix}
+% 			\theta_{-1}\\
+% 			\theta_0
+% 		\end{pmatrix}\right\|^2
+% 		+ \sum_{k=0}^n \lrSq_k^2 \E\left\|\left(\prod_{j=k+1}^n \tilde{\momMatrix}_j\right)
+% 		\begin{pmatrix}
+% 			0\\
+% 			\martIncr_{k+1}
+% 		\end{pmatrix}\right\|^2\\
+% 		\label{eq: mom recursion upper bound}
+% 		&\le \left\|\prod_{k=0}^n \tilde{\momMatrix}_k\right\|^2
+% 		\underbrace{\left\|\begin{pmatrix}
+% 			\theta_{-1}\\
+% 			\theta_0
+% 		\end{pmatrix}\right\|^2}_{=2\|\weights_0-\minimum\|^2 \mathrlap{\text{ for } \weights_{-1}=\weights_0}}
+% 		+ \sum_{k=0}^n \lrSq_k^2 \left\|\prod_{j=k+1}^n \tilde{\momMatrix}_j\right\|^2
+% 		\underbrace{\E\|\martIncr_{k+1}\|^2}_{\le \tilde{\stdBound}^2}.
+% 	\end{align}
+% 	Interlacing the eigenspaces of \(\theta_{n-1}\) with the eigenspaces of
+% 	\(\theta_n\) again
+% 	\begin{align*}
+% 		V = \begin{pmatrix}
+% 			v_1 & 0 & \cdots & v_d & 0 \\
+% 			0 & v_1 & \cdots & 0 & v_d
+% 		\end{pmatrix},
+% 	\end{align*}
+% 	we get
+% 	\begin{align*}
+% 		\tilde{\momMatrix}_n
+% 		= V \underbrace{\diag\left[\begin{pmatrix}
+% 			0 & 1 \\
+% 			-\momCoeff_n & 1+\momCoeff_n - \lrSq_n\hesseEV_i	
+% 		\end{pmatrix}_{i=1,\dots,\dimension}\right]}_{=\momMatrix_n}V^T
+% 		= \diag(R_n^{(1)}, \dots, R_n^{(\dimension)}).
+% 	\end{align*}
+% 	So using the fact that the operator norm is equal to its largest eigenvalue\footnote{
+% 		Proof: \(
+% 			\|A\|
+% 			= \sup_{\|x\| =1} \sqrt{\langle Ax, Ax\rangle}
+% 			= \sup_{\|x\| =1} \sqrt{\sum_{i=1}^\dimension \hesseEV_i^2 x_i^2},
+% 			= \max_{i=1,\dots,\dimension} |\hesseEV_i|
+% 		\)
+% 	}
+% 	% and since the isometry property of an orthonormal basis change\footnote{
+% 	% 	Proof: \(\|x\|^2 = x^Tx = x^TVV^Tx = (V^T x)^T V^Tx = \|V^T x\|^2\)
+% 	% } transfers to operator norms, i.e.
+% 	we get
+% 	\begin{align*}
+% 		\|\tilde{\momMatrix}_n\|=\|\momMatrix_n\|
+% 		=\max_{i=1,\dots, \dimension} \max\{|\momEV^{(i1)}|,|\momEV^{(i2)}|\},
+% 	\end{align*}
+% 	we can apply the eigenvalue analysis of
+% 	Theorem~\ref{thm: momentum - stable set of parameters} to this case. As we have
+% 	found in the subsequent Lemma~\ref{lem: optimal hb parameter selection} it is
+% 	optimal to select \(\momCoeff_n\) equal to
+% 	\begin{align*}
+% 		\max\{(1-\sqrt{\lrSq_n\hesseEV_1})^2, (1-\sqrt{\lrSq_n\hesseEV_\dimension})^2\}.
+% 	\end{align*}
+% 	So if we assume learning rates
+% 	\begin{align*}
+% 		\lrSq_n = \lr_n^2 = \frac{a^2}{(n+b)^2},
+% 	\end{align*}
+% 	then we get operator norms of 
+% 	\begin{align*}
+% 		\|\momMatrix_n\| = \sqrt{\momCoeff_n}
+% 		&= \max\{(1-\sqrt{\lrSq_n\hesseEV_1}), (1-\sqrt{\lrSq_n\hesseEV_\dimension})\}\\
+% 		&= \max\left\{
+% 			\left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right),
+% 			\left(1-\frac{a\sqrt{\hesseEV_\dimension}}{n+b}\right)
+% 		\right\}\\
+% 		&= \left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right) \qquad \text{ for } n \gg 0.
+% 	\end{align*}
+% 	Using the same detour over the exponential as in the SGD case
+% 	(i.e. equation (\ref{eq: detour over exponential bound})),
+% 	we get \begin{align*}
+% 		\Bigg\|\prod_{j=k}^{n-1}\tilde{\momMatrix}\ \Bigg\|^2
+% 		&\le \left(\prod_{j=k}^{n-1} \left(1-\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\right)^2
+% 		\qquad \text{ for } n \gg 0\\
+% 		&\le \exp\left(-2\sum_{j=k}^{n-1}\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\\
+% 		&\le \exp(-2a\sqrt{\hesseEV_1}[\log(n+b)-\log(k+b)])\\
+% 		&\le \left(\frac{n+b}{k+b}\right)^{-2\sqrt{\hesseEV_1} a}.
+% 	\end{align*}
+% 	\fxnote{Due to \(\lrSq^2\) this is not the same argument as we then have \(1/n^4\) in the
+% 	variance sum. Does this result in better than BLUE convergence? If yes, what is wrong?}
+% 	Plugging this inequality into (\ref{eq: mom recursion upper bound}) we
+% 	get
+% 	\begin{align*}
+% 		&\E\|\Weights_n-\minimum\|^2\\
+% 		&\le\underbrace{
+% 			2\left(\frac{n+b}{b}\right)^{-2\sqrt{\hesseEV_1}a}\|\weights_0 - \minimum\|^2
+% 		}_{
+% 			=O(n^{-2\sqrt{\hesseEV_1}a})\|\weights_0-\minimum\|^2
+% 		}
+% 		+ \sum_{k=0}^{n-1}\lrSq_k^2 
+% 		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2
+% 	\end{align*}
+% 	With similar arguments as in Theorem~\ref{thm: convergence rates for diminishing lr schedules}
+% 	we can bound the variance term
+% 	\begin{align*}
+% 		&\sum_{k=0}^{n-1}\lrSq_k^2 
+% 		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2\\
+% 		&=\sum_{k=0}^{n-1}\left(\frac{a}{k+b}\right)^4 
+% 		\left(\frac{n+b}{k+b+1}\right)^{-2\sqrt{\hesseEV_1} a} \tilde{\stdBound}^2\\
+% 		&= \tilde{\stdBound}^2 a^4 (n+b)^{-2\sqrt{\hesseEV_1}a}
+% 		\underbrace{
+% 			\sum_{k=0}^{n-1}\frac{1}{(k+b)^4}(k+b+1)^{2\sqrt{\hesseEV_1} a}
+% 		}_{
+% 			\sim\int_b^{n+b}\frac{(x+1)^{2\sqrt{\hesseEV_1}a}}{x^4}dx
+% 		}\\
+% 		&\in O(n^{-3} + n^{-2\sqrt{\hesseEV_1}a})\tilde{\stdBound}^2.
+% 	\end{align*}
+% \end{proof}
 
 % \begin{remark}
 % 	While we do not get faster convergence, we get safer convergence as \(\hesseEV_1\)
