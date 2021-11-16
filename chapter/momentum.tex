@@ -142,7 +142,20 @@ to calculate an intermediate position \(y_{n+1}\)
 It then uses that intermediate position to calculate the gradient instead of the
 previous position \(\weights_n\).
 %
-\fxnote{Illustrate Nesterov's Momentum}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.5]{media/hinton_nesterov_momentum.png}
+	\caption{
+		\parencite[lecture 6c]{hintonNeuralNetworksMachine2012} The blue arrow
+		illustrates the movement of heavy ball momentum, i.e. first the small
+		``gradient move'', then the large ``momentum move''. Meanwhile the brown
+		arrow represents the ``momentum move'' and the red arrow the ``gradient
+		move'' for Nesterov's momentum in green. The gradient turns around as we
+		move towards the right, and we see that Nesterov's momentum adjusts
+		quicker than heavy ball momentum, which is flung outwards.
+	}
+\end{figure}
+%
 \begin{definition}[Nesterov's Momentum]
 	\label{def: nesterov's momentum}
 	\begin{subequations}
