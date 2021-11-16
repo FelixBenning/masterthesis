@@ -41,10 +41,11 @@ eigenspace scales independently
 	\le (1-\lr \hesseEV_i)\langle \weights_n - \minimum, v_i \rangle
 \end{align*}
 So the \ref{eq: newton minimum approx} rescales the steps by dividing every
-eigenspace through its respective eigenvalue. For positive eigenvalues is all
-nice and dandy. But for negative eigenvalues, which represent a maximum in their
-eigenspace, the \ref{eq: newton minimum approx} multiplies by a negative value
-\(\tfrac1{\hesseEV_i}\) and therefore causes movement towards this eigenvalue.
+eigenspace through its respective eigenvalue. For positive eigenvalues this is
+all nice and dandy. But for negative eigenvalues, which represent a maximum in
+their eigenspace, the \ref{eq: newton minimum approx} multiplies the gradient by
+a negative value \(\tfrac1{\hesseEV_i}\) and therefore causes movement towards
+this eigenvalue.
 
 Okay, now that we remembered these crucial problems, let us make one egregious
 assumption. Let us assume that the standard basis are already the eigenvectors,
@@ -85,9 +86,8 @@ provided by \textcite{ruderOverviewGradientDescent2017} is, that
 ``It adapts the learning rate to the parameters, performing smaller updates
 (i.e. low learning rates) for parameters associated with frequently occurring
 features, and larger updates (i.e. high learning rates) for parameters
-associated with infrequent features.''
-But I am not sure if I buy that.
-
+associated with infrequent features.'' But even this intuition seems to assume
+that these ``features'' seem to somehow correspond to the coordinates.
 
 \begin{description}
 	\item[AdaGrad] \parencite{duchiAdaptiveSubgradientMethods2011}
@@ -113,7 +113,7 @@ But I am not sure if I buy that.
 	when looking at SGD, that we need to reduce the learning rate when the
 	variance starts to dominate.
 
-	\item[RMSProp]\parencite[lecture 6e]{hintonNeuralNetworksMachine2012} Now as the sum of squares increases monotonically, we can see 
+	\item[RMSProp]\parencite[lecture 6e]{hintonNeuralNetworksMachine2012} As the sum of squares increases monotonically, we can see 
 	in (\ref{eq: adagrad motivation contraction}) that this essentially reduces
 	the learning rate of AdaGrad in every step. So RMSProp actually uses an
 	estimator for the second moments, i.e. divides \(G_n^{(i)}\) by \(n\). Well,
@@ -126,9 +126,9 @@ But I am not sure if I buy that.
 	\end{align*}
 	Another benefit of this exponential average is, that we weigh more recent
 	gradients higher. If we do not work on a quadratic function, as we assumed in
-	our motivation, the motivation only works locally. So it is probably a good
-	idea to discount older gradients further away. Anyway, the algorithm ``RMSProp''
-	is defined as
+	our motivation, this argument only works locally. So it is probably a good
+	idea to discount older gradients further away. Anyway, the algorithm
+	``RMSProp'' is defined as
 	\begin{align*}
 		\Weights_{n+1}^{(i)}
 		&= \Weights_n^{(i)}
@@ -191,7 +191,11 @@ But I am not sure if I buy that.
 	taking the absolute value (i.e. using the maximum norm). This idea results in
 	the ``AdaMax'' algorithm.
 
-	\item[AMSGrad] 
+	\item[AMSGrad] \parencite{reddiConvergenceAdam2019} While we have argued that
+	the exponential moving average used for second moment estimation is a good
+	thing, \textcite{reddiConvergenceAdam2019} find, that in the cases where
+	these methods do not converge it is due to some seldomly occurring directions
+	getting discounted too fast. So they suggest using a running maximum instead.
 \end{description}
 
 Since all these optimizers make component-wise adjustments which could be written
@@ -209,9 +213,10 @@ eigenspaces will be the eigenvectors. And at that point we know that these
 algorithms should behave like Newton's algorithm. So it is no surprise that they
 perform really well.
 
-\textcite{wilsonMarginalValueAdaptive2018} on the other hand find examples where
-these adaptive methods become very unstable. But these examples might be
-unrealistic as well.
+On the other hand one can find examples where these adaptive methods become very
+unstable
+\parencite[e.g.][]{wilsonMarginalValueAdaptive2018,reddiConvergenceAdam2019}.
+But these examples might be unrealistic as well.
 
 In empirical benchmarks such as \textcite{schmidtDescendingCrowdedValley2021} no
 optimizer seems to outperform the others consistently.
