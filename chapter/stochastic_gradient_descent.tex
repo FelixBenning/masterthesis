@@ -1349,7 +1349,10 @@ region cf. Figure~\ref{fig: visualize saddle point gd}.
 
 Detecting convergence is thus its own research field \parencite[for a recent
 approach including an overview of previous work see
-e.g.][]{pesmeConvergenceDiagnosticBasedStep2020}.\fxnote{expand on this?}
+e.g.][]{pesmeConvergenceDiagnosticBasedStep2020}. One prominent conjecture is,
+that the dot product of the weight updates becomes more random when we have
+converged. Because we do not follow a straight gradient path anymore, with
+gradients pointing in roughly the same direction.
 
 Another problem with diminishing learning rates is: If we reduce learning rates
 too fast (e.g. \(\tfrac{1}{n+1}\) when \(\hesseEV_1=1/4\) requires something
