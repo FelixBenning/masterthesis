@@ -1443,10 +1443,67 @@ adapted into a saddle-point-repelling algorithm by
 \parencite[e.g.][]{haghighiNumericalOptimizationUnderstanding2014} does probably(?)
 not repel from saddle points as it attempts to estimate the real hessian.
 
+\section{Backtracking}\label{sec: backtracking}
 
+In general we do not know the parameters \(\ubound\) or \(\lbound\). While
+the learning rate \(\tfrac1\ubound\) might not be optimal as it treats the largest
+eigenvalue preferential over the smallest, it results in decent progress and
+is much more stable as we will find out in Section~\ref{sec: nesterov momentum convergence}.
 
+And with an idea first proposed by \textcite{armijoMinimizationFunctionsHaving1966}
+we can actually emulate this rate without knowing \(\ubound\). The idea is the
+following: We start with some (optimistic) initial guess \(\lr_0 = \tfrac{1}{\ubound_0}>0\) and check
+whether
+\begin{align}
+	\label{eq: armijo's condition}
+	\tag{Armijo's Condition}
+	\Loss\left(\weights - \lr_0\nabla\Loss(\weights)\right)
+	\le \Loss(\weights) - \tfrac{\lr_0}{2}\|\nabla\Loss(\weights)\|^2
+\end{align}
+is satisfied. If that is not the case, we try \(\lr_1 = \delta\lr_0\)
+for some \(0<\delta<1\). We continue testing the same equation with
+\begin{align*}
+	\lr_n = \delta \lr_{n-1} = \delta^n \lr_0
+\end{align*}
+until the equation is satisfied and then we use this particular \(\lr_n\).
+Lemma~\ref{lem: smallest upper bound} implies that if \(\nabla\Loss\) is
+\(\ubound\)-Lipschitz continuous, then for any \(\lr_n < \tfrac{1}{\ubound}\)
+this equation is satisfied, since the function is also
+\(\tfrac{1}{\lr_n}\)-Lipschitz continuous in that case.
 
+\begin{lemma}
+	The number of iterations \(n_A\) to find an appropriate learning rate for some
+	\(\Loss\in\lipGradientSet{\ubound}\) starting with guess \(\ubound_0>0\) and
+	reduction factor \(\delta\), is bounded by
+	\begin{align*}
+		n_A \le \begin{cases}
+			1 & \ubound_0 \ge \ubound \qquad \text{``too pessimistic''} \\
+			\left\lceil \frac{\log(\ubound_0/\ubound)}{\log(\delta)} \right\rceil & \ubound_0 < \ubound
+		\end{cases}
+	\end{align*}
+\end{lemma}
+\begin{proof}
+	If \(\ubound_0\) is too pessimistic (larger than \(\ubound\)), then the test
+	will immediately succeed and the only overhead is a single evaluation every step.
+	In the other case we only need
+	\begin{align*}
+		\lr_{n_A} = \frac{\delta^{n_A}}{\ubound_0} \xle{!} \lr = \frac{1}{\ubound}
+		\iff n_A \log(\delta) \le \log(\ubound_0/\ubound)
+	\end{align*}
+	As \(\delta<1\) dividing by \(\log(\delta)\) flips the inequality. Selecting the
+	smallest \(n_A\) such that this equation is satisfied results in our claim.
+\end{proof}
 
+\textcite[Lemma 3.1]{truongBacktrackingGradientDescent2019} prove that for any
+compact region of an arbitrary \(C^1\) loss function, an upper bound for the
+number of iterations to find a suitable \(\lr_{n_A}\) exists. They use this
+result to prove convergence (without rates) of GD to some critical point for
+general \(C^1\) functions.\fxnote{present result here?}
+
+They also propose a more sophisticated rule (two-way backtracking) which uses
+the previous learning rate as a starting point for the next iteration. This
+gambles on the fact that the Lipschitz constant does not change much in a
+neighborhood of our current iterate. Experimental results seem promising.
 
 \section{Complexity Bounds}\label{sec: complexity bounds}
 
@@ -1987,67 +2044,6 @@ available in any gradient. But making further assumptions like continuity of
 the underlying function \(\model\) inducing \(\Loss(\weights)\) it might
 be possible to find better bounds.
 
-\section{Backtracking}\label{sec: backtracking}
-
-In general we do not know the parameters \(\ubound\) or \(\lbound\). While
-the learning rate \(\tfrac1\ubound\) might not be optimal as it treats the largest
-eigenvalue preferential over the smallest, it results in decent progress and
-is much more stable as we will find out in Section~\ref{sec: nesterov momentum convergence}.
-
-And with an idea first proposed by \textcite{armijoMinimizationFunctionsHaving1966}
-we can actually emulate this rate without knowing \(\ubound\). The idea is the
-following: We start with some (optimistic) initial guess \(\lr_0 = \tfrac{1}{\ubound_0}>0\) and check
-whether
-\begin{align}
-	\label{eq: armijo's condition}
-	\tag{Armijo's Condition}
-	\Loss\left(\weights - \lr_0\nabla\Loss(\weights)\right)
-	\le \Loss(\weights) - \tfrac{\lr_0}{2}\|\nabla\Loss(\weights)\|^2
-\end{align}
-is satisfied. If that is not the case, we try \(\lr_1 = \delta\lr_0\)
-for some \(0<\delta<1\). We continue testing the same equation with
-\begin{align*}
-	\lr_n = \delta \lr_{n-1} = \delta^n \lr_0
-\end{align*}
-until the equation is satisfied and then we use this particular \(\lr_n\).
-Lemma~\ref{lem: smallest upper bound} implies that if \(\nabla\Loss\) is
-\(\ubound\)-Lipschitz continuous, then for any \(\lr_n < \tfrac{1}{\ubound}\)
-this equation is satisfied, since the function is also
-\(\tfrac{1}{\lr_n}\)-Lipschitz continuous in that case.
-
-\begin{lemma}
-	The number of iterations \(n_A\) to find an appropriate learning rate for some
-	\(\Loss\in\lipGradientSet{\ubound}\) starting with guess \(\ubound_0>0\) and
-	reduction factor \(\delta\), is bounded by
-	\begin{align*}
-		n_A \le \begin{cases}
-			1 & \ubound_0 \ge \ubound \qquad \text{``too pessimistic''} \\
-			\left\lceil \frac{\log(\ubound_0/\ubound)}{\log(\delta)} \right\rceil & \ubound_0 < \ubound
-		\end{cases}
-	\end{align*}
-\end{lemma}
-\begin{proof}
-	If \(\ubound_0\) is too pessimistic (larger than \(\ubound\)), then the test
-	will immediately succeed and the only overhead is a single evaluation every step.
-	In the other case we only need
-	\begin{align*}
-		\lr_{n_A} = \frac{\delta^{n_A}}{\ubound_0} \xle{!} \lr = \frac{1}{\ubound}
-		\iff n_A \log(\delta) \le \log(\ubound_0/\ubound)
-	\end{align*}
-	As \(\delta<1\) dividing by \(\log(\delta)\) flips the inequality. Selecting the
-	smallest \(n_A\) such that this equation is satisfied results in our claim.
-\end{proof}
-
-\textcite[Lemma 3.1]{truongBacktrackingGradientDescent2019} prove that for any
-compact region of an arbitrary \(C^1\) loss function, an upper bound for the
-number of iterations to find a suitable \(\lr_{n_A}\) exists. They use this
-result to prove convergence (without rates) of GD to some critical point for
-general \(C^1\) functions.\fxnote{present result here?}
-
-They also propose a more sophisticated rule (two-way backtracking) which uses
-the previous learning rate as a starting point for the next iteration. This
-gambles on the fact that the Lipschitz constant does not change much in a
-neighborhood of our current iterate. Experimental results seem promising.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
