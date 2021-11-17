@@ -1743,21 +1743,144 @@ there should be better uses for parallelization. One could for example train
 the same model with different weight initializations (or entirely different
 models) to generate ensemble models with (e.g. bagging, boosting, etc.).
 
-\section{Outlook}
+\section{SDE View}
 
 While we got bounds on \(\E\|\Weights_n - \minimum\|^2\) which entails a
 distributional bound using something like Chebyshev's inequality, we only
 have convergence of the expected value of the loss. It might therefore be
 interesting to further develop our understanding of the distribution of \(\Weights_n\).
 
-A more recent approach is to model SGD not as an approximation of an ODE but a
-stochastic differential equation (SDE).
+A more recent approach is to model SGD not as an approximation of an ODE (i.e.
+\ref{eq: gradient flow}) but a stochastic differential equation (SDE) also known
+in the literature as ``stochastic modified equation''
+\begin{align}
+	\tag{SME}
+	d\mathcal{\Weights}_t^{\lr}
+	= -\nabla\Loss(\mathcal{\Weights}_t^{\lr})dt
+	+ \sqrt{\lr \Sigma(\mathcal{\Weights}_t^{\lr})}dB_t
+\end{align}
+where \(B_t\) is a standard brownian motion and \(\Sigma\) is a covariance
+matrix
+\begin{align*}
+	\Sigma(\weights)
+	&:= \E[(\nabla\loss(w,Z) - \nabla\Loss(w))(\nabla\loss(w,Z) - \nabla\Loss(w))^T]\\
+	&= \E[(\nabla\loss(w,Z) - \nabla\Loss(w))^{\otimes 2}]\\
+	&= \Cov(\nabla\loss(w,Z) - \nabla\Loss(w))
+\end{align*}
+%
+For independent identically distributed random variables \(X_k\). It might seem
+a bit weird to have our learning rate \(\lr\) appear in an equation which is
+supposed to be a \emph{limiting} equation for \(\lr\to 0\). But notice how that
+is quite similar to
+\begin{align*}
+	\frac{1}n\sum_{k=0}^n X_k - \E[X_1] \to \mathcal{N}(0, \tfrac{\sigma^2}{n}).
+\end{align*}
+Just that we can multiply this equation by \(\sqrt{n}\) to obtain a static 
+target as a limit. But we can not simply multiply some factor to SGD to get
+something similar. So we have to figure out how to deal with this moving target.
+Now as we want to prove convergence in distribution, we can just consider the
+distributional difference
+\begin{align*}
+	\E g(\mathcal{\Weights}_T^{\lr}) - \E g(\Weights^{\lr}_{T/\lr})
+\end{align*}
+where \(g\) is from a sufficiently large test function set (e.g. all uniformly continuous functions)
+to test distributional convergence with, and we pick \(\lr\) from
+\begin{align*}
+	\mathcal{H} = \{\lr : T/\lr \in \naturals\}
+\end{align*}
+and let \(\Weights_n^{\lr}\) be SGD with constant learning rate \(\lr\). Now
+since we know that SGD converges to \ref{eq: gradient flow} (i.e.
+\(\mathcal{\Weights}^{0}_T\)) as \(\lr\to 0\) we know that 
+\begin{align*}
+	\E g(\mathcal{\Weights}_T^{\lr}) - \E g(\Weights^{\lr}_{T/\lr})
+	= \underbrace{
+		\E g(\mathcal{\Weights}_T^{\lr}) - \E g(\mathcal{\Weights}_T^0)
+	}_{\to 0 \quad (\lr\to 0)}
+	+ \underbrace{
+		\E g(\mathcal{\Weights}_T^0) - \E g(\Weights^{\lr}_{T/\lr})
+	}_{\to 0 \quad (\lr\to 0)}.
+\end{align*}
+So the question is not \emph{whether} we have convergence, but rather how fast.
+The following result is the latest result on this error estimation problem.
 
+\begin{theorem}[{\cite[Theorem 1.1, 1.2]{ankirchnerApproximatingStochasticGradient2021}}]
+	Assume there exists some \(C>0\) such that
+	\begin{align*}
+		|\nabla\loss(\weights, z)| \le C(1+|\weights|)
+		\qquad \forall \weights, z,
+	\end{align*}
+	and that the functions \(\nabla\Loss\) and \(\sqrt{\Sigma}\) are Lipschitz
+	continuous in \(C^{\infty}\), such that all their derivatives are bounded.
+	Then for all test functions \(g\) with at most polynomial growth, i.e. there
+	exists \(C>0\), \(m\in\naturals\) s.t. 
+	\begin{align*}
+		|g(x)| \le C(1+|x|^m),
+	\end{align*}
+	we have
+	\begin{align}
+		\tag{GF error}
+		\E g(\mathcal{\Weights}^0_T) - \E g(\Weights_{T/\lr}^\lr)
+		= \lr \int_0^T \phi_t^g(\mathcal{\Weights}^0_t)dt + O(\lr^2)
+	\end{align}
+	with
+	\begin{align*}
+		\phi_t^g(\weights)
+		:= \tfrac12 \trace[
+			\nabla^2 y_t(\weights)
+			(\nabla\Loss(\weights)^{\otimes 2} + { \color{purple} \Sigma(\weights)})
+		]
+		+ \partial_t\nabla y_t(\weights)^T \nabla\Loss(\weights)
+		+ \tfrac12 \partial_t^2 y_t(\weights)
+	\end{align*}
+	where
+	\begin{align*}
+		y_t(\weights) := \nabla\Loss(\mathcal{\Weights}_{T-t}^0)
+		\qquad \text{for } \mathcal{\Weights}^0_0 = \weights.
+	\end{align*}
+	And we also have
+	\begin{align}
+		\tag{SME error}
+		\E g(\mathcal{\Weights}^h_T) - \E g(\Weights_{T/\lr}^\lr)
+		= \lr \int_0^T \varphi_t^g(\mathcal{\Weights}^{\color{purple}0}_t)dt + O(\lr^2)
+	\end{align}
+	with
+	\begin{align*}
+		\varphi_t^g(\weights)
+		:= \tfrac12 \trace[
+			\nabla^2 y_t(\weights)\nabla\Loss(\weights)^{\otimes 2}
+		]
+		+ \partial_t\nabla y_t(\weights)^T \nabla\Loss(\weights)
+		+ \tfrac12 \partial_t^2 y_t(\weights).
+	\end{align*}
+\end{theorem}
 
-\fxwarning{fix!}
-[\textcite{simsekliTailIndexAnalysisStochastic2019}]
+While this results provides more explicit bounds, there unfortunately does not
+exist a proof for
+\begin{align*}
+	\left| \int_0^T \varphi_t^g(\mathcal{W}^0_t)dt \right|
+	\le \left| \int_0^T \phi_t^g(\mathcal{W}^0_t)dt \right|
+\end{align*}
+yet. Which would prove that the SME approximates SGD better than \ref{eq:
+gradient flow}.
 
+Also note that the convergence towards a Brownian motion driven SDE requires
+bounded variances similar to the central limit theorem. Once variances are not
+bounded anymore, the limiting SDE would have to be driven by a heavier tailed
+\(\alpha\) stable distribution, becoming a Lévy motion. \textcite{simsekliTailIndexAnalysisStochastic2019}
+argue that these heavier tailed distributions fit empirical distributions
+generated from common datasets better and also argue that Lévy motions would
+converge to flatter minima than brownian motions. In other words, they argue
+that the approximation with a brownian motion is neither accurate nor does it
+have desireable properties.
 
+In general this approach is very young and much more research is needed. But as
+one obtains distributional properties of SGD this way, it is plausible that using
+this approach we could make better distributional statements and understand the
+behavior of SGD on non-convex loss functions better. In particular one could try
+to apply metastability results
+\parencite[e.g.][]{bovierMetastabilityPotentialTheoreticApproach2015} to the
+limiting stochastic processes, to bound exit times from meta stable areas (local
+minimas, saddle points, etc.).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
