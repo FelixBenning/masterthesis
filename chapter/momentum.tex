@@ -573,7 +573,7 @@ can write
 		0 & \delta\\
 		0 & 0 
 	\end{pmatrix}\right)^n
-	= \sum_{k=0}^n {n\choose k} r_i^k \begin{pmatrix}
+	= \sum_{k=0}^n \binom{n}{k} r_i^k \begin{pmatrix}
 		0 & \delta \\
 		0 & 0
 	\end{pmatrix}^{n-k}\\
@@ -873,7 +873,7 @@ complement.
 		\right)^n\Bigg\|\\
 		&\le \max_{i=1,\dots,\dimension}
 		\Bigg\|
-		\sum_{k=0}^n {n \choose k}
+		\sum_{k=0}^n \binom{n}{k}
 				|r_{i1}|^{n-k}
 			\underbrace{
 				\left(

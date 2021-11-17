@@ -1,9 +1,9 @@
 % !TEX root = ../Masterthesis.tex
-\chapter{Outlook}
+\chapter{Other Methods}
 
 \section{Second Order Methods}
 
-\section{Heuristics}
+\section{Heuristics for Adaptive Learning Rates}
 
 There are a number of widely used heuristics which are provided in the
 default optimizer selection of machine learning frameworks such as Tensorflow.
@@ -91,14 +91,13 @@ that these ``features'' seem to somehow correspond to the coordinates.
 
 \begin{description}
 	\item[AdaGrad] \parencite{duchiAdaptiveSubgradientMethods2011}
-	We have basically already motivated AdaGrad in (\ref{eq: almost adagrad}).
-	We are going to use the stochastic gradients though
+	We have already motivated most of AdaGrad in (\ref{eq: almost adagrad}).
+	But we are going to use the stochastic gradients
 	\begin{align*}
 		G_n^{(i)} := \sum_{k=0}^n [\nabla\loss(\weights_n, Z_n)^{(i)}]^2 \qquad i=1,\dots,\dimension,
 	\end{align*}
-	and introduce a small \parencite[i.e. \(\approx 10^{-8}\)][]{ruderOverviewGradientDescent2017}
-	term \(\epsilon\) to avoid numerical instability due to dividing through zero.
-	This result in the ``AdaGrad'' algorithm
+	and introduce a small term \(\epsilon\) \parencite[\(\approx 10^{-8}\)][]{ruderOverviewGradientDescent2017}
+	to avoid numerical instability. This result in the ``AdaGrad'' algorithm
 	\begin{align*}
 		\Weights_{n+1}^{(i)}
 		&= \Weights_n^{(i)}
@@ -114,7 +113,7 @@ that these ``features'' seem to somehow correspond to the coordinates.
 	variance starts to dominate.
 
 	\item[RMSProp]\parencite[lecture 6e]{hintonNeuralNetworksMachine2012} As the sum of squares increases monotonically, we can see 
-	in (\ref{eq: adagrad motivation contraction}) that this essentially reduces
+	in (\ref{eq: adagrad motivation contraction}) that this quickly reduces
 	the learning rate of AdaGrad in every step. So RMSProp actually uses an
 	estimator for the second moments, i.e. divides \(G_n^{(i)}\) by \(n\). Well,
 	that is a bit of a lie. To avoid calculations it uses a recursive exponential
@@ -125,17 +124,16 @@ that these ``features'' seem to somehow correspond to the coordinates.
 		+ (1-\gamma)(\nabla\loss(\Weights_n, Z_n)^{(i)})^2.
 	\end{align*}
 	Another benefit of this exponential average is, that we weigh more recent
-	gradients higher. If we do not work on a quadratic function, as we assumed in
-	our motivation, this argument only works locally. So it is probably a good
-	idea to discount older gradients further away. Anyway, the algorithm
-	``RMSProp'' is defined as
+	gradients higher. As the Second Taylor Approximation is only locally
+	accurate, so it is probably a good idea to discount older gradients further
+	away. Anyway, the algorithm ``RMSProp'' is defined as
 	\begin{align*}
 		\Weights_{n+1}^{(i)}
 		&= \Weights_n^{(i)}
 		- \frac{\lr_n}{\text{RMS}(\nabla\loss)_n}\nabla\loss(\Weights_n, Z_n)^{(i)}
 		\qquad i=1,\dots,\dimension,
 	\end{align*}
-	where we denote
+	where we denote the Root Mean Square
 	\begin{align*}
 		\text{RMS}(\nabla\loss)_n := \sqrt{\hat{\E}[\nabla\loss(\Weights_n)^{(i)}]^2+\epsilon}.
 	\end{align*}
@@ -184,12 +182,12 @@ that these ``features'' seem to somehow correspond to the coordinates.
 	momentum.
 
 	\item[AdaMax] \parencite{kingmaAdamMethodStochastic2017} In the same paper
-	as Adam, the authors also note that \(\text{RMS}(\nabla\loss)\) is basically
-	a \(2\)-norm and one could use a different norm for the gradients as well.
-	Recall that we essentially want the absolute eigenvalue of the hesse matrix
-	in the end. For that, squaring the gradient components works just as well as
-	taking the absolute value (i.e. using the maximum norm). This idea results in
-	the ``AdaMax'' algorithm.
+	as Adam, the authors also note that the Root Mean Squared
+	\(\text{RMS}(\nabla\loss)\) are basically a \(2\)-norm and one could use a
+	different norm for the gradients as well.  Recall that we essentially want
+	the absolute eigenvalue of the hesse matrix in the end. For that, squaring
+	the gradient components works just as well as taking the absolute value (i.e.
+	using the maximum norm). This idea results in the ``AdaMax'' algorithm.
 
 	\item[AMSGrad] \parencite{reddiConvergenceAdam2019} While we have argued that
 	the exponential moving average used for second moment estimation is a good
