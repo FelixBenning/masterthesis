@@ -11,16 +11,17 @@
 \usepackage[unicode, hidelinks]{hyperref} %% clickable links
 \usepackage{enumitem} %% better (customizable) enumerations (e.g. \begin{enumerate}[label=(\roman*)])
 
-%%% EDITING (Annotations, TODO, etc.) 
-\usepackage[draft]{fixme} %final removes annotations %draft includes annotations
-\fxsetup{theme=color}
-%%\fxnote{some note} ,\fxwarning{}, \fxerror{}, \fxfatal{} <- does not allow [final] to compile
 
 %%% STYLING
 % \setlength{\parindent}{0em} % No indentation for new paragraphs
 \usepackage{emptypage} % removes page numbers on empty pages
 % \makeatletter \@twosidefalse \makeatother
 \usepackage{xcolor}
+
+%%% EDITING (Annotations, TODO, etc.) 
+\usepackage[draft]{fixme} %final removes annotations %draft includes annotations
+\fxsetup{theme=color}
+%%\fxnote{some note} ,\fxwarning{}, \fxerror{}, \fxfatal{} <- does not allow [final] to compile
 
 %%% GRAPHICS & PLOTS
 
@@ -54,6 +55,9 @@
 %%% BIBLIOGRAPHY
 \usepackage[style=authoryear, backend=biber, maxcitenames=2]{biblatex}
 \addbibresource{references.bib}
+\setcounter{biburlnumpenalty}{7000} % penalty 0-10000 for margin overlap after number
+\setcounter{biburllcpenalty}{7000} % penalty for overlap after lower case letter
+
 
 \include{./Macros}
 
