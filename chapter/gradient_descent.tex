@@ -353,7 +353,7 @@ the existence of a Hessian if possible.
 \subsubsection{Convexity}
 
 Instead of non-negative eigenvalues we can demand ``convexity'' which does
-not require the existence of a hesse matrix, but is equivalent to its positive
+not require the existence of a Hessian, but is equivalent to its positive
 definiteness (non-negative eigenvalues) if it exists.
 %
 \begin{definition}[Convexity]\label{def: convexity}
@@ -476,7 +476,7 @@ eigenvalues \((\hesseEV_i)_i\) of a (symmetric) matrix A to represent a point
 	x = \sum_{i=1}^{d}x_i v_i.
 \end{align*}
 As we have no negative eigenvalues in the convex case, the upper bound on the
-hesse matrix is equivalent to a bound on its operator norm. And since a
+Hessian is equivalent to a bound on its operator norm. And since a
 bounded derivative is equivalent to Lipschitz continuity of the function itself
 (cf. Lemma~\ref{lem-appendix: lipschitz and bounded derivative}), another way
 to express our upper bound is by requiring Lipschitz continuity of the gradient
@@ -1175,7 +1175,7 @@ bit more work we can actually achieve the same rates.
 		- 2\lr\langle \nabla\Loss(\weights_n), \weights_n - \minimum\rangle
 		+ \lr^2 \| \nabla\Loss(\weights_n)\|^2.
 	\end{align*}
-	But now we need to find a better lower bound for the scalar product in the
+	But now we need to find a tighter lower bound for the scalar product in the
 	middle. Previously we used the lower bound on the Bregman Divergence from
 	Lemma~\ref{lem: bregmanDiv lower bound}. Now the lower bound
 	from the strong convexity property is also available. But we can not use
@@ -1276,11 +1276,9 @@ Now as promised we still have to show the improved lower bound.
 	\end{align}
 	into the previous equation, and applying Lemma~\ref{lem: Lipschitz Gradient
 	implies taylor inequality} again to get \((\ubound-\lbound)\)-Lipschitz
-	continuity from our upper bound on the Bregman Divergence.
-	The inequality above also follows from Lemma~\ref{lem: Lipschitz Gradient
-	implies taylor inequality}. Therefore
+	continuity from our upper bound on the Bregman Divergence.  Therefore
 	\(g_x\in\lipGradientSet{\ubound-\lbound}\) and if \(\ubound -\lbound>0\) we
-	can now apply Lemma~\ref{lem: bregmanDiv lower bound} to get
+	can apply Lemma~\ref{lem: bregmanDiv lower bound} to get
 	\begin{align}
 		\bregmanDiv{f}(y,x)
 		&= \bregmanDiv{g_x}(y,x) + \tfrac{\lbound}2 \|y-x\|^2
@@ -1294,11 +1292,11 @@ Now as promised we still have to show the improved lower bound.
 		+ \tfrac{\lbound}2 \|y-x\|^2.
 	\end{align}
 	Since the \(\|y-x\|^2\) lower bound improves the convergence rate in
-	our convergence theorem, it is helpful to view it as the ``good'' part of
-	our lower bound and view the application of the gradient lower bound as
-	a fallback.
+	our convergence theorem (\ref{thm: gd strong convexity convergence rate}), it
+	is helpful to view it as the ``good'' part of our lower bound and view the
+	application of the gradient lower bound as a fallback.
 
-	The case \(\ubound=\lbound\) which we have to cover separately offers some
+	The case \(\ubound=\lbound\), which we have to cover separately, offers some
 	more insight into that. In this case our lower bound  (\ref{eq:
 	strong convexity implies bregmanDiv lower bound}) makes (\ref{eq: bregmanDiv
 	upper bound}) an equality. This means we could get
@@ -1326,13 +1324,13 @@ Now as promised we still have to show the improved lower bound.
 	\end{align*}
 	Moving the scalar product to the left we get
 	\begin{align*}
-		\overbrace{(\ubound+\lbound)/(\ubound-\lbound)}^{
+		\overbrace{\frac{ \ubound+\lbound }{ \ubound-\lbound }}^{
 			= (1+\tfrac{2\lbound}{\ubound-\lbound})
 		}
 		&\langle \nabla f(x) - \nabla f(y), x-y\rangle \\
 		&\ge \tfrac{1}{\ubound-\lbound}\|\nabla f(x) - \nabla f(y)\|^2
 		+ \underbrace{(\tfrac{\lbound^2}{\ubound-\lbound}-\lbound)}_{
-			=\ubound\lbound/(\ubound-\lbound)
+			=\frac{\ubound\lbound}{ \ubound-\lbound }
 		} \|y-x\|^2.
 	\end{align*}
 	Dividing by the factor on the left finishes this proof.
@@ -1347,22 +1345,21 @@ Polyak-\L{}ojasiewicz condition
 	\label{eq: PL condition}\tag{PL}
 	\|\nabla \Loss(\weights) \|^2 \ge c(\Loss(\weights)-\inf_{\theta}\Loss(\theta)).
 \end{align}
-This condition does not require convexity but ``invexity'', i.e.
+This condition does not require convexity but so called ``invexity'', i.e.
 \begin{align*}
 	\Loss(\theta) \ge \Loss(\weights) + \nabla\Loss(\weights)\eta(\weights, \theta)
 \end{align*}
 for some vector valued function \(\eta\). Convexity is a special case for \(\eta(\weights,
 \theta)=\weights-\theta\). Considering Lemma~\ref{lem: smallest upper bound}
-and Theorem~\ref{thm: convergence chain} it is perhaps not too surprising that a
-lower bound on the gradient for a given distance we want to cover allows for
+and Theorem~\ref{thm: convergence chain}, it is perhaps not too surprising that a
+lower bound on the gradient for a given loss difference we want to cover allows for
 convergence proofs. In fact the convergence proof is just two lines:
 Using Lemma~\ref{lem: smallest upper bound} and the \ref{eq: PL condition}-assumption we get
 \begin{align*}
 	\Loss(\weights_{n+1})- \Loss(\weights_n) \le -\tfrac1{2\ubound} \|\nabla\Loss(\weights_n)\|^2
 	\le -\tfrac{c}{2\ubound}(\Loss(\weights_n) - \Loss(\minimum)),
 \end{align*}
-which then only requires subtracting \(\Loss(\minimum)-\Loss(\weights_n)\) from
-both sides to get
+subtracting \(\Loss(\minimum)-\Loss(\weights_n)\) from both sides we finally get
 \begin{align*}
 	\Loss(\weights_{n+1}) - \Loss(\minimum)
 	\le (1-\tfrac{c}{2\ubound})(\Loss(\weights_n) - \Loss(\minimum)).
@@ -1371,9 +1368,9 @@ But while convexity comes with a geometric intuition this \ref{eq: PL
 condition}-condition does not.
 
 And since we have built intuition on how non-convex regions
-repel iterates into convex regions we now have intuition how general smooth
-functions behave and it is more difficult to build this intuition for non-invex
-regions so we do not really gain much intuition by this generalization. But
+repel iterates into convex regions, we now have intuition how general smooth
+functions behave. It is more difficult to build this intuition for non-invex
+regions. So we do not really gain much intuition by this generalization. But
 this generalization highlights the attributes of (strong)-convexity we
 actually need. And we have basically already proven this condition with
 (\ref{eq: strong convexity implies PL}). We only need to use (\ref{eq: weight
@@ -1387,28 +1384,28 @@ as we are repelled from non-convex regions is that we are only going to
 converge to some \emph{local} minima. This problem has been addressed by
 \textcite{pascanuSaddlePointProblem2014} who summarize a distribution analysis
 by \textcite{brayStatisticsCriticalPoints2007} of critical points in random
-gaussian fields.
+Gaussian fields.
 
 Intuitively the dimension increases the number of eigenvalues
-of the hessian, making it exponentially less likely that \emph{all} of them are
+of the Hessian, making it exponentially less likely that \emph{all} of them are
 either positive or negative. In other words: In high dimension almost all
 critical points are saddle points! But the lower the loss at the critical point,
-the likelier it is in fact a minimum. This means that on a gaussian random field
+the likelier it is in fact a minimum. This means that on a Gaussian random field
 critical points which are local minima are likely close to the global minimum.
 
 \textcite{pascanuSaddlePointProblem2014}
 then confirm this hypothesis empirically by analyzing the share of saddle
-points in all critical points found at a certain loss levels of a loss function
+points in all critical points found at certain loss levels of a loss function
 induced by training models on a reduced MNIST dataset. So it \emph{appears} that
-random gaussian fields approximate deep learning problems sufficiently well to
+random Gaussian fields approximate deep learning problems sufficiently well to
 argue that local minima will generally be close enough to the global minima,
 since all other critical points are overwhelmingly likely to be saddle points.
-Further theoretical justification for neuronal networks in particular is
+Further theoretical justification for neuronal networks in particular, is
 provided by \textcite{choromanskaLossSurfacesMultilayer2015}.
 
 \textcite{garipovLossSurfacesMode2018} found in an empirical study that local
 minima can be connected by a simple path (e.g. linear spline with just one
-free knot) with near-constant loss. In other words the local minima do not only
+free knot) with near-constant loss. In other words, the local minima do not only
 appear to be of similar height (in loss), they also appear to be connected
 by a network of valleys. They then propose purposefully making SGD unstable
 with higher learning rates once it converged, to explore these valleys and find
@@ -1423,29 +1420,30 @@ Section~\ref{sec: SGD with Averaging}).
 
 \subsection{Second Order Methods}
 
-The assumption of strong convexity makes some people suggest second order
+The assumption of strong convexity leads some to suggest second order
 methods. In particular the Newton-Raphson method which has much better
 convergence guarantees. But while we do assume convexity to be able to bound
 convergence rates, we still want to use our method on non-convex functions. And
 the Newton-Raphson method has a bunch of issues in this case.
 
-As we can see in Equation~(\ref{eq: newton minimum approx}), the method jumps right to the
-vertex of a quadratic function. This is nice if the vertex is a minimum
-(which convexity guarantees) but it is not so nice if the vertex is a saddle point
-or maximum. Additionally the method becomes unstable (impossible) for small 
-(zero) eigenvalues, since then the hesse matrix is hard to numerically invert (no
+As we can see in Section~\ref{sec: visualize gd} (\ref{eq: newton minimum
+approx}), the method jumps right to the vertex of a quadratic function. This is
+nice if the vertex is a minimum (which convexity guarantees) but it is not so
+nice if the vertex is a saddle point or maximum. Additionally the method becomes
+unstable (or impossible) for small (or zero) eigenvalues, since then the Hessian
+is hard to numerically invert (or no
 longer invertible).
-On top of these fundamental problems the storage of the Hessian requires
+On top of these fundamental problems, the storage of the Hessian requires
 \(O(\dimension^2)\) space already and its inversion takes \(O(\dimension^3)\)
-time, which is infeasible for high dimensional data. Especially considering that
-\ref{eq: gradient descent} will do \(O(\dimension^2)\) steps while the Newton-Raphson
-method does one inversion. Lastly there are issues obtaining the Hessian in a
-stochastic setting.
+computation time, which is infeasible for high dimensional data. Especially
+considering that \ref{eq: gradient descent} will do \(O(\dimension^2)\) steps
+while the Newton-Raphson method does one inversion. Lastly, there are issues
+obtaining the Hessian in a stochastic setting.
 
 So the difficulty in creating a second order method lies in addressing all these
 concerns at once. One approach by \textcite{martensDeepLearningHessianfree2010},
 called ``Hessian Free Optimization'' was reasonably successful and is based on
-the ``Conjugate Gradient Method'' \parencite[for an introduction see
+the ``Conjugate Gradient (CG) Method'' \parencite[for an introduction see
 e.g.][]{shewchukIntroductionConjugateGradient1994}\fxnote{or own chapter/section?}.
 While CG converges in \(\dimension\) steps on quadratic loss functions, there
 are no convergence guarantees for general loss functions. Another Quasi-Newton
@@ -1453,7 +1451,7 @@ method was proposed by \textcite{vinyalsKrylovSubspaceDescent2012} which was
 adapted into a saddle-point-repelling algorithm by
 \textcite{dauphinIdentifyingAttackingSaddle2014}. L-BFGS
 \parencite[e.g.][]{haghighiNumericalOptimizationUnderstanding2014} does probably(?)
-not repel from saddle points as it attempts to estimate the real hessian.
+not repel from saddle points as it attempts to estimate the real Hessian.
 
 \section{Backtracking}\label{sec: backtracking}
 
@@ -1722,7 +1720,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	in the origin. We simply used the fact that our original loss function
 	was essentially already a quadratic function except for the constant influx
 	at the first tile. And that constant in the derivative has no bearing on the
-	hesse matrix.
+	Hessian.
 
 
 	To calculate the operator norm of \(H\) we can use the equality above and	
@@ -1794,7 +1792,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	is similarly convex, setting its derivative equal to zero will actually provide us
 	with its minimum. And similarly to \(\Loss\) itself, \(\Loss_n\) is a
 	quadratic function, so the gradient is just an affine function with a
-	constant hesse matrix. Therefore finding the minimum only requires solving
+	constant Hessian. Therefore finding the minimum only requires solving
 	a linear equation. One can just go through the same motions as we did
 	before to obtain the equation:
 	%
