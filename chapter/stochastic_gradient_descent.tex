@@ -297,7 +297,7 @@ we get in Theorem~\ref{thm: distance SGD vs GD}.
 				\nabla\Loss(\weights_n)-\nabla\Loss(\Weights_n)\rangle
 			}_{
 				\le 0 \qquad
-				\text{if \(\Loss\) was convex (Lemma~\ref{lem: bermanDiv lower bound}) and }
+				\text{if \(\Loss\) was convex (Lemma~\ref{lem: bregmanDiv lower bound}) and }
 				\lr_n<2/\ubound
 			}
 		\end{aligned}
@@ -949,7 +949,7 @@ generalize this to non-quadratic functions.
 		\label{eq: getting rid of the scalar product (SGD)}
 		&= \|\Weights_n - \minimum\|^2
 		- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\minimum\rangle}_{
-			\xge{\text{Lem.~\ref{lem: bermanDiv lower bound (strongly convex)}}}
+			\xge{\text{Lem.~\ref{lem: bregmanDiv lower bound (strongly convex)}}}
 			\tfrac{\ubound\lbound}{\ubound+\lbound}\|\Weights_n - \minimum\|^2
 			\mathrlap{+ \tfrac{1}{\ubound+\lbound}\|\nabla\Loss(\Weights_n)\|^2}
 		}
@@ -968,7 +968,7 @@ Now we can use this recursion to obtain a similar theorem as in the quadratic
 case. This theorem was inspired by
 \textcite{nemirovskiRobustStochasticApproximation2009} but introduces the split
 in transient and asymptotic phase and improves the rate of convergence with the
-application of Lemma~\ref{lem: bermanDiv lower bound (strongly convex)}.
+application of Lemma~\ref{lem: bregmanDiv lower bound (strongly convex)}.
 
 \begin{theorem}[Optimal Rates]\label{thm: optimal rates SGD}
 	For a \(\Loss\in\strongConvex{\lbound}{\ubound}\) with
@@ -1488,8 +1488,8 @@ rather than to reduce them too quickly, which slows progress down below \(O(1/n)
 
 \section{General Convex Case -- Averaging}\label{sec: SGD with Averaging}
 
-As the noise prevents us from using Lemma~\ref{lem: bermanDiv lower bound} in
-place of Lemma~\ref{lem: bermanDiv lower bound (strongly convex)} to ensure a
+As the noise prevents us from using Lemma~\ref{lem: bregmanDiv lower bound} in
+place of Lemma~\ref{lem: bregmanDiv lower bound (strongly convex)} to ensure a
 decreasing distance from the optimum, we can not use the same approach we used
 in the classical convex loss function setting (Section~\ref{sec: convex convergence theorems})
 as we did in Lemma~\ref{lem: SGD bound with noise} for strongly convex functions.

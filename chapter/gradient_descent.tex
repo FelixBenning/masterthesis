@@ -843,7 +843,7 @@ One way to ensure such a lower bound on the gradient is using convexity.
 			\langle \nabla\Loss(\weights_n), \weights_n - \minimum\rangle
 		}_{
 			\ge \tfrac{1}\ubound \|\nabla \Loss (\weights_n) - \nabla\Loss(\minimum)\|^2
-			\mathrlap{\quad \text{using Lemma~\ref{lem: bermanDiv lower bound}}}
+			\mathrlap{\quad \text{using Lemma~\ref{lem: bregmanDiv lower bound}}}
 		} + \lr^2\|\nabla \Loss(\weights_n)\|^2
 		\\
 		&\le \|\weights_n - \minimum\|^2 - 
@@ -902,7 +902,7 @@ One way to ensure such a lower bound on the gradient is using convexity.
 Now to the Lemma we promised to ensure that our weights do not move further away
 from the minimum.
 %
-\begin{lemma}[{\cite[Theorem~2.1.5]{nesterovLecturesConvexOptimization2018}}]\label{lem: bermanDiv lower bound}
+\begin{lemma}[{\cite[Theorem~2.1.5]{nesterovLecturesConvexOptimization2018}}]\label{lem: bregmanDiv lower bound}
 	For \(f\in\lipGradientSet{\ubound}\) we have
 	\begin{subequations}
 	\begin{align}
@@ -1081,9 +1081,13 @@ Now given that we have proven (\ref{eq: decreasing weight difference}), i.e.
 \end{align}
 for convex functions and provided a lower bound for the gradient it might seem
 like we should be able to state a convergence statement about the weights as
-well. But the lower bound on our gradient uses the current loss delta. And if
-our loss function is really flat, then the loss difference might already be
-really small even if we are still far away in parameter space.
+well. But the lower bound on our gradient (\ref{eq: lower bound gradient size})
+uses the current loss delta
+\begin{align*}
+	\Loss(\weights_n)	- \Loss(\minimum).
+\end{align*}
+And if our loss function is really flat, then the loss difference might already
+be really small even if we are still far away in parameter space.
 
 Strong convexity prevents this by requiring a minimum of curvature (cf.
 Figure~\ref{fig: visualize strong convexity}). With it we can provide a lower
@@ -1105,19 +1109,22 @@ allows us to prove convergence of the weights with convergence of the gradients.
 More specifically we can bound our weight iteration (\ref{eq: weight iteration})
 \begin{align*}
 	\|\weights_{n+1}-\minimum\|^2
-	\le (1-\lr(\tfrac2{\ubound} -\lr)\lbound)\|\weights_n - \minimum\|^2.
+	\le \left(1-\lr\left(\tfrac2{\ubound} -\lr\right)\lbound\right)
+	\|\weights_n - \minimum\|^2.
 \end{align*}
-In other words we are closing the loop of Theorem~\ref{thm: convergence chain}.
-Optimizing over the learning rate \(\lr\) (similarly to Lemma~\ref{lem: smallest
-upper bound}) results in \(\lr=\tfrac1\ubound\) and convergence rate
+In other words we are closing the loop of the convergence type implications in
+Theorem~\ref{thm: convergence chain}. Optimizing over the learning rate \(\lr\)
+(similarly to Lemma~\ref{lem: smallest upper bound}) results in
+\(\lr=\tfrac1\ubound\) and convergence rate
 \begin{align*}
 	\|\weights_{n+1}-\minimum\|^2
 	\le (1-\tfrac{\lbound}{2\ubound})\|\weights_n - \minimum\|^2
 	\le (1-\tfrac{1}{2\condition})^{n+1}\|\weights_0-\minimum\|^2
 \end{align*}
 %
-which is in the same ballpark as we got in the quadratic problem. But with a bit
-more work we can actually achieve the same rates.
+which is in the same ballpark as we got in the quadratic problem in
+Subsection~\ref{subsec: necessary assumptions in the quadratic case}. But with a
+bit more work we can actually achieve the same rates.
 %
 \begin{theorem}[{\cite[Theorem~2.1.15]{nesterovLecturesConvexOptimization2018}}]
 	\label{thm: gd strong convexity convergence rate}
@@ -1130,17 +1137,17 @@ more work we can actually achieve the same rates.
 		\|\weights_n - \minimum\|
 		&\le \left(
 			1- 2\lr\frac{\ubound\lbound}{\ubound+\lbound}
-		\right)^{n/2}
-		\|\weights_0 - \minimum\| \\
+		\right)^{\tfrac{n}2}
+		\|\weights_0 - \minimum\|, \\
 		\label{eq: gd strong convexity convergence rate 2}
 		\Loss(\weights_n) - \Loss(\minimum)
 		&\le \frac\ubound{2} \left(
 			1- 2\lr\frac{\ubound\lbound}{\ubound+\lbound}
 		\right)^{n}
-		\|\weights_0 - \minimum\|^2
+		\|\weights_0 - \minimum\|^2.
 	\end{align}
 	\end{subequations}
-	In particular for \(\lr=\tfrac2{\ubound+\lbound}\) we achieve the optimal
+	In particular for \(\lr=\tfrac2{\ubound+\lbound}\), we achieve the optimal
 	rate of convergence
 	\begin{subequations}\label{eq: gd strong convexity optimal rate}
 	\begin{align}
@@ -1148,15 +1155,15 @@ more work we can actually achieve the same rates.
 		&\le \left(
 			1- \frac{2}{1+\condition}
 		\right)^n
-		\|\weights_0 - \minimum\| \\
+		\|\weights_0 - \minimum\|, \\
 		\Loss(\weights_n) - \Loss(\minimum)
 		&\le \frac\ubound{2} \left(
 			1- \frac{2}{1+\condition}
 		\right)^{2n}
-		\|\weights_0 - \minimum\|^2
+		\|\weights_0 - \minimum\|^2,
 	\end{align}
 	\end{subequations}
-	where \(\condition=\ubound/\lbound\) is the condition number.
+	where \(\condition:=\tfrac\ubound\lbound\) is the condition number.
 \end{theorem}
 \begin{proof}
 	This proof starts like the proof for convex functions, cf. (\ref{eq:
@@ -1170,66 +1177,67 @@ more work we can actually achieve the same rates.
 	\end{align*}
 	But now we need to find a better lower bound for the scalar product in the
 	middle. Previously we used the lower bound on the Bregman Divergence from
-	Lemma~\ref{lem: bermanDiv lower bound}. Now the lower bound
+	Lemma~\ref{lem: bregmanDiv lower bound}. Now the lower bound
 	from the strong convexity property is also available. But we can not use
-	both, which suggests we are loosing sharpness in our bound. And indeed this
-	bound can be improved to be
+	both, suggesting we lose sharpness in our bound. And indeed, we will prove in
+	Lemma~\ref{lem: bregmanDiv lower bound (strongly convex)} that this bound can
+	be improved to be
  	\begin{align*}
 		&\langle \nabla\Loss(\weights_n) -\nabla\Loss(\minimum), \weights_n - \minimum\rangle	\\
 		&\ge \tfrac{\ubound\lbound}{\ubound+\lbound}\|\weights_n - \minimum\|^2
 		+ \tfrac{1}{\ubound+\lbound}
-		\|\nabla\Loss(\weights_n) - \nabla\Loss(\minimum)\|^2
+		\|\nabla\Loss(\weights_n) - \nabla\Loss(\minimum)\|^2.
 	\end{align*}
-	Using this lower bound, which we will prove in Lemma~\ref{lem: bermanDiv
-	lower bound (strongly convex)}, we get
+	Using this lower bound we get
  \begin{align*}
 		\|\weights_{n+1} - \minimum\|^2
 		\le \left(1- 2\lr \tfrac{\ubound\lbound}{\ubound+\lbound}\right)
 		\|\weights_n - \minimum\|^2
 		+ \underbrace{\lr}_{\ge 0}
 		\underbrace{\left(\lr-\tfrac{2}{\ubound+\lbound}\right)}_{\le0}
-		\|\nabla\Loss(\weights_n)\|^2
+		\|\nabla\Loss(\weights_n)\|^2,
 	\end{align*}
-	which immediately proves (\ref{eq: gd strong convexity convergence rate
-	1}) using induction. Note that we could additionally use our lower bound on the
+	immediately proving (\ref{eq: gd strong convexity convergence rate
+	1}) with induction. Note that we could additionally use our lower bound on the
 	gradient. But this does not represent a significant improvement,
-	especially for the optimal rates where we max out the learning rate making
-	the term on the right equal to zero. Equation~(\ref{eq: gd strong convexity
-	convergence rate 2}) follows from our upper bound on the loss using weights,
-	cf. Theorem~\ref{thm: convergence chain} (\ref{eq: weight implies loss convergence})
+	especially for the optimal rates where we max out the learning rate, making
+	the term on the right in our inequality equal to zero. Equation~(\ref{eq: gd
+	strong convexity convergence rate 2}) follows from our upper bound on the
+	loss using weights, cf. Theorem~\ref{thm: convergence chain} (\ref{eq: weight
+	implies loss convergence})
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\minimum)
 		\le \tfrac\ubound{2} \| \weights_n - \minimum\|^2.
 	\end{align*}
 	To get (\ref{eq: gd strong convexity optimal rate}) we simply have to plug
-	in the assumed optimal learning rate \(\lr=2/(\ubound+\lbound)\) into
+	in the assumed optimal learning rate \(\lr=\tfrac2{\ubound+\lbound}\) into
 	our general rate and show that the rate is still positive. This means that
-	we have not overshot zero, which means that the upper bound on our learning
-	rate, we assume to be optimal, is binding:
+	we have not overshot zero, implying that the upper bound on our learning
+	rate (we assume to be optimal) is binding:
 	\begin{align*}
 		\left(1- 4 \frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)
 		= \frac{(\ubound^2 + 2\ubound\lbound + \lbound^2) - 4 \ubound\lbound}{(\ubound+\lbound)^2}
 		= \left(\frac{\ubound-\lbound}{\ubound+\lbound}\right)^2
-		= \left(1-\frac{2\lbound}{\ubound+\lbound}\right)^2
+		= \left(1-\frac{2\lbound}{\ubound+\lbound}\right)^2.
 	\end{align*}
-	To get the representation in (\ref{eq: gd strong convexity optimal rate}) we
+	For the representation in (\ref{eq: gd strong convexity optimal rate}) we
 	just have to divide both enumerator and denominator by \(\lbound\).
 \end{proof}
 
 Now as promised we still have to show the improved lower bound.
 
 \begin{lemma}[{\cite[Theorem~2.1.12]{nesterovLecturesConvexOptimization2018}}]
-	\label{lem: bermanDiv lower bound (strongly convex)}
+	\label{lem: bregmanDiv lower bound (strongly convex)}
 	If \(f\in\strongConvex{\lbound}{\ubound}\), then for any
 	\(x,y\in\reals^\dimension\) we have
 	\begin{align*}
 		\langle \nabla f(x) - \nabla f(y), x-y\rangle 
 		\ge \tfrac{\lbound\ubound}{\lbound+\ubound} \| x-y\|^2
-		+ \tfrac{1}{\lbound+\ubound}\|\nabla f(x) -\nabla f(y)\|^2
+		+ \tfrac{1}{\lbound+\ubound}\|\nabla f(x) -\nabla f(y)\|^2.
 	\end{align*}
 \end{lemma}
 \begin{proof}
-	Similarly to Lemma~\ref{lem: bermanDiv lower bound} we want to
+	Similarly to Lemma~\ref{lem: bregmanDiv lower bound} we want to
 	add \(\bregmanDiv{f}(x,y)\) and \(\bregmanDiv{f}(y,x)\) together to
 	get a lower bound for the scalar product equal to this sum. But since we
 	already have a lower bound due to strong convexity
@@ -1240,10 +1248,10 @@ Now as promised we still have to show the improved lower bound.
 	we first have to ``remove'' this lower bound from \(f\) to apply our other
 	lower bound. So we define
 	\begin{align*}
-		g_x(y) := f(y) - \tfrac{\lbound}2\|y-x\|^2 \qquad
-		\nabla g_x(y) = \nabla f(y) - \lbound(y-x)
+		g_x(y) := f(y) - \tfrac{\lbound}2\|y-x\|^2, \qquad
+		\nabla g_x(y) = \nabla f(y) - \lbound(y-x),
 	\end{align*}
-	which still has positive Bregman Convergence, i.e. is convex
+	which still has positive Bregman Divergence, i.e. is convex 
 	\begin{align*}
 		\bregmanDiv{g_x}(y,z)
 		&= g_x(y) - g_x(z) - \langle\nabla g_x(z), y-z\rangle \\
@@ -1257,18 +1265,22 @@ Now as promised we still have to show the improved lower bound.
 			+ \lbound\langle z-x, y-z\rangle
 		\end{aligned}\\
 		&= \bregmanDiv{f}(y,z) - \tfrac{\lbound}2\|y-z\|^2
-		\xge{(\ref{eq: strong convexity implies bregmanDiv lower bound})} 0
+		\xge{(\ref{eq: strong convexity implies bregmanDiv lower bound})} 0,
 	\end{align*}
-	and has \((\ubound-\lbound)\)-Lipschitz continuous gradient by
-	Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality} and 
+	but has its strong convexity property removed.
+	It also has \((\ubound-\lbound)\)-Lipschitz continuous gradient, as can be
+	seen by plugging
 	\begin{align}
 		\label{eq: bregmanDiv upper bound}
-		\bregmanDiv{f}(y,z) \le \tfrac{\ubound}2\|y-z\|^2.
+		\bregmanDiv{f}(y,z) \xle{\text{Lemma \ref{lem: bregmanDiv lower bound}}} \tfrac{\ubound}2\|y-z\|^2,
 	\end{align}
+	into the previous equation, and applying Lemma~\ref{lem: Lipschitz Gradient
+	implies taylor inequality} again to get \((\ubound-\lbound)\)-Lipschitz
+	continuity from our upper bound on the Bregman Divergence.
 	The inequality above also follows from Lemma~\ref{lem: Lipschitz Gradient
 	implies taylor inequality}. Therefore
 	\(g_x\in\lipGradientSet{\ubound-\lbound}\) and if \(\ubound -\lbound>0\) we
-	can now apply Lemma~\ref{lem: bermanDiv lower bound} to get
+	can now apply Lemma~\ref{lem: bregmanDiv lower bound} to get
 	\begin{align}
 		\bregmanDiv{f}(y,x)
 		&= \bregmanDiv{g_x}(y,x) + \tfrac{\lbound}2 \|y-x\|^2
@@ -1294,7 +1306,7 @@ Now as promised we still have to show the improved lower bound.
 		\langle \nabla f(x) - \nabla f(y), x-y\rangle
 		= \bregmanDiv{f}(x,y) + \bregmanDiv{f}(y,x) = \lbound \|y-x\|^2.
 	\end{align*}
-	But instead we apply Lemma~\ref{lem: bermanDiv lower bound} to half of it
+	But instead we apply Lemma~\ref{lem: bregmanDiv lower bound} to half of it
 	which results in the statement of this lemma.
 
 	Now we just have to finish the case \(\ubound>\lbound\). In equation
