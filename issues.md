@@ -51,4 +51,25 @@ Basis change matrices do not cancel out
 - [ ] Instead of bounded 2nd derivative -> upper bound on Bregman Divergence
 	  use bounded third derivative -> derive lr for newton?
 
+# Optimization similar to autodiff?
+
+## Instant optimization:
+
+- Addition: Select every value as large as possible 
+- division: max divisor, min dividend
+- multiplication: max both
+- subtraction: max ...
+- if/else: maximize respective options and  decision boundary
+
+-> all other operations can be expressed with those (?)
+
+### Issue: Conflicting orders
+
+(x-y)/x
+
+make x large/make x small
+
+solvable?
+
+## condition calculation?
 

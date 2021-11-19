@@ -292,12 +292,47 @@ relation to momentum
 relation to Newton
 
 
-\section{Geometric Schemes}
+\section{Geometric Methods}
 
-\subsection{Cutting Plane Schemes}
+\subsection{Cutting Plane Methods}
+
+Notice how the \(\dimension-1\) dimensional hyperplane
+\begin{align*}
+	\mathcal{H} := \{\theta : \langle \nabla\Loss(\weights), \theta - \weights \rangle = 0\}
+\end{align*}
+separates the set in which direction the Loss is increasing
+\begin{align*}
+	\mathcal{H}_+ := \{\theta : \langle \nabla\Loss(\weights), \theta - \weights \rangle > 0\}
+\end{align*}
+from the set in which direction the loss is decreasing \(\mathcal{H}_-\). While
+this is only a local statement, convexity implies that \(\Loss(\weights)\) is
+smaller than the loss at any \(\theta\in\mathcal{H}_+\) because
+\begin{align*}
+	\Loss(\theta)
+	\ge \Loss(\weights) + \underbrace{\langle \nabla\Loss(\weights), \theta -\weights\rangle}_{>0}
+	> \Loss(\weights)
+\end{align*}
+Therefore we know the minimum can not be in \(\mathcal{H}_+\), which allows us
+to cut away this entire set from consideration.
+
+Cutting plane methods use this fact to iteratively shrink the considered set
+until the minimum is found. As convexity is vital here, it is unlikely they
+might ever work for non-convex loss functions.
 
 \subsubsection{Center of Gravity Method}
+
+This method simply evaluates the gradient at the center of gravity of the
+remaining set in the hope that the cutting plane method cuts away roughly half
+of the remaining set. Therefore convergence speed can be shown to be linear 
+\parencite[Theorem 2.1]{bubeckConvexOptimizationAlgorithms2015}.
+Unfortunately this requires calculating the center of gravity of an arbitrary
+set which is its own computational problem. 
+
 \subsubsection{Ellipsoid Methods}
+
+
+
+
 \subsubsection{Vaidya's Cutting Plane Method}
 
 \subsection{Geometric Descent}
