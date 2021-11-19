@@ -298,11 +298,13 @@ relation to Newton
 
 Notice how the \(\dimension-1\) dimensional hyperplane
 \begin{align*}
-	\mathcal{H} := \{\theta : \langle \nabla\Loss(\weights), \theta - \weights \rangle = 0\}
+	\mathcal{H}
+	:= \{\theta : \langle \nabla\Loss(\weights), \theta - \weights \rangle = 0\}
 \end{align*}
-separates the set in which direction the Loss is increasing
+separates the set in which direction the loss is increasing
 \begin{align*}
-	\mathcal{H}_+ := \{\theta : \langle \nabla\Loss(\weights), \theta - \weights \rangle > 0\}
+	\mathcal{H}_+
+	:= \{\theta : \langle \nabla\Loss(\weights), \theta - \weights \rangle > 0\},
 \end{align*}
 from the set in which direction the loss is decreasing \(\mathcal{H}_-\). While
 this is only a local statement, convexity implies that \(\Loss(\weights)\) is
