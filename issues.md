@@ -31,7 +31,7 @@ Basis change matrices do not cancel out
 - [ ] classic case
 - [ ] stochastic case
 
-# Standard Basis are Eigenvectors?
+# Standard Basis are Eigenvectors? Heuristics Foundation
 
 - [ ] In high dimension two random vectors are likely orthogonal -> eigenspace groups?
 - [ ] Coordinate Descent
@@ -41,5 +41,14 @@ Basis change matrices do not cancel out
 - [ ] try to do the estimation better
 
 # Conjugate Gradient Descent
+
+# Multi chain Montecarlo (estimate bias of larger steps)
+
+- Simon (Heidelberg) work?
+
+# Trust Regions
+
+- [ ] Instead of bounded 2nd derivative -> upper bound on Bregman Divergence
+	  use bounded third derivative -> derive lr for newton?
 
 

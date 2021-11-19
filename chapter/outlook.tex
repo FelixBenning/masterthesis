@@ -1,9 +1,8 @@
 % !TEX root = ../Masterthesis.tex
 \chapter{Other Methods}
 
-\section{Second Order Methods}
 
-\section{Heuristics for Adaptive Learning Rates}
+\section{Heuristics - Methods lacking Theory}
 
 There are a number of widely used heuristics which are provided in the
 default optimizer selection of machine learning frameworks such as Tensorflow.
@@ -218,6 +217,38 @@ But these examples might be unrealistic as well.
 
 In empirical benchmarks such as \textcite{schmidtDescendingCrowdedValley2021} no
 optimizer seems to outperform the others consistently.
+
+
+\section{Theoretical Methods lacking Application}
+
+\subsection{Conjugate Gradient Descent}
+
+relation to momentum
+
+\subsubsection{Hessian Free Gradient Descent}
+\textcite{martensDeepLearningHessianfree2010}
+
+\subsection{Geometric Descent}
+\textcite{bubeckGeometricAlternativeNesterov2015}
+
+similar rate of convergence as Nesterov
+
+\subsection{Natural Gradient Descent}
+
+relation to Newton
+
+\subsection{Quasi Newton Methods}
+
+\subsubsection{Gaus Newton}
+\textcite{bottouOptimizationMethodsLargeScale2018}
+
+\subsubsection{L-BFGS}
+
+\subsubsection{Krylov Subspace Descent}
+
+\textcite{vinyalsKrylovSubspaceDescent2012}
+
+Turned into Saddle Point repelling methods by \textcite{dauphinIdentifyingAttackingSaddle2014}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
