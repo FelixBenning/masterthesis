@@ -323,17 +323,28 @@ might ever work for non-convex loss functions.
 
 This method simply evaluates the gradient at the center of gravity of the
 remaining set in the hope that the cutting plane method cuts away roughly half
-of the remaining set. Therefore convergence speed can be shown to be linear 
+of the remaining set. Therefore convergence speed can be shown to be
+linear\footnote{i.e. exponential in non numerical-analysis jargon} 
 \parencite[e.g.][Theorem 2.1]{bubeckConvexOptimizationAlgorithms2015}.
 Unfortunately this requires calculating the center of gravity of an arbitrary
 set which is its own computational problem. 
 
 \subsubsection{Ellipsoid Methods}
 
-
+To work around the center of gravity problem, the ellipsoid methods starts out
+with an ellipsoid set, makes one cut through the center, and finds a new
+ellipsoid around the remaining set. This new ellipsoid is larger than the
+set we would actually have to consider, but at least finding its center is
+tractable. The convergence speed is still linear \parencite[e.g][Theorem
+2.4]{bubeckConvexOptimizationAlgorithms2015}.
 
 
 \subsubsection{Vaidya's Cutting Plane Method}
+
+This method uses polytopes instead of ellipsoids as base objects to make the
+center of gravity search tractable and seems to be more efficient
+computationally \parencite[e.g.][Section
+2.3]{bubeckConvexOptimizationAlgorithms2015}.
 
 \subsection{Geometric Descent}
 \textcite{bubeckGeometricAlternativeNesterov2015}
