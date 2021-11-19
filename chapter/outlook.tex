@@ -331,7 +331,7 @@ linear\footnote{i.e. exponential in non numerical-analysis jargon}
 Unfortunately this requires calculating the center of gravity of an arbitrary
 set which is its own computational problem. 
 
-\subsubsection{Ellipsoid Methods}
+\subsubsection{Ellipsoid Method}
 
 To work around the center of gravity problem, the ellipsoid methods starts out
 with an ellipsoid set, makes one cut through the center, and finds a new
@@ -349,8 +349,31 @@ computationally \parencite[e.g.][Section
 2.3]{bubeckConvexOptimizationAlgorithms2015}.
 
 \subsection{Geometric Descent}
-\textcite{bubeckGeometricAlternativeNesterov2015}
-similar rate of convergence as Nesterov
+
+\textcite{bubeckGeometricAlternativeNesterov2015} realized that strong convexity
+\begin{align*}
+	\Loss(\theta)
+	\ge \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights\rangle
+	+ \tfrac{\lbound}{2}\|\theta-\weights\|^2
+\end{align*}
+is equivalent to
+\begin{align*}
+	\tfrac{\lbound}{2}\|\theta - (\weights - \tfrac1\lbound \nabla\Loss(\weights))\|^2
+	\le \frac{\|\nabla\Loss(\weights)\|^2}{2\lbound} - (\Loss(\weights)-\Loss(\theta))
+\end{align*}
+which implies that for \(\theta=\minimum\) we know that the minimum
+\(\minimum\) is inside the ball
+\begin{align*}
+	\minimum\in B\left(\weights- \tfrac1\lbound\nabla\Loss(\weights), 
+		\frac{\|\nabla\Loss(\weights)\|^2}{\lbound^2}
+		- \frac{ \Loss(\weights)-\Loss(\minimum) }{\lbound}
+	\right).
+\end{align*}
+With Lipschitz continuity of the gradient \textcite{bubeckGeometricAlternativeNesterov2015}
+further refine this ``confidence ball'' around the minimum and use it to create
+an algorithm with the same rate of convergence as Nesterov's momentum.
+Unfortunately it looks like this algorithm is much more dependent on
+convexity than the momentum method.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
