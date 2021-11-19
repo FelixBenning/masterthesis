@@ -260,16 +260,14 @@ again, to derive an ``accelerated cubic Newton scheme'' \parencite[Section
 4.2]{nesterovLecturesConvexOptimization2018} similar to Nesterov momentum, i.e.
 the accelerated gradient descent.
 
-\subsection{Conjugate Gradient Descent}
-
-relation to momentum
-
-\subsubsection{Hessian Free Gradient Descent}
-\textcite{martensDeepLearningHessianfree2010}
-
-
-
 \subsection{Quasi Newton Methods}
+
+While the analysis and regularization of Newton's method itself is important,
+it can not be used directly as the calculation and storage of the Hessian is
+usually too expensive at cost \(O(\dimension^2)\), and if that is not the case,
+then inversion of this matrix at cost \(O(\dimension^3)\) almost certainly is,
+for most machine learning applications. Additionally we have saddle point
+repelling properties on our wish list.
 
 \subsubsection{Gaus Newton}
 \textcite{bottouOptimizationMethodsLargeScale2018}
@@ -281,6 +279,13 @@ relation to momentum
 \textcite{vinyalsKrylovSubspaceDescent2012}
 
 Turned into Saddle Point repelling methods by \textcite{dauphinIdentifyingAttackingSaddle2014}
+
+\subsection{Conjugate Gradient Descent}
+
+relation to momentum
+
+\subsubsection{Hessian Free Gradient Descent}
+\textcite{martensDeepLearningHessianfree2010}
 
 \section{Natural Gradient Descent}
 
