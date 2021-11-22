@@ -73,3 +73,6 @@ solvable?
 
 ## condition calculation?
 
+# Take Gradient w.r.t. different norm
+
+cf. Conjugate Gradient

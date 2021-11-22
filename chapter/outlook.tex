@@ -219,88 +219,6 @@ But these examples might be unrealistic as well.
 In empirical benchmarks such as \textcite{schmidtDescendingCrowdedValley2021} no
 optimizer seems to outperform the others consistently.
 
-
-\section{(Quasi) Newton Methods}
-
-\subsection{Cubic Regularization of Newton's Method}
-
-We have motivated the Newton-Raphson method on quadratic functions where
-convergence is instant. Convergence analysis for general loss functions requires
-an analysis of the way the Hessian changes. In Section~\ref{sec:
-lipschitz continuity of the Gradient} we used Lipschitz continuity of the
-gradient to get an upper bound on our Loss (\ref{eq: lin approx + distance
-penalty notion})
-\begin{align*}
-	\Loss(\theta)
-	\le \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
-	+ \tfrac{\ubound}2 \|\theta-\weights\|^2,
-\end{align*}
-which we then optimized over in Lemma~\ref{lem: smallest upper bound} to find
-that gradient descent with learning rate \(\tfrac1\ubound\) is optimal with
-regards to this bound. The Lipschitz constant \(\ubound\) bounds the second
-derivative and thus the rate of change of the gradient. This allows us to
-formulate for how long we can trust our gradient evaluation in some sense.
-
-In the case of the Newton-Raphson method, we need a similar rate of change
-bound on the Hessian. In this case we want to bound the rate of change of the
-second derivative so we assume a Lipschitz continuous second derivative (or 
-in other words bounded third derivative). This similarly results in the upper
-bound
-\begin{align*}
-	\Loss(\theta)
-	\le \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
-	+ \tfrac12\langle \nabla^2\Loss(\weights)(\theta-\weights), \theta-\weights \rangle
-	+ \tfrac{M}6\|\theta-\weights\|^3.
-\end{align*}
-The solution of which represents the cubic regularization of Newton's method
-\parencite[Section 4.1]{nesterovLecturesConvexOptimization2018}.
-The solution of which can unfortunately not be written explicitly.
-
-Since this method is history agnostic again, Nesterov utilizes estimating sequences
-again, to derive an ``accelerated cubic Newton scheme'' \parencite[Section
-4.2]{nesterovLecturesConvexOptimization2018} similar to Nesterov momentum, i.e.
-the accelerated gradient descent.
-
-\subsection{Quasi Newton Methods}
-
-While the analysis and regularization of Newton's method itself is important,
-it can not be used directly as the calculation and storage of the Hessian is
-usually too expensive at cost \(O(\dimension^2)\), and if that is not the case,
-then inversion of this matrix at cost \(O(\dimension^3)\) almost certainly is,
-for most machine learning applications. Additionally we have saddle point
-repelling properties on our wish list.
-
-
-
-\subsubsection{L-BFGS}
-
-\subsubsection{Krylov Subspace Descent}
-
-\textcite{vinyalsKrylovSubspaceDescent2012}
-
-Turned into Saddle Point repelling methods by \textcite{dauphinIdentifyingAttackingSaddle2014}
-
-\subsection{Conjugate Gradient Descent}
-
-relation to momentum
-
-\subsubsection{Hessian Free Gradient Descent}
-\textcite{martensDeepLearningHessianfree2010}
-
-
-\subsection{Gauß-Newton Algorithm}
-
-The (classical) Gauß-Newton Algorithm variant of the Newton-Raphson method
-specialized for loss functions which are sums of squared residuals. In other
-words loss functions of the form
-\begin{align*}
-	\Loss(\weights) = \sum_{k=1}^n r_k(\weights)^2.
-\end{align*}
-The generalized Gauß-Newton Algorithm 
-\textcite{bottouOptimizationMethodsLargeScale2018}
-\fxnote{Levenberg Marquard algorithm?}
-
-
 \section{Geometric Methods}
 
 \subsection{Cutting Plane Methods}
@@ -381,10 +299,169 @@ which implies that for \(\theta=\minimum\) we know that the minimum
 With Lipschitz continuity of the gradient \textcite{bubeckGeometricAlternativeNesterov2015}
 further refine this ``confidence ball'' around the minimum and use it to create
 an algorithm with the same rate of convergence as Nesterov's momentum.
-Unfortunately it looks like this algorithm is much more dependent on
+Unfortunately this looks like the algorithm is much more dependent on
 convexity than the momentum method.
 
+
+\section{(Quasi) Newton Methods}
+
+\subsection{Cubic Regularization of Newton's Method}
+
+We have motivated the Newton-Raphson method on quadratic functions where
+convergence is instant. Convergence analysis for general loss functions requires
+an analysis of the way the Hessian changes. In Section~\ref{sec:
+lipschitz continuity of the Gradient} we used Lipschitz continuity of the
+gradient to get an upper bound on our Loss (\ref{eq: lin approx + distance
+penalty notion})
+\begin{align*}
+	\Loss(\theta)
+	\le \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
+	+ \tfrac{\ubound}2 \|\theta-\weights\|^2,
+\end{align*}
+which we then optimized over in Lemma~\ref{lem: smallest upper bound} to find
+that gradient descent with learning rate \(\tfrac1\ubound\) is optimal with
+regards to this bound. The Lipschitz constant \(\ubound\) bounds the second
+derivative and thus the rate of change of the gradient. This allows us to
+formulate for how long we can trust our gradient evaluation in some sense.
+
+In the case of the Newton-Raphson method, we need a similar rate of change
+bound on the Hessian. In this case we want to bound the rate of change of the
+second derivative so we assume a Lipschitz continuous second derivative (or 
+in other words bounded third derivative). This similarly results in the upper
+bound
+\begin{align*}
+	\Loss(\theta)
+	\le \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
+	+ \tfrac12\langle \nabla^2\Loss(\weights)(\theta-\weights), \theta-\weights \rangle
+	+ \tfrac{M}6\|\theta-\weights\|^3.
+\end{align*}
+The solution of which represents the cubic regularization of Newton's method
+\parencite[Section 4.1]{nesterovLecturesConvexOptimization2018}.
+The solution of which can unfortunately not be written explicitly.
+
+Since this method is history agnostic again, Nesterov utilizes estimating sequences
+again, to derive an ``accelerated cubic Newton scheme'' \parencite[Section
+4.2]{nesterovLecturesConvexOptimization2018} similar to Nesterov momentum, i.e.
+the accelerated gradient descent.
+
+\subsection{Quasi Newton Methods}
+
+While the analysis and regularization of Newton's method itself is important,
+it can not be used directly as the calculation and storage of the Hessian is
+usually too expensive at cost \(O(\dimension^2)\), and if that is not the case,
+then inversion of this matrix at cost \(O(\dimension^3)\) almost certainly is,
+for most machine learning applications. Additionally we have saddle point
+repelling properties on our wish list.
+
+
+
+\subsubsection{L-BFGS}
+
+\subsubsection{Krylov Subspace Descent}
+
+\textcite{vinyalsKrylovSubspaceDescent2012}
+
+Turned into Saddle Point repelling methods by \textcite{dauphinIdentifyingAttackingSaddle2014}
+
 \fxnote{Generalized Minimal Residual method?}
+
+\subsection{Conjugate Gradient Descent}
+
+Similar to momentum, conjugate gradient descent is another attempt to solve
+high condition problems. The best introduction I found so far was
+\textcite{shewchukIntroductionConjugateGradient1994}. But here is another
+attempt.
+
+Recall that we can write
+our loss function as an approximate paraboloid (cf. (\ref{eq: paraboloid
+approximation of L}))
+\begin{align*}
+	\Loss(\theta)
+	= (\theta-\weights)^T \nabla^2\Loss(\weights)(\theta-\weights)
+	+ c(\weights) + o(\|\theta-\weights\|^2)
+\end{align*}
+If the second taylor approximation is accurate and we have a constant
+positive definite Hessian \(H:=\nabla^2\Loss(\weights)\), then our loss can also
+be written as
+\begin{align*}
+	\Loss(\weights) = \Loss(\minimum) + 
+	(\weights-\minimum)^T H(\weights-\minimum)
+	= \Loss(\minimum) + \|\weights-\minimum\|_H^2,
+\end{align*}
+where the norm \(\|\cdot\|_H\) is induced by the scalar product
+\begin{align*}
+	\langle x, y \rangle_H := \langle x, Hy\rangle.
+\end{align*}
+In the space \((\reals^d, \|\cdot\|_H)\) our problem therefore has condition one
+(\(\condition=1\))!
+
+But since we cannot obtain a gradient with respect to this norm, and do not
+know \(H\) in general, it is difficult to actually work with this space.
+The method that turns out to still work on this space, is the method of
+conjugate directions.
+
+\subsubsection{Conjugate Directions}
+
+Let us take any (normed) direction \(v^{(1)}\) and complete it to an orthonormal
+basis \(v^{(1)},\dots,v^{(\dimension)}\) on \((\reals^d, \|\cdot\|_H)\). Then we
+can represent any vector \(\theta=\weights-\minimum\) as a linear combination of
+this orthonormal basis
+\begin{align*}
+	\theta = \sum_{k=1}^\dimension \theta^{(k)} v^{(k)}.
+\end{align*}
+Let us now optimize over the learning rate for a move in direction \(v_1\)
+\begin{align*}
+	\weights_{n+1} = \weights_n + \lr_n v_1
+	= (\theta_n^{(1)} + \lr_n)v^{(1)} + \sum_{k=2}^\dimension \theta_n^{(k)} v^{(k)}.
+\end{align*}
+Due to orthogonality we have
+\begin{align*}
+	\Loss(\weights_{n+1}) = \Loss(\minimum) + \sum_{k=1}^{\dimension} (\theta_{n+1}^{(k)})^2.
+\end{align*}
+And since most of the \(\theta^{(k)}_{n+1}\) stay constant no matter the learning
+rate \(\lr_n\), the only one we actually optimize over is \((\theta^{(1)}_{n+1})^2\).
+And we can make that coordinate zero with \(\lr_n=-\theta^{(1)}_n\).
+
+So if we do a line search (optimize the loss over one direction, i.e. \(v^{(1)}\)),
+then we know that we will never ever have to move in the direction \(v^{(1)}\)
+again. The target lies orthogonal to \(v^{(1)}\). Note that this is generally
+not the case for condition numbers other than zero\fxwarning{picture}.
+So the trick is to select orthogonal search directions not with respect to the
+euclidean scalar product, but rather orthogonal with respect to
+\(\langle\cdot,\cdot\rangle_H\), i.e. ``conjugate'' to each other. As we pick
+a conjugate second search direction, we can without loss of generality assume
+that the second search direction is \(v^{(2)}\) otherwise we can just switch
+to a new basis where this is true. Similar for the other dimensions. Therefore
+we are going to remove one component in every step\footnote{
+	This implies that this method is optimal in the linear span of search
+	directions (compare with Assumption~\ref{assmpt: parameter in linear hull of
+	gradients})!
+}.
+
+\subsubsection{Evaluation Troubles}
+
+
+
+
+\fxnote{relation to momentum}
+
+\subsubsection{Hessian Free Gradient Descent}
+\textcite{martensDeepLearningHessianfree2010}
+
+
+\subsection{Gauß-Newton Algorithm}
+
+The (classical) Gauß-Newton Algorithm variant of the Newton-Raphson method
+specialized for loss functions which are sums of squared residuals. In other
+words loss functions of the form
+\begin{align*}
+	\Loss(\weights) = \sum_{k=1}^n r_k(\weights)^2.
+\end{align*}
+The generalized Gauß-Newton Algorithm 
+\textcite{bottouOptimizationMethodsLargeScale2018}
+\fxnote{Levenberg Marquard algorithm?}
+
+
 
 \section{Natural Gradient Descent}
 
@@ -412,6 +489,11 @@ different justification for these algorithms, one that involves qualitatively
 different approximations. It should also be noted that research on the design of
 methods inspired by the natural gradient is ongoing and may lead to markedly
 different algorithms.''
+
+\section{Coordinate Descent}
+
+\fxnote{elaborate or cut}
+\textcite[7.3]{bottouOptimizationMethodsLargeScale2018}, \textcite[6.4]{bubeckConvexOptimizationAlgorithms2015}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

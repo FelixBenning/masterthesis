@@ -133,10 +133,10 @@ approximation only relative to \(\weights\). To obtain its absolute coordinates
 and obtain the notion of a paraboloid centered around
 vertex \(\hat{\weights}\)
 %
-\begin{align}\label{paraboloid approximation of L}
+\begin{align}\label{eq: paraboloid approximation of L}
 	\Loss(\theta)
 	= \overbrace{
-		\tfrac12 (\theta- \hat{\weights}) \nabla^2 \Loss(\weights) (\theta-\hat{\weights})
+		\tfrac12 (\theta- \hat{\weights})^T \nabla^2 \Loss(\weights) (\theta-\hat{\weights})
 		+ c(\weights)
 	}^{T_2\Loss(\weights+x)} + o(\|\theta-\weights\|^2)
 \end{align}
@@ -173,8 +173,8 @@ In that case the eigenvalues might be negative as well as positive representing
 a saddle point (cf. Figure~\ref{fig: visualize saddle point gd}), or all
 negative representing a maximum.
 
-Taking the derivative of the representation (\ref{paraboloid approximation of
-L}) of \(\Loss\) we can write the gradient at \(\weights\) as
+Taking the derivative of the representation (\ref{eq: paraboloid approximation
+of L}) of \(\Loss\) we can write the gradient at \(\weights\) as
 %
 \begin{align}\label{eq: hesse representation of gradient}
 	\nabla \Loss(\weights)
@@ -827,8 +827,7 @@ One way to ensure such a lower bound on the gradient is using convexity.
 		\ge \frac{\Loss(\weights_n)-\Loss(\minimum)}{\|\weights_0-\minimum\|}
 	\end{align}
 	if we can make sure that our weights do not move away from our minimum \(\minimum\).
-	Utilizing convexity again we will prove in Lemma~\ref{lem: bermanDiv lower
-	bound} that
+	Utilizing convexity again we will prove in Lemma~\ref{lem: bregmanDiv lower bound} that
 	\begin{align*}
 		\langle\nabla\Loss(\weights) - \nabla\Loss(\minimum), \weights-\minimum\rangle
 		\ge \tfrac1{\ubound} \|\nabla\Loss(\weights) - \nabla\Loss(\minimum)\|^2.
