@@ -270,8 +270,7 @@ then inversion of this matrix at cost \(O(\dimension^3)\) almost certainly is,
 for most machine learning applications. Additionally we have saddle point
 repelling properties on our wish list.
 
-\subsubsection{Gaus Newton}
-\textcite{bottouOptimizationMethodsLargeScale2018}
+
 
 \subsubsection{L-BFGS}
 
@@ -288,9 +287,18 @@ relation to momentum
 \subsubsection{Hessian Free Gradient Descent}
 \textcite{martensDeepLearningHessianfree2010}
 
-\section{Natural Gradient Descent}
 
-relation to Newton
+\subsection{Gauß-Newton Algorithm}
+
+The (classical) Gauß-Newton Algorithm variant of the Newton-Raphson method
+specialized for loss functions which are sums of squared residuals. In other
+words loss functions of the form
+\begin{align*}
+	\Loss(\weights) = \sum_{k=1}^n r_k(\weights)^2.
+\end{align*}
+The generalized Gauß-Newton Algorithm 
+\textcite{bottouOptimizationMethodsLargeScale2018}
+\fxnote{Levenberg Marquard algorithm?}
 
 
 \section{Geometric Methods}
@@ -375,6 +383,36 @@ further refine this ``confidence ball'' around the minimum and use it to create
 an algorithm with the same rate of convergence as Nesterov's momentum.
 Unfortunately it looks like this algorithm is much more dependent on
 convexity than the momentum method.
+
+\fxnote{Generalized Minimal Residual method?}
+
+\section{Natural Gradient Descent}
+
+``Natural gradient descent'' would require a deep dive into ``information geometry''
+for which we do not have time. But not mentioning this algorithm at all would do it
+injustice. So to avoid playing a game of telephone, here is a direct quote of
+the description by \textcite{bottouOptimizationMethodsLargeScale2018}:
+
+``We have seen that Newton's method is invariant to linear transformations of
+the parameter vector w. By contrast, the natural gradient method [5, 6] aims to
+be invariant with respect to all differentiable and invertible transformations.
+The essential idea consists of formulating the gradient descent algorithm in the
+space of prediction functions rather than specific parameters. Of course, the
+actual computation takes place with respect to the parameters, but accounts for
+the anisotropic relation between the parameters and the decision function. That
+is, in parameter space, the natural gradient algorithm will move the parameters
+more quickly along directions that have a small impact on the decision function,
+and more cautiously along directions that have a large impact on the decision
+function.
+
+We remark at the outset that many authors [119, 99] propose
+quasi-natural-gradient methods that are strikingly similar to the quasi-Newton
+methods described in §6.2. The natural gradient approach therefore offers a
+different justification for these algorithms, one that involves qualitatively
+different approximations. It should also be noted that research on the design of
+methods inspired by the natural gradient is ongoing and may lead to markedly
+different algorithms.''
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
