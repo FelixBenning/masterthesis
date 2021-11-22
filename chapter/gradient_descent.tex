@@ -1463,7 +1463,7 @@ is much more stable as we will find out in Section~\ref{sec: nesterov momentum c
 
 And with an idea first proposed by \textcite{armijoMinimizationFunctionsHaving1966}
 we can actually emulate this rate without knowing \(\ubound\). The idea is the
-following: We start with some (optimistic) initial guess \(\lr_0 = \tfrac{1}{\ubound_0}>0\) and check
+following: We start with some (optimistic) initial guess \(\lr_0 := \tfrac{1}{\ubound_0}>0\) and check
 whether
 \begin{align}
 	\label{eq: armijo's condition}
@@ -1471,8 +1471,8 @@ whether
 	\Loss\left(\weights - \lr_0\nabla\Loss(\weights)\right)
 	\le \Loss(\weights) - \tfrac{\lr_0}{2}\|\nabla\Loss(\weights)\|^2
 \end{align}
-is satisfied. If that is not the case, we try \(\lr_1 = \delta\lr_0\)
-for some \(0<\delta<1\). We continue testing the same equation with
+is satisfied. If that is not the case, we try \(\lr_1 := \delta\lr_0\)
+for some \(\delta\in(0,1)\). We continue testing the same equation with
 \begin{align*}
 	\lr_n = \delta \lr_{n-1} = \delta^n \lr_0
 \end{align*}
@@ -1488,8 +1488,9 @@ this equation is satisfied, since the function is also
 	reduction factor \(\delta\), is bounded by
 	\begin{align*}
 		n_A \le \begin{cases}
-			1 & \ubound_0 \ge \ubound \qquad \text{``too pessimistic''} \\
-			\left\lceil \frac{\log(\ubound_0/\ubound)}{\log(\delta)} \right\rceil & \ubound_0 < \ubound
+			1 & \ubound_0 \ge \ubound \qquad \text{``too pessimistic''}, \\
+			\left\lceil \log\left(\frac{\ubound}{ \ubound_0 }\right)\log\left(\frac1\delta\right) \right\rceil
+			& \ubound_0 < \ubound.
 		\end{cases}
 	\end{align*}
 \end{lemma}
@@ -1498,18 +1499,26 @@ this equation is satisfied, since the function is also
 	will immediately succeed and the only overhead is a single evaluation every step.
 	In the other case we only need
 	\begin{align*}
-		\lr_{n_A} = \frac{\delta^{n_A}}{\ubound_0} \xle{!} \lr = \frac{1}{\ubound}
-		\iff n_A \log(\delta) \le \log(\ubound_0/\ubound)
+		\lr_{n_A} = \frac{\delta^{n_A}}{\ubound_0} \xle{!} \lr = \frac{1}{\ubound},
 	\end{align*}
-	As \(\delta<1\) dividing by \(\log(\delta)\) flips the inequality. Selecting the
+	or equivalently
+	\begin{align*}
+		n_A \log(\delta) \le \log\left(\tfrac{ \ubound_0 }{ \ubound }\right).
+	\end{align*}
+	As \(\delta<1\) dividing by \(\log(\delta)\) flips the inequality
+	\begin{align*}
+		n_A \ge \log\left(\tfrac{ \ubound_0 }{ \ubound }\right)\log(\delta)
+		= \log\left(\tfrac{\ubound}{ \ubound_0 }\right)\log\left(\tfrac1\delta\right).
+	\end{align*}
+	Selecting the
 	smallest \(n_A\) such that this equation is satisfied results in our claim.
 \end{proof}
 
 \textcite[Lemma 3.1]{truongBacktrackingGradientDescent2019} prove that for any
 compact region of an arbitrary \(C^1\) loss function, an upper bound for the
 number of iterations to find a suitable \(\lr_{n_A}\) exists. They use this
-result to prove convergence (without rates) of GD to some critical point for
-general \(C^1\) functions.\fxnote{present result here?}
+result to prove convergence (without rates) of \ref{eq: gradient descent} to
+some critical point for general \(C^1\) functions.\fxnote{present result here?}
 
 They also propose a more sophisticated rule (two-way backtracking) which uses
 the previous learning rate as a starting point for the next iteration. This
@@ -1519,7 +1528,7 @@ neighborhood of our current iterate. Experimental results seem promising.
 \section{Complexity Bounds}\label{sec: complexity bounds}
 
 Now that we found convergence rates for \ref{eq: gradient descent} on (strongly) convex
-problems, the question is can we do better? I.e. how fast could an algorithms
+problems, the question is, can we do better? I.e. how fast could an algorithms
 possibly be? To tackle this problem let us first make an assumption about what
 this algorithm can do. Unrolling our \ref{eq: gradient descent} algorithm
 %
@@ -1527,38 +1536,39 @@ this algorithm can do. Unrolling our \ref{eq: gradient descent} algorithm
 	\weights_n = \weights_0 - \lr\sum_{k=0}^{n-1} \nabla \Loss(\weights_k)
 \end{align*}
 %
-we can see, that even if we allowed custom learning rates for every iteration
+we can see that even if we allowed custom learning rates \(\lr_n\) for every
+iteration \(n\), i.e.
 %
 \begin{align*}
 	\weights_n = \weights_0 - \sum_{k=0}^{n-1} \lr_k \nabla \Loss(\weights_k)
 \end{align*}
 %
 we would still end up in the linear span of all gradients, shifted by \(\weights_0\).
-And since we are in the class of first order optimization methods where we are
+And since we are in the class of first order optimization methods, where we are
 only provided with the function evaluation itself and the gradient, an obvious
-assumption for a class of optimization methods would be
+assumption for a class of optimization methods might be
 %
 \begin{assumption}[{\cite[Assumption 2.1.4]{nesterovLecturesConvexOptimization2018}}]
 	\label{assmpt: parameter in linear hull of gradients}
 	The \(n\)-th iterate of the optimization method is contained in the span of all
 	previous gradients shifted by the initial starting point
 	\begin{align*}
-		\weights_n \in \linSpan\{\nabla \Loss(\weights_k) : 0\le k \le n-1\} + \weights_0
+		\weights_n \in \linSpan\{\nabla \Loss(\weights_k) : 0\le k \le n-1\} + \weights_0.
 	\end{align*}
 \end{assumption}
 %
-Now the question becomes: How can we utilize this assumption to construct a
-function which is difficult to optimize?
-\textcite{gohWhyMomentumReally2017} provides an intuitive interpretation for a loss
-function taken from \textcite[Section 2.1.2]{nesterovLecturesConvexOptimization2018}
-which I further modify into the following example.
+So how can we utilize this assumption to construct a function which is difficult to
+optimize?  \textcite{gohWhyMomentumReally2017} provides an intuitive
+interpretation for a loss function taken from \textcite[Section
+2.1.2]{nesterovLecturesConvexOptimization2018} which we will further modify into
+the following example.
 
 \begin{figure}[h]
 	\centering
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_coloring_problem.pdf_tex}
 	\caption{
-		Even after \(\dimension\) steps (when all tiles have a non-zero value)
+		Even after \(\dimension\) steps (when all segments have a non-zero value)
 		\ref{eq: gradient descent} is still far off from the solution. Even when
 		using the learning rate \(\tfrac1\ubound\) as is the case here.
 	}
@@ -1571,7 +1581,7 @@ will only start to get hot once the first segment of it has heated up. Similarly
 the \(n\)-th segment will only increase in temperature once the \((n-1)\)-th segment
 is no longer at zero temperature. If the heat transfer would only depend on the
 current heat level difference, one could thus express a simplified heat level
-recursion as follows\footnote{
+recursion for the \(i\)-th segment as follows\footnote{
 	Taking first the learning rate to zero and afterwards the space discretization, would
 	result in the well known differential equation for heat with boundary
 	conditions.
@@ -1583,11 +1593,11 @@ recursion as follows\footnote{
 	+ \lr 
 	\begin{cases}
 		[\weights_{n}^{(i-1)} - \weights_{n}^{(i)}] + [\weights_{n}^{(i+1)} - \weights_{n}^{(i)}]
-		&  1 < i < \dimension \\
+		&  1 < i < \dimension, \\
 		[1 - \weights_{n}^{(1)}] + [\weights_{n}^{(2)} - \weights_{n}^{(1)}]
-		& i = 1 \\
+		& i = 1, \\
 		[\weights_{n}^{(i-1)} - \weights_{n}^{(i)}]
-		& i = \dimension
+		& i = \dimension.
 	\end{cases}
 \end{align*}
 %
@@ -1595,13 +1605,13 @@ For the loss function
 %
 \begin{align}\label{eq: naive complexity counterexample loss}
 	\tilde{\Loss}(\weights)
-	= \frac12 (\weights^{(1)}-1)^2
+	:= \frac12 (\weights^{(1)}-1)^2
 	+ \frac12 \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 \end{align}
 %
 this is just the \ref{eq: gradient descent} recursion. Now here is the crucial insight:
 
-Since any weight (parameter component) is only affected once its neighbors are
+Since any weight is only affected once its neighbors are
 affected, the second weight can not be affected before the second step since
 the first weight is only heated in the first step. And since the second weight
 will be unaffected until the second step, the third weight will be unaffected
@@ -1623,18 +1633,18 @@ this argument results in the following theorem inspired by \textcite[Theorem
 \end{remark}
 \begin{theorem}[{\cite[Theorem~2.1.7]{nesterovLecturesConvexOptimization2018}}]
 	\label{thm: convex function complexity bound}
-	For any \(\weights_0\in\reals^d\), any \(n\) such that 
+	For any \(\weights_0\in\reals^d\), any \(n\in\naturals\) such that 
 	\[0\le n\le \tfrac12 (d-1),\]
 	there exists \(\Loss\in\lipGradientSet[\infty,1]{\ubound}\)
-	s.t. for any first order method \(\firstOrderMethod\)
+	such that for any first order method \(\firstOrderMethod\)
 	satisfying Assumption~\ref{assmpt: parameter in linear hull of gradients}
 	we have
 	\begin{subequations}
 	\begin{align}
 		\Loss(\weights_n) - \Loss(\minimum)
-		&\ge \frac{\ubound \|\weights_0 - \minimum\|^2}{16(n+1)^2} \\
+		&\ge \frac{\ubound \|\weights_0 - \minimum\|^2}{16(n+1)^2}, \\
 		\|\weights_n -\minimum\|^2 
-		&\ge \frac12 \|\weights_0 - \minimum\|^2
+		&\ge \frac12 \|\weights_0 - \minimum\|^2.
 	\end{align}
 	\end{subequations}
 	where \(\minimum = \arg\min_\weights \Loss(\weights)\) is the unique minimum.
@@ -1656,12 +1666,12 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\end{align}
 
 	Third, we want to make sure that our loss function is actually convex. To
-	see this notice that we can write the gradient as
+	see this note that we can write the gradient as
 	%
 	\begin{align}\label{eq: naive complexity example loss gradient}
 		\nabla \tilde{\Loss}(\weights)
 		= \graphLaplacian\weights + (\weights^{(1)} -1) \stdBasis_1
-		= (\graphLaplacian + \stdBasis_1 \stdBasis_1^T)\weights - \stdBasis_1
+		= (\graphLaplacian + \stdBasis_1 \stdBasis_1^T)\weights - \stdBasis_1,
 	\end{align}
 	%
 	where \(\stdBasis_1=(1,0,\dots,0)^T\) is the first standard basis
@@ -1676,9 +1686,9 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	} for the 
 	\fxnote{tikz graph}{undirected graph} \(\graph=(\vertices, \edges)\) with 
 	\begin{align*}
-		\vertices = \{1,\dots, \dimension\}
+		\vertices = \{1,\dots, \dimension\},
 		\qquad
-		\edges = \{(i, i+1) : 1\le i \le \dimension-1\}
+		\edges = \{(i, i+1) : 1\le i \le \dimension-1\},
 	\end{align*}
 	%
 	\begin{align*}
@@ -1698,14 +1708,14 @@ this argument results in the following theorem inspired by \textcite[Theorem
 			\vdots & \ddots & \ddots & \ddots & -1 & 0 \\
 			\vdots &  & \ddots & -1 & 2 & -1 \\
 			0 & \cdots & \cdots & 0  & -1 & 1
-		\end{pmatrix*}
+		\end{pmatrix*}\in \reals^{\dimension\times\dimension}
 	\end{align*}
 	%
 	This means our loss function is quadratic with
 	\begin{align*}
-		\nabla^2\tilde{\Loss}(\weights) = H = (A_G + \stdBasis_1 \stdBasis_1^T)
+		H := \nabla^2\tilde{\Loss}(\weights) = (A_G + \stdBasis_1 \stdBasis_1^T)
 	\end{align*}
-	And the Hesse matrix is positive definite because
+	And the Hessian is positive definite because
 	%
 	\begin{align*}
 		\langle \weights , H \weights\rangle
@@ -1718,28 +1728,28 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		\ge 0.
 	\end{align*}
 	%
-	The last equality can be verified by taking the derivative of both and
+	The last equality can be verified by taking the derivative of both sides and
 	realizing they are the same, which is sufficient because they are both zero	
 	in the origin. We simply used the fact that our original loss function
-	was essentially already a quadratic function except for the constant influx
+	is essentially already a quadratic function, except for the constant influx
 	at the first tile. And that constant in the derivative has no bearing on the
 	Hessian.
 
 
 	To calculate the operator norm of \(H\) we can use the equality above and	
-	\((a-b)^2 \le 2(a^2 + b^2)\) to get
+	\((a-b)^2 \le 2(a^2 + b^2)\) for any real \(a,b\) to get
 	\begin{align*}
 		\langle \weights, H\weights\rangle
 		\le (\weights^{(1)})^2 + 2\sum_{k=1}^{d-1}(\weights^{(k)})^2 + (\weights^{(k+1)})^2 
 		\le 4 \sum_{k=1}^{d-1} (\weights^{(k)})^2
-		= 4 \|\weights\|^2
+		= 4 \|\weights\|^2.
 	\end{align*}
-	Which immediately implies that the largest eigenvalue is smaller than 4. To
+	This immediately implies that the largest eigenvalue is smaller than 4. To
 	obtain a convex function with a Lipschitz continuos gradient with constant
 	\(\ubound\), we can now simply define
 	\begin{align*}
 		\Loss(\weights):= \frac{\ubound}{4}\tilde{\Loss}(\weights)
-		= \frac\ubound{8}\left[
+		\xeq{(\ref{eq: naive complexity counterexample loss})} \frac\ubound{8}\left[
 			(\weights^{(1)}-1)^2
 			+ \sum_{k=1}^{\dimension-1} (\weights^{(k)}-\weights^{(k+1)})^2
 		\right].
@@ -1757,7 +1767,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	%
 	\begin{align*}
 		\weights_n \in \linSpan\{\nabla\Loss(\weights_k): 0 \le k \le n-1\}
-		\subseteq \reals^n \subseteq \reals^\dimension
+		\subseteq \reals^n \subseteq \reals^\dimension,
 	\end{align*}
 	%
 	which immediately results in the second claim of the theorem
@@ -1767,10 +1777,11 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		= d-n \\
 		&\lxeq{(\ref{eq: w.l.o.g dim=2n+1})} n+1
 		\xeq{(\ref{eq: w.l.o.g dim=2n+1})} \tfrac{n+1}{2n+1} d
+		\ge \tfrac12 d
 		\xge{(\ref{eq: initial distance})} \tfrac12 \|\minimum - \weights_0\|^2. 
 	\end{align*}
 
-	To get the bound on the loss function we have to be a bit more subtle.
+	To get the bound on the loss function, we have to be a bit more subtle.
 	On \(\reals^n\subseteq \reals^\dimension\) the modified loss function
 	%
 	\begin{align}\label{eq: sink loss}
@@ -1782,7 +1793,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	\end{align}
 	%
 	is equal to \(\Loss(\weights)\) because \(\weights^{(i)}=0\) for \(i>n\).
-	Therefore
+	Therefore we have
 	%
 	\begin{align*}
 		\Loss(\weights_n) - \inf_{\weights}\Loss(\weights)
@@ -1790,7 +1801,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		\ge \inf_{\weights}\Loss_n(\weights).
 	\end{align*}
 	%
-	Having a closer look at \(\Loss_n\) will therefore give us a lower bound
+	Having a closer look at \(\Loss_n\) will provide us with a lower bound
 	without having to know anything about \(\firstOrderMethod\). Since \(\Loss_n\)
 	is similarly convex, setting its derivative equal to zero will actually provide us
 	with its minimum. And similarly to \(\Loss\) itself, \(\Loss_n\) is a
@@ -1800,20 +1811,20 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	before to obtain the equation:
 	%
 	\begin{align}\label{eq: optimality condition for sink loss}
-		A_n \weights - \stdBasis_1 \xeq{!} 0 \qquad 
+		A_n \weights - \stdBasis_1 \xeq{!} 0, \qquad
 		A_n =\begin{cases}
-			2 & i=j\le n \\
-			-1 & i=j+1\le n \text{ or } j=i+1\le n \\
-			0 & \text{else}
-		\end{cases} 
+			2 & i=j\le n, \\
+			-1 & i=j+1\le n \text{ or } j=i+1\le n, \\
+			0 & \text{else}.
+		\end{cases}
 	\end{align}
 	%
 	But at least for solving it, it helps to have an intuition what \(\Loss_n\)
-	actually represents. Recall \(\Loss\) represents just
+	actually represents. Recall that in our motivation, \(\Loss\) represents just
 	a single heat source at interval \(\weights^{(1)}\) at constant
-	temperature one which slowly heats up our rod to this level. Now
+	temperature one, which slowly heats up our rod to this level. Now
 	\(\Loss_n\) not only has a source, it also has a sink with constant
-	temperature zero at \(n\) which cools down the rod from this other side.
+	temperature zero at \(n\), which cools down the rod from this other side.
 
 	It is therefore quite intuitive that the equilibrium solution
 	\(\hat{\weights}_n\) (optimal solution for \(\Loss_n\)) should be a linearly
@@ -1821,13 +1832,13 @@ this argument results in the following theorem inspired by \textcite[Theorem
 	%
 	\begin{align*}
 		\hat{\weights}_n^{(i)} = \begin{cases}
-			1 - \tfrac{i}{n+1} & i \le n+1\\
-			0	& i \ge n+1
+			1 - \tfrac{i}{n+1} & i \le n+1,\\
+			0	& i \ge n+1.
 		\end{cases}
 	\end{align*}	
 	%
-	And this is in fact the solution of our linear equation (\ref{eq: optimality
-	condition for sink loss}) as can be verified by calculation. Since
+	And this is in fact the solution of our linear equation, (\ref{eq: optimality
+	condition for sink loss}), as can be verified by calculation. Since
 	\(\weights_n \in \reals^n\) on which \(\Loss\) and \(\Loss_n\) are equal
 	we finally get
 	%
@@ -1843,7 +1854,7 @@ this argument results in the following theorem inspired by \textcite[Theorem
 		=\frac{\ubound}{8(n+1)}
 		\xeq{(\ref{eq: initial distance})} \frac{L\|\weights_0 - \minimum\|^2}{8(n+1)d}\\
 		&\lxge{(\ref{eq: w.l.o.g dim=2n+1})}
-		\frac{L\|\weights_0 - \minimum\|^2}{16(n+1)^2}
+		\frac{L\|\weights_0 - \minimum\|^2}{16(n+1)^2}.
 		\qedhere
 	\end{align*}
 \end{proof}
@@ -1861,7 +1872,7 @@ For a strongly convex loss we simply add a regularization term:
 	\right]
 	+ \frac\lbound{2} \| \weights \|^2\\
 	&= \frac{\ubound - \lbound}{4} \tilde{\Loss}(\weights)
-	+ \frac{\lbound}{2}\| \weights \|^2
+	+ \frac{\lbound}{2}\| \weights \|^2, \qquad \lbound>0.
 \end{align*}
 %
 From the proof of Theorem~\ref{thm: convex function complexity bound} we know
@@ -1880,8 +1891,9 @@ Therefore we know that \(\Loss\in\strongConvex[\infty,1]{\lbound}{\ubound}\) bec
 	&\precsim (\ubound - \lbound + \lbound)\identity = \ubound \identity.
 \end{align*}
 %
-Using \(\lbound(\condition -1)=\ubound-\lbound\) and (\ref{eq: naive complexity
-example loss gradient}) we can set the gradient to zero
+Using \(\lbound(\condition -1)=\ubound-\lbound\) where
+\(\condition=\tfrac\ubound\lbound\) is our condition number and (\ref{eq: naive
+complexity example loss gradient}), we can set the gradient to zero
 \begin{align*}
 	0 &\lxeq{!} \nabla \Loss(\weights)
 	=  \frac{\lbound(\condition -1)}{4} \nabla\tilde{\Loss}(\weights) - \lbound \weights\\
@@ -1890,9 +1902,7 @@ example loss gradient}) we can set the gradient to zero
 	\right]\weights - \frac{\lbound(\condition-1)}{4}\stdBasis_1.
 \end{align*}
 %
-Assuming \(\condition>1\) (\(\condition=1\) implies \(\Loss=\lbound\|\cdot\|^2\) and
-\(\minimum=\mathbf{0}\)),
-this condition can be rewritten as
+Assuming \(\condition>1\), this condition can be rewritten as
 %
 \begin{align*}
 	0 =  \left[
@@ -1900,61 +1910,72 @@ this condition can be rewritten as
 	\right] - \stdBasis_1
 	\weights.
 \end{align*}
+\(\condition=1\) implies \(\Loss=\lbound\|\cdot\|^2\) and
+\(\minimum=\mathbf{0}\).
 %
 All entries on the diagonal except for the last dimension (which only has one
 connection and no source or sink) are equal to
 %
 \begin{align*}
-	2+\frac{4}{\condition-1} = 2\frac{\condition +1}{\condition-1}
+	2+\frac{4}{\condition-1} = 2\frac{\condition +1}{\condition-1}.
 \end{align*}
 %
 This results in the system of equations
 %
 \begin{subequations}
 \label{eq: solution to the strongly convex coloring problem}
-\begin{align*}
-	0&=2\frac{\condition+1}{\condition -1}\weights^{(1)} - \weights^{(2)} -1 \\
+\begin{align}
+	0&=2\frac{\condition+1}{\condition -1}\weights^{(1)} - \weights^{(2)} -1, \\
 	0&=2\frac{\condition+1}{\condition -1}\weights^{(i)}
-	- \weights^{(i+1)} - \weights^{(i-1)}  && 2\le i <d \\
+	- \weights^{(i+1)} - \weights^{(i-1)}
+	&& 2\le i <d, \\
+	\label{eq: solution to the strongly convex coloring problem c}
 	0&= \left(2\frac{\condition+1}{\condition -1} -1 \right)\weights^{(d)}
-	- \weights^{(d-1)}
-\end{align*}
+	- \weights^{(d-1)}.
+\end{align}
 \end{subequations}
-Defining \(\weights^{(0)} =1\) we can unify the first two equations (flipping
-the sign)
+Defining \(\weights^{(0)} :=1\) we can unify the first two equations. Flipping
+the sign and dividing by \(\weights^{(i-1)}\) results in
 \begin{align*}
 	0&= 
 	\frac{\weights^{(i+1)}}{\weights^{(i)}}\frac{\weights^{(i)}}{\weights^{(i-1)}}
 	- 2\frac{\condition+1}{\condition -1}\frac{\weights^{(i)}}{\weights^{(i-1)}}
-	+ 1  && i <d
+	+ 1  && i <d.
 \end{align*}
 %
-This means that for a solution \(\) of the quadratic equation
+This means that for a solution \(q\) of the quadratic equation
 \begin{align}\label{eq: coloring solution quadratic equation}
-	0&= x^2 - 2\frac{\condition+1}{\condition -1}x + 1,
+	0&= q^2 - 2\frac{\condition+1}{\condition -1}q + 1,
 \end{align}
 %
-\(\weights^{(i)} = x^i\) will be a solution to the first \(d-1\) equations.
+\(\weights^{(i)} := q^i\) will be a solution to the first \(d-1\) equations, as
+\begin{align*}
+	\underbrace{\frac{\weights^{(i+1)}}{\weights^{(i)}}}_{=\frac{q^{i+1}}{q^i}=q}
+	\underbrace{\frac{\weights^{(i)}}{\weights^{(i-1)}}}_{=q}
+	- 2\frac{\condition+1}{\condition-1}
+	\underbrace{\frac{\weights^{(i)}}{\weights^{(i-1)}}}_{=q} +1.
+\end{align*}
 Unfortunately neither of the solutions
 %
-\begin{align*}
-	x_{1/2} &= \frac{\condition+1}{\condition -1} \pm 
+\begin{align}\label{eq: solutions to strong convexity complexity quadratic problem}
+	q_{1/2} &= \frac{\condition+1}{\condition -1} \pm 
 	\sqrt{\left(\tfrac{\condition+1}{\condition-1}\right)^2 -1}
 	=\frac{\condition +1 \pm \sqrt{4\condition}}{\condition -1}\\
 	&= \frac{(\sqrt{\condition}\pm 1)^2}{(\sqrt{\condition}-1)(\sqrt{\condition}+1)}
-\end{align*}
+\end{align}
 %
-is a solution to the last equation. This is why we are going to formulate the
-following theorem only for \(\dimension=\infty\)\footnote{
+results in a solution to the last equation, (\ref{eq: solution to the strongly
+convex coloring problem c}). This is why we are going to formulate the following
+theorem only for \(\dimension=\infty\)\footnote{
 	For large dimensions the real solution seems to be almost
 	indistinguishable from the limiting case (e.g. \(\dimension=40,
 	\condition=10\) results in a maximal error of the order \(10^{-11}\). The
-	error in the first 35 dimensions is even of the order \(10^{-13}\))
+	error in the first 35 dimensions is even of the order \(10^{-13}\)).
 }.
 We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 \begin{align*}
 	\sequenceSpace := \Big\{
-		f:\naturals \to \reals : \| f\|^2 = \sum_{k\in\naturals} f(k)^2< \infty
+		f:\naturals \to \reals \mid \| f\|^2 = \sum_{k\in\naturals} f(k)^2< \infty
 	\Big\}.
 \end{align*}
 %
@@ -1968,9 +1989,9 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 	\begin{align}
 		\|\weights_n - \minimum\|
 		&\ge \left(1-\frac2{1+\sqrt{\condition}}\right)^n \|\weights_0 - \minimum\| \\
-		\Loss(\weights_n) - \Loss(\minimum)
+		\Loss(\weights_n) - \Loss(\minimum),
 		&\ge \tfrac{\lbound}{2}
-		\left(1-\frac2{1+\sqrt{\condition}}\right)^{2n} \|\weights_0 - \minimum\|^2
+		\left(1-\frac2{1+\sqrt{\condition}}\right)^{2n} \|\weights_0 - \minimum\|^2.
 	\end{align}
 	\end{subequations}
 	where \(\minimum\) is the unique minimum of \(\Loss\).
@@ -1980,7 +2001,8 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 	of generality that \(\condition>1\).
 	
 	Further, we can again assume without loss of generality that
-	\(\weights_0=\mathbf{0}\).  Of the two solutions to the linear equations
+	\(\weights_0=\mathbf{0}\). Of the two solutions (\ref{eq: solutions to
+	strong convexity complexity quadratic problem}) to the linear equations
 	(\ref{eq: solution to the strongly convex coloring problem}) induced by the
 	two solutions \(q_{1/2}\) of (\ref{eq: coloring solution quadratic equation})
 	only
@@ -1998,7 +2020,7 @@ We formalize \(\dimension=\infty\) as the sequence space with euclidean norm
 		= q^{2n} \|\weights_0 - \minimum\|^2.
 	\end{align*}
 	Taking the root results in the first claim. The second claim immediately
-	follows from the definition of strong convexity (Def~\ref{def: strong convexity})
+	follows from the definition of strong convexity (Definition~\ref{def: strong convexity})
 	and \(\nabla\Loss(\minimum) = 0\):
 	\begin{align*}
 		\Loss(\weights_n) - \Loss(\minimum)
@@ -2015,23 +2037,24 @@ Lipschitz continuity of the gradient), it might be surprising how far away
 tight enough? This is not the case. In Chapter~\ref{chap: momentum} we will get
 to know a family of methods which do achieve these rates of convergence.
 
-So can we
-explain the Lemma? Well, first of all it is of course just an upper bound we
-are minimizing. But the more important issue is that we are taking a very
-local perspective. We only care about minimizing the next loss, using 
-nothing but the current gradient. In Assumption~\ref{assmpt: parameter in
-linear hull of gradients} on the other hand, we consider the linear span of all
-gradients so far. This distinction is important as it will make the
-``momentum method'' discussed in Chapter~\ref{chap: momentum} seem much more obvious.
+So can we explain Lemma~\ref{lem: smallest upper bound}? Well, first of all it
+is of course just an upper bound we are minimizing. But the more important issue
+is that we are taking a very local perspective. We only care about minimizing
+the next loss, using nothing but the current gradient. In
+Assumption~\ref{assmpt: parameter in linear hull of gradients} on the other
+hand, we consider the linear span of all gradients so far. This distinction is
+important as it will make the ``momentum method'' discussed in
+Chapter~\ref{chap: momentum} seem much more obvious.
 
 Lastly since this generalization of assumptions improved our rate of convergence
 we might ask if we could generalize our assumption further. Heuristics like
-the well known Adagrad, Adadelta and RMSProp use different learning rates for
-different components of the gradients for example. Their iterates can thus
+the well known Adagrad, Adadelta and RMSProp (see Section~\ref{sec: heuristics
+for adpative learning rates}) use different learning rates for different
+components of the gradients for example. Their iterates can thus
 be expressed by
 %
 \begin{align*}
-	\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k)
+	\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k),
 \end{align*}
 %
 where \(H_k\) are diagonal matrices. But at least upper triangle matrices do
@@ -2043,12 +2066,12 @@ parameter in linear hull of gradients} to
 	\label{assmpt: parameter in generalized linear hull of gradients}
 	The \(n\)-th iterate of the optimization method can be expressed as
 	\begin{align*}
-		\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k)
+		\weights_n = \weights_0 + \sum_{k=0}^{n-1} H_k \nabla\Loss(\weights_k),
 	\end{align*}
 	where \(H_k\) are upper triangular matrices.
 \end{assumption}
 
-Both Complexity Bounds continue to hold with this Assumption in place of
+Both complexity bounds continue to hold with this assumption in place of
 Assumption~\ref{assmpt: parameter in linear hull of gradients}. And since one
 could just switch the relation \((\weights_n-\weights_{n+1})^2\) to
 \((\weights_n+\weights_{n+1})^2\) to force a flip from positive to negative

@@ -3,6 +3,7 @@
 
 
 \section{Heuristics for Adaptive Learning Rates}
+\label{sec: heuristics for adpative learning rates}
 
 There are a number of widely used heuristics which are provided in the
 default optimizer selection of machine learning frameworks such as Tensorflow.
@@ -184,7 +185,7 @@ that these ``features'' seem to somehow correspond to the coordinates.
 	as Adam, the authors also note that the Root Mean Squared
 	\(\text{RMS}(\nabla\loss)\) are basically a \(2\)-norm and one could use a
 	different norm for the gradients as well.  Recall that we essentially want
-	the absolute eigenvalue of the hesse matrix in the end. For that, squaring
+	the absolute eigenvalue of the Hessian in the end. For that, squaring
 	the gradient components works just as well as taking the absolute value (i.e.
 	using the maximum norm). This idea results in the ``AdaMax'' algorithm.
 
