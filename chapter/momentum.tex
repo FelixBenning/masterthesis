@@ -1155,19 +1155,19 @@ Which can be written as in (\ref{eq: Phi_0 (upper bound - kinda)}) with
 	z_0 = y_0 - \ubound^{-1}\nabla\Loss(y_0).
 \end{align*}
 This is the same technique as we used in (\ref{eq: newton minimum approx}). Keep
-in mind that our upper bound is a quadratic function which therefore
-is equal to its second taylor derivative.
+in mind that our upper bound is a quadratic function which is therefore
+equal to its second taylor derivative.
 
 Now since we started with an upper bound, it is trivial to find \(\weights_0\)
 such that
 \begin{align*}
-	\Loss(\weights_0) \le \min_{\weights}\Phi_0(\weights)
+	\Loss(\weights_0) \le \min_{\weights}\Phi_0(\weights),
 \end{align*}
 as we can simply select \(\weights_0=z_0\) to get
 \begin{align*}
 	\Loss(\weights_0) =\Loss(z_0) \le \Phi_0(z_0) = \min_{\weights}\Phi_0(\weights).
 \end{align*}
-Now the idea is to morph our upper bound \(\Phi_0\) via \(\Phi_n\) slowly into
+The idea is now, to morph our upper bound \(\Phi_0\) via \(\Phi_n\) slowly into
 a lower bound while keeping 
 \begin{align}\label{eq: staying ahead of the estimates}
 	\Loss(\weights_n) \le \min_{\weights}\Phi_n(\weights)=:\underline{\Phi}_n.
@@ -1176,8 +1176,9 @@ This would force \(\weights_n\) towards the minimum as it needs to stay smaller
 than \(\Phi_n\) which changes into a lower bound of \(\Loss\). By controlling
 the speed of morphing we will be able to bound the convergence speed. But we
 can not morph too fast otherwise we will not be able to stay ahead of it, i.e.
-fulfill (\ref{eq: staying ahead of the estimates}). Okay now that we have set
-up the gameplan let us make this more concrete.
+fulfill (\ref{eq: staying ahead of the estimates}). 
+
+So how do we make this concrete?
 The obvious lower bounds we want to utilize are made up of all the gradients we
 collect along the way
 \begin{align*}
@@ -1192,7 +1193,7 @@ us consider
 \end{align*}
 For \(\gamma=1\) we would have a lower bound, but if \(\nabla\Loss(y_1)\)
 does not happen to be zero, the tangent point \(y_1\) is sitting on a slope and
-therefore is not smaller than the minimum of \(\phi_1=\Phi_1\) and since \(\phi_1\)
+is therefore not smaller than the minimum of \(\phi_1=\Phi_1\) and since \(\phi_1\)
 is a lower bound on \(\Loss\) it will generally be impossible to satisfy
 (\ref{eq: staying ahead of the estimates}) with \(\weights_1\) in that case.
 So the first take-away is, that we can generally not select \(\gamma=1\)

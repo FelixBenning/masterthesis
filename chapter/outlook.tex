@@ -395,52 +395,172 @@ where the norm \(\|\cdot\|_H\) is induced by the scalar product
 In the space \((\reals^d, \|\cdot\|_H)\) our problem therefore has condition one
 (\(\condition=1\))!
 
-But since we cannot obtain a gradient with respect to this norm, and do not
-know \(H\) in general, it is difficult to actually work with this space.
-The method that turns out to still work on this space, is the method of
-conjugate directions.
+\subsubsection{Excursion: The Gradient in \((\reals^\dimension, \|\cdot\|_H)\)}
+
+We have made our problem much simpler but the space we are considering much
+more complicated. The question is now, what methods we can realistically use
+in this new space?
+
+Naively one might wish to take the gradient with respect to this space. As this
+gradient would point straight towards the minimum because we are in the
+\(\condition=1\) case. This means, that this gradient should be just as
+powerful as the Newton-Raphson method, which would be great. So let us try to
+obtain this gradient. From the definition of the gradient we have
+\begin{align}
+	\label{eq: gradient definition equation}
+	0\xeq{!}&\lim_{v\to 0}\frac{
+		|\Loss(\weights + v) - \Loss(\weights) - \langle \nabla_H\Loss(\weights), v\rangle_H |
+	}{\|v\|_H}\\
+	\nonumber
+	&=\lim_{v\to 0}\frac{
+		|\Loss(\weights + v) - \Loss(\weights) -  \nabla_H\Loss(\weights)^T H v |
+	}{\|v\|}
+	\frac{\|v\|}{\|v\|_H}\\
+	\nonumber
+	&=\lim_{v\to 0}\frac{
+		|\Loss(\weights + v) - \Loss(\weights) -  \langle H\nabla_H\Loss(\weights), v\rangle |
+	}{\|v\|}
+	\frac{\|v\|}{\|v\|_H}
+\end{align}
+Where we have used symmetry of the Hessian \(H\) for the last equation. Now if
+we had
+\begin{align*}
+	H \nabla_H \Loss(\weights) = \nabla\Loss(\weights),
+\end{align*}
+then the first fraction would go to zero by the definition of the gradient.
+While the second fraction would be bounded due to norm equivalence, since all norms
+are equivalent in final dimensional real vector spaces. Therefore
+\begin{align*}
+	\nabla_H \Loss(\weights) := H^{-1}\nabla\Loss(\weights)
+\end{align*}
+is a (and due to uniqueness the) solution of (\ref{eq: gradient definition
+equation}). So we have found a method equivalent to Newton's method.
+Unfortunately it \emph{is} Newtons's method. And since we still do not want
+to invert the Hessian, we have to think of something else. Fortunately, that
+something else only has to work for \(\condition=1\).
 
 \subsubsection{Conjugate Directions}
 
-Let us take any (normed) direction \(v^{(1)}\) and complete it to an orthonormal
-basis \(v^{(1)},\dots,v^{(\dimension)}\) on \((\reals^d, \|\cdot\|_H)\). Then we
-can represent any vector \(\theta=\weights-\minimum\) as a linear combination of
-this orthonormal basis
+Let us take any (normed) direction \(d^{(1)}\) and complete it to an H-orthogonal
+basis \(d^{(1)},\dots,d^{(\dimension)}\). H-orthogonal is also known as
+``conjugate''. Then we can represent any vector \(\theta\) as a linear
+combination of this conjugate basis
 \begin{align*}
-	\theta = \sum_{k=1}^\dimension \theta^{(k)} v^{(k)}.
+	\theta = \sum_{k=1}^\dimension \theta^{(k)} d^{(k)}.
 \end{align*}
-Let us now optimize over the learning rate for a move in direction \(v_1\)
+Denoting \(\Delta\weights_n := \weights_n -\minimum\), let us now optimize over
+the learning rate for a move in direction \(d^{(1)}\)
 \begin{align*}
-	\weights_{n+1} = \weights_n + \lr_n v_1
-	= (\theta_n^{(1)} + \lr_n)v^{(1)} + \sum_{k=2}^\dimension \theta_n^{(k)} v^{(k)}.
+	\Delta\weights_{1} = \Delta\weights_0 + \lr_0 d^{(1)}
+	= (\Delta\weights^{(1)} + \lr_0)d^{(1)}
+	+ \sum_{k=2}^\dimension \Delta\weights^{(k)} d^{(k)}.
 \end{align*}
-Due to orthogonality we have
+Due to conjugacy we have
 \begin{align*}
-	\Loss(\weights_{n+1}) = \Loss(\minimum) + \sum_{k=1}^{\dimension} (\theta_{n+1}^{(k)})^2.
+	\Loss(\weights_{1})
+	= \Loss(\minimum) + \|\Delta\weights_{1}\|_H^2
+	= \Loss(\minimum) + \sum_{k=1}^{\dimension} (\Delta\weights_{1}^{(k)})^2\|d^{(k)}\|^2.
 \end{align*}
-And since most of the \(\theta^{(k)}_{n+1}\) stay constant no matter the learning
-rate \(\lr_n\), the only one we actually optimize over is \((\theta^{(1)}_{n+1})^2\).
-And we can make that coordinate zero with \(\lr_n=-\theta^{(1)}_n\).
+And since most of the \(\Delta\weights^{(k)}_{1}\) stay constant no matter the
+learning rate \(\lr_n\), the only one we actually optimize over is
+\((\Delta\weights^{(1)}_{1})^2\).
+And we can make that coordinate zero with \(\lr_0 :=-\Delta\weights_0^{(1)}\).
 
-So if we do a line search (optimize the loss over one direction, i.e. \(v^{(1)}\)),
-then we know that we will never ever have to move in the direction \(v^{(1)}\)
-again. The target lies orthogonal to \(v^{(1)}\). Note that this is generally
-not the case for condition numbers other than zero\fxwarning{picture}.
-So the trick is to select orthogonal search directions not with respect to the
-euclidean scalar product, but rather orthogonal with respect to
-\(\langle\cdot,\cdot\rangle_H\), i.e. ``conjugate'' to each other. As we pick
-a conjugate second search direction, we can without loss of generality assume
-that the second search direction is \(v^{(2)}\) otherwise we can just switch
-to a new basis where this is true. Similar for the other dimensions. Therefore
-we are going to remove one component in every step\footnote{
-	This implies that this method is optimal in the linear span of search
-	directions (compare with Assumption~\ref{assmpt: parameter in linear hull of
-	gradients})!
-}.
+So if we do a line search (optimize the loss over one direction, i.e. \(d^{(1)}\)),
+then we know that we will never ever have to move in the direction \(d^{(1)}\)
+again. The target \(\minimum\) lies H-orthogonal to \(d^{(1)}\)\fxwarning{
+	picture why this goes wrong for conditions other than one
+}. Now if we
+optimize over the next direction the same holds true. In fact we get the globally
+optimal solution in the span of search directions using this method 
+\begin{align*}
+	\Delta\weights_n &= \sum_{k=n+1}^\dimension\Delta\weights^{(k)} d^{(k)}\\
+	&= \arg\min \{
+		\Loss(\weights) : \weights \in \weights_0 + \linSpan[d^{(1)},\dots, d^{(n)}]
+	\} - \minimum.
+\end{align*}
+In this light, recall that we provided complexity bounds for weights in the
+linear span of gradients shifted by \(\weights_0\) in Section~\ref{sec: complexity bounds}
+(cf. Assumption~\ref{assmpt: parameter in linear hull of gradients}). So if our
+search directions were the gradients, we would obtain optimal convergence for
+this class of methods.
 
-\subsubsection{Evaluation Troubles}
+\subsubsection{Simplifying Gram-Schmidt}
 
+Unfortunately our gradients are not conjugate in general. But that is no
+trouble, we can just use Gram-Schmidt conjugation. Right?
 
+So here is the problem: We need knowledge of the hessian \(H\) for this
+procedure and have to remove the components from all previous directions. This
+blows up time complexity making this procedure not worthwhile. But as it turns
+out, the gradients do have some additional structure we can exploit to remove
+these issues.
+
+First let us summarize what we have so far. We want to obtain the same conjugate
+search directions \((d^{(1)},\dots,d^{(\dimension)})\) from
+\((\nabla\Loss(\weights_0),\dots,\nabla\Loss(\weights_{\dimension-1}))\)
+we would get if we used Gram-Schmidt conjugation, which also implies
+\begin{align*}
+	\mathcal{D}_k := \linSpan\{\nabla\Loss(\weights_0),\dots,\nabla\Loss(\weights_k)\}
+	= \linSpan\{d^{(1)},\dots,d^{(k+1)}\}.
+\end{align*}
+And we select our weights with line searches along the search directions
+\begin{align*}
+	\weights_{n+1} := \arg\min_\lr \Loss(\weights_n - \lr d_{n+1})
+\end{align*}
+resulting in
+\begin{align*}
+	\weights_n = \arg\min\{ \Loss(\weights) : \weights\in\weights_0 + \mathcal{D}_{n-1}\}.
+\end{align*}
+This last condition implies that the gradient \(\nabla\Loss(\weights_n)\)
+must necessarily be orthogonal to \(\mathcal{D}_{n-1}\) (unless we have already
+converged to \(\minimum\)). Otherwise \(\weights_n\) would not be optimal. This
+orthogonality also allows us to argue that \(\mathcal{D}_k\) actually has rank
+\(k+1\) and its respective generators are basis, which was necessary for the
+conjugate directions argument.
+
+So if we could somehow translate this euclidean orthogonality into a
+H-orthogonality we would be done. And here comes in one crucial insight:
+\(\mathcal{D}_n\) is a ``Krylov-subspace'', i.e. can be generated by repeated
+application of an operator. More specifically we have
+\begin{align*}
+	\mathcal{D}_n = \{H^1 \Delta\weights_0, \dots, H^{n+1}\Delta\weights_0\}.
+\end{align*}
+\begin{proof}
+	The induction start \(n=0\) is simply due to \(\nabla\Loss(\weights_0) =
+	H\Delta\weights_0\) and the induction step starts with
+	\begin{align*}
+		\nabla\Loss(\weights_{n+1})= H\Delta\weights_{n+1}
+		&= H(\Delta\weights_n - \lr_n \nabla\Loss(\weights_n))\\
+		&= \underbrace{\nabla\Loss(\weights_n)}_{\in \mathcal{D}_n} - \lr_n H
+		\underbrace{\nabla\Loss(\weights_n)}_{\in \mathcal{D}_n}.
+	\end{align*}
+	To finish this step, we apply the induction assumption and notice that the
+	second summand might now contain the vector \(H^{n+2}\Delta\weights_0\) if the
+	coefficient of \(H^{n+1}\Delta\weights_0\) was not zero. Therefore
+	\(\mathcal{D}_{n+1}\) is contained in the Krylov subspace. And due to the
+	number of elements in the generator of the Krylov subspace it can not have
+	higher rank than \(n+2\), and thus cannot be larger.
+\end{proof}
+This fact is useful, because it implies that \(H\mathcal{D}_{n-1}\) is contained
+in \(\mathcal{D}_n\) to which \(\nabla\Loss(\weights_{n+1})\) was orthogonal.
+Therefore \(\nabla\Loss(\weights_{n+1})\) is already \(H\)-orthogonal to
+\(\mathcal{D}_{n-1}\) from the get go. In other words we already have
+\begin{align*}
+	\langle \nabla\Loss(\weights_{n+1}), d^{(k)} \rangle_H = 0 
+	\qquad \forall k\le n-1.
+\end{align*}
+To construct a conjugate \(d^{(n+1)}\) we therefore only have to remove the
+\(d^{(n)}\) component from our gradient! So we want to select
+\begin{align*}
+	d^{(n+1)} = \nabla\Loss(\weights_{n+1})
+	- \frac{\langle \nabla\Loss(\weights_{n+1}), d^{(n)}\rangle_H}{\|d^{(n)}\|_H^2}d^{(n)}.
+\end{align*}
+
+\subsubsection{Evaluating the \(H\)-Dot-Product}
+
+Now, we ``just'' have to find a way to evaluate this factor without actually
+knowing the Hessian \(H\).
 
 
 \fxnote{relation to momentum}
