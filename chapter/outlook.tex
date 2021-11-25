@@ -544,20 +544,20 @@ application of an operator. More specifically we have
 	number of elements in the generator of the Krylov subspace it can not have
 	higher rank than \(n+1\), and thus cannot be larger.
 \end{proof}
-This is useful, because it implies that \(H\mathcal{D}_{n-1}\) is contained
-in \(\mathcal{D}_n\) to which \(\nabla\Loss(\weights_{n+1})\) is orthogonal.
-Therefore \(\nabla\Loss(\weights_{n+1})\) is already \(H\)-orthogonal to
-\(\mathcal{D}_{n-1}\) from the get go. In other words we already have
+This is useful, because it implies that \(H\mathcal{D}_{n-2}\) is contained
+in \(\mathcal{D}_{n-1}\) to which \(\nabla\Loss(\weights_n)\) is orthogonal.
+Therefore \(\nabla\Loss(\weights_n)\) is already \(H\)-orthogonal to
+\(\mathcal{D}_{n-2}\) from the get go. In other words we already have
 \begin{align*}
-	\langle \nabla\Loss(\weights_{n+1}), d^{(k)} \rangle_H = 0 
+	\langle \nabla\Loss(\weights_n), d^{(k)} \rangle_H = 0 
 	\qquad \forall k\le n-1.
 \end{align*}
 To construct a new conjugate direction \(d^{(n+1)}\) we therefore only have to
 remove the previous direction \(d^{(n)}\) component from our gradient! So we
 want to select
 \begin{align*}
-	d^{(n+1)} = \nabla\Loss(\weights_{n+1})
-	- \frac{\langle \nabla\Loss(\weights_{n+1}), d^{(n)}\rangle_H}{\|d^{(n)}\|_H^2}d^{(n)}.
+	d^{(n+1)} = \nabla\Loss(\weights_n)
+	- \frac{\langle \nabla\Loss(\weights_n), d^{(n)}\rangle_H}{\|d^{(n)}\|_H^2}d^{(n)}.
 \end{align*}
 
 \subsubsection{Evaluating the \(H\)-Dot-Product}
