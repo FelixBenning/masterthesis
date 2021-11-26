@@ -347,12 +347,13 @@ the accelerated gradient descent.
 \subsection{Gauß-Newton Algorithm}
 
 The (classical) Gauß-Newton Algorithm variant of the Newton-Raphson method
-specialized for loss functions which are sums of squared residuals. In other
+is specialized for loss functions which are sums of squared residuals. In other
 words loss functions of the form
 \begin{align*}
 	\Loss(\weights) = \sum_{k=1}^n r_k(\weights)^2.
 \end{align*}
-The generalized Gauß-Newton Algorithm 
+The generalized Gauß-Newton Algorithm is specialized for more general
+compositions of loss functions.
 \textcite{bottouOptimizationMethodsLargeScale2018}
 \fxnote{Levenberg Marquard algorithm?}
 
@@ -365,7 +366,6 @@ then inversion of this matrix at cost \(O(\dimension^3)\) almost certainly is,
 for most machine learning applications. Additionally we have saddle point
 repelling properties on our wish list.
 
-\section{L-BFGS}
 
 
 \section{Conjugate Gradient Descent}
@@ -674,8 +674,7 @@ Turned into Saddle Point repelling methods by \textcite{dauphinIdentifyingAttack
 
 \fxnote{Generalized Minimal Residual method?}
 
-
-
+\section{L-BFGS}
 
 
 
