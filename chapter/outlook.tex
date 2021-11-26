@@ -11,8 +11,7 @@ default optimizer selection of machine learning frameworks such as Tensorflow.
 As we have only covered \ref{eq: gradient descent} and momentum so far, we have
 quite a bit of ground to cover. But at the same time most of the remaining
 common optimizer \parencite[as reviewed by e.g.][]{ruderOverviewGradientDescent2017}
-can be motivated in a similar way, which might or might not be new, as I did not
-properly search previous work for this idea.
+can be motivated in a similar way, which might or might not be new.
 
 Recall that the \ref{eq: newton minimum approx}
 \begin{align*}
@@ -471,11 +470,23 @@ And we can make that coordinate zero with \(\lr_0 :=-\Delta\weights_0^{(1)}\).
 
 So if we do a line search (optimize the loss over one direction, i.e. \(d^{(1)}\)),
 then we know that we will never ever have to move in the direction \(d^{(1)}\)
-again. The target \(\minimum\) lies H-orthogonal to \(d^{(1)}\)\fxwarning{
-	picture why this goes wrong for conditions other than one
-}. Now if we
-optimize over the next direction the same holds true. In fact we get the globally
-optimal solution in the span of search directions using this method 
+again. The target \(\minimum\) lies H-orthogonal to \(d^{(1)}\).
+%
+\begin{figure}[h]
+	\centering
+	\def\svgwidth{1\textwidth}
+	\input{media/conjugate_direction.pdf_tex}
+	\caption{
+		The method of conjugate directions only works because in the
+		\(\condition=1\) case (brown contour) minimizing the loss in any direction
+		eliminates that direction. This does not work for general condition numbers
+		as illustrated with the blue contour lines.
+	}
+	\label{fig: conjugate direction depends on condition one}
+\end{figure}
+%
+If we optimize over the next direction the same holds true. In fact we get the
+globally optimal solution in the span of search directions using this method 
 \begin{align*}
 	\Delta\weights_n &= \sum_{k=n+1}^\dimension\Delta\weights^{(k)} d^{(k)}\\
 	&= \arg\min \{
