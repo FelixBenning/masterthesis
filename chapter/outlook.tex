@@ -339,8 +339,8 @@ The solution of which represents the cubic regularization of Newton's method
 \parencite[Section 4.1]{nesterovLecturesConvexOptimization2018}.
 The solution of which can unfortunately not be written explicitly.
 
-Since this method is history agnostic again, Nesterov utilizes estimating sequences
-again, to derive an ``accelerated cubic Newton scheme'' \parencite[Section
+Since this method is history agnostic again, Nesterov reuses estimating
+sequences, to derive an ``accelerated cubic Newton scheme'' \parencite[Section
 4.2]{nesterovLecturesConvexOptimization2018} similar to Nesterov momentum, i.e.
 the accelerated gradient descent.
 
@@ -357,20 +357,13 @@ repelling properties on our wish list.
 
 \subsubsection{L-BFGS}
 
-\subsubsection{Krylov Subspace Descent}
-
-\textcite{vinyalsKrylovSubspaceDescent2012}
-
-Turned into Saddle Point repelling methods by \textcite{dauphinIdentifyingAttackingSaddle2014}
-
-\fxnote{Generalized Minimal Residual method?}
 
 \subsection{Conjugate Gradient Descent}
 
 Similar to momentum, conjugate gradient descent is another attempt to solve
 high condition problems. The best introduction I found so far was
-\textcite{shewchukIntroductionConjugateGradient1994}. But here is another
-attempt.
+\textcite{shewchukIntroductionConjugateGradient1994}. This is an attempt at a
+shorter version. 
 
 Recall that we can write
 our loss function as an approximate paraboloid (cf. (\ref{eq: paraboloid
@@ -428,7 +421,7 @@ we had
 	H \nabla_H \Loss(\weights) = \nabla\Loss(\weights),
 \end{align*}
 then the first fraction would go to zero by the definition of the gradient.
-While the second fraction would be bounded due to norm equivalence, since all norms
+The second fraction would be bounded due to norm equivalence, since all norms
 are equivalent in final dimensional real vector spaces. Therefore
 \begin{align*}
 	\nabla_H \Loss(\weights) := H^{-1}\nabla\Loss(\weights)
@@ -602,16 +595,67 @@ Using (\ref{eq: evaluated H dot product}) and (\ref{eq: optimal learning rate CG
 we can replace the Gram-Schmidt constant from (\ref{eq: next search direction})
 with things we can actually calculate resulting in
 \begin{align*}
-	d^{(n+1)} = \nabla\Loss(\weights_n)
+	d^{(n+1)}
+	&= \nabla\Loss(\weights_n)
 	- \frac{
 		\|\nabla\Loss(\weights_n)\|^2
-	}{\langle \nabla\Loss(\weights_{n-1}), d^{(n)}\rangle}d^{(n)}
+	}{\langle \nabla\Loss(\weights_{n-1}), d^{(n)}\rangle}d^{(n)}\\
+	&= \nabla\Loss(\weights_n)
+	- \frac{\|\nabla\Loss(\weights_n)\|^2}{\|\nabla\Loss(\weights_{n-1})\|^2}
+	d^{(n)},
+\end{align*}
+where the last equation is due to \(\nabla\Loss(\weights_{n-1})\) being orthogonal
+to \(d^{(n-1)}\in\mathcal{D}_{n-2}\), i.e.
+\begin{align*}
+	\langle \nabla\Loss(\weights_{n-1}), d^{(n)} \rangle
+	\xeq{(\ref{eq: next search direction})} 
+	\langle \nabla\Loss(\weights_{n-1}),\nabla\Loss(\weights_{n-1}) - c d^{(n-1)}\rangle
+	= \|\nabla\Loss(\weights_{n-1})\|^2.
 \end{align*}
 
-\fxnote{relation to momentum}
+\subsubsection{Relation to Momentum}
 
-\subsubsection{Hessian Free Gradient Descent}
+Unfortunately the assumption of a constant and positive definite Hessian
+\(H=\nabla^2\Loss(\weights)\) is fairly difficult to remove here. To do so
+we would somehow have to estimate the error we are making, working with the taylor
+approximation. This would probably result in some form of estimating sequence
+argument again. And we already found that Nesterov momentum is in some sense
+optimal then.
+
+In fact for specific selections of the momentum coefficient, the momentum method
+\emph{is} the conjugate gradient method. For that consider that the movement
+direction \(d^{(n+1)}\) consists of the gradient and the previous direction
+\(d^{(n)}\) which would be our momentum. More specifically we have
+\begin{align*}
+	\lr_{n-1}d^{(n)} = \weights_{n-1} - \weights_n
+\end{align*}
+and therefore
+\begin{align*}
+	\weights_{n+1}
+	&= \weights_n - \lr_n d^{(n+1)}\\
+	&= \weights_n - \lr_n \left[
+		\nabla\Loss(\weights_n)
+		- \frac{\|\nabla\Loss(\weights_n)\|^2}{\|\nabla\Loss(\weights_{n-1})\|^2}
+		d^{(n)},
+	\right]\\
+	&= \weights_n - \underbrace{\lr_n}_{=:\alpha_n} \nabla\Loss(\weights_n)
+		+ \underbrace{\tfrac{\lr_n\|\nabla\Loss(\weights_n)\|^2}{\lr_{n-1}\|\nabla\Loss(\weights_{n-1})\|^2}}_{=:\beta_n}
+		(\weights_n-\weights_{n-1}).
+\end{align*}
+Conjugate gradient can therefore be viewed as a special form of momentum with
+a particular selection of parameters.
+
+\subsection{Hessian Free Gradient Descent}
 \textcite{martensDeepLearningHessianfree2010}
+
+\subsection{Krylov Subspace Descent}
+
+\textcite{vinyalsKrylovSubspaceDescent2012}
+
+Turned into Saddle Point repelling methods by \textcite{dauphinIdentifyingAttackingSaddle2014}
+
+\fxnote{Generalized Minimal Residual method?}
+
 
 
 \subsection{Gauß-Newton Algorithm}
