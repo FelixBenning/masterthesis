@@ -302,16 +302,22 @@ Unfortunately this looks like the algorithm is much more dependent on
 convexity than the momentum method.
 
 
-\section{Newton Methods}
+\section{Global Newton Methods}
+
+So far we have only motivated the Newton-Raphson method on quadratic functions.
+Assuming we are in some local area around the minimum, it can be shown that
+successive \ref{eq: newton minimum approx}s result in convergence. But these
+proofs rely on the fact that the Hessian is locally accurate enough. Therefore
+even these proofs implicitly bound the rate of change of the curvature (Hessian).
+For global Newton methods we just go about this more explicitly, like we did
+with the rate of change of \ref{eq: gradient descent} (Section~\ref{sec:
+lipschitz continuity of the Gradient}).
 
 \subsection{Cubic Regularization of Newton's Method}
 
-We have motivated the Newton-Raphson method on quadratic functions where
-convergence is instant. Convergence analysis for general loss functions requires
-an analysis of the way the Hessian changes. In Section~\ref{sec:
-lipschitz continuity of the Gradient} we used Lipschitz continuity of the
-gradient to get an upper bound on our Loss (\ref{eq: lin approx + distance
-penalty notion})
+ In Section~\ref{sec: lipschitz continuity of the Gradient} we used Lipschitz
+ continuity of the gradient to get an upper bound on our Loss (\ref{eq: lin
+ approx + distance penalty notion})
 \begin{align*}
 	\Loss(\theta)
 	\le \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
@@ -334,7 +340,7 @@ bound
 	+ \tfrac12\langle \nabla^2\Loss(\weights)(\theta-\weights), \theta-\weights \rangle
 	+ \tfrac{M}6\|\theta-\weights\|^3.
 \end{align*}
-The solution of which represents the cubic regularization of Newton's method
+Minimizing this upper bound results in the cubic regularization of Newton's method
 \parencite[Section 4.1]{nesterovLecturesConvexOptimization2018}.
 The solution of which can unfortunately not be written explicitly.
 
@@ -342,6 +348,112 @@ Since this method is history agnostic again, Nesterov reuses estimating
 sequences, to derive an ``accelerated cubic Newton scheme'' \parencite[Section
 4.2]{nesterovLecturesConvexOptimization2018} similar to Nesterov momentum, i.e.
 the accelerated gradient descent.
+
+\subsection{Levenberg-Marquard Regularization}
+
+Instead of using a cubic bound motivated by a bounded third derivative, one
+could still use a quadratic bound
+\begin{align*}
+	\Loss(\theta)
+	&\le \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
+	+ \tfrac12\langle \nabla^2\Loss(\weights)(\theta-\weights), \theta-\weights \rangle
+	+ \tfrac{M}2\|\theta-\weights\|^2\\
+	&= \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
+	+ \tfrac12\langle [\nabla^2\Loss(\weights)+M\identity](\theta-\weights), \theta-\weights \rangle
+\end{align*}
+which might perhaps be motivated by a bounded second derivative
+\begin{align*}
+	\lbound\identity \precsim \nabla^2\Loss(\weights) \precsim \ubound\identity
+\end{align*}
+which would justify the bound \(M:=\ubound-\lbound\), as we have
+\begin{align*}
+	\Loss(\theta)
+	&\le \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
+	+ \underbrace{\tfrac{\ubound}2\|\theta-\weights\|^2\mathrlap{.}}_{
+		\le \tfrac12\langle
+			[\nabla^2\Loss(\weights)+M\identity]
+		\mathrlap{
+			(\theta-\weights),
+				\theta-\weights
+			\rangle
+		}
+	}
+\end{align*}
+Of course in practice one would probably use smaller \(M\), hoping that
+the changes are not so drastic that the smallest eigenvalues become the
+upper bound. While minimizing the cubic bound was difficult, minimizing this
+bound results in
+\begin{align}\label{eq: levenberg-marquard regularization}
+	\weights_{n+1}
+	= \weights_n - [\nabla^2\Loss(\weights_n)+M\identity]^{-1}\nabla\Loss(\weights_n).
+\end{align}
+For this result one simply replaces \(\nabla^2\Loss(\weights)\) with
+\([\nabla^2\Loss(\weights)+M\identity]\) in the derivation of the \ref{eq:
+newton minimum approx}.
+
+For very small \(M\) this method behaves like the Newton-Raphson method, while
+for large \(M\) the step in every eigenspace is roughly \(\tfrac1M\) and the
+method therefore behaves like \ref{eq: gradient descent}. Levenberg-Marquard
+regularization (\ref{eq: levenberg-marquard regularization}) can therefore also
+be viewed as a way to interpolate between the faster Newton-Raphson method and
+the more stable \ref{eq: gradient descent}. 
+
+It moves small eigenvalues further away from zero, making the Hessian easier to
+invert (without numerical errors). And it can turn negative eigenvalues into
+(small) positive eigenvalues, which results in large movements in these
+eigenspaces in the correct direction (away from the vertex). On the other hand
+it might also fail to make large negative eigenvalues positive, turning them into
+small negative eigenvalues causing big jumps towards the vertex in this
+eigenspace. So if we pick \(M\) too small, this method can make things worse.
+If it is too big, it will just slow down convergence and behave roughly like
+gradient descent with a small learning rate. Additionally it still requires the
+inversion of a matrix.
+
+\subsection{Trust Bounds}
+
+Another way to make sure that we can trust the Hessian is to have literal trust
+bounds, i.e.
+\begin{align*}
+	\min_{ \theta\in B(\weights) }
+	\underbrace{
+		\Loss(\weights)
+		+ \langle \nabla\Loss(\weights), \theta-\weights\rangle
+		+ \langle \nabla^2\Loss(\weights)(\theta-\weights), \theta-\weights\rangle
+	}_{= T_2\Loss(\theta)}
+\end{align*}
+where \(B(\weights)\) is some trust set around \(\weights\). For the euclidean
+ball
+\begin{align*}
+	B(\weights) = \{ \theta : \|\theta - \weights\| \le \epsilon\}
+\end{align*}
+this restriction can be converted into the secondary condition
+\begin{align*}
+	g(\theta) := \frac{\|\theta - \weights\|^2 - \epsilon^2}{2} \le 0.
+\end{align*}
+The Lagrangian function to this constrained optimization problem is
+\begin{align*}
+	L(\theta, M) 
+	&= T_2\Loss(\theta) + M g(\theta)\\
+	&= \Loss(\weights) -\tfrac{\epsilon^2}{2}
+	+ \langle \nabla\Loss(\weights), \theta-\weights\rangle
+	+ \langle [\nabla^2\Loss(\weights) + M\identity](\theta-\weights), \theta-\weights\rangle.
+\end{align*}
+As the constant \(\frac{\epsilon}2\) does not change this optimization problem,
+its solution is the same as in Levenberg-Marquard regularization. So trust
+bounds are the more general concept.
+
+In particular \textcite{dauphinIdentifyingAttackingSaddle2014} define the bound
+\begin{align*}
+	B(\weights) = \{ \theta : \|\theta-\weights\|_{|H|} \le \epsilon\}
+\end{align*}
+where \(|H|\) is the hessian with its eigenvalues replaced by their absolute values
+and \(\|x\|_{|H|}:= x^T |H| x\). They show that this trust bound results in
+\begin{align*}
+	\tag{saddle-free Newton}
+	\weights_{n+1}	= \weights_n - |\nabla^2\Loss(\weights_n)|^{-1}\nabla\Loss(\weights_n).
+\end{align*}
+
+\subsection{Damped Newton}
 
 \subsection{Gauß-Newton Algorithm}
 
@@ -673,6 +785,8 @@ e.g. by using CG on
 \begin{align*}
 	\Loss(\weights) = \|A\weights - b\|^2.
 \end{align*}
+Visualizing CG would be somewhat boring as it converges in two steps on two
+dimensional loss surfaces.
 
 \section{Hessian Free Gradient Descent}
 \textcite{martensDeepLearningHessianfree2010}
