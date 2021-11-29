@@ -81,7 +81,7 @@ loss \(\Loss\)
 	= \Loss(\weights) + x^T \nabla \Loss(\weights) + \tfrac12 x^T \nabla^2 \Loss(\weights) x,
 \end{align}
 %
-using only the first order condition, i.e. by setting the first derivative to zero
+using only the first order condition, i.e.\ by setting the first derivative to zero
 %
 \begin{align}\label{eq: Taylor approx derivative}
 	\nabla T_2\Loss(\weights+x) = \nabla \Loss(\weights) + \nabla^2\Loss(\weights) x \xeq{!} 0
@@ -630,7 +630,7 @@ allows us to create this worst case upper bound though.
 \begin{theorem}[{\cite[Theorem~4.10]{bottouOptimizationMethodsLargeScale2018}}]
 	\label{thm: convergence of the gradient (only lip cont)}
 	For a loss function with \(\ubound\)-Lipschitz gradient and finite lower bound
-	(i.e. \(\inf_{\weights}\Loss(\weights) >-\infty\)) \ref{eq: gradient descent} with
+	(i.e.\ \(\inf_{\weights}\Loss(\weights) >-\infty\)) \ref{eq: gradient descent} with
 	learning rate \(\lr\in(0,\tfrac2\ubound)\) induces convergence of the gradient.
 	The convergence rate is at least \(o(\tfrac1n)\). More precisely, the average
 	gradient converges with rate \(O(\tfrac1n)\)
@@ -701,7 +701,7 @@ gradient, and thus allows us to formulate and optimize over an upper bound of
 the loss function, resulting in learning rate \(\frac{1}{\ubound}\).
 
 If the gradient can change faster, we can trust it less and have to take smaller
-steps. Even with infinitesimal steps (i.e. in the \ref{eq: gradient flow} case)
+steps. Even with infinitesimal steps (i.e.\ in the \ref{eq: gradient flow} case)
 we need at least uniform continuity of \(\nabla\Loss\) such that the inequality
 \begin{align}\label{eq: bounded gradient integral}
 	\int_{t_0}^\infty \|\nabla \Loss(\weights(s))\|^2 ds
@@ -932,7 +932,7 @@ from the minimum.
 	and linearly approximating \(f\), which is by definition the derivative of the size of
 	\(\bregmanDiv{f}(y,x)\). Now this error rate can be translated
  	back into a real error using the stickiness of the gradient due to
-	its Lipschitz continuity. I.e. by Lemma~\ref{lem: smallest upper bound} we know that
+	its Lipschitz continuity. i.e.\ by Lemma~\ref{lem: smallest upper bound} we know that
 	%
 	\begin{align*}
 		\bregmanDiv{f}(x,x) = 0
@@ -1251,7 +1251,7 @@ Now as promised we still have to show the improved lower bound.
 		g_x(y) := f(y) - \tfrac{\lbound}2\|y-x\|^2, \qquad
 		\nabla g_x(y) = \nabla f(y) - \lbound(y-x),
 	\end{align*}
-	which still has positive Bregman Divergence, i.e. is convex 
+	which still has positive Bregman Divergence, i.e.\ is convex 
 	\begin{align*}
 		\bregmanDiv{g_x}(y,z)
 		&= g_x(y) - g_x(z) - \langle\nabla g_x(z), y-z\rangle \\
@@ -1527,7 +1527,7 @@ neighborhood of our current iterate. Experimental results seem promising.
 \section{Complexity Bounds}\label{sec: complexity bounds}
 
 Now that we found convergence rates for \ref{eq: gradient descent} on (strongly) convex
-problems, the question is, can we do better? I.e. how fast could an algorithms
+problems, the question is, can we do better? i.e.\ how fast could an algorithms
 possibly be? To tackle this problem let us first make an assumption about what
 this algorithm can do. Unrolling our \ref{eq: gradient descent} algorithm
 %

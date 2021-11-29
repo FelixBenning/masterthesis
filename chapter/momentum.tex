@@ -47,7 +47,7 @@ if it is too high, we are not moving fast enough on shallow slopes.
 If our friction \(\friction\) is low enough (our momentum parameter \(\beta\)
 we will introduce later high enough), then we will find for heavy ball momentum,
 that the convergence rate in every eigenspace is only determined by the friction
-(i.e. the rate we dissipate energy with). If our friction is higher than some
+(i.e.\ the rate we dissipate energy with). If our friction is higher than some
 critical value dependent on learning rate and eigenvalues of the Hessian, then
 the eigenvalues matter again. And it will turn out that the optimal momentum
 parameter is right at that critical point \parencite[see also ``critical
@@ -147,7 +147,7 @@ previous position \(\weights_n\).
 	\includegraphics[scale=0.5]{media/hinton_nesterov_momentum.png}
 	\caption{
 		\parencite[lecture 6c]{hintonNeuralNetworksMachine2012} The blue arrow
-		illustrates the movement of heavy ball momentum, i.e. first the small
+		illustrates the movement of heavy ball momentum, i.e.\ first the small
 		``gradient move'', then the large ``momentum move''. Meanwhile the brown
 		arrow represents the ``momentum move'' and the red arrow the ``gradient
 		move'' for Nesterov's momentum in green. The gradient turns around as we
@@ -388,7 +388,7 @@ can be seen very well in Figure~\ref{fig: annotated heavy ball rates}, the
 wider attraction area allows for moving out the largest eigenvalues to the
 right with larger eigenvalues shifting the smaller eigenvalues towards the
 right as well into more acceptable convergence rates. If the smallest and
-largest eigenvalue are far apart (i.e. the condition number \(\condition\) is
+largest eigenvalue are far apart (i.e.\ the condition number \(\condition\) is
 high) this should be very useful.
 
 So how much do we gain? In other words what are the optimal rates of
@@ -828,7 +828,7 @@ complement.
 		1>\momCoeff
 		\ge \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\},
 	\end{align*}
-	we are in the complex case, i.e. \(\rho(R) = \sqrt{\momCoeff}\) and
+	we are in the complex case, i.e.\ \(\rho(R) = \sqrt{\momCoeff}\) and
 	\begin{align*}
 		\|R^n\|
 		&\le \rho(R)^{n-1}(\rho(R)+n[1+\rho(R)^2])\\
@@ -1431,9 +1431,9 @@ explains why we should make (\ref{eq: morphing speed equation}) an equality.
 		% plotted against \(\gamma_n\) and
 		% \(\hat{\momCoeff}\) corresponds to \(\hat{\gamma}\).
 		%
-		For \(\condition^{-1}=0\) i.e. \(\lbound=0\)
+		For \(\condition^{-1}=0\) i.e.\ \(\lbound=0\)
 		we see how it might be helpful to select a different \(\condition_0\)
-		even though increasing \(\lbound_0\) (i.e. \(\condition_0^{-1}\))
+		even though increasing \(\lbound_0\) (i.e.\ \(\condition_0^{-1}\))
 		increases \(\Phi_0\) which is part of the bound on convergence.
 	}
 	\label{fig: gamma path}
@@ -1791,7 +1791,7 @@ differential equation
 \begin{align*}
 	\ddot{\weights} + \frac{3}{t}\dot{\weights} + \nabla\Loss(\weights) = 0
 \end{align*}
-i.e. decreasing friction \(\friction=3/t\) over time. They then use this
+i.e.\ decreasing friction \(\friction=3/t\) over time. They then use this
 continuous approximation to derive better convergence rates (\(O(1/n^3)\) instead of
 \(O(1/n^2)\)) when this conservative (\(\condition^{-1}=0\)) assumption is used
 but the loss function is strongly convex. They also propose a scheme of
@@ -1897,7 +1897,7 @@ SGD with Averaging}.
 % 			\martIncr_{k+1}
 % 		\end{pmatrix}.
 % 	\end{align*}
-% 	With the same conditional independence arguments as in SGD (i.e. the first
+% 	With the same conditional independence arguments as in SGD (i.e.\ the first
 % 	summand is deterministic, the remaining ones are linear functions of pairwise
 % 	independent martingale increments), we get
 % 	\begin{align}
@@ -1986,7 +1986,7 @@ SGD with Averaging}.
 % 		&= \left(1-\frac{a\sqrt{\hesseEV_1}}{n+b}\right) \qquad \text{ for } n \gg 0.
 % 	\end{align*}
 % 	Using the same detour over the exponential as in the SGD case
-% 	(i.e. equation (\ref{eq: detour over exponential bound})),
+% 	(i.e.\ equation (\ref{eq: detour over exponential bound})),
 % 	we get \begin{align*}
 % 		\Bigg\|\prod_{j=k}^{n-1}\tilde{\momMatrix}\ \Bigg\|^2
 % 		&\le \left(\prod_{j=k}^{n-1} \left(1-\frac{a\sqrt{\hesseEV_1}}{j+b}\right)\right)^2

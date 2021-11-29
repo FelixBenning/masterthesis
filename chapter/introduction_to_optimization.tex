@@ -63,7 +63,7 @@ algorithms which can minimize arbitrary loss functions.
 This train of thought leads us to various ``black box'' models where we assume
 no knowledge of the loss function itself but assume we have some form of oracle
 telling us things about the loss function. ``Zero order oracles'' allow us to
-evaluate the loss function at a particular point, i.e. retrieve \(\Loss(\weights)\)
+evaluate the loss function at a particular point, i.e.\ retrieve \(\Loss(\weights)\)
 for any \(\weights\) at a fixed cost. ``First order oracles'' provide us not
 only with \(\Loss(\weights)\) but also with \(\nabla\Loss(\weights)\), and so on. 
 
@@ -130,7 +130,7 @@ And while Lipschitz continuity is sufficient to find an \(\lossError\)-solution
 \end{align*}
 %
 in a finite number of evaluations of the loss, it still requires a full
-``grid search'' (i.e. tiling our parameter set with a grid into (tiny) cells
+``grid search'' (i.e.\ tiling our parameter set with a grid into (tiny) cells
 and trying out one point for every cell) with time complexity \parencite[pp.
 12,13]{nesterovLecturesConvexOptimization2018}
 %
@@ -195,7 +195,7 @@ Loss Surface analysis in Section~\ref{sec: loss surface} and Backtracking
 in Section~\ref{sec: backtracking} are not required to understand the following
 chapters, but they motivate the assumptions we will make.
 
-While gradient descent is applicable to \(\Loss_\sample\), i.e. allows us
+While gradient descent is applicable to \(\Loss_\sample\), i.e.\ allows us
 to minimize empirical risk (\ref{eq: empirical risk}), we will question this
 approach in Chapter~\ref{chap: sgd} where we show that it is possible to
 minimize \(\Loss\) itself provided we have an infinite supply of samples. If we
