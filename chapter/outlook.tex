@@ -301,7 +301,7 @@ an algorithm with the same rate of convergence as Nesterov's momentum.
 Unfortunately this looks like the algorithm is much more dependent on
 convexity than the momentum method.
 
-\section{Conjugate Gradient Descent}
+\section{Conjugate Gradient Descent}\label{sec: conjugate gradient descent}
 
 Similar to momentum, conjugate gradient descent is another attempt to solve
 high condition problems. The best introduction I found so far was
@@ -715,9 +715,11 @@ it might also fail to make large negative eigenvalues positive, turning them int
 small negative eigenvalues causing big jumps towards the vertex in this
 eigenspace. So if we pick \(M\) too small, this method can make things worse.
 If it is too big, it will just slow down convergence and behave roughly like
-gradient descent with a small learning rate. Additionally it still requires the
-inversion of a matrix.
-And as we have used the Lipschitz continuity to justify its bound (\ref{eq:
+gradient descent with a small learning rate. 
+
+\subsubsection{Theoretical Guarantees}
+
+As we have used the Lipschitz continuity to justify its bound (\ref{eq:
 levenberg-marquard justification}), we are already starting out with a worse
 bound than the one we have used for the convergence of gradient descent. So
 this approach does not result in better convergence guarantees. It is
@@ -725,9 +727,39 @@ therefore more of a heuristic than theoretically motivated. In his motivation
 for the cubic regularization Nesterov states ``Unfortunately,
 none of these approaches seems to be useful in addressing the global behavior of
 second-order schemes.'' \parencite[p. 242]{nesterovLecturesConvexOptimization2018}.
-This also includes the following two methods.
+This also includes trust bounds (Subsection~\ref{subsec: trust bounds}) and
+damped Newton (Subsection~\ref{subsec: damped newton}).
 
-\subsection{Trust Bounds}
+\subsubsection{Hessian Free Optimization}
+
+Since (\ref{eq: levenberg-marquard regularization}) still requires the inversion
+of a matrix, which is infeasible in high dimension,
+\textcite{martensDeepLearningHessianfree2010} suggests a Hessian free variant.
+He notes that the bound
+\begin{align*}
+	f(\theta) = \Loss(\weights) + \langle \nabla\Loss(\weights), \theta-\weights \rangle
+	+ \tfrac12\langle [\nabla^2\Loss(\weights)+M\identity](\theta-\weights), \theta-\weights \rangle
+\end{align*}
+we are optimizing over is a quadratic, (and hopefully convex) function and
+suggests using conjugate gradient descent (Section~\ref{sec: conjugate gradient
+descent}) on this bound. Conjugate gradient descent does not require inversion
+of the hessian and it does not even require the hessian itself. It only
+requires the ability to evaluate \(\nabla^2\Loss(\weights)v\) for any vector
+\(v\). For this evaluation \textcite{martensDeepLearningHessianfree2010} suggests
+using either the finite differences approximation
+\begin{align*}
+	\nabla^2\Loss(\weights) v
+	\approx \frac{\nabla\Loss(\weights + \epsilon v) - \nabla\Loss(\weights)}{\epsilon}.
+\end{align*}
+or adapting automatic differentiation frameworks to this task, as discussed in
+\textcite{pearlmutterFastExactMultiplication1994}. This avoids storage cost
+\(O(\dimension^2)\) of the Hessian. Stopping conjugate gradient descent early,
+avoids most of the computational costs as well. This is justified with the fact
+that the first few iterations of conjugate gradient achieve most of the
+optimization.
+
+
+\subsection{Trust Bounds}\label{subsec: trust bounds}
 
 Another way to make sure that we can trust the Hessian is to have literal trust
 bounds, i.e.
@@ -773,7 +805,7 @@ and \(\|x\|_{|H|}:= x^T |H| x\). They show that this trust bound results in
 This method avoids moving towards saddle points and maxima as it does not flip
 the direction with negative eigenvalues in these eigenspaces.
 
-\subsection{Damped Newton}
+\subsection{Damped Newton}\label{subsec: damped newton}
 
 ``Not moving too far away'' could also be phrased as a line search along the
 direction given by the Newton-Raphson method, i.e.
@@ -813,9 +845,6 @@ for most machine learning applications. Additionally we have saddle point
 repelling properties on our wish list.
 
 
-
-\subsection{Hessian Free Gradient Descent}
-\textcite{martensDeepLearningHessianfree2010}
 
 \subsection{Krylov Subspace Descent}
 
