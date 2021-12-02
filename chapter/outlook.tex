@@ -91,7 +91,7 @@ that these ``features'' seem to somehow correspond to the coordinates.
 \begin{description}
 	\item[AdaGrad] \parencite{duchiAdaptiveSubgradientMethods2011}
 	We have already motivated most of AdaGrad in (\ref{eq: almost adagrad}).
-	But we are going to use the stochastic gradients
+	But we will use the stochastic gradients
 	\begin{align*}
 		G_n^{(i)} := \sum_{k=0}^n [\nabla\loss(\weights_n, Z_n)^{(i)}]^2 \qquad i=1,\dots,\dimension,
 	\end{align*}
@@ -600,7 +600,7 @@ and therefore
 Conjugate gradient can therefore be viewed as a special form of momentum with
 a particular selection of parameters.
 
-For a constant Hessian it has the nice property that it is going to converge in
+For a constant Hessian it has the nice property that it converges in
 a finite number of steps. And quickly! It is actually a competitive method to
 solve linear equations \parencite[Section 10]{shewchukIntroductionConjugateGradient1994},
 e.g. by using CG on

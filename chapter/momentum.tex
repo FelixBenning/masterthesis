@@ -33,9 +33,9 @@ gradient flow}), we want to set the acceleration equal to our gradient
 \end{align*}
 %
 But without friction any potential (height) energy we have would be conserved.
-In other words: when we reach the bottom we have so much velocity, that we are
-going to massively overshoot the minimum. To dissipate this energy, we are also
-going to add a ``friction force'' inversely proportional to our current velocity
+In other words: when we reach the bottom we have so much velocity, that we would
+massively overshoot the minimum. So to dissipate this energy, we also
+add a ``friction force'' inversely proportional to our current velocity
 %
 \begin{align}\label{eq: acceleration is gradient + friction}
 	\ddot{\weights} = -\nabla \Loss(\weights) - \friction \dot{\weights}.
@@ -1370,7 +1370,7 @@ With Lemma~\ref{lem: estimating sequence convergence speed} in mind this hints
 at how we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
 we derived with eigenvalues back!
 But since \(\lbound=0\) implies \(\condition=\infty\)
-which would set our rate of convergence to one, we are going to continue
+which would set our rate of convergence to one, we will continue
 to entertain the general case with general \(\lbound_0\) summarized in
 Algorithm~\ref{algo: general schema of optimal methods}. 
 %
