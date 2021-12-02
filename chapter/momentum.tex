@@ -13,17 +13,17 @@ the walls of the ravine.
 	\centering
 	\def\svgwidth{1\textwidth}
 	\input{media/visualize_bad_conditioning.pdf_tex}
-	\caption{Momentum reduces fluctuations and converges faster}
+	\caption{Momentum reduces fluctuations and converges faster.}
 	\label{fig: visualize bad conditioning}
 \end{figure}
 
-As a fix it seems appropriate to average the gradients in some sense, to
+As a fix it seems appropriate to average the gradients in some sense to
 cancel out the opposing jumps and go straight down the ravine. In other words
 we want to build momentum. Now if we move according to the sum (integral) of
 the gradients, then our velocity stops being equal to the gradient but instead
-becomes the antiderivative of the gradient.
+becomes the antiderivative of the gradient
 \begin{align*}
-	\dot{\weights} = -\int\nabla\Loss(\weights)dt
+	\dot{\weights} = -\int\nabla\Loss(\weights)dt.
 \end{align*}
 So instead of setting our gradient equal to the velocity like in (\ref{eq:
 gradient flow}), we want to set the acceleration equal to our gradient
@@ -44,10 +44,11 @@ Note that we can only lose as much energy as we dissipate with friction, so in
 some sense we want to make it as high as possible to quicken convergence. But
 if it is too high, we are not moving fast enough on shallow slopes.
 
-If our friction \(\friction\) is low enough (our momentum parameter \(\beta\)
-we will introduce later high enough), then we will find for heavy ball momentum,
-that the convergence rate in every eigenspace is only determined by the friction
-(i.e.\ the rate we dissipate energy with). If our friction is higher than some
+If our friction \(\friction\) is low enough\footnote{
+	our momentum parameter \(\momCoeff\) (we will introduce later) high enough
+}, then we will find (for heavy ball momentum), that the convergence rate in
+every eigenspace is only determined by the friction, i.e.\ the rate we dissipate
+energy with. If our friction is higher than some
 critical value dependent on learning rate and eigenvalues of the Hessian, then
 the eigenvalues matter again. And it will turn out that the optimal momentum
 parameter is right at that critical point \parencite[see also ``critical
@@ -73,17 +74,17 @@ order ODE
 \end{align*}
 %
 \begin{subequations}
-Which allows us to naively discretize our ODE with the Euler discretization
+This allows us to naively discretize our ODE with the Euler discretization
 \begin{align}
-	\weights_{n+1} &= \weights_n + \lr \momentum_n \label{eq: naive momentum move}\\
+	\weights_{n+1} &= \weights_n + \lr \momentum_n, \label{eq: naive momentum move}\\
 	\momentum_{n+1} &= \momentum_n + \lr [-\nabla \Loss(\weights_n) - \friction \momentum_n]
 	\label{eq: naive momentum}\\ \nonumber
 	&= (1-\lr\friction)\momentum_n - \lr\nabla \Loss(\weights_n).
 \end{align}
 \end{subequations}
 %
-Here we use \(\momentum\) to denote the momentum (velocity \(\dot{\weights}\)
-assuming unit mass).
+Here we use \(\momentum\) to denote the velocity \(\dot{\weights}\), or momentum
+assuming unit mass.
 If we plug the second equation (\ref{eq: naive momentum}) into the first
 equation (\ref{eq: naive momentum move}) we get
 %
@@ -102,8 +103,8 @@ by \textcite{gohWhyMomentumReally2017}.
 \begin{definition}[Heavy Ball Method]
 	\begin{subequations}
 	\begin{align}
-		\weights_{n+1} &= \weights_n + \lr \momentum_{n+1} \label{eq: momentum move}\\
-		\momentum_{n+1} &= (1-\lr\friction)\momentum_n - \lr\nabla \Loss(\weights_n)
+		\weights_{n+1} &= \weights_n + \lr \momentum_{n+1}, \label{eq: momentum move}\\
+		\momentum_{n+1} &= (1-\lr\friction)\momentum_n - \lr\nabla \Loss(\weights_n).
 		\label{eq: momentum}
 	\end{align}
 	\end{subequations}
@@ -118,7 +119,7 @@ by \textcite{gohWhyMomentumReally2017}.
 		+ \underbrace{(1-\lr\friction)}_{
 			=:\momCoeff
 		}(\weights_n - \weights_{n-1})
-		- \underbrace{\lr^2}_{=:\lrSq}\nabla \Loss(\weights_n)
+		- \underbrace{\lr^2}_{=:\lrSq}\nabla \Loss(\weights_n).
 	\end{align}
 	In particular we can set ``the momentum coefficient'' \(\momCoeff\) to zero to
 	obtain gradient descent again. This is of course an artifact of our
@@ -130,11 +131,11 @@ by \textcite{gohWhyMomentumReally2017}.
 %
 Nesterov's momentum is even more aggressive: Instead of using \(p_{n+1}\) for
 the \(\weights_{n+1}\) update, it considers the certain ``momentum move''
-to calculate an intermediate position \(y_{n+1}\)
+to calculate an intermediate position \(y_{n+1}\) (cf. Figure~\ref{fig: hinton nesterov momentum})
 %
 \begin{align*}
 	\weights_{n+1}
-	&= \weights_n + \overbrace{\lr [(1-\lr\friction)\momentum_n}^{\text{``momentum move''}}
+	&= \underbrace{\weights_n + \overbrace{\lr [(1-\lr\friction)\momentum_n}^{\text{``momentum move''}}}_{=:y_{n+1}}
 	- \lr\nabla \Loss(\weights_n)] \\
 	&= y_{n+1} - \lrSq \nabla \Loss(\weights_n).
 \end{align*}
@@ -154,13 +155,15 @@ previous position \(\weights_n\).
 		move towards the right, and we see that Nesterov's momentum adjusts
 		quicker than heavy ball momentum, which is flung outwards.
 	}
+	\label{fig: hinton nesterov momentum}
 \end{figure}
 %
 \begin{definition}[Nesterov's Momentum]
 	\label{def: nesterov's momentum}
 	\begin{subequations}
 	\begin{align}
-		\weights_{n+1} &= \weights_n + \lr \momentum_{n+1} \label{eq: nesterov momentum move}\\
+		\weights_{n+1} &= \weights_n + \lr \momentum_{n+1},
+		\label{eq: nesterov momentum move}\\
 		\momentum_{n+1}
 		&= (1-\lr\friction)\momentum_n
 		- \lr\nabla L[\weights_n + \lr(1-\lr\friction)\momentum_n]
@@ -178,11 +181,11 @@ previous position \(\weights_n\).
 	%
 	\begin{subequations} \label{eq: nesterov intermediate position version}
 	\begin{align}
-		\weights_{n+1} &= y_{n+1} - \lrSq \nabla \Loss(y_{n+1})\\
-		y_{n+1}&= \weights_n + \momCoeff(\weights_n - \weights_{n-1})
+		\weights_{n+1} &= y_{n+1} - \lrSq \nabla \Loss(y_{n+1}),\\
+		y_{n+1}&= \weights_n + \momCoeff(\weights_n - \weights_{n-1}).
 	\end{align}
 	\end{subequations}
-	dropping the intermediate position as well results in the analog to (\ref{eq:
+	Dropping the intermediate position as well results in the analog to (\ref{eq:
 	flat momentum})
 	\begin{align}
 		\weights_{n+1} &= \weights_n + \momCoeff(\weights_n - \weights_{n-1})
@@ -231,9 +234,9 @@ method as
 	\end{pmatrix}
 \end{align*}
 %
-For readability I will now omit the identity matrix \(\identity\) from the
+For readability we will now omit the identity matrix \(\identity\) from the
 block matrices which are just a constant multiplied by an identity matrix.
-Using the digitalization of the hesse matrix (\ref{eq: diagnalization of the
+Using the digitalization of the Hessian (\ref{eq: diagnalization of the
 Hesse matrix}) again, we get
 %
 \begin{align*}
@@ -255,7 +258,7 @@ Hesse matrix}) again, we get
 	\begin{pmatrix}
 		V & 0 \\
 		0 & V
-	\end{pmatrix}^T
+	\end{pmatrix}^T.
 \end{align*}
 %
 Reordering the eigenvalues to
@@ -267,7 +270,7 @@ Reordering the eigenvalues to
 	\end{pmatrix}
 \end{align*}
 %
-reorders the transformation matrix of the eigenspace to
+reorders the transformation matrix of the eigenspace into a block diagonal matrix
 %
 \begin{align}\label{eq: eigenspace momentum transformation}
 	\momMatrix := \begin{pmatrix}
@@ -277,16 +280,16 @@ reorders the transformation matrix of the eigenspace to
 		& & & 0 & 1 \\
 		& & & -\momCoeff & 1+\momCoeff - \lrSq\hesseEV_\dimension \\
 	\end{pmatrix}
-	= \begin{pmatrix}
+	=: \begin{pmatrix}
 		\momMatrix_1 \\
 		& \ddots\\
 		&& \momMatrix_\dimension
 	\end{pmatrix}
 \end{align}
 %
-So in contrast to Section~\ref{sec: visualize gd} we do not get a diagonal
+So in contrast to Section~\ref{sec: visualize gd}, we do not get a diagonal
 matrix immediately. To achieve a similar eigenvalue analysis as in
-Section~\ref{sec: visualize gd} we first have to determine the eigenvalues
+Section~\ref{sec: visualize gd}, we first have to determine the eigenvalues
 \(\momEV_{i1},\momEV_{i2}\) of each \(\momMatrix_i\) and then ensure that
 \begin{align}
 	\max_{i=1,\dots, \dimension} \max\{|\momEV_{i1}|,|\momEV_{i2}|\} < 1.
@@ -309,14 +312,14 @@ appendix. We will only cover the result here.
 	\def\svgwidth{1\textwidth}
 	\input{media/annotated_heavy_ball_rates.pdf_tex}
 	\caption{
-		Heat plot of \(\max\{|\momEV_1|,|\momEV_2|\}\) for the Heavy Ball Momentum.
-		Strictly speaking the ``Monotonic'' (M) and ``Oscillation'' (O) areas should not
-		extend into negative \(\momCoeff\) since \(\momEV_{1/2}\)
-		have opposite signs there, but it still describes the behavior of the
-		dominating eigenvalue. The third label in the legend corresponds to the
-		remarkably sharp border of the ``Ripples'' area which I did not want to
-		draw over. Also recall that \(\momCoeff=0\) represents SGD
-		without momentum.
+		This is a Heat plot of \(\max\{|\momEV_1|,|\momEV_2|\}\) for the Heavy
+		Ball Momentum.  Strictly speaking the ``Monotonic'' (M) and
+		``Oscillation'' (O) areas should not extend into negative \(\momCoeff\)
+		since \(\momEV_{1/2}\) have opposite signs there, but it still describes
+		the behavior of the dominating eigenvalue. The empty third label in the
+		legend corresponds to the remarkably sharp border of the ``Ripples'' area.
+		Drawing an actual line would have occluded the fact that it is visible by
+		itself. Also recall that \(\momCoeff=0\) represents SGD without momentum.
 	}
 	\label{fig: annotated heavy ball rates}
 \end{figure}
@@ -328,13 +331,13 @@ appendix. We will only cover the result here.
 		\momEV_{1/2}
 		= \tfrac12 \left(
 			1+\momCoeff-\lrSq\hesseEV \pm \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
-		\right)
+		\right),
 	\end{align*}
 	then 
 	\begin{enumerate}
 		\item \(\max\{|\momEV_1|,|\momEV_2|\}<1\) if and only if
 		\begin{align*}
-			0<\lrSq\hesseEV < 2(1+\momCoeff) \qquad \text{and} \qquad |\momCoeff|<1
+			0<\lrSq\hesseEV < 2(1+\momCoeff) \qquad \text{and} \qquad |\momCoeff|<1.
 		\end{align*}
 		\item The complex case can be characterized by either
 		\begin{align*}
@@ -366,30 +369,32 @@ appendix. We will only cover the result here.
 		Restricted to \(1>\momCoeff>0\) this results in two different	
 		behaviors. For
 		\begin{align*}
-			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff
+			0<\lrSq\hesseEV \le (1-\sqrt{\momCoeff})^2 < 1+\momCoeff,
 		\end{align*}
 		we have \(1>\momEV_1 > \momEV_2 > 0\) which results in a monotonic
 		linear convergence (``Monotonic'' case). For
 		\begin{align*}
-			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff)
+			1+\momCoeff < (1+\sqrt{\momCoeff})^2\le \lrSq\hesseEV < 2(1+\momCoeff),
 		\end{align*}
 		on the other hand, we get \(-1 < \momEV_2 < \momEV_1 < 0\) which implies 
 		an oscillating convergence (``Oscillation''). In contrast to the ``Ripples''
 		we switch the side of the distance to the minimum in every iteration.
 	\end{enumerate}
+	See also Figure~\ref{fig: annotated heavy ball rates} for a visualization of
+	these cases.
 \end{theorem}
 \begin{proof}
 	Appendix Theorem~\ref{thm-appdx: momentum - stable set of parameters}
 \end{proof}
 
 In particular (positive) momentum extends the available range for convergent
-learning rate/eigenvalue products which allows for larger learning rates. As
-can be seen very well in Figure~\ref{fig: annotated heavy ball rates}, the
-wider attraction area allows for moving out the largest eigenvalues to the
-right with larger eigenvalues shifting the smaller eigenvalues towards the
-right as well into more acceptable convergence rates. If the smallest and
-largest eigenvalue are far apart (i.e.\ the condition number \(\condition\) is
-high) this should be very useful.
+learning rate and eigenvalue products \(\lrSq\hesseEV\) which allows for larger
+learning rates. As can be seen very well in Figure~\ref{fig: annotated heavy
+ball rates}, the wider attraction area allows for moving out the largest
+eigenvalues to the right with larger eigenvalues shifting the smaller
+eigenvalues towards the right as well into more acceptable convergence rates. If
+the smallest and largest eigenvalues are far apart (i.e.\ the condition number
+\(\condition\) is high), this should be very useful.
 
 So how much do we gain? In other words what are the optimal rates of
 convergence? 
@@ -404,24 +409,24 @@ convergence?
 	with 
 	\begin{align*}
 		\arg\min_{\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}
+		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}.
 	\end{align*}
-	Optimizing over the learning rate \(\lrSq\) as well we get the optimal rate
+	Optimizing over the learning rate \(\lrSq\) as well, we get the optimal rate
 	\begin{align*}
 		\sqrt{\momCoeff_*} = 1-\frac{2}{1+\sqrt{\kappa}}.
 	\end{align*}
 	for parameters
 	\begin{align*}
-		\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}}
+		\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}},
 		\qquad
-		\momCoeff_*=\left(1-\frac{2}{1+\sqrt{\kappa}}\right)^2
+		\momCoeff_*=\left(1-\frac{2}{1+\sqrt{\kappa}}\right)^2.
 	\end{align*}
 \end{lemma}
 
 \begin{proof}
-	Since the plot looks quite symmetric it is quite intuitive that
-	we only have to consider the largest and smallest eigenvalue. For now we
-	can consider it as a lower bound:
+	Since the plot in Figure~\ref{fig: annotated heavy ball rates} looks quite
+	symmetric, it is relatively intuitive that we only have to consider the largest and
+	smallest eigenvalue. For now we can consider it as a lower bound:
 	\begin{align}\label{eq: lower bound best heavy ball rates}
 		\min_{\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 		\ge \min_{\momCoeff}
@@ -430,24 +435,26 @@ convergence?
 	Let us inspect the claim
 	\begin{align}\label{eq: optimal heavy ball momentum - ev representation}
 		\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}
+		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}.
 	\end{align}
-	In that case we are still (barely) in the complex case, therefore the rate
-	of convergence is equal to \(\sqrt{\momCoeff}\), i.e.
+	If we do select \(\momCoeff\) like this, we are still (barely) in the complex
+	case, therefore the rate of convergence is equal to \(\sqrt{\momCoeff}\),
+	i.e.
 	\begin{align*}
 		\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-		= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}
+		= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}.
 	\end{align*}
-	Now let us wiggle around \(\momCoeff\) a bit. If we would increase it, then
-	we are obviously increasing our rate since it is then still equal to
-	\(\sqrt{\momCoeff}\) as we just expanded the size of the complex case. Now the
-	question is what happens if we decrease it. Now by our selection of \(\momCoeff\)
-	either the smallest or largest eigenvalue sits right at the edge of the real 
-	case. If we can show that our absolute eigenvalue maximum is increasing if
-	we move further into the real case (decrease \(\momCoeff\)), we would have
-	proven that we can only become worse off doing so. This is annoyingly technical,
-	so it is covered in Lemma~\ref{lem-appdx: just at the border of complex case is
-	best beta} in the appendix.
+	Now let us wiggle around \(\momCoeff\) a bit. If we would increase
+	\(\momCoeff\), then we are obviously increasing our rate since it is then
+	still equal to \(\sqrt{\momCoeff}\) as we just expanded the size of the
+	complex case. Now the question is what happens if we decrease it. Now by our
+	selection of \(\momCoeff\) either the smallest or largest eigenvalue sits
+	right at the edge of the real case. If we can show that our absolute
+	eigenvalue maximum is increasing if we move further into the real case
+	(decrease \(\momCoeff\)), we would have proven that we can only become worse
+	off doing so. This is annoyingly technical, so it is covered in
+	Lemma~\ref{lem-appdx: just at the border of complex case is best beta} in the
+	appendix.
 
 	Now since both the largest and smallest eigenvalue are included in the complex
 	case, we know that all eigenvalues in between must also be in the complex case
@@ -456,21 +463,21 @@ convergence?
 
 	Now we have to optimize over the learning rate \(\lrSq\). Doing our balancing
 	act again, only with \(\sqrt{\hesseEV_1},\sqrt{\hesseEV_\dimension}\) instead
-	of \(\hesseEV_1,\hesseEV_\dimension\) we get the same result as in
+	of \(\hesseEV_1,\hesseEV_\dimension\), we get the same result as in
 	(\ref{eq: optimal SGD lr eigenvalue representation}), i.e.
 	\begin{align*}
-		\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}}
+		\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}},
 	\end{align*}
 	%
-	Since this makes both of them equally bad. We can plug this learning rate into
-	either equation from (\ref{eq: optimal heavy ball momentum - ev representation})
-	to get the remaining claims about the optimal momentum \(\momCoeff_*\) and optimal
-	convergence rate \(\sqrt{\momCoeff_*}\).
+	as this makes both of them equally bad. We can plug this learning rate into
+	either equation from inside the maximum of (\ref{eq: optimal heavy ball
+	momentum - ev representation}) to get the remaining claims about the optimal
+	momentum \(\momCoeff_*\) and optimal convergence rate \(\sqrt{\momCoeff_*}\).
 \end{proof}
 
-And this convergence rate is in fact \emph{equal} to our lower bound  in
+This convergence rate is in fact \emph{equal} to our lower bound  in
 Theorem~\ref{thm: strong convexity complexity bound} (not even up to a
-constant!). So on quadratic functions we can not do any better without violating
+constant!). So on quadratic functions we cannot do any better without violating
 our assumptions about possible optimizing algorithms (Assumption~ \ref{assmpt:
 parameter in generalized linear hull of gradients}).
 
@@ -1122,7 +1129,7 @@ with learning rate
 	1-\frac{2}{\sqrt{3\condition+1}}.
 \end{align*}
 But as we have learned with
-Heavy Ball Momentum, optimal learning rates are no use if we can not generalize
+Heavy Ball Momentum, optimal learning rates are no use if we cannot generalize
 them.
 
 \subsection{Estimating Sequences}
@@ -1175,7 +1182,7 @@ a lower bound while keeping
 This would force \(\weights_n\) towards the minimum as it needs to stay smaller
 than \(\Phi_n\) which changes into a lower bound of \(\Loss\). By controlling
 the speed of morphing we will be able to bound the convergence speed. But we
-can not morph too fast otherwise we will not be able to stay ahead of it, i.e.
+cannot morph too fast otherwise we will not be able to stay ahead of it, i.e.
 fulfill (\ref{eq: staying ahead of the estimates}). 
 
 So how do we make this concrete?
@@ -2029,7 +2036,7 @@ SGD with Averaging}.
 % \begin{remark}
 % 	While we do not get faster convergence, we get safer convergence as \(\hesseEV_1\)
 % 	is much smaller than \(\sqrt{\hesseEV_1}\) in general. And since momentum
-% 	is just a linear combination of gradients, we can not achieve anything better
+% 	is just a linear combination of gradients, we cannot achieve anything better
 % 	than the BLUE for the expected value which converges at this rate. So
 % 	faster convergence is impossible.
 % \end{remark}
