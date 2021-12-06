@@ -95,7 +95,7 @@ minimum
 	\|\weights_{n+1} - \minimum \|
 	&= \|\Pi_\Omega(\tilde{\weights}_{n+1}) - \Pi_\Omega(\minimum)\|
 	\le \|\tilde{\weights}_{n+1} - \minimum \|\\
-	&\le \text{ unbounded arguments }\\
+	&\le \dots \text{ [unbounded arguments] }\\
 	&\le \|\weights_n - \minimum\|.
 \end{align*}
 
@@ -158,31 +158,29 @@ search like ``simulated annealing'' \parencite[e.g.][]{bouttierConvergenceRateSi
 or ``evolutionary algorithms'' \parencite[e.g.][]{heConditionsConvergenceEvolutionary2001}.
 But in the end they all scale relatively poor in the dimension. Calculating the
 \mbox{(sub-)gradient} on the other hand scales only linearly in the dimension.
-Calculating the second derivative (hesse matrix) requires \(O(\dimension^2)\)
+Calculating the second derivative (Hessian) requires \(O(\dimension^2)\)
 operations and doing something useful with it (e.g. solving a linear
 equation), usually causes \(O(\dimension^3)\) operations. For this reason first
 order methods seem most suited for high dimensional optimization, as their
-convergence guarantees are independent of the dimension.
-
-There are also first order optimization techniques we will not discuss like
-Vaidya's cutting plane method
-\parencite[e.g.][]{bubeckConvexOptimizationAlgorithms2015} with complexity
-\(O(\dimension^4)\) or \(O(\dimension^3)\) ``up to logarithmic factors''
-\parencite[Section 2.3]{bubeckConvexOptimizationAlgorithms2015} as they are
-too expensive for our purposes.
+convergence guarantees are independent of the dimension. But there are attempts
+to make second order methods viable by avoiding the calculation of the Hessian.
+These methods are usually called ``Quasi Newton methods'' of which we will 
+sketch the most common methods in Chapter~\ref{chap: other methods}.
 
 \section{Gameplan}
 
 As motivated above, we will mostly focus on first order methods. More
 issues with second order methods are mentioned in Section~\ref{sec: loss
-surface}. A more terse but comprehensive review of first order methods can be found in
-\textcite{bubeckConvexOptimizationAlgorithms2015} which also considers cutting
-plane algorithms as mentioned above. A review with a stronger focus on second
-order methods can be found in
-\textcite{bottouOptimizationMethodsLargeScale2018}. The second half of
-\textcite{nesterovLecturesConvexOptimization2018} introduces more ideas for
-structural optimization, the first half covers both first order and second
-order methods extensively but does not consider stochasticity.
+surface}. The most similar review to this work was conducted by
+\textcite{bottouOptimizationMethodsLargeScale2018} with a stronger focus on
+second order methods but only passing interest in
+momentum methods which are quite successful in practice.
+The second half of \textcite{nesterovLecturesConvexOptimization2018} introduces
+more ideas for structural optimization, the first half covers both first order
+and second order methods extensively but does not consider stochasticity much
+and provides little intuition.
+A review with heavier focus on geometric methods (Section~\ref{sec: geometric methods}) 
+was conducted by \textcite{bubeckConvexOptimizationAlgorithms2015}.
 
 In Chapter~\ref{chap: gradient descent} we will review the well
 established method of gradient descent which can minimize deterministic
@@ -204,6 +202,11 @@ start to reuse samples we would just end up minimizing \(\Loss_\sample\) again.
 In Chapter~\ref{chap: momentum} we will discuss methods to speed up
 gradient descent. This chapter is mostly independent of Chapter~\ref{chap: sgd},
 so they can be read in any order.
+
+Chapter~\ref{chap: other methods} provides a review of all the methods we did
+not have time to go over in detail. This review should provide enough intuition
+to understand their importance, but we will entirely skip convergence proofs
+and sometimes only sketch their ideas.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

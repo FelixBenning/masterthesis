@@ -1440,18 +1440,9 @@ considering that \ref{eq: gradient descent} will do \(O(\dimension^2)\) steps
 while the Newton-Raphson method does one inversion. Lastly, there are issues
 obtaining the Hessian in a stochastic setting.
 
-So the difficulty in creating a second order method lies in addressing all these
-concerns at once. One approach by \textcite{martensDeepLearningHessianfree2010},
-called ``Hessian Free Optimization'' was reasonably successful and is based on
-the ``Conjugate Gradient (CG) Method'' \parencite[for an introduction see
-e.g.][]{shewchukIntroductionConjugateGradient1994}\fxnote{or own chapter/section?}.
-While CG converges in \(\dimension\) steps on quadratic loss functions, there
-are no convergence guarantees for general loss functions. Another Quasi-Newton
-method was proposed by \textcite{vinyalsKrylovSubspaceDescent2012} which was
-adapted into a saddle-point-repelling algorithm by
-\textcite{dauphinIdentifyingAttackingSaddle2014}. L-BFGS
-\parencite[e.g.][]{haghighiNumericalOptimizationUnderstanding2014} does probably(?)
-not repel from saddle points as it attempts to estimate the real Hessian.
+So the difficulty in crafting a working second order method lies in addressing
+all these concerns at once. We will discuss some attempts in Chapter~\ref{chap:
+other methods}.
 
 \section{Backtracking}\label{sec: backtracking}
 
