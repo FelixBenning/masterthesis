@@ -799,7 +799,7 @@ instead of (\ref{eq: hessian free next}) which requires \(B_{\Loss(\weights_n)}\
 and in turn the regularization parameter \(M\) for this upper bound. Of course
 at this point we can not use conjugate gradient descent anymore. They then suggest
 using L-BFGS to solve this optimization problem. Why not use L-BFGS in the first
-place? Well the problem
+place? Well, the problem
 \begin{align*}
 	\min \{ \Loss(\weights_n + \weights) : \weights \in \mathcal{K}_{m-1} \}
 \end{align*}
@@ -1031,8 +1031,37 @@ different algorithms.''
 
 \section{Coordinate Descent}
 
-\fxnote{elaborate or cut}
-\textcite[7.3]{bottouOptimizationMethodsLargeScale2018}, \textcite[6.4]{bubeckConvexOptimizationAlgorithms2015}
+Coordinate descent only ever updates one coordinate. ``[I]n situations in which
+\(d\) coordinate updates can be performed at cost similar to the evaluation of
+one full gradient, the method is competitive with a full gradient method both
+theoretically and in practice.'' \parencite[7.3, p.
+72]{bottouOptimizationMethodsLargeScale2018}. This might be interesting as the
+Hessian is of course much easier to handle in one dimension. A perfect line
+search might not be the right thing to do on the other hand, as
+\textcite{powellSearchDirectionsMinimization1973} provides an example of a
+three dimensional function on which coordinate descent jumps between the
+corners of the cube, never converging. Although this behavior can be fixed
+with a stochastic selection of the coordinates instead of cycling through them.
+In fact \textcite{bubeckConvexOptimizationAlgorithms2015} argues that coordinate
+descent \emph{is} just SGD with a random filter, filtering out all
+but one coordinate and disappearing in expectation. I.e. for a random index \(I\)
+and standard basis vectors \(\stdBasis_1,\dots,\stdBasis_\dimension\) we can
+define
+\begin{align*}
+	\nabla\loss(\weights, i)
+	:= \tfrac1{P(I=i)} \langle \nabla\Loss(\weights), \stdBasis_i \rangle \stdBasis_i
+\end{align*}
+to get the original loss in expectation
+\begin{align*}
+	\E[\nabla\loss(\weights,I)] = \sum_{k=1}^\dimension P(I=k) \nabla\loss(\weights,k)
+	= \sum_{k=1}^\dimension \langle \nabla\Loss(\weights), \stdBasis_k\rangle \stdBasis_k
+	= \nabla\Loss(\weights).
+\end{align*}
+With conditional independence the same argument can be applied to already
+stochastic losses. So we can apply our SGD convergence statements to prove
+convergence of random coordinate descent.
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
