@@ -203,7 +203,7 @@ can not be an improvement over standard momentum in general as Nesterov's
 momentum is already asymptotically optimal.
 
 And the theoretical justification for these algorithms is quite thin. There
-are some fantastic animation by \textcite{radfordVisualizingOptimizationAlgos2014}
+are some fantastic animations by \textcite{radfordVisualizingOptimizationAlgos2014},
 which heavily imply that these ``adaptive algorithms'' are better at breaking
 symmetry. But these toy problems are generally axis aligned which means their
 eigenspaces will be the eigenvectors. And at that point we know that these
@@ -217,6 +217,16 @@ But these examples might be unrealistic as well.
 
 In empirical benchmarks such as \textcite{schmidtDescendingCrowdedValley2021} no
 optimizer seems to outperform the others consistently.
+
+While this section was mostly concerned with commonly used algorithms with little
+theoretical justification, the remaining chapter will walk through approaches
+from the theoretical side which are not as widely used in practice as the
+methods discussed so far. In other words, there are no reference implementations
+for the following methods in machine learning frameworks such as Tensorflow.
+This proxy for usage is likely anything but perfect as most of these methods are
+more difficult to implement and might simply be deemed too complex to maintain
+reference implementations for. But beginners, especially from fields other than
+mathematics, are still likely to stick to the default optimizers.
 
 \section{Geometric Methods}
 
