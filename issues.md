@@ -36,10 +36,6 @@ Basis change matrices do not cancel out
 - [ ] In high dimension two random vectors are likely orthogonal -> eigenspace groups?
 - [ ] Coordinate Descent
 
-# SDE view
-
-- [ ] try to do the estimation better
-
 # Conjugate Gradient Descent
 
 # Multi chain Montecarlo (estimate bias of larger steps)
@@ -48,8 +44,8 @@ Basis change matrices do not cancel out
 
 # Trust Regions
 
-- [ ] Instead of bounded 2nd derivative -> upper bound on Bregman Divergence
-	  use bounded third derivative -> derive lr for newton?
+- [x] Instead of bounded 2nd derivative -> upper bound on Bregman Divergence
+	  use bounded third derivative -> derive lr for newton? -> Cubic newton
 
 # Optimization similar to autodiff?
 
@@ -76,3 +72,16 @@ solvable?
 # Take Gradient w.r.t. different norm
 
 cf. Conjugate Gradient
+
+# Parallelization Alternative to Batches
+
+Global Optimization?
+Idea
+1. start out gd from n points -> distribution
+2. split one point in random distribution around point occasionally during training 
+-> tree (too many branches for parallelization)
+-> branch cutting based on current height (evolutionary algorithm).
+Tree has independent strands so we can apply SGD proof (for mathematical proof
+pretend cutting does not exist) then apply culling to full tree.
+
+Tree might approximate uniform distribution over all parameters?
