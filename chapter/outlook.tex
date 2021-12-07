@@ -622,7 +622,7 @@ e.g. by using CG on
 Visualizing CG would be somewhat boring as it converges in two steps on two
 dimensional loss surfaces.
 
-\section{BFGS}
+\section{Secant Methods}
 
 If we wish to estimate the Hessian with the change of our gradients over time,
 we will soon notice that we do not get the evaluation of the Hessian at one point
@@ -633,12 +633,12 @@ but rather an average
 	\underbrace{(\weights_n - \weights_{n-1})}_{=:\Delta\weights_n}.
 \end{align}
 Using this ``average'' \(H_n\) in place of the Hessian \(\nabla^2\Loss(\weights_n)\)
-to reshape the gradient results in the ``secant method''
+to reshape the gradient, results in the ``secant method''
 \begin{align*}
 	\tag{secant method}
 	\weights_{n+1}	= \weights_n - H_n^{-1}\nabla\Loss(\weights_n).
 \end{align*}
-While it might seem like this averaging is undesirable at first, this averaging
+While it might seem like this averaging is undesirable at first, it
 can sometimes be desireable as it smooths out noisy or fluctuating Hessians
 \parencite[e.g.][]{metzGradientsAreNot2021}. In one dimension this is already well
 defined, as we can simply define
@@ -655,24 +655,24 @@ And for \(\dimension>1\) we have
 \begin{align*}
 	\frac{\dimension(\dimension+1)}{2} > \dimension.
 \end{align*}
-To make \(H_n\) unique we have to add additional requirements. 
+So to make \(H_n\) unique we have to add additional requirements. 
 
 \subsection{DFP}
 
 If we already have an estimate of the Hessian \(\hat{H}_{n-1}\) from previous
 iterations, it might be sensible to use ``as much as possible'' of
-\(\hat{H}_{n-1}\) and change only so much that \(\hat{H}_n\) fulfills the secant
-condition (\ref{eq: secant equation}), i.e.
+\(\hat{H}_{n-1}\), and change only as much as needed to guarantee \(\hat{H}_n\)
+fulfills the secant condition (\ref{eq: secant equation}), i.e.
 \begin{align}\label{eq: dfp optimization problem}
 	\hat{H}_n &:=
 	\arg\min_H \|H-\hat{H}_{n-1}\|
 	& \text{subject to}\quad H=H^T,\quad  \Delta g_n= H\Delta\weights_n.
 \end{align}
-This still leaves us with the selection of the norm. A norm that turned out to 
+This still leaves us with the selection of the norm. A norm that turns out to 
 be useful is the weighted Frobenius norm \(\|\cdot\|_W\) with
 \begin{align*}
-	\|A\|_W := \|W^{1/2}AW^{1/2}\|_F \quad\text{where}\quad
-	\|A\|_F^2 := \text{trace}(A^TA)=\sum_{i,j=1}^{\dimension}A_{i,j}^2
+	\|A\|_W := \|W^{1/2}AW^{1/2}\|_F, \quad\text{where}\quad
+	\|A\|_F^2 := \text{trace}(A^TA)=\sum_{i,j=1}^{\dimension}A_{i,j}^2.
 \end{align*}
 If we select \(W:=H_n^{-1}\), then according to
 \textcite{nocedalQuasiNewtonMethods2006} the unique solution of (\ref{eq: dfp
@@ -685,7 +685,7 @@ optimization problem}) is
 	\left(\identity-\frac{\Delta g_n \Delta\weights_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
 	+ \frac{\Delta g_n \Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}.
 \end{align}
-Since we really want to use \(\hat{H}_n^{-1}\) and matrix inversion is expensive
+Since we really want to use \(\hat{H}_n^{-1}\) and matrix inversion is expensive,
 \textcite{nocedalQuasiNewtonMethods2006} remark that there is also a recursion
 for its inverse
 \begin{align*}
@@ -708,16 +708,15 @@ and further examined and developed by Fletcher and Powell. Hence its name.
 
 \subsection{BFGS}
 
-Since we only really want \(\hat{H}_n^{-1}\)
+Since we only really want \(\hat{H}_n^{-1}\),
 \textcite{broydenConvergenceClassDoublerank1970,fletcherNewApproachVariable1970,goldfarbFamilyVariablemetricMethods1970,shannoConditioningQuasiNewtonMethods1970}
-all independently came up with the following improvement to DFP, which is why
-this chapter is not called DFP. First we reorder (\ref{eq: secant equation})
-into
+all independently came up with the following improvement to DFP. First we
+reorder (\ref{eq: secant equation}) into
 \begin{align*}
 	H_n^{-1} \Delta g_n = \Delta\weights_n
 \end{align*}
-and now the idea is to look for the inverse directly instead of looking for
-\(H_n\) first. In other words we look for
+and now we look for the inverse directly, instead of looking for \(H_n\) first.
+In other words we define
 \begin{align*}
 	\hat{H}_n^{-1} &:= \arg\min_{H^{-1}} \| H^{-1} - \hat{H}_{n-1}^{-1}\|
 	& \text{ subject to}\quad H=H^T,\quad H^{-1}\Delta g_n =\Delta \weights_n.
@@ -733,7 +732,7 @@ recursion
 	+ \tfrac{\Delta\weights_n \Delta \weights_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}.
 \end{align}
 An interesting property of this update is, that it retains strict positive
-definiteness of previous estimates as we have for a nonzero vector \(z\)
+definiteness of previous estimates as we have for a non-zero vector \(z\)
 \begin{align*}
 	z^T \hat{H}_n^{-1} z
 	&= \underbrace{
