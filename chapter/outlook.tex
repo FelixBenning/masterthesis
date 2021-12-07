@@ -622,8 +622,165 @@ e.g. by using CG on
 Visualizing CG would be somewhat boring as it converges in two steps on two
 dimensional loss surfaces.
 
-\section{L-BFGS}
+\section{BFGS}
 
+If we wish to estimate the Hessian with the change of our gradients over time,
+we will soon notice that we do not get the evaluation of the Hessian at one point
+but rather an average
+\begin{align}\label{eq: secant equation}
+	\underbrace{\nabla\Loss(\weights_n) - \nabla\Loss(\weights_{n-1})}_{=:\Delta g_n}
+	= \underbrace{\int_0^1 \nabla^2\Loss(\weights_{n-1} + t(\weights_n-\weights_{n-1}))dt}_{=:H_n}
+	\underbrace{(\weights_n - \weights_{n-1})}_{=:\Delta\weights_n}.
+\end{align}
+Using this ``average'' \(H_n\) in place of the Hessian \(\nabla^2\Loss(\weights_n)\)
+to reshape the gradient results in the ``secant method''
+\begin{align*}
+	\tag{secant method}
+	\weights_{n+1}	= \weights_n - H_n^{-1}\nabla\Loss(\weights_n).
+\end{align*}
+While it might seem like this averaging is undesirable at first, this averaging
+can sometimes be desireable as it smooths out noisy or fluctuating Hessians
+\parencite[e.g.][]{metzGradientsAreNot2021}. In one dimension this is already well
+defined, as we can simply define
+\begin{align*}
+	H_n := \frac{\Loss'(\weights_n)-\Loss'(\weights_{n-1})}{\weights_n-\weights_{n-1}}.
+\end{align*}
+But there is no unique solution to the secant equation (\ref{eq: secant equation})
+in \(\dimension\) dimensions. This is because both the weight difference
+\(\Delta\weights_n\) and the gradient difference \(\Delta g_n\) are
+\(\dimension\) dimensional vectors, (\ref{eq: secant
+equation}) therefore represents \(d\) linear equations to find the
+\(\frac{\dimension(\dimension+1)}{2}\) entries of the symmetric matrix \(H_n\).
+And for \(\dimension>1\) we have
+\begin{align*}
+	\frac{\dimension(\dimension+1)}{2} > \dimension.
+\end{align*}
+To make \(H_n\) unique we have to add additional requirements. 
+
+\subsection{DFP}
+
+If we already have an estimate of the Hessian \(\hat{H}_{n-1}\) from previous
+iterations, it might be sensible to use ``as much as possible'' of
+\(\hat{H}_{n-1}\) and change only so much that \(\hat{H}_n\) fulfills the secant
+condition (\ref{eq: secant equation}), i.e.
+\begin{align}\label{eq: dfp optimization problem}
+	\hat{H}_n &:=
+	\arg\min_H \|H-\hat{H}_{n-1}\|
+	& \text{subject to}\quad H=H^T,\quad  \Delta g_n= H\Delta\weights_n.
+\end{align}
+This still leaves us with the selection of the norm. A norm that turned out to 
+be useful is the weighted Frobenius norm \(\|\cdot\|_W\) with
+\begin{align*}
+	\|A\|_W := \|W^{1/2}AW^{1/2}\|_F \quad\text{where}\quad
+	\|A\|_F^2 := \text{trace}(A^TA)=\sum_{i,j=1}^{\dimension}A_{i,j}^2
+\end{align*}
+If we select \(W:=H_n^{-1}\), then according to
+\textcite{nocedalQuasiNewtonMethods2006} the unique solution of (\ref{eq: dfp
+optimization problem}) is
+\begin{align}
+	\tag{DFP}
+	\hat{H}_n =
+	\left(\identity-\frac{\Delta g_n \Delta\weights_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
+	\hat{H}_{n-1}
+	\left(\identity-\frac{\Delta g_n \Delta\weights_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
+	+ \frac{\Delta g_n \Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}.
+\end{align}
+Since we really want to use \(\hat{H}_n^{-1}\) and matrix inversion is expensive
+\textcite{nocedalQuasiNewtonMethods2006} remark that there is also a recursion
+for its inverse
+\begin{align*}
+	\tag{DFP'}
+	\hat{H}_n^{-1}
+	= \hat{H}_{n-1}^{-1}
+	- \frac{
+		\hat{H}_{n-1}^{-1}\Delta g_n \Delta g_n^T \hat{H}_{n-1}^{-1}
+	}{
+		\langle \Delta g_n, \hat{H}_{n-1}^{-1}\Delta g_n\rangle
+	}
+	+ \frac{
+		\Delta\weights_n \Delta\weights_n^T
+	}{
+		\langle \Delta g_n, \Delta\weights_n\rangle
+	}.
+\end{align*}
+This estimation \(\hat{H}_n\) of \(H_n\) was first proposed by Davidon in 1959
+and further examined and developed by Fletcher and Powell. Hence its name.
+
+\subsection{BFGS}
+
+Since we only really want \(\hat{H}_n^{-1}\)
+\textcite{broydenConvergenceClassDoublerank1970,fletcherNewApproachVariable1970,goldfarbFamilyVariablemetricMethods1970,shannoConditioningQuasiNewtonMethods1970}
+all independently came up with the following improvement to DFP, which is why
+this chapter is not called DFP. First we reorder (\ref{eq: secant equation})
+into
+\begin{align*}
+	H_n^{-1} \Delta g_n = \Delta\weights_n
+\end{align*}
+and now the idea is to look for the inverse directly instead of looking for
+\(H_n\) first. In other words we look for
+\begin{align*}
+	\hat{H}_n^{-1} &:= \arg\min_{H^{-1}} \| H^{-1} - \hat{H}_{n-1}^{-1}\|
+	& \text{ subject to}\quad H=H^T,\quad H^{-1}\Delta g_n =\Delta \weights_n.
+\end{align*}
+For the weighted Frobenius norm with weights \(W=H_n\) this results in the BFGS
+recursion
+\begin{align}
+	\tag{BFGS}
+	\hat{H}_n^{-1} :=
+	\left(\identity-\tfrac{\Delta\weights_n \Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
+	\hat{H}_{n-1}^{-1}
+	\left(\identity-\tfrac{ \Delta\weights_n\Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
+	+ \tfrac{\Delta\weights_n \Delta \weights_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}.
+\end{align}
+An interesting property of this update is, that it retains strict positive
+definiteness of previous estimates as we have for a nonzero vector \(z\)
+\begin{align*}
+	z^T \hat{H}_n^{-1} z
+	&= \underbrace{
+		\left(z-\tfrac{
+			\langle\Delta\weights_n, z\rangle \Delta g_n^T
+		}{
+			\langle \Delta g_n, \Delta\weights_n\rangle
+		}\right)
+		\hat{H}_{n-1}^{-1}
+		\left(z-\tfrac{\langle \Delta\weights_n, z\rangle \Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
+	}_{
+	\ge \begin{cases}
+		z^T \hat{H}_{n-1}^{-1} z > 0 & \langle\Delta\weights_n, z\rangle^2 =0 \\
+		0 & \text{else}
+	\end{cases}
+	}
+	+ \tfrac{\langle\Delta\weights_n, z\rangle^2}{\langle \Delta g_n, \Delta\weights_n\rangle}.
+	\\
+	&> 0.
+\end{align*}
+
+\subsection{L-BFGS}
+
+Limited memory BFGS is essentially just an implementation detail of BFGS. As
+we only want to apply our inverse Hessian \(\hat{H}_n^{-1}\) to some vector,
+i.e. the gradient, we do not necessarily need to know or store this matrix if
+we can achieve this goal without doing so. And if we use our recursion we can
+apply our inverse Hessian to the vector \(v\) by calculating
+\begin{align*}
+	\hat{H}_n^{-1}v =
+	\left(\identity-\tfrac{\Delta\weights_n \Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
+	\hat{H}_{n-1}^{-1}
+	\left(v-\tfrac{ \langle \Delta g_n, v\rangle}{\langle \Delta g_n, \Delta\weights_n\rangle}\Delta\weights_n\right)
+	+ \tfrac{\langle \Delta \weights_n, v\rangle}{\langle \Delta g_n, \Delta\weights_n\rangle}\Delta\weights_n.
+\end{align*}
+Assuming \(\langle \Delta g_n, \Delta\weights_n\rangle\) is precalculated, we
+only need to calculate a scalar product and subtract two vectors until we have
+reached a point where we need to only apply \(\hat{H}_{n-1}^{-1}\) to a vector.
+Going through this recursively and assuming \(\hat{H}_0=\identity\), we only
+need \(O(n\dimension)\) operations to calculate \(\hat{H}_n^{-1}v\) this way.
+For \(n\le\dimension\) this can be cheaper than matrix vector multiplication
+requiring \(O(\dimension^2)\) operations. Unfortunately after some time it
+becomes more and more expensive.
+
+So limited memory BFGS simply throws away information older than \(k\) iterations,
+effectively restarting the estimation of the inverse Hessian with
+\(\hat{H}_{n-k}^{-1}=\identity\), guaranteeing a cost of \(O(k\dimension)=O(\dimension)\).
 
 \section{Global Newton Methods}
 
