@@ -20,6 +20,7 @@ begin
 	using Distributions: Distributions, Normal
 	using PlutoUI: Slider
 	using Plots: plot, plot!
+	using Zygote: gradient
 
 	Random.seed!(123)
 end
@@ -28,21 +29,74 @@ end
 dist = Normal(0,1)
 
 # ╔═╡ 90005b2e-5a4e-48e2-bb68-c672aaa8241c
-@bind sampleSize Slider(1:100, default=45, show_value=true)
+@bind sampleSize Slider(1:1000, default=45, show_value=true)
+
+# ╔═╡ 12055488-26de-45ba-950f-f5fc8dcc1084
+@bind params Slider(1:sampleSize, default=20, show_value=true)
 
 # ╔═╡ b4b3092b-c911-4c72-b64f-8a246149a8f4
 locations = rand(dist, sampleSize)
 
 # ╔═╡ d19332db-917c-4c38-b784-a30088d4e567
-f(x) = 3*x
+f(x) = 3*x +5
 
 # ╔═╡ c2e70f83-de84-4b62-a054-6798772594db
 y = f.(locations) + rand(dist, sampleSize)
 
+# ╔═╡ fd67cd82-6269-4111-b523-e93d598a7665
+@bind iteration Slider(1:sampleSize, default=sampleSize, show_value=true)
+
+# ╔═╡ cd9be82a-84d0-4eef-a143-b24dbd744562
+function bounds(data, offset_factor)
+	hard_lims = (minimum(data), maximum(data))
+	offset = offset_factor*(hard_lims[2]-hard_lims[1])
+	return (hard_lims[1]-offset, hard_lims[2]+offset)
+end
+
+# ╔═╡ 62cc31da-a9a3-46ed-b139-07172e3107bc
+feature(p, loc) = loc^(p-1)
+
+# ╔═╡ ba95b2e6-993a-4b9d-9268-1d2feb409bc3
+model(weights) = loc -> begin
+	return sum([weight*feature(p, loc) for (p, weight) in enumerate(weights)])
+end
+
+# ╔═╡ 351de230-a7d0-4923-b5c9-7a09fa0fcd29
+features(params) = [feature(p, loc) for loc in locations, p in 1:params]
+
+# ╔═╡ f4d2589e-e428-403a-8725-b3effcdd1c6f
+w_LS(params) = begin
+	X=features(params)
+	return (X' * X)\X'*y
+end
+
+# ╔═╡ ecac974d-63e8-4fa1-ac7e-ab78a58db155
+loss(weights, x, y) = (model(weights)(x) - y)^2
+
+# ╔═╡ 2614c4a3-2ce8-4a4d-be5a-5b94020885f9
+w_GD(params, lr) = begin
+	accumulate(zip(locations, y), init=zeros(params)) do weights, (inp,label)
+		return weights - lr* gradient(w->loss(w, inp, label), weights)[1]
+	end
+end
+
 # ╔═╡ 6e224826-0534-48be-a68c-e0198d49b915
 begin
-	data_plot = plot(locations, y, st=:scatter, label="noisy data")
-	plot!(data_plot, locations, f, label="real relation")
+	xlim= bounds(locations, 0.02)
+	ylim=bounds(y, 0.03)
+	data_plot = plot(
+		locations, y, st=:scatter, label="Noisy Data",
+		xlim=xlim, ylim=ylim
+	)
+	plot!(data_plot, xlim[1]:0.01:xlim[2], f, label="Real Relation")
+	plot!(
+		data_plot, xlim[1]:0.01:xlim[2], model(w_LS(params)), 
+		label="Least Squares"
+	)
+	plot!(
+		data_plot, xlim[1]:0.01:xlim[2], model(w_GD(params, 0.001)[iteration]), 
+		label="SGD at iteration $(iteration)"
+	)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -52,16 +106,24 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 Distributions = "~0.25.35"
 Plots = "~1.25.2"
 PlutoUI = "~0.7.22"
+Zygote = "~0.6.32"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
+
+[[AbstractFFTs]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "485ee0867925449198280d4af84bdb46a2a404d0"
+uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
+version = "1.0.1"
 
 [[AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -96,6 +158,12 @@ git-tree-sha1 = "f2202b55d816427cd385a9a4f3ffb226bee80f99"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+0"
 
+[[ChainRules]]
+deps = ["ChainRulesCore", "Compat", "LinearAlgebra", "Random", "RealDot", "Statistics"]
+git-tree-sha1 = "feeac82d7ef2bc0e531433a1f1bd65b4d8dd53c8"
+uuid = "082447d4-558c-5d27-93f4-14fc19e9eca2"
+version = "1.16.0"
+
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "4c26b4e9e91ca528ea212927326ece5918a04b47"
@@ -125,6 +193,12 @@ deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
 git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
+
+[[CommonSubexpressions]]
+deps = ["MacroTools", "Test"]
+git-tree-sha1 = "7b8a93dba8af7e3b42fecabf646260105ac373f7"
+uuid = "bbf7d656-a473-5ed7-a52c-81e309532950"
+version = "0.3.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
@@ -171,6 +245,18 @@ deps = ["InverseFunctions", "Test"]
 git-tree-sha1 = "80c3e8639e3353e5d2912fb3a1916b8455e2494b"
 uuid = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 version = "0.4.0"
+
+[[DiffResults]]
+deps = ["StaticArrays"]
+git-tree-sha1 = "c18e98cba888c6c25d1c3b048e4b3380ca956805"
+uuid = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
+version = "1.0.3"
+
+[[DiffRules]]
+deps = ["LogExpFunctions", "NaNMath", "Random", "SpecialFunctions"]
+git-tree-sha1 = "2cf62aa67a355dd44bf5b0438e685e04c22984dc"
+uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
+version = "1.8.0"
 
 [[Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
@@ -239,6 +325,12 @@ deps = ["Printf"]
 git-tree-sha1 = "8339d61043228fdd3eb658d86c926cb282ae72a8"
 uuid = "59287772-0a20-5a39-b81b-1366585eb4c0"
 version = "0.4.2"
+
+[[ForwardDiff]]
+deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "LogExpFunctions", "NaNMath", "Preferences", "Printf", "Random", "SpecialFunctions", "StaticArrays"]
+git-tree-sha1 = "6406b5112809c08b1baa5703ad274e1dded0652f"
+uuid = "f6369f11-7733-5829-9624-2563aa707210"
+version = "0.10.23"
 
 [[FreeType2_jll]]
 deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
@@ -327,6 +419,12 @@ deps = ["Logging", "Random"]
 git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
 version = "0.2.2"
+
+[[IRTools]]
+deps = ["InteractiveUtils", "MacroTools", "Test"]
+git-tree-sha1 = "006127162a51f0effbdfaab5ac0c83f8eb7ea8f3"
+uuid = "7869d1d1-7146-5819-86e3-90919afe41df"
+version = "0.4.4"
 
 [[IniFile]]
 deps = ["Test"]
@@ -639,6 +737,12 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 [[Random]]
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[RealDot]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "9f0a1b71baaf7650f4fa8a1d168c7fb6ee41f0c9"
+uuid = "c1ae055f-0cd5-4b69-90a6-9a35b1a98df9"
+version = "0.1.0"
 
 [[RecipesBase]]
 git-tree-sha1 = "6bf3f380ff52ce0832ddd3a2a7b9538ed1bcca7d"
@@ -954,6 +1058,18 @@ git-tree-sha1 = "cc4bf3fdde8b7e3e9fa0351bdeedba1cf3b7f6e6"
 uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
 version = "1.5.0+0"
 
+[[Zygote]]
+deps = ["AbstractFFTs", "ChainRules", "ChainRulesCore", "DiffRules", "Distributed", "FillArrays", "ForwardDiff", "IRTools", "InteractiveUtils", "LinearAlgebra", "MacroTools", "NaNMath", "Random", "Requires", "SpecialFunctions", "Statistics", "ZygoteRules"]
+git-tree-sha1 = "76475a5aa0be302c689fd319cd257cd1a512fb3c"
+uuid = "e88e6eb3-aa80-5325-afca-941959d7151f"
+version = "0.6.32"
+
+[[ZygoteRules]]
+deps = ["MacroTools"]
+git-tree-sha1 = "8c1a8e4dfacb1fd631745552c8db35d0deb09ea0"
+uuid = "700de1a5-db45-46bc-99cf-38207098b444"
+version = "0.2.2"
+
 [[libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "5982a94fcba20f02f42ace44b9894ee2b140fe47"
@@ -1009,9 +1125,18 @@ version = "0.9.1+5"
 # ╠═982336a0-5b3d-11ec-35ec-9957437ec51f
 # ╠═8e96515d-be37-4819-a9be-14877536983a
 # ╠═90005b2e-5a4e-48e2-bb68-c672aaa8241c
+# ╠═12055488-26de-45ba-950f-f5fc8dcc1084
 # ╠═b4b3092b-c911-4c72-b64f-8a246149a8f4
 # ╠═d19332db-917c-4c38-b784-a30088d4e567
-# ╠═c2e70f83-de84-4b62-a054-6798772594db
+# ╟─c2e70f83-de84-4b62-a054-6798772594db
+# ╠═fd67cd82-6269-4111-b523-e93d598a7665
 # ╠═6e224826-0534-48be-a68c-e0198d49b915
+# ╟─cd9be82a-84d0-4eef-a143-b24dbd744562
+# ╠═62cc31da-a9a3-46ed-b139-07172e3107bc
+# ╠═ba95b2e6-993a-4b9d-9268-1d2feb409bc3
+# ╠═351de230-a7d0-4923-b5c9-7a09fa0fcd29
+# ╠═f4d2589e-e428-403a-8725-b3effcdd1c6f
+# ╠═ecac974d-63e8-4fa1-ac7e-ab78a58db155
+# ╠═2614c4a3-2ce8-4a4d-be5a-5b94020885f9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
