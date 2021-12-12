@@ -85,3 +85,12 @@ Tree has independent strands so we can apply SGD proof (for mathematical proof
 pretend cutting does not exist) then apply culling to full tree.
 
 Tree might approximate uniform distribution over all parameters?
+
+
+# SGD - vs. overfitted polynomials
+
+simulation
+
+# Krylov Subspace descent
+
+-> PCA on hessian??
