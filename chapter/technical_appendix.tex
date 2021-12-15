@@ -127,8 +127,8 @@
 		= \liminf_m \frac{x_m}{y_m}.
 	\end{align*}
 	Since \(\gamma\) was arbitrary this proves the first inequality. The second
-	inequality is true by definition of the limes inferior (superior) and the
-	third inequality can be proved in the same way as the first starting with
+	inequality is true by definition of the limes inferior (and superior) and the
+	third inequality can be proven in the same way as the first starting with
 	\(\limsup_n \frac{\Delta x_n}{\Delta y_n} < \gamma\).
 \end{proof}
 \begin{lemma}
@@ -304,7 +304,7 @@
 		}_{=\sqrt{4\lrSq\hesseEV}=\mathrlap{2\sqrt{\lrSq\hesseEV}}}
 		= (1\pm \sqrt{\lrSq\hesseEV})^2	
 	\end{align*}
-	of \(\Delta\). Assuming those roots are real which requires \(\lrSq\hesseEV>0\).
+	of \(\Delta\). Assuming those roots are real, which requires \(\lrSq\hesseEV>0\).
 	But if \(\lrSq\hesseEV\le0\) then we would have
 	\begin{align*}
 		\momEV_1
@@ -355,27 +355,21 @@
 		\begin{align}\label{eq: sigma1 condition}
 			0\xle{\text{Real Case}} \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 -4\momCoeff} < 1-\momCoeff +\lrSq\hesseEV.
 		\end{align}
-		And since \((1+\sqrt{\lrSq\hesseEV})^2 \le \momCoeff\) leads to a contradiction:
+		And since \((1+\sqrt{\lrSq\hesseEV})^2 \le \momCoeff\) leads to a contradiction
 		\begin{align*}
 			0 \le 1-\momCoeff+\lrSq\hesseEV \le 1-(1+\sqrt{\lrSq\hesseEV})^2 +\lrSq\hesseEV
-			= -2\sqrt{\lrSq\hesseEV} \ge 0
+			= -2\sqrt{\lrSq\hesseEV} \ge 0,
 		\end{align*}
 		the real case is restricted to the case \(\momCoeff < (1-\sqrt{\lrSq\hesseEV})^2\)
 		as we are otherwise in the complex case (\ref{eq: complex case}).
-		This means that due to
-		\begin{align*}
-			1-\momCoeff+\lrSq\hesseEV
-			> 1 - (1-\sqrt{\lrSq\hesseEV})^2 + \lrSq\hesseEV
-			= 2\sqrt{\lrSq\hesseEV}>0
-		\end{align*}
-		the inequality (\ref{eq: sigma1 condition}) is (in the real case) equivalent to
+		The inequality (\ref{eq: sigma1 condition}) is (in the real case) equivalent to
 		\begin{align*}
 			&(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff < (1-\momCoeff+\lrSq\hesseEV)^2\\
 			&\iff \cancel{1^2} + 2(\momCoeff-\lrSq\hesseEV) + 
 			\cancel{(\momCoeff-\lrSq\hesseEV)^2} - 4\momCoeff
 			< \cancel{1^2} - 2(\momCoeff-\lrSq\hesseEV) + 
 			\cancel{(\momCoeff-\lrSq\hesseEV)^2}\\
-			&\iff 0 < 4\lrSq\momCoeff.
+			&\iff 0 < 4\lrSq\hesseEV.
 		\end{align*}
 		Which is a given for positive learning rates in the convex	
 		case. This is not surprising if one remembers the proof from gradient
@@ -384,13 +378,12 @@
 		root to the other side we get
 		\begin{align}\label{eq: from -1<sigma_2 followed}
 			0 \xle{\text{Real Case}} \sqrt{(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff}
-			< 3+\momCoeff-\lrSq\hesseEV
+			< 3+\momCoeff-\lrSq\hesseEV.
 		\end{align}
-		Now if we assume \(\lrSq\hesseEV < 3+\momCoeff\), then this condition is
-		equivalent to 
+		From this we get \(\lrSq\hesseEV < 3+\momCoeff\). We also get
 		\begin{align}
 			\nonumber
-			&(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff < (3+\momCoeff-\lrSq\hesseEV)\\
+			&(1+\momCoeff-\lrSq\hesseEV)^2 - 4\momCoeff < (3+\momCoeff-\lrSq\hesseEV)^2\\
 			\nonumber
 			&\iff 1^2 + 2(\momCoeff-\lrSq\hesseEV) + \cancel{(\momCoeff-\lrSq\hesseEV)^2} - 4\momCoeff
 			< 3^2 + 6(\momCoeff-\lrSq\hesseEV) + \cancel{(\momCoeff-\lrSq\hesseEV)^2}\\
@@ -403,7 +396,7 @@
 		\(\lrSq\hesseEV <3+\momCoeff\) which means that we have proven that our
 		requirements are sufficient for \(\max\{|\momEV_1|,|\momEV_2|\}<1\).
 		What is left to show is that \(|\momCoeff|<1\) is also necessary in the real
-		case. Now from (\ref{eq: momentum upper bound derivation}) we immediately
+		case. From (\ref{eq: momentum upper bound derivation}) we immediately
 		get
 		\begin{align*}
 			0 \le \tfrac{\lrSq\hesseEV}2 < 1+\momCoeff
@@ -411,11 +404,11 @@
 		which implies \(-1 < \momCoeff\). At first glance it might look like
 		\(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) is already sufficient for the upper
 		bound, but for \(\lrSq\hesseEV>4\) this bound is greater than one again.
-		So let us assume \(\lrSq\hesseEV>2\) and \(\momCoeff>0\), then
+		So let us assume \(\lrSq\hesseEV>2\) and \(\momCoeff>1\), then
 		\(\momCoeff<(1-\sqrt{\lrSq\hesseEV})^2\) implies a contradiction:
 		\begin{align*}
-			\sqrt{\momCoeff} < \sqrt{\lrSq\momCoeff} -1
-			&\implies \smash{\overbrace{(1+\sqrt{\momCoeff})^2}^{1+2\sqrt{\momCoeff} + \momCoeff}}
+			\sqrt{\momCoeff} < \sqrt{\lrSq\hesseEV} -1
+			&\implies \underbrace{(1+\sqrt{\momCoeff})^2}_{1+2\sqrt{\momCoeff} + \momCoeff}
 			< \lrSq\hesseEV
 			\stackrel{(\ref{eq: from -1<sigma_2 followed})}{<} 3+\momCoeff \\
 			&\implies -2 +2\sqrt{\momCoeff} < 0
@@ -458,7 +451,7 @@
 \end{lemma}
 \begin{proof}
 	Using the characterizations of the real case
-	from Theorem~\ref{thm: momentum - stable set of parameters} we get
+	from Theorem~\ref{thm: momentum - stable set of parameters}, we get
 	\begin{align*}
 		\frac{d}{d\momCoeff}\max\{|\momEV_1|,|\momEV_2|\}
 		= \begin{cases}
@@ -733,8 +726,8 @@
 		f(k) - f(k-1) \le \frac{1}{\sqrt{\Gamma^k}}-\frac{1}{\sqrt{\Gamma^{k-1}}}
 		\qquad \forall k > 0.
 	\end{align*}
-	for our weaker inequality this requires the right side to be lower bounded
-	by a constant. Now if we had not started out looking for a squared \(f\) we
+	For our weaker inequality this requires the right side to be lower bounded
+	by a constant. Now if we had not started out looking for a squared \(f\), we
 	would have instead ended up with the increment
 	\begin{align*}
 		\frac{1}{\Gamma^k}-\frac{1}{\Gamma^{k-1}}.
