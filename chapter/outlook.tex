@@ -10,7 +10,7 @@ default optimizer selection of machine learning frameworks such as Tensorflow.
 
 As we have only covered \ref{eq: gradient descent} and momentum so far, we have
 quite a bit of ground to cover. But at the same time most of the remaining
-common optimizer \parencite[as reviewed by e.g.][]{ruderOverviewGradientDescent2017}
+common optimizers \parencite[as reviewed by e.g.][]{ruderOverviewGradientDescent2017}
 can be motivated in a similar way, which might or might not be new.
 
 Recall that the \ref{eq: newton minimum approx}
@@ -37,9 +37,9 @@ To simplify things, let us assume a quadratic loss function
 eigenspace scales independently
 \begin{align*}
 	\langle \weights_{n+1} - \minimum, v_i \rangle
-	\le (1-\lr \hesseEV_i)\langle \weights_n - \minimum, v_i \rangle
+	\le (1-\lr \hesseEV_i)\langle \weights_n - \minimum, v_i \rangle.
 \end{align*}
-So the \ref{eq: newton minimum approx} rescales the steps by dividing every
+The \ref{eq: newton minimum approx} rescales these steps by dividing every
 eigenspace through its respective eigenvalue. For positive eigenvalues this is
 all nice and dandy. But for negative eigenvalues, which represent a maximum in
 their eigenspace, the \ref{eq: newton minimum approx} multiplies the gradient by
@@ -86,7 +86,7 @@ provided by \textcite{ruderOverviewGradientDescent2017} is, that
 (i.e.\ low learning rates) for parameters associated with frequently occurring
 features, and larger updates (i.e.\ high learning rates) for parameters
 associated with infrequent features.'' But even this intuition seems to assume
-that these ``features'' seem to somehow correspond to the coordinates.
+that these ``features'' somehow correspond to the coordinates vectors.
 
 \begin{description}
 	\item[AdaGrad] \parencite{duchiAdaptiveSubgradientMethods2011}
@@ -96,8 +96,10 @@ that these ``features'' seem to somehow correspond to the coordinates.
 		G_n^{(i)} := \sum_{k=0}^n [\nabla\loss(\weights_n, Z_n)^{(i)}]^2 \qquad i=1,\dots,\dimension,
 	\end{align*}
 	and introduce a small term \(\epsilon\) \parencite[\(\approx 10^{-8}\)][]{ruderOverviewGradientDescent2017}
-	to avoid numerical instability. This result in the ``AdaGrad'' algorithm
-	\begin{align*}
+	to avoid numerical instability (see also Levenberg-Marquard regularization,
+	Subsection~\ref{subsec: levenberg-marquard regularization}). This results in
+	the ``AdaGrad'' algorithm
+ 	\begin{align*}
 		\Weights_{n+1}^{(i)}
 		&= \Weights_n^{(i)}
 		- \frac{\lr_n}{\sqrt{G_n^{(i)}+\epsilon}}\nabla\loss(\Weights_n, Z_n)^{(i)}
@@ -123,16 +125,16 @@ that these ``features'' seem to somehow correspond to the coordinates.
 		+ (1-\gamma)(\nabla\loss(\Weights_n, Z_n)^{(i)})^2.
 	\end{align*}
 	Another benefit of this exponential average is, that we weigh more recent
-	gradients higher. As the Second Taylor Approximation is only locally
-	accurate, so it is probably a good idea to discount older gradients further
-	away. Anyway, the algorithm ``RMSProp'' is defined as
+	gradients higher. The Second Taylor Approximation is only locally
+	accurate after all, so it is probably a good idea to discount older gradients
+	further away. Anyway, the algorithm ``RMSProp'' is defined as
 	\begin{align*}
 		\Weights_{n+1}^{(i)}
 		&= \Weights_n^{(i)}
 		- \frac{\lr_n}{\text{RMS}(\nabla\loss)_n}\nabla\loss(\Weights_n, Z_n)^{(i)}
 		\qquad i=1,\dots,\dimension,
 	\end{align*}
-	where we denote the Root Mean Square
+	where we denote the root mean square as
 	\begin{align*}
 		\text{RMS}(\nabla\loss)_n := \sqrt{\hat{\E}[\nabla\loss(\Weights_n)^{(i)}]^2+\epsilon}.
 	\end{align*}
@@ -157,7 +159,7 @@ that these ``features'' seem to somehow correspond to the coordinates.
 		\nabla\loss(\Weights_n, Z_n)^{(i)}.
 	\end{align*}
 
-	\item[Adam] \parencite{kingmaAdamMethodStochastic2017} applies the same idea
+	\item[Adam] \textcite{kingmaAdamMethodStochastic2017} apply the same idea
 	as RMSProp to the momentum update, i.e.
 	\begin{align*}
 		\Weights_{n+1} = \Weights_n + \frac{\lr_n}{\text{RMS}(\nabla\loss)_n} \momentum_{n+1}
@@ -173,8 +175,7 @@ that these ``features'' seem to somehow correspond to the coordinates.
 	the term \(\momentum_n\) with \(\frac{1}{1-\momCoeff^n}\) assuming a constant
 	momentum coefficient, and similarly for \(\text{RMS}(\nabla\loss)_n\). Then
 	this modified momentum and second moment estimator of the gradients are
-	used for the update instead.
-
+	used for the update instead, resulting in the \textbf{ada}ptive \textbf{m}omentum method.
 
 	\item[NAdam] \parencite{dozatIncorporatingNesterovMomentum2016}
 	uses the same idea as Adam just with Nesterov momentum instead of heavy ball
@@ -197,7 +198,7 @@ that these ``features'' seem to somehow correspond to the coordinates.
 
 Since all these optimizers make component-wise adjustments which could be written
 as a diagonal matrix, Assumption~\ref{assmpt: parameter in generalized linear
-hull of gradients} still applies. Which means our complexity bounds from
+hull of gradients} still applies. This means our complexity bounds from
 Section~\ref{sec: complexity bounds} still apply. Therefore these algorithms
 can not be an improvement over standard momentum in general as Nesterov's
 momentum is already asymptotically optimal.
@@ -221,12 +222,13 @@ optimizer seems to outperform the others consistently.
 While this section was mostly concerned with commonly used algorithms with little
 theoretical justification, the remaining chapter will walk through approaches
 from the theoretical side which are not as widely used in practice as the
-methods discussed so far. In other words, there are no reference implementations
+methods discussed so far. To be more precise: there are no reference implementations
 for the following methods in machine learning frameworks such as Tensorflow.
-This proxy for usage is likely anything but perfect as most of these methods are
+This proxy for usage is likely anything but perfect, as most of these methods are
 more difficult to implement and might simply be deemed too complex to maintain
 reference implementations for. But beginners, especially from fields other than
-mathematics, are still likely to stick to the default optimizers.
+mathematics, are still likely to stick to the default optimizers. So it seems
+fair to say that the following methods are not as common in practice.
 
 \section{Geometric Methods}\label{sec: geometric methods}
 
@@ -260,12 +262,12 @@ might ever work for non-convex loss functions.
 \subsubsection{Center of Gravity Method}
 
 This method simply evaluates the gradient at the center of gravity of the
-remaining set in the hope that the cutting plane method cuts away roughly half
+remaining set, in the hope that the cutting plane method cuts away roughly half
 of the remaining set. Therefore convergence speed can be shown to be
 linear\footnote{i.e.\ exponential in non numerical-analysis jargon} 
 \parencite[e.g.][Theorem 2.1]{bubeckConvexOptimizationAlgorithms2015}.
 Unfortunately this requires calculating the center of gravity of an arbitrary
-set which is its own computational problem. 
+set which is its own difficult computational problem. 
 
 \subsubsection{Ellipsoid Method}
 
@@ -308,15 +310,15 @@ which implies that for \(\theta=\minimum\) we know that the minimum
 With Lipschitz continuity of the gradient \textcite{bubeckGeometricAlternativeNesterov2015}
 further refine this ``confidence ball'' around the minimum and use it to create
 an algorithm with the same rate of convergence as Nesterov's momentum.
-Unfortunately this looks like the algorithm is much more dependent on
+Unfortunately it looks like this algorithm is much more dependent on (strong)
 convexity than the momentum method.
 
 \section{Conjugate Gradient Descent}\label{sec: conjugate gradient descent}
 
 Similar to momentum, conjugate gradient descent is another attempt to solve
-high condition problems. The best introduction I found so far was
-\textcite{shewchukIntroductionConjugateGradient1994}. This is an attempt at a
-shorter version. 
+high condition problems. One of the most approachable introductions so far was
+written by \textcite{shewchukIntroductionConjugateGradient1994}. This is an
+attempt at a shorter version. 
 
 Recall that we can write
 our loss function as an approximate paraboloid (cf. (\ref{eq: paraboloid
@@ -379,7 +381,7 @@ are equivalent in final dimensional real vector spaces. Therefore
 \begin{align*}
 	\nabla_H \Loss(\weights) := H^{-1}\nabla\Loss(\weights)
 \end{align*}
-is a (and due to uniqueness the) solution of (\ref{eq: gradient definition
+is a (and due to uniqueness, the) solution of (\ref{eq: gradient definition
 equation}). So we have found a method equivalent to Newton's method.
 Unfortunately it \emph{is} Newtons's method. And since we still do not want
 to invert the Hessian, we have to think of something else. Fortunately, that
@@ -421,9 +423,9 @@ again. The target \(\minimum\) lies H-orthogonal to \(d^{(1)}\).
 	\def\svgwidth{1\textwidth}
 	\input{media/conjugate_direction.pdf_tex}
 	\caption{
-		The method of conjugate directions only works because in the
-		\(\condition=1\) case (brown contour), minimizing the loss in any direction
-		eliminates that direction. This does not work for general condition numbers
+		The method of conjugate directions only works, because in the
+		\(\condition=1\) case (brown contour) minimizing the loss in any direction
+		eliminates that direction. This does not work for general condition numbers,
 		as illustrated with the blue contour lines.
 	}
 	\label{fig: conjugate direction depends on condition one}
@@ -457,7 +459,7 @@ these issues.
 First let us summarize what we have so far. We want to obtain the same conjugate
 search directions \((d^{(1)},\dots,d^{(\dimension)})\) from
 \((\nabla\Loss(\weights_0),\dots,\nabla\Loss(\weights_{\dimension-1}))\)
-we would get if we used Gram-Schmidt conjugation, which also implies
+we would get, if we used Gram-Schmidt conjugation, which also implies
 \begin{align*}
 	\mathcal{K}_k := \linSpan\{\nabla\Loss(\weights_0),\dots,\nabla\Loss(\weights_k)\}
 	= \linSpan\{d^{(1)},\dots,d^{(k+1)}\}.
@@ -474,8 +476,8 @@ resulting in
 This last condition implies that the gradient \(\nabla\Loss(\weights_n)\)
 must necessarily be orthogonal to \(\mathcal{K}_{n-1}\) (unless we have already
 converged to \(\minimum\)). Otherwise \(\weights_n\) would not be optimal. This
-orthogonality also allows us to argue that \(\mathcal{K}_k\) actually has rank
-\(k+1\) and its respective generators are basis, which was necessary for the
+orthogonality allows us to argue that \(\mathcal{K}_k\) actually has rank
+\(k+1\) and its respective generators are both a basis, which was necessary for the
 conjugate directions argument.
 
 So if we could somehow translate this euclidean orthogonality into a
@@ -504,7 +506,7 @@ application of an operator. More specifically we have
 	second summand might now contain the vector \(H^{n+1}\Delta\weights_0\) if the
 	coefficient of \(H^{n}\Delta\weights_0\) is not zero. Therefore
 	\(\mathcal{K}_{n}\) is contained in the Krylov subspace. And due to the
-	number of elements in the generator of the Krylov subspace it can not have
+	number of elements in the generator of the Krylov subspace, it can not have
 	higher rank than \(n+1\), and thus cannot be larger.
 \end{proof}
 This is useful, because it implies that \(H\mathcal{K}_{n-2}\) is contained
@@ -533,7 +535,7 @@ prev gradient and d(n)}) of \(\nabla\Loss(\weights_n)\), we get
 	= \langle \nabla\Loss(\weights_n), \nabla\Loss(\weights_{n-1}) \rangle
 	- \lr_{n-1}\langle \nabla\Loss(\weights_n), H d^{(n)}\rangle.
 \end{align*}
-Using the definition of \(\langle\cdot,\cdot\rangle_H\) and reordering results in
+Using the definition of \(\langle\cdot,\cdot\rangle_H\) and reordering, results in
 \begin{align}
 	\nonumber
 	\langle \nabla\Loss(\weights_n), d^{(n)}\rangle_H
@@ -724,6 +726,7 @@ In other words we define
 For the weighted Frobenius norm with weights \(W=H_n\) this results in the BFGS
 recursion
 \begin{align}
+	\label{eq: bfgs}
 	\tag{BFGS}
 	\hat{H}_n^{-1} :=
 	\left(\identity-\tfrac{\Delta\weights_n \Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
@@ -759,8 +762,8 @@ definiteness of previous estimates as we have for a non-zero vector \(z\)
 Limited memory BFGS is essentially just an implementation detail of BFGS. As
 we only want to apply our inverse Hessian \(\hat{H}_n^{-1}\) to some vector,
 i.e. the gradient, we do not necessarily need to know or store this matrix if
-we can achieve this goal without doing so. And if we use our recursion we can
-apply our inverse Hessian to the vector \(v\) by calculating
+we can achieve this goal without doing so. And if we use our recursion (\ref{eq:
+bfgs}), we can apply our inverse Hessian to the vector \(v\) by calculating
 \begin{align*}
 	\hat{H}_n^{-1}v =
 	\left(\identity-\tfrac{\Delta\weights_n \Delta g_n^T}{\langle \Delta g_n, \Delta\weights_n\rangle}\right)
@@ -962,7 +965,7 @@ select
 	\weights_{n+1}
 	= \arg\min \{ \Loss(\weights) : \weights \in \weights_n + \mathcal{K}_{m-1} \}
 \end{align}
-instead of (\ref{eq: hessian free next}) which requires \(B_{\Loss(\weights_n)}\)
+instead of the (\ref{eq: hessian free next}) recursion, which requires \(B_{\Loss(\weights_n)}\)
 and in turn the regularization parameter \(M\) for this upper bound. Of course
 at this point we can not use conjugate gradient descent anymore. They then suggest
 using L-BFGS to solve this optimization problem. Why not use L-BFGS in the first
@@ -977,8 +980,9 @@ of \(\mathcal{K}_{m-1}\) into
 \end{align*}
 which is easier to solve as the dimensionality of the problem is greatly
 reduced for \(m\ll \dimension\). So in some sense it is similar to
-line search. Krylov subspace descent essentially bets on the conjecture that the
-Krylov subspaces represent the ``important'' directions for optimization. Just
+line search, but for \(m\) dimensions instead of one. Krylov subspace descent
+essentially bets on the conjecture that the Krylov subspaces represent the
+ ``important'' directions for optimization. Just
 like the gradient direction is the optimal direction for line search.
 
 \subsection{Trust Bounds}\label{subsec: trust bounds}
@@ -1051,7 +1055,7 @@ resulting in
 
 \section{Gauß-Newton Algorithm}
 
-The Gauß-Newton Algorithm opens up the black box of our loss function to create
+The Gauß-Newton Algorithm opens up the black box of our loss function, to create
 a relatively cheap approximation of the Hessian \(\nabla^2\Loss\).
 To motivate the (classical) Gauß-Newton algorithm, we are going to assume a
 squared loss
@@ -1070,7 +1074,7 @@ Assuming differentiation and integration can be freely swapped, we have
 	\nonumber
 	&=\E[\nabla\model(X)\nabla\model(X)^T + (\model(X)-Y)\nabla^2\model(X)].
 \end{align}
-Now if our model is close to the truth, i.e. we are close to the minimum, then
+If our model is close to the truth, i.e. we are close to the minimum, then
 \(\model(X)-Y\) should be small. Therefore we should approximately have
 \begin{align*}
 	\nabla^2\Loss(\weights) \approx \E[\nabla\model(X)\nabla\model(X)^T].
@@ -1101,7 +1105,7 @@ since we have
 
 \subsection{Levenberg-Marquard Algorithm}
 
-Unfortunately it is not necessarily strictly positive definite. That is, if there
+Unfortunately, it is not necessarily strictly positive definite. That is, if there
 is a vector \(v\), which is orthogonal to \(\nabla\model(X)\) for all but a
 zero probability set of \(X\), then this vector is in the eigenspace with
 eigenvalue zero. For the expectation one might still be able to discuss that
@@ -1150,7 +1154,7 @@ hessian gauss newton})
 		&+ \E[\tfrac{d}{df}\loss(\model(X),Y)\tfrac{d^2}{d\weights^2}\model(X)].
 	\end{aligned}
 \end{align}
-Again we throw away the second part with the Hessian of the model \(\model\),
+Again we throw away the part with the Hessian of the model \(\model\),
 to obtain the approximation
 \begin{align*}
 	\nabla^2\Loss(\weights)
@@ -1161,7 +1165,7 @@ Hessian of the loss function in the middle. The calculation of which might be a
 huge or tiny problem. If the model prediction is one dimensional it is likely
 not an issue. Then it would only be a constant.
 
-One should still come up with some justification why the second part of the
+One should still come up with some justification, why the second part of the
 Hessian part can be thrown away though, i.e. why is
 \begin{align*}
 	\E[\tfrac{d}{df}\loss(\model(X),Y)\tfrac{d^2}{d\weights^2}\model(X)]
@@ -1207,8 +1211,8 @@ Hessian is of course much easier to handle in one dimension. A line search might
 not be the right thing to though, as
 \textcite{powellSearchDirectionsMinimization1973} provides an example of a three
 dimensional function on which coordinate descent jumps between the
-corners of the cube, never converging. Although this behavior can be fixed
-with a stochastic selection of the coordinates instead of cycling through them.
+corners of the cube, never converging. This behavior can be fixed
+with a stochastic selection of the coordinates, instead of cycling through them.
 In fact \textcite{bubeckConvexOptimizationAlgorithms2015} argues that coordinate
 descent \emph{is} just SGD with a random filter, filtering out all
 but one coordinate and disappearing in expectation. I.e. for a random index \(I\)
