@@ -5,7 +5,7 @@
 To understand why the convergence rate is poor when the condition
 number is high, we can visualize a high ratio of the lowest to the highest
 eigenvalue as a narrow ravine. The gradient points in the direction of the
-strongest descent which is mostly to the opposite side of the ravine and only slightly
+strongest descent, which points mostly to the opposite of the ravine and only slightly
 along its length. This causes our iterate to bounce back and forth between
 the walls of the ravine.
 %
@@ -32,7 +32,7 @@ gradient flow}), we want to set the acceleration equal to our gradient
 	\ddot{\weights} = -\nabla \Loss(\weights).
 \end{align*}
 %
-But without friction any potential (height) energy we have would be conserved.
+But without friction, any potential (height) energy we have, would be conserved.
 In other words: when we reach the bottom we have so much velocity, that we would
 massively overshoot the minimum. So to dissipate this energy, we also
 add a ``friction force'' inversely proportional to our current velocity
@@ -90,7 +90,9 @@ equation (\ref{eq: naive momentum move}) we get
 %
 \begin{align*}
 	\weights_{n+1}
-	&= \weights_n + \lr [(1-\lr\friction)\momentum_{n-1} - \lr\nabla \Loss(\weights_{n-1})].
+	&= \weights_n + \lr [(1-\lr\friction)
+	\underbrace{\momentum_{n-1}}_{=\mathrlap{\frac{\weights_n-\weights_{n-1}}{\lr}}}
+	- \lr\nabla \Loss(\weights_{n-1})].
 \end{align*}
 %
 This means we are using gradient information from \(\weights_{n-1}\) to update
@@ -185,7 +187,7 @@ previous position \(\weights_n\).
 		y_{n+1}&= \weights_n + \momCoeff(\weights_n - \weights_{n-1}).
 	\end{align}
 	\end{subequations}
-	Dropping the intermediate position as well results in the analog to (\ref{eq:
+	Dropping the intermediate position as well, results in the analog to (\ref{eq:
 	flat momentum})
 	\begin{align}
 		\weights_{n+1} &= \weights_n + \momCoeff(\weights_n - \weights_{n-1})
@@ -195,10 +197,9 @@ previous position \(\weights_n\).
 %
 \begin{remark}\fxwarning{too informal?}
 	This method also known as ``Nesterov's Accelerated Gradient'' (NAG) is said
-	to date back to \textcite{nesterovMethodSolvingConvex1983}.  But not only is
-	the original text in Russian, it also difficult to find on the internet.
-	Fortunately, \citeauthor{nesterovMethodSolvingConvex1983} wrote textbooks,
-	\citetitle{nesterovLecturesConvexOptimization2018}
+	to date back to \textcite[in Russian]{nesterovMethodSolvingConvex1983}.
+	Fortunately, \citeauthor{nesterovMethodSolvingConvex1983} wrote textbooks
+	in English, \citetitle{nesterovLecturesConvexOptimization2018}
 	(\citeyear{nesterovLecturesConvexOptimization2018}) being the most recent.
 	Unfortunately Chapter 2.2 on optimal methods provides barely any
 	intuition at all, and it is advisable to consult other sources (e.g.
@@ -261,13 +262,21 @@ Hesse matrix}) again, we get
 	\end{pmatrix}^T.
 \end{align*}
 %
-Reordering the eigenvalues to
+Reordering the eigenvalues from
+\begin{align*}
+	\begin{pmatrix}
+		v_1 & \cdots & v_\dimension & 0 & \cdots & 0\\
+		0 & \cdots & 0 & v_1 & \cdots & v_\dimension
+	\end{pmatrix}
+\end{align*}
+%
+to
 %
 \begin{align*}
 	\begin{pmatrix}
 		v_1 & 0 & \cdots & v_\dimension & 0 \\
 		0 & v_1 & \cdots & 0 & v_\dimension
-	\end{pmatrix}
+	\end{pmatrix},
 \end{align*}
 %
 reorders the transformation matrix of the eigenspace into a block diagonal matrix
@@ -314,8 +323,8 @@ appendix. We will only cover the result here.
 	\caption{
 		This is a Heat plot of \(\max\{|\momEV_1|,|\momEV_2|\}\) for the Heavy
 		Ball Momentum.  Strictly speaking the ``Monotonic'' (M) and
-		``Oscillation'' (O) areas should not extend into negative \(\momCoeff\)
-		since \(\momEV_{1/2}\) have opposite signs there, but it still describes
+		``Oscillation'' (O) areas should not extend into negative \(\momCoeff\),
+		since \(\momEV_{1/2}\) have opposite signs there. But it still describes
 		the behavior of the dominating eigenvalue. The empty third label in the
 		legend corresponds to the remarkably sharp border of the ``Ripples'' area.
 		Drawing an actual line would have occluded the fact that it is visible by
@@ -380,19 +389,17 @@ appendix. We will only cover the result here.
 		an oscillating convergence (``Oscillation''). In contrast to the ``Ripples''
 		we switch the side of the distance to the minimum in every iteration.
 	\end{enumerate}
-	See also Figure~\ref{fig: annotated heavy ball rates} for a visualization of
-	these cases.
 \end{theorem}
 \begin{proof}
 	Appendix Theorem~\ref{thm-appdx: momentum - stable set of parameters}
 \end{proof}
 
-In particular (positive) momentum extends the available range for convergent
-learning rate and eigenvalue products \(\lrSq\hesseEV\) which allows for larger
-learning rates. As can be seen very well in Figure~\ref{fig: annotated heavy
+In particular, (positive) momentum extends the available range for
+learning rate and eigenvalue products \(\lrSq\hesseEV\), which results in
+convergence. As can be seen very well in Figure~\ref{fig: annotated heavy
 ball rates}, the wider attraction area allows for moving out the largest
-eigenvalues to the right with larger eigenvalues shifting the smaller
-eigenvalues towards the right as well into more acceptable convergence rates. If
+eigenvalues to the right, with larger learning rates shifting the smaller
+eigenvalues towards the right as well, into more acceptable convergence rates. If
 the smallest and largest eigenvalues are far apart (i.e.\ the condition number
 \(\condition\) is high), this should be very useful.
 
@@ -401,14 +408,14 @@ convergence?
 
 \begin{lemma}[Optimal Parameter Selection]
 	\label{lem: optimal hb parameter selection}
-	For a given learning rate we have
+	For a given learning rate \(\lr\), we have
 	\begin{align*}
 		\min_{\momCoeff}\max_{i=1,\dots, \dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 		= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}
 	\end{align*}
 	with 
 	\begin{align*}
-		\arg\min_{\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+		\momCoeff^*=\arg\min_{\momCoeff}\max_{i=1,\dots,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}.
 	\end{align*}
 	Optimizing over the learning rate \(\lrSq\) as well, we get the optimal rate
@@ -434,20 +441,19 @@ convergence?
 	\end{align}
 	Let us inspect the claim
 	\begin{align}\label{eq: optimal heavy ball momentum - ev representation}
-		\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
+		\momCoeff^*=\arg\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
 		= \max\{(1-\sqrt{\lrSq\hesseEV_1})^2, (1-\sqrt{\lrSq\hesseEV_\dimension})^2\}.
 	\end{align}
 	If we do select \(\momCoeff\) like this, we are still (barely) in the complex
 	case, therefore the rate of convergence is equal to \(\sqrt{\momCoeff}\),
 	i.e.
 	\begin{align*}
-		\min_{\momCoeff}\max_{i=1,\dimension}\{|\momEV_{i1}|,|\momEV_{i2}|\}
-		= \max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}.
+		\max\{(1-\sqrt{\lrSq\hesseEV_1}), (1-\sqrt{\lrSq\hesseEV_\dimension})\}.
 	\end{align*}
 	Now let us wiggle around \(\momCoeff\) a bit. If we would increase
 	\(\momCoeff\), then we are obviously increasing our rate since it is then
 	still equal to \(\sqrt{\momCoeff}\) as we just expanded the size of the
-	complex case. Now the question is what happens if we decrease it. Now by our
+	complex case. Now the question is what happens if we decrease it. By our
 	selection of \(\momCoeff\) either the smallest or largest eigenvalue sits
 	right at the edge of the real case. If we can show that our absolute
 	eigenvalue maximum is increasing if we move further into the real case
@@ -464,7 +470,7 @@ convergence?
 	Now we have to optimize over the learning rate \(\lrSq\). Doing our balancing
 	act again, only with \(\sqrt{\hesseEV_1},\sqrt{\hesseEV_\dimension}\) instead
 	of \(\hesseEV_1,\hesseEV_\dimension\), we get the same result as in
-	(\ref{eq: optimal SGD lr eigenvalue representation}), i.e.
+	(\ref{eq: optimal SGD lr eigenvalue representation}), that is 
 	\begin{align*}
 		\lr_* = \sqrt{\lrSq_*} = \frac{2}{\sqrt{\hesseEV_1}+\sqrt{\hesseEV_\dimension}},
 	\end{align*}
@@ -502,8 +508,15 @@ for eigenvalues \(\hesseEV_i\) of matrix \(A\), because of
 	= \rho(A)
 \end{align*}
 where \(x=\sum_{k=1}^\dimension x_i v_i\). The eigenvalue analysis was therefore
-sufficient for the gradient descent case. In the momentum case on the other
-hand our transformation matrix \(R\) (\ref{eq: eigenspace momentum transformation})
+sufficient for the gradient descent case
+\begin{align*}
+	\|\weights_n-\minimum\|
+	\le \underbrace{\|1-\lr\nabla^2\Loss \|^n}_{
+		=\rho(1-\lr\nabla^2\Loss)^n
+	} \|\weights_0 - \minimum\|.
+\end{align*}
+In the momentum case on the other
+hand, our transformation matrix \(R\) (\ref{eq: eigenspace momentum transformation})
 is not symmetric. But the eigenvalue analysis is still useful due to Gelfand's Formula
 \parencite{gelfandNormierteRinge1941} i.e.
 \begin{align*}
@@ -627,8 +640,8 @@ Which results in
 \end{align*}
 %
 Of course we do not have any bounds for \(\|U\|\|U^{-1}\|\) so this is still
-not explicit enough. And the fact that \(\delta\) jumps from zero to one once the
-eigenvalues are not equal anymore does not inspire confidence in the continuity
+not explicit enough. And the fact that \(\delta\) jumps from zero to one (once the
+eigenvalues are not equal anymore) does not inspire confidence in the continuity
 of \(U\). In fact \textcite[Section 7.1.5]{golubMatrixComputations2013} claim
 that ``any matrix [...] that diagonalizes
 \begin{align*}
@@ -638,8 +651,8 @@ that ``any matrix [...] that diagonalizes
 	\end{pmatrix},
 	\qquad \epsilon \ll 1,
 \end{align*}
-has a 2-norm condition of order \(1/\epsilon\)''. Now this is not the same matrix
-but this example shows that we have to be careful. Especially since we try to select
+has a 2-norm condition of order \(1/\epsilon\)''. While this is not the same matrix,
+this example shows that we have to be careful. Especially since we try to select
 our learning rate \(\lrSq\) and momentum coefficient \(\momCoeff\) in such a way
 that we are right on the complex border (Lemma~\ref{lem: optimal hb parameter
 selection}). So we do in fact strive for the term inside the square root to be zero
@@ -667,7 +680,7 @@ stable transformation, the ``Schur decomposition''.
 	transpose of \(Q\).
 \end{theorem}
 
-The neat thing about this result is that unitary matrices are isometries for the
+The neat thing about this result is, that unitary matrices are isometries for the
 euclidean norm.
 
 \begin{lemma}[Unitary Matrices are Isometries]
@@ -763,14 +776,21 @@ complement.
 		\end{pmatrix}
 	\end{align*}
 	is a normalized eigenvector for eigenvalue \(r_1\) of \(R\), there are
-	only two options for an orthonormal second vector, which results in \(Q\).
-
+	only two options of opposite direction for an orthonormal second vector
+	\begin{align*}
+		\pm \frac{1}{\sqrt{1+|r_1|^2}} \begin{pmatrix}
+			-\conjugate{r}_1 \\
+			1
+		\end{pmatrix},
+	\end{align*}
+	which results in \(Q\).
+	
 	Recall that any eigenvalue of \(R\), in particular \(r_1\) and
 	\(\conjugate{r}_1\in\{r_1, r_2\}\), is a root of the characteristic polynomial
 	\begin{align}\label{eq: property of eigenvalues of R}
 		\det (r\identity - R) = r^2 - r\xi + \momCoeff = 0.
 	\end{align}
-	Now we can calculate the Schur decomposition of \(R\):
+	With this we can calculate the Schur decomposition of \(R\):
 	\begin{align*}
 		Q^* R Q
 		&= \frac{1}{1+|r_1|^2} \begin{pmatrix}
@@ -800,7 +820,7 @@ complement.
 		\\
 		&=\frac{1}{1+|r_{1}|^2}\begin{pmatrix}
 			r_1(1+|r_1|^2)
-			& -\momCoeff \conjugate{r}_1^2  + (1+\xi \conjugate{r}_1) \\
+			& -[\momCoeff \conjugate{r}_1^2  + (1+\xi \conjugate{r}_1)] \\
 			0 &  \momCoeff\conjugate{r}_1 + \xi - r_1
 		\end{pmatrix}\\
 		&\lxeq{(\ref{eq: property of eigenvalues of R})}\begin{pmatrix}
@@ -812,11 +832,11 @@ complement.
 			r_1
 			& -\frac{(1+\momCoeff)(1+\conjugate{r}_1^2)}{1+|r_1|^2} \\
 			0 &  \frac{\momCoeff\conjugate{r}_1 + r_2}{1+|r_1|^2}
-		\end{pmatrix}
+		\end{pmatrix},
 	\end{align*}
 	where we have used \(\xi - r_1 = r_2\) in the last equation. Now in the complex
-	case (and the case \(4\momCoeff = \xi^2\)) we have
-	\(|r_1|=|r_2|=\sqrt{\momCoeff}\) and \(\conjugate{r_1} = r_2\) which results
+	case (and the case \(4\momCoeff = \xi^2\)), we have
+	\(|r_1|=|r_2|=\sqrt{\momCoeff}\) and \(\conjugate{r}_1 = r_2\) which results
 	in
 	\begin{align*}
 		Q^* R Q
@@ -839,15 +859,20 @@ complement.
 	\begin{align*}
 		\|R^n\|
 		&\le \rho(R)^{n-1}(\rho(R)+n[1+\rho(R)^2])\\
-		&\le 3n\rho(R)^{n-1} \qquad \forall n\ge 1.
+		&\le (2n+1)\rho(R)^{n-1}
 	\end{align*}
 	For all \(\epsilon>0\) we therefore have
 	\begin{align*}
 		\|R^n\|
-		&\le \frac{3\exp(1)/\rho(R)}{\log(\rho(R)+\epsilon)-\log(\rho(R))}
+		&\le \underbrace{\frac{3\exp(1)/\rho(R)}{\log(\rho(R)+\epsilon)-\log(\rho(R))}}_{
+			\approx 3\exp(1)\epsilon^{-1}
+		}
 		[\rho(R)+\epsilon]^n
-		\\
-		&\in O([\rho(R)+\epsilon]^n).
+		\in O([\rho(R)+\epsilon]^n), \quad \forall n\ge 1
+	\end{align*}
+	using the first taylor approximation
+	\begin{align*}
+		\log(\rho(R)+\epsilon) \approx \log(\rho(R)) + \frac{\epsilon}{\log(\rho(R))}.
 	\end{align*}
 \end{theorem}
 \begin{proof}
@@ -905,14 +930,16 @@ complement.
 		\\
 		&\le \max_{i=1,\dots,\dimension}
 		\rho(R_i)^n + n \rho(R_i)^{n-1}(1+\rho(R_i)^2)\\
-		&=	\rho(R)^{n-1}(\rho(R) + n [1+\rho(R)^2]).
+		&=	\rho(R)^{n-1}(\rho(R) + n [1+\rho(R)^2])\\
+		&\le \rho(R)^{n-1}(1 + 2n)\\
+		&\le 3n\rho(R)^{n-1} \qquad \forall n\ge 1.
 	\end{align*}
 	For the second claim let \(\epsilon>0\), then we have
 	\begin{align*}
 		\frac{\|R^n\|}{[\rho(R)+\epsilon]^n}
 		&\le \frac{3n\rho(R)^{n-1}}{[\rho(R)+\epsilon]^n}\\
 		&= \frac{3}{\rho(R)}\exp(\log(n) + n[\log(\rho(R))-\log(\rho(R)+\epsilon)])\\
-		&\le \frac{3}{\rho(R)}\exp
+		&\lxle{\max_n} \frac{3}{\rho(R)}\exp
 		\left(\log\left(\frac{1}{[\log(\rho(R)+\epsilon)-\log(\rho(R))]}\right) + 1\right)\\
 		&= \frac{3\exp(1)/\rho(R)}{\log(\rho(R)+\epsilon)-\log(\rho(R))}.
 	\end{align*}
@@ -922,16 +949,17 @@ complement.
 
 \section{Why Consider Alternatives?}
 
-Now while Nesterov's Momentum breaks Assumption~\ref{assmpt: parameter in
+While Nesterov's Momentum breaks Assumption~\ref{assmpt: parameter in
 generalized linear hull of gradients} as it uses gradients at a
 different point than the iterates, it does not break it fundamentally. The
 assumption applies to the intermediate states \(y_n\) which are not too far
 from our actual iterates and would thus allow us to make similar statements
 about them with a bit of work.
 
-And while Heavy Ball Momentum can already almost achieve the optimal convergence
-rate of our complexity bounds up to some issues with the operator norm, there
-are more issues with it besides this particular sticking point.
+And since heavy ball momentum can already achieve the optimal convergence
+rate of our complexity bounds up to some epsilon due to issues with the operator
+norm, why should we consider a different approach which can not be better than
+an already optimal method?
 
 \subsubsection{Weakest Link Contraction Factor}
 
@@ -974,17 +1002,18 @@ cycle instead of converging.
 	\label{fig: heavy ball counterexample}
 \end{figure}
 
-Since we know \(\lbound\) and \(\ubound\) of their counterexample function from
-Figure~\ref{fig: heavy ball counterexample}, we know the parameters \(\lrSq_*\)
-and \(\momCoeff_*\) which they used to explicitly write out the momentum recursion
-with \(\weights_{n+1}, \weights_{n}, \weights_{n-1}\). Assuming a three-cycle
-this left them with just three linear equations which results in the three-cycle
-displayed in the Figure. Since we start with zero momentum, we just have to
-find a point to enter this cycle. Additional to solving this initialization
-problem, \textcite[pp. 93-94]{lessardAnalysisDesignOptimization2016} also show
-that this cycle is stable under noise (attractive).
+In their counterexample from Figure~\ref{fig: heavy ball counterexample}, we
+know the parameters \(\lbound\) and \(\ubound\) and therefore \(\lrSq_*\)
+and \(\momCoeff_*\). They use this to explicitly write out the momentum
+recursion with \(\weights_{n+1}, \weights_{n}, \weights_{n-1}\). Assuming a
+three-cycle this left them with just three linear equations which results in
+the three-cycle displayed in the Figure. Since we start with zero momentum, we
+just have to find a point to enter this cycle. Additional to solving this
+initialization problem, \textcite[pp.
+ 93-94]{lessardAnalysisDesignOptimization2016} show that this cycle is
+stable under noise (attractive).
 
-\textcite{ghadimiGlobalConvergenceHeavyball2015} salvages some of this wreckage
+\textcite{ghadimiGlobalConvergenceHeavyball2015} salvage some of this wreckage
 by proving general convergence results with tighter restrictions on hyper
 parameters. In particular for \(\Loss\in\strongConvex{\lbound}{\ubound}\) and
 \begin{align*}
@@ -998,8 +1027,9 @@ considerably weaker than the condition
 	0<\lrSq\lbound \le \dots \le \lrSq\ubound < 2(1+\momCoeff)
 \end{align*}
 from Theorem~\ref{thm: momentum - stable set of parameters}. In particular
-momentum stops increasing the selection space for learning rates, just like
-\(\lbound\) which rules out our optimal parameters immediately. 
+momentum stops increasing the selection space for learning rates. In fact it
+shrinks it!
+This rules out rules out our optimal parameter immediately. 
 
 Similarly they prove that for \(\Loss\in\lipGradientSet{\ubound}\) and
 \begin{align*}
@@ -1017,13 +1047,14 @@ which provides a tighter convergence bound than
 Theorem~\ref{thm: convex function GD loss upper bound} for gradient descent 
 without momentum \(\momCoeff=0\), but is actually harmed by momentum. While
 this bound might not be the best and further improvements could be made
-\parencite[see e.g.][]{sunNonErgodicConvergenceAnalysis2019} it appears that we
-always end up with \(O(1/n)\) convergence rates in the general case and we
+\parencite[see e.g.][]{sunNonErgodicConvergenceAnalysis2019}, it appears that we
+always end up with \(O(1/n)\) convergence rates in the general case, which is not
+at all optimal, and we
 therefore turn towards Nesterov's Momentum.
 
 \section{Nesterov's Momentum Convergence}\label{sec: nesterov momentum convergence}
 
-The Eigenvalue analysis of Nesterov's Momentum starts out very similar and we
+The Eigenvalue analysis of Nesterov's Momentum starts out very similar, and we
 easily obtain the analog eigenspace transformation to (\ref{eq: eigenspace
 momentum transformation})
 %
@@ -1086,58 +1117,57 @@ all \(\tilde{\momCoeff}_i\) are positive which requires
 \begin{align*}
 	1-\lrSq\hesseEV_i >= 0
 \end{align*}
-So let us select \(\lrSq= 1/\hesseEV_\dimension\). Now we just need to ensure
-that the smallest eigenvalue is in the complex case, for that set it to be
+So let us select \(\lrSq= 1/\hesseEV_\dimension\). We just need to ensure
+that the smallest eigenvalue is in the complex case. For that, we set it to be
 right on the border \(\tilde{\momCoeff}_1=(1-\sqrt{\lrSq\hesseEV_1})^2\),
-which then results in
+which results in
 \begin{align*}
 	\momCoeff = \frac{(1-\sqrt{\lrSq\hesseEV_1})^2}{1-\lrSq\hesseEV_1}
 	=\frac{1-\sqrt{\lrSq\hesseEV_1}}{1+\sqrt{\lrSq\hesseEV_1}}
 	=\frac{1-\sqrt{1/\condition}}{1+\sqrt{1/\condition}} (< 1).
 \end{align*}
-Since
+Since we have
 \begin{align*}
-	\tilde{\momCoeff}_1 >= \dots >=\tilde{\momCoeff}_\dimension=0
+	\tilde{\momCoeff}_1 >= \dots >=\tilde{\momCoeff}_\dimension=0,
 \end{align*}
-the worst rate convergence is exhibited by the first eigenspace and is equal to
+the worst rate of convergence is exhibited by the first eigenspace and is equal to
 \begin{align}\label{eq: nesterov convegence rate eigenvalue derivation}
 	\sqrt{\tilde{\momCoeff}_1} = \sqrt{(1-\sqrt{\lrSq\hesseEV_1})^2}
 	= 1-\sqrt{1/\condition} = 1- \frac{1}{\sqrt{\condition}}.
 \end{align}
 %
 This rate of convergence is a tiny bit worse than the optimal heavy ball
-convergence rate \(1-2/(1+\sqrt{\condition})\), which is also the complexity
-bound, but it is quite similar.
+convergence rate \(1-2/(1+\sqrt{\condition})\), which is also equal to the
+complexity bound, but it is quite similar.
 
-Now if you had a look at Figure~\ref{fig:
-annotated nesterov rates} you might have noticed that for a fixed learning
-rate the \(\lrSq\hesseEV_i\) are \(\dimension\) vertical lines. We made sure
+Now if you had a look at Figure~\ref{fig: annotated nesterov rates} you might
+have noticed that for a fixed learning rate \(\lrSq\), the \(\lrSq\hesseEV_i\)
+are \(\dimension\) vertical lines. We made sure
 that the rightmost line was right on top of the black line and then moved up
 our momentum term until all our rates where in the ripples area. From the
 plot you might get the intuition that we can improve convergence if we
 increase the learning rate to move the largest eigenvalue into the oscillating
-range just like in the gradient descent. And this is in fact not the optimal
+range just like for \ref{eq: gradient descent}. And this is in fact not the optimal
 selection of learning rates. \textcite{lessardAnalysisDesignOptimization2016}
-claim\footnote{The proof is left to the reader} that optimal tuning results in
+claim\footnote{The proof is left to the reader.}, that optimal tuning results in
 \begin{align*}
 	\lrSq = \frac{4}{3\ubound + \lbound}
 	\quad \text{and} \quad
 	\momCoeff = \frac{\sqrt{3\condition+1}-2}{\sqrt{3\condition+1}+2}
 \end{align*}
-with learning rate
+with convergence rate
 \begin{align*}
 	1-\frac{2}{\sqrt{3\condition+1}}.
 \end{align*}
-But as we have learned with
-Heavy Ball Momentum, optimal learning rates are no use if we cannot generalize
-them.
+But as we have learned with heavy ball momentum, optimal convergence rates are 
+of no use if we cannot generalize them.
 
 \subsection{Estimating Sequences}
 
-To prove convergence for gradient descent we proved that gradient descent
+To prove convergence for \ref{eq: gradient descent}, we proved that gradient descent
 minimizes a ``local'' upper bound (Lemma~\ref{lem: smallest upper bound}). Local
 in the sense that we only use the gradient information at our current position
-and discard all previous gradient information. To prove better convergence rates
+and discard all previous gradient information. To prove better convergence rates,
 we need to utilize the previous gradients too.
 
 Let us start with an upper bound of the form
@@ -1155,14 +1185,15 @@ One example for such an upper bound is
 	+ \tfrac{\ubound}{2}\|\weights -y_0\|^2.
 \end{align*}
 %
-Which can be written as in (\ref{eq: Phi_0 (upper bound - kinda)}) with
-\(\lbound_0=\ubound\) by selecting
+This is the local upper bound we minimized in Lemma~\ref{lem: smallest upper
+bound} to obtain gradient descent. We can write this upper bound as in
+(\ref{eq: Phi_0 (upper bound - kinda)}) with \(\lbound_0=\ubound\), by selecting
 %
 \begin{align*}
 	z_0 = y_0 - \ubound^{-1}\nabla\Loss(y_0).
 \end{align*}
-This is the same technique as we used in (\ref{eq: newton minimum approx}). Keep
-in mind that our upper bound is a quadratic function which is therefore
+Note this is the same technique as we used in (\ref{eq: newton minimum approx}).
+Also keep in mind that our upper bound is a quadratic function, which is therefore
 equal to its second taylor derivative.
 
 Now since we started with an upper bound, it is trivial to find \(\weights_0\)
@@ -1186,7 +1217,7 @@ cannot morph too fast otherwise we will not be able to stay ahead of it, i.e.
 fulfill (\ref{eq: staying ahead of the estimates}). 
 
 So how do we make this concrete?
-The obvious lower bounds we want to utilize are made up of all the gradients we
+The obvious lower bounds we want to utilize, are made up of all the gradients we
 collect along the way
 \begin{align*}
 	\phi_n(\weights)
@@ -1198,11 +1229,12 @@ us consider
 \begin{align*}
 	\Phi_1 = \gamma \phi_1 + (1-\gamma)\Phi_0
 \end{align*}
-For \(\gamma=1\) we would have a lower bound, but if \(\nabla\Loss(y_1)\)
+For \(\gamma=1\) we would have a lower bound. But if \(\nabla\Loss(y_1)\)
 does not happen to be zero, the tangent point \(y_1\) is sitting on a slope and
-is therefore not smaller than the minimum of \(\phi_1=\Phi_1\) and since \(\phi_1\)
-is a lower bound on \(\Loss\) it will generally be impossible to satisfy
-(\ref{eq: staying ahead of the estimates}) with \(\weights_1\) in that case.
+is therefore not smaller than the minimum of \(\phi_1=\Phi_1\). And since
+\(\phi_1\) is a lower bound of \(\Loss\), it will generally be impossible to
+satisfy (\ref{eq: staying ahead of the estimates}) with \(\weights_1\) in that
+case.
 So the first take-away is, that we can generally not select \(\gamma=1\)
 unless we are already in the minimum. But this also hints at another issue:
 A convex combination of lower bounds
@@ -1211,16 +1243,17 @@ A convex combination of lower bounds
 \end{align*}
 is also a lower bound. But since they generally only have one tangent point
 which is equal and are otherwise strictly lower, it is difficult to find
-a \(\weights\) such that \(\Loss(\weights)\) is smaller than its minimum.
-So the \(y_k\) already need to be equal to the minimum
+a \(\weights\) such that \(\Loss(\weights)\) is smaller than the minimum of this
+lower bound. So the \(y_k\) already need to be equal to the minimum
 of \(\Loss\) such that the \(\phi_k\) start out with no slope and their
 minimum is also equal to \(\weights_*\). If we have
 \begin{align*}
 	\sum_{k=1}^n \hat{\gamma}_k \phi_k(\weights)
 	+ \hat{\gamma}_0 \Phi_0(\weights)
 \end{align*}
-we get a bit more wiggle room but if we want to slowly remove our upper bound
-we run into a similar problem. Therefore we also need to slowly remove the old
+we get a bit more wiggle room in the form of \(\hat{\gamma}_0\). But if we want
+to slowly remove our upper bound \(\Phi_0\), we run into a similar problem. Therefore we
+also need to slowly remove the old
 \(\phi_k\) upper bounds, constructed with \(y_k\) far away from the minimum
 \(\weights_*\). This motivates why we might wish to select
 \begin{align}\label{eq: estimating sequence recursion}
@@ -1277,21 +1310,24 @@ recursion}) into
 \end{proof}
 
 Now we just need to make sure that we can actually satisfy (\ref{eq: staying
-ahead of the estimates}) while making \(\gamma_k\) as large as possible.
-For that we want an explicit representation of \(\underline{\Phi}_{n}\).
-Fortunately we are only adding up quadratic functions therefore the function
-\(\Phi_{n}\) is quadratic too and can thus be written in the form
+ahead of the estimates}) while making \(\gamma_k\) as large as possible. For
+gradient descent we just minimized the quadratic upper bound \(\Phi_0\). Now
+we need to minimized the \(\Phi_n\). For that we want an explicit
+representation of \(\Phi_n\).
+Fortunately we are only adding up quadratic functions, therefore the function
+\(\Phi_{n}\) is quadratic too, and can thus be written in the form
 \begin{align}\label{eq: centered Phi representation}
-	\Phi_{n}(\weights) = \underline{\Phi}_{n} + \tfrac{\lbound_{n}}{2}\|\weights - z_n\|^2
+	\Phi_{n}(\weights) = \underline{\Phi}_{n} + \tfrac{\lbound_{n}}{2}\|\weights - z_n\|^2,
 \end{align}
-where our convexity parameter \(\lbound_n\) morphs from \(\lbound_0\) to
-\(\lbound\)
+where \(z_n\) is the minimum, and our convexity parameter \(\lbound_n\) morphs
+from \(\lbound_0\) to \(\lbound\)
 \begin{align}\label{eq: lbound recursion}
 	\lbound_n =(1-\Gamma_1^n)\lbound + \Gamma_1^n \lbound_0
-	= \gamma_n \lbound + (1-\gamma_n)\lbound_{n-1}
+	= \gamma_n \lbound + (1-\gamma_n)\lbound_{n-1},
 \end{align}
-and \(z_n\) is the minimum. Assuming (\ref{eq: staying ahead of the estimates})
-holds for \(n-1\) we can write our minimal value as
+because \(\lbound_{n-1}\identity\) is by induction the Hessian of \(\Phi_n\).
+Assuming (\ref{eq: staying ahead of the estimates}) holds for \(n-1\), we can
+write our minimal value as
 \begin{align*}
 	\underline{\Phi}_n
 	&= \Phi_n(y_n) - \tfrac{\lbound_n}{2}\|y_n - z_n\|^2 \\
@@ -1309,8 +1345,8 @@ holds for \(n-1\) we can write our minimal value as
 	\xge{?} \Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 \end{align*}
 Now you might recall that \(y_n\) are our intermediate ``information
-collection points'' which then define the actual iterate. And
-since Lemma~\ref{lem: smallest upper bound} we know that we can achieve
+collection points'', which then define the actual iterate. And
+since Lemma~\ref{lem: smallest upper bound}, we know that we can achieve
 \begin{align*}
 	\Loss(y_n) - \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2
 	\ge \Loss(\weights_n)
@@ -1319,7 +1355,7 @@ by selecting the learning rate \(\lrSq=1/\ubound\) in
 \begin{align*}
 	\weights_n = y_n - \lrSq \nabla\Loss(y_n).
 \end{align*}
-To be able to satisfy (\ref{eq: staying ahead of the estimates}) we therefore
+To be able to satisfy (\ref{eq: staying ahead of the estimates}), we therefore
 only need to lower bound our ``junk''
 \begin{align*}
 	J := (1-\gamma_n)\left(
@@ -1329,7 +1365,7 @@ only need to lower bound our ``junk''
 	- \tfrac{\lbound_n}{2}\|y_n - z_n\|^2
 \end{align*}
 by \(- \tfrac{1}{2\ubound}\|\nabla\Loss(y_n)\|^2\). By having a closer look at
-\(z_n\) and expressing it in terms of \(z_{n-1}\) the necessary terms fall out
+\(z_n\) and expressing it in terms of \(z_{n-1}\), the necessary terms fall out
 and we obtain the following sufficient conditions
 \begin{lemma}[Dumpster Dive]
 	The conditions
@@ -1368,15 +1404,15 @@ particular picking any \(\weights_0\) and selecting
 \begin{align*}
 	\Phi_0(\weights):= \Loss(\weights_0) + \tfrac{\lbound}{2}\|\weights_0 - \weights\|^2
 \end{align*}
-works as well. And in that case we have \(\lbound_n = \lbound\) for all \(n\)
+works as well. And in that case we have \(\lbound_n = \lbound\) for all \(n\),
 which simplifies (\ref{eq: morphing speed equation using condition}) to
 \begin{align}\label{eq: convergence rate for lbound_0=lbound}
-	\gamma_{n+1} = \frac1{\sqrt{\condition}} \implies \Gamma_1^n = (1-\tfrac{1}{\sqrt{\condition}})^n
+	\gamma_{n+1} = \frac1{\sqrt{\condition}} \implies \Gamma_1^n = (1-\tfrac{1}{\sqrt{\condition}})^n.
 \end{align}
 With Lemma~\ref{lem: estimating sequence convergence speed} in mind this hints
 at how we get our convergence rate (\ref{eq: nesterov convegence rate eigenvalue derivation})
 we derived with eigenvalues back!
-But since \(\lbound=0\) implies \(\condition=\infty\)
+But since \(\lbound=0\) implies \(\condition=\infty\),
 which would set our rate of convergence to one, we will continue
 to entertain the general case with general \(\lbound_0\) summarized in
 Algorithm~\ref{algo: general schema of optimal methods}. 
@@ -1431,9 +1467,11 @@ explains why we should make (\ref{eq: morphing speed equation}) an equality.
 	\caption{
 		Picking the largest possible \(\gamma_n\) which satisfy (\ref{eq:
 		morphing speed equation using condition}) makes the inequality an
-		equality. If we start out with \(\condition_0=\condition\) we have
+		equality \(\ubound \gamma_n^2 = \lbound_n\),
+		and therefore \(\condition_n^{-1} = \gamma_n^2\).
+		If we start out with \(\condition_0=\condition\), we therefore have
 		\(\gamma_n=\hat{\gamma}=\sqrt{\condition^{-1}}\) for all \(n\).
-		Otherwise \(\hat{\gamma}\) acts as an attraction point.
+		In all other cases \(\hat{\gamma}\) still acts as an attraction point.
 		% \(\momCoeff\) represents \(\momCoeff_n\)
 		% plotted against \(\gamma_n\) and
 		% \(\hat{\momCoeff}\) corresponds to \(\hat{\gamma}\).
@@ -1483,10 +1521,10 @@ point. So we can now use the equivalent recursion (\ref{eq: morphing speed
 equation using condition}) with \(\condition_n:=\ubound/\lbound_n\).
 By defining \(\gamma_0:=1/\sqrt{\condition_0}\) we can ensure
 \begin{align*}
-	\gamma_n^2 = \condition_n^{-1} \qquad  \text{for all } n\ge0
+	\gamma_n^2 = \condition_n^{-1} \qquad  \text{for all } n\ge0.
 \end{align*}
-which in turn allows us to get rid of the \(\condition_n\). Applying the p-q
-formula and discarding the negative option results in the explicit recursion
+This in turn allows us to get rid of the \(\condition_n\). Applying the p-q
+formula and discarding the negative option, results in the explicit recursion
 \begin{align*}
 	\gamma_{n+1}
 	= \tfrac12 \left[
@@ -1534,8 +1572,8 @@ which we recognize from our eigenvalue analysis.
 \end{algorithm}
 
 
-What is left to do is an analysis of convergence in particular for the case
-where \(\condition_0\neq\condition\) especially applicable for \(\lbound=0\).
+What is left to do is an analysis of convergence, in particular for the case
+where \(\condition_0\neq\condition\), which is especially applicable for \(\lbound=0\).
 Figure~\ref{fig: gamma path} provides some intuition why it might also be
 useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 
@@ -1570,36 +1608,37 @@ useful to have \(\condition_0>\condition\) when \(\lbound\neq0\).
 	\end{align*}
 \end{theorem}
 \begin{proof}
-	Using
+	We can use
 	\begin{align*}
 		\Phi_0(\weights) := \Loss(\weights_0) + \tfrac{\lbound_0}{2}\|\weights -\weights_0\|^2
 	\end{align*}
-	which ensures \(\weights_0=z_0\) for Lemma~\ref{lem: streamline general
-	schema of optimal methods} allows us to apply Lemma~\ref{lem: estimating
-	sequence convergence speed} to obtain
+	to ensure \(\weights_0=z_0\) for Lemma~\ref{lem: streamline general
+	schema of optimal methods} needed for Algorithm~\ref{algo: dynamic nesterov
+	momentum}. We can then apply Lemma~\ref{lem: estimating sequence
+	convergence speed} to obtain
 	\begin{align*}
 		\Loss(\weights_n)-\Loss(\weights_*)
 		&\le \Gamma_1^n(\Phi_0(\weights_*)-\Loss(\weights_*))\\
 		&= \Gamma^n\left[
 			\Loss(\weights_0) -\Loss(\weights_*)
 			+ \tfrac{\lbound_0}2\|\weights_0-\weights_*\|^2
-		\right]
+		\right].
 	\end{align*}	
-	and using \(\langle \nabla\Loss(\weights_*), \cdot\rangle = 0\) and
-	Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality} we get the
-	second upper bound with
+	We can bound the original loss with the original weight difference
+	(Lemma~\ref{lem: Lipschitz Gradient implies taylor inequality})
 	\begin{align*}
 		\Loss(\weights_0)-\Loss(\weights_*)\le \tfrac{\ubound}{2}\|\weights_0-\weights\|^2
 	\end{align*}
-	For the upper bound on \(\Gamma^n\) we have already covered the case
+	to get the second upper bound.
+	Now to the upper bound on \(\Gamma^n\). We have already covered the case
 	\(\condition_0=\condition\) in (\ref{eq: convergence rate for lbound_0=lbound}),
-	keeping \(1+x\le\exp(x)\) in mind. The general case is covered in the
+	(with \(1+x\le\exp(x)\) in mind). The general case is covered in the
 	Lemma~\ref{lem-appendix: convergence rate bounds for estimating sequences}
 \end{proof}
 
 \section{Hyperparameter Selection}
 
-Knowing the condition number one might wish to optimize the convergence rate
+Knowing the condition number, one might wish to optimize the convergence rate
 of Theorem~\ref{thm: nesterov momentum convergence rates} over \(\condition_0\).
 For \(\condition_0^{-1}\in(\condition^{-1}, 3+\condition^{-1}]\) this entails
 minimizing
@@ -1608,9 +1647,9 @@ minimizing
 	= \ubound \frac{1+\condition_0^{-1}}{\condition_0^{-1}-\condition^{-1}}
 	= \ubound \frac{1+\frac{1}{\condition_0^{-1}}}{1-\frac{\condition^{-1}}{\condition_0^{-1}}}
 \end{align}
-Since both the enumerator decreases with \(\condition_0^{-1}\) and the
-denominator increases with \(\condition_0^{-1}\), we want to select it as large
-as possible.
+Since both, the enumerator decreases with \(\condition_0^{-1}\), and the
+denominator increases with \(\condition_0^{-1}\), we want to select
+\(\condition_0^{-1}\) as large as possible.
 
 Looking at Figure~\ref{fig: gamma path} this should make us suspicious. There
 is nothing special about \(\condition_0^{-1}=3+\condition^{-1}\) when it
@@ -1618,7 +1657,7 @@ comes to \(\Gamma^n\). The \(\gamma_n\) are still increasing afterwards. And
 from (\ref{eq: convergence rate optimization}) it seems that the trade-off of
 higher \(\lbound_0\) seems to be worth it. So maybe we should have another go
 at bounding \(\Gamma^n\). But instead of diving head first into even more
-technical calculations we could also consider the fact that
+technical calculations, we could also consider the fact that
 \begin{align*}
 	\Gamma^n
 	= \prod_{k=1}^n (1-\gamma_k)
@@ -1662,7 +1701,7 @@ By taking the derivative of \(c\) one can show that it is monotonously
 decreasing (Lemma~\ref{lem-appendix: derivative loss difference constant in
 gamma}). Taking \(\gamma_1=1\) would imply an infinite
 \(\kappa_0^{-1}\) (and \(\lbound_0\)) and therefore seems to prevent us from
-doing so at first glance. but all relevant things like the loss difference upper
+doing so at first glance, but all relevant things like the loss difference upper
 bound
 \begin{align}\label{eq: gamma_1 dependent loss difference}
 	\Loss(\weights_n)-\Loss(\weights_*)
@@ -1734,7 +1773,7 @@ While Algorithm~\ref{algo: optimal nesterov momentum} eliminates another
 hyperparameter, we still need to somehow know the Lipschitz constant \(\ubound\)
 of the gradient and the condition number \(\condition\).
 
-The lipschitz constant can be estimated with Backtracking (Section~\ref{sec:
+The Lipschitz constant can be estimated with Backtracking (Section~\ref{sec:
 backtracking}). With the condition number we could just be conservative and set
 \(\condition^{-1}=0\). This sacrifices linear convergence, but in view of the
 asymptotic convergence rates stochasticity causes, this might not be so bad. But
@@ -1758,13 +1797,14 @@ progression) is significant, this might not be a satisfactory answer.
 	\label{fig: momentum gamma plot}
 \end{figure}
 
-From our eigenvalue analysis we know that smaller eigenvalues will generally
+From our eigenvalue analysis, we know that smaller eigenvalues will generally
 still converge (even if we neglect them) although at a slower rate. So we
 could just guess a condition and see how it goes. And if we have a look at
 Figure~\ref{fig: momentum gamma plot} a condition guess will simply stop the
 progression of \(\gamma_n\) towards zero at this point and consequently stop the
-progression of \(\momCoeff_n\) towards one. If we dislike the convergence speed
-we can probably just increase the condition number on the fly which causes the
+progression of \(\momCoeff_n\) towards one. If we dislike the resulting
+convergence speed, we can probably just increase the condition number on the
+fly which causes the
 \(\gamma_n\) to fall further and momentum to continue its move towards one.
 In Figure~\ref{fig: momentum progression} we can see that it only takes very
 few iterations until we converge to
@@ -1800,27 +1840,27 @@ differential equation
 \end{align*}
 i.e.\ decreasing friction \(\friction=3/t\) over time. They then use this
 continuous approximation to derive better convergence rates (\(O(1/n^3)\) instead of
-\(O(1/n^2)\)) when this conservative (\(\condition^{-1}=0\)) assumption is used
+\(O(1/n^2)\)) when this conservative (\(\condition^{-1}=0\)) assumption is used,
 but the loss function is strongly convex. They also propose a scheme of
 ``restarting'' Nesterov's Momentum to achieve linear convergence in the
-strongly convex case without knowing the condition number (A restart effectively
+strongly convex case without knowing the condition number (a restart effectively
 resets momentum back to a lower level).
 
 Last but not least recall that \(\lrSq=1/\ubound\) is the \emph{squared}
 discretization \(\lr^2\) of the ODE which can deceive you into thinking that the
 discretization is similar given that \ref{eq: gradient descent} converges for \(\lr \in
 (0,2/\ubound)\). But the implied discretization \(\lr=1/\sqrt{\ubound}\) of
-Nesterov's Momentum much larger in general. Providing some more intuition where the
-speedup comes from.
+Nesterov's Momentum is much larger in general. This provides some intuition
+for where the speedup comes from.
 
 \fxwarning{deal with floats}
 
 \section{Stochasticity}
 
 It has not yet fully crystalized whether or not Momentum is beneficial in a
-stochastic setting. Since our movement is determined by the integral (sum) of
-gradients in this setting, one can argue intuitively that we might get a sort
-of averaging there already which should reduce variance and be beneficial for convergence
+stochastic setting. Since movement is determined by the integral (sum) of
+gradients in this setting, one can argue intuitively, that we might get a sort
+of averaging effect, which should reduce variance and be beneficial for convergence
 \parencite[e.g.][p. 69]{bottouOptimizationMethodsLargeScale2018}. \textcite{gohWhyMomentumReally2017}
 on the other hand claim that ``increasing momentum, contrary to popular
 belief, causes the errors to compound'', most likely citing
@@ -1830,10 +1870,10 @@ Now as we can already achieve optimal performance (in the BLUE sense) for
 variance reduction in SGD (cf. Subsection~\ref{subsec: variance reduction}),
 it is also intuitive why momentum might not be beneficial in stochastic settings.
 But since it simply introduces additional parameters (\(\momCoeff\) could be zero
-to get GD again), it provides a bit more freedom to play with. In particular
-\textcite{flammarionAveragingAccelerationThere2015} show the close relation of 
-momentum parameters to the averaging GD we have discussed in Section~\ref{sec:
-SGD with Averaging}.
+to get GD again), it provides a bit more freedom to play with.
+\textcite{flammarionAveragingAccelerationThere2015} show that this freedom in
+parameters results in a close relation of momentum to the averaging GD, which
+we have discussed in Section~\ref{sec: SGD with Averaging}.
 
 % \subsection{Quadratic Functions}
 
