@@ -105,16 +105,16 @@ optimization.
 \section{Zero Order Optimization}
 
 If we assume an infinite number of possible inputs \(\weights\), it does not matter
-how much and where we sample \(\Loss\) there is always a different \(\weights\) where
+how much and where we sample \(\Loss\), there is always a different \(\weights\) where
 \(\Loss\) might be arbitrarily lower (see various ``No-Free-Lunch Theorems'').
-We must therefore start making assumptions about \(\Loss\) to make this
+We must therefore start making assumptions about \(\Loss\), to make this
 problem tractable.
 
 \subsection{Grid Search}
 
 It is reasonable to assume that the value of our loss \(\Loss\) at some point
 \(\weights\) will not differ much from the loss of points in close proximity.
-Otherwise we would have to sample every point which is not possible for continuous
+Otherwise we would have to sample every point, which is not possible for continuous
 and thus infinite parameter sets. This assumption is continuity of the loss
 \(\Loss\). One possible formulation is ``\(\lipConst\)-Lipschitz continuity''
 %
@@ -140,8 +140,8 @@ and trying out one point for every cell) with time complexity \parencite[pp.
 %
 where \(\dimension\) is the dimension of \(\weights\). The fact that grid search is
 sufficient can be seen by tiling the space into a grid and asking the oracle
-for the value of the loss function at each center. If the minimum is placed in
-some tile, the Lipschitz continuity forces the center of the tile to be \(\lossError\)
+for the value of the loss function at each center. If the minimum is in
+some tile, the Lipschitz continuity forces the center of that tile to be \(\lossError\)
 close to it \parencite[cf.][p. 11]{nesterovLecturesConvexOptimization2018}.
 
 The fact that this is necessary can be seen by imagining a ``resisting
@@ -159,19 +159,17 @@ or ``evolutionary algorithms'' \parencite[e.g.][]{heConditionsConvergenceEvoluti
 But in the end they all scale relatively poor in the dimension. Calculating the
 \mbox{(sub-)gradient} on the other hand scales only linearly in the dimension.
 Calculating the second derivative (Hessian) requires \(O(\dimension^2)\)
-operations and doing something useful with it (e.g. solving a linear
-equation), usually causes \(O(\dimension^3)\) operations. For this reason first
+operations, and doing something useful with it (e.g. solving a linear
+equation) usually causes \(O(\dimension^3)\) operations. For this reason first
 order methods seem most suited for high dimensional optimization, as their
 convergence guarantees are independent of the dimension. But there are attempts
 to make second order methods viable by avoiding the calculation of the Hessian.
 These methods are usually called ``Quasi Newton methods'' of which we will 
 sketch the most common methods in Chapter~\ref{chap: other methods}.
 
-\section{Gameplan}
+\section{Related Work}
 
-As motivated above, we will mostly focus on first order methods. More
-issues with second order methods are mentioned in Section~\ref{sec: loss
-surface}. The most similar review to this work was conducted by
+A similar review was conducted by
 \textcite{bottouOptimizationMethodsLargeScale2018} with a stronger focus on
 second order methods but only passing interest in
 momentum methods which are quite successful in practice.
@@ -182,21 +180,24 @@ and provides little intuition.
 A review with heavier focus on geometric methods (Section~\ref{sec: geometric methods}) 
 was conducted by \textcite{bubeckConvexOptimizationAlgorithms2015}.
 
+\section{Readers Guide}
+
 In Chapter~\ref{chap: gradient descent} we will review the well
 established method of gradient descent which can minimize deterministic
 functions. It might be tempting to skip this chapter, but note that this chapter 
-mostly introduces building blocks we will use in subsequent chapters. We mostly
-prove convergence of gradient descent as motivation for these building blocks.
-The actual proofs for convergence are actually very short. What can be skipped
-are the complexity bounds in Section~\ref{sec: complexity bounds}. The
-Loss Surface analysis in Section~\ref{sec: loss surface} and Backtracking
-in Section~\ref{sec: backtracking} are not required to understand the following
-chapters, but they motivate the assumptions we will make.
+introduces important building blocks we will use in subsequent chapters. We
+prove convergence of gradient descent mostly as motivation for these building blocks.
+The convergence proofs themselves are actually very short.
+
+The complexity bounds in Section~\ref{sec: complexity bounds} on the other hand,
+are not required for subsequent chapters. Neither is the loss surface analysis
+in Section~\ref{sec: loss surface} and backtracking in Section~\ref{sec:
+backtracking}, but they motivate assumptions we make.
 
 While gradient descent is applicable to \(\Loss_\sample\), i.e.\ allows us
 to minimize empirical risk (\ref{eq: empirical risk}), we will question this
 approach in Chapter~\ref{chap: sgd} where we show that it is possible to
-minimize \(\Loss\) itself provided we have an infinite supply of samples. If we
+minimize \(\Loss\) itself, provided we have an infinite supply of samples. If we
 start to reuse samples we would just end up minimizing \(\Loss_\sample\) again.
 
 In Chapter~\ref{chap: momentum} we will discuss methods to speed up
@@ -205,8 +206,8 @@ so they can be read in any order.
 
 Chapter~\ref{chap: other methods} provides a review of all the methods we did
 not have time to go over in detail. This review should provide enough intuition
-to understand their importance, but we will entirely skip convergence proofs
-and sometimes only sketch their ideas.
+to understand their importance, but we will skip convergence proofs entirely
+and sometimes only sketch the ideas.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
