@@ -3,13 +3,13 @@
 \chapter{Stochastic Gradient Descent (SGD)}\label{chap: sgd}
 
 So far we have only discussed the minimization of a function we can get accurate
-gradient information from. If our loss function is stochastic the best we can
-do so far, is to minimize the empirical risk (\ref{eq: empirical risk})
+gradient information from. If our loss function is stochastic, the best we can
+do so far is to minimize the empirical risk (\ref{eq: empirical risk}), i.e.
 \begin{align*}
 	\Loss_\sample(\weights) = \frac{1}{\sampleSize}\sum_{k=1}^\sampleSize \loss(\weights, Z_k)
 	= \E_{Z\sim \dist_\sample}[\loss(\weights, Z)]
 \end{align*}
-for some sample \(\sample=(Z_1,\dots,Z_\sampleSize)\) inducing the empirical
+for some sample \(\sample=(Z_1,\dots,Z_\sampleSize)\), inducing the empirical
 distribution \(\dist_\sample\). Now if we try to minimize \(\Loss_\sample\),
 resulting in a guess \(\hat{\weights}\) of its minimum \(\minimum^{(\sample)}\),
 to get close to the minimum \(\minimum\) of \(\Loss\), we are really applying a
@@ -44,17 +44,17 @@ expressive the hypothesis class \(\{\model\}\) is
 \parencite{vapnikOverviewStatisticalLearning1999}. The more dimensions our
 weight vectors \(\weights\) have, the larger the VC-dimension usually is. But
 VC dimensions try to remove ``duplicates'', i.e.\ parameters which do not
-actually allow for different models. E.g. chaining linear functions only results
-in a linear function and therefore does not increase the expressiveness of our
-hypothesis class. Nevertheless deep learning models should still be highly
-over-parametrized according to this theory, and have no business generalizing to
-unseen examples. Yet they seem to.
+actually allow for different models. Chaining linear functions for example only
+results in a linear function and therefore does not increase the expressiveness
+of our hypothesis class. Nevertheless, deep learning models should still be
+highly over-parametrized according to this theory, and have no business
+generalizing to unseen examples. Yet they seem to.
 
 To solve this mystery one has to make the upper bounds more algorithm specific
 and avoid taking the supremum over \emph{all} possible parameters \(\weights\).
 Instead we want to consider the weights that our algorithm would actually pick.
-E.g. for an algorithm \(\algo\) \textcite{hardtTrainFasterGeneralize2016} use
-the upper bound
+For an algorithm \(\algo\) for example,
+\textcite{hardtTrainFasterGeneralize2016} use the upper bound
 \begin{align*}
 	&\Loss(\algo(\sample)) - \Loss(\minimum)\\
 	&= \underbrace{\Loss(\algo(\sample)) - \Loss_\sample(\algo(\sample))}_{
@@ -109,7 +109,7 @@ for a stochastic gradient
 %
 of which the expected value\footnote{
 	We need to be able to swap the expectation with differentiation. A sufficient 
-	condition is continuity of \(\nabla\loss\) in \(\weights\), which allows us
+	condition is continuity of \(\nabla_\weights\loss\) in \(\weights\), which allows us
 	to use the mean value theorem
 	\begin{align*}
 		\frac{\partial}{\partial \weights_k}\E[\loss(\weights, X,Y)]
@@ -223,8 +223,11 @@ A constant learning rate \(\lr\) represents an equidistant discretization.
 Since \(\nabla\Loss\) is Lipschitz continuous, the local discretization error
 \begin{align*}
 	\|\weights(\lr)  - \weights_\lr \|
-	&= \|(\weights_0 - \int_0^\lr\nabla\Loss(\weights(s))ds) - (\weights_0-\lr\nabla\Loss(\weights_0))\|\\
-	&\le  \int_0^\lr \underbrace{\|\nabla\Loss(\weights_0) - \nabla\Loss(\weights(s))\|}_{
+	&= \Big\|
+		\Big(\weights_0 - \int_0^\lr\nabla\Loss(\weights(s))ds\Big)
+		- (\weights_0-\lr\nabla\Loss(\weights_0))
+	\Big\|\\
+	&\le \int_0^\lr \underbrace{\|\nabla\Loss(\weights_0) - \nabla\Loss(\weights(s))\|}_{
 		\le \ubound \|\weights(s) - \weights(0)\| \in O(s) \mathrlap{\quad\text{(Taylor approx., Lip. \(\nabla\Loss\))}}
 	}ds 
 \end{align*}
@@ -252,8 +255,8 @@ it is enough to bound the distance between SGD and GD.
 			\sum_{j=k+1}^{n-1}\lr_j^2\ubound^2 + 2\lr_j\ubound
 		\right),
 	\end{align*}
-	which can be simplified for constant learning rates \(\lr_n=\lr\) and bounded
-	martingale increment variances \(\E\|\martIncr_n\|^2 \le \stdBound^2\) to
+	which can be simplified for \(\lr:=\max_n\lr_n\) and bounded martingale
+	increment variances \(\E\|\martIncr_n\|^2 \le \stdBound^2\) to
 	\begin{align*}
 		\max_{n}\E\|\weights_n	-\Weights_n\|^2
 		\le \lr T\stdBound^2\exp[T(\lr\ubound^2 + 2\ubound)] \in O(\lr)
@@ -331,8 +334,15 @@ we get in Theorem~\ref{thm: distance SGD vs GD}.
 			\le \exp\left(\sum_{j=k+1}^{n-1}\lr_j^2\ubound^2 + 2\lr_j\ubound\right)
 		}
 	\end{align*}
-	using \(1+x\le\exp(x)\) for the first claim. The rest 
-	follows from \(n\lr\le T\).
+	using \(1+x\le\exp(x)\) for the first claim. Assuming bounded martingale
+	increment variances \(\E\|\martIncr_n\|^2\le\stdBound^2\) and \(\lr=\max_n\lr_n\)
+	we therefore have 
+	\begin{align*}
+		\E\|\Weights_n-\weights_n\|^2
+		&\le \lr\stdBound^2\underbrace{\sum_{k=0}^{n-1}\lr_k}_{\le T}
+		\exp\Bigg((\lr\ubound^2+2\ubound)\underbrace{\sum_{j=k+1}^{n-1}\lr_j}_{\le T}\Bigg).
+		\qedhere
+	\end{align*}
 \end{proof}
 
 \subsection{Excursion: Stochastic Approximation}
@@ -384,7 +394,7 @@ generalization is necessary to craft convergence proofs for Reinforcement
 Learning where we do not get unbiased estimates of some gradients towards the
 minimum, but rather unbiased estimates of a coordinate of the Bellman Operator
 (Fixed Point Iteration towards the optimum). See also ``coordinate descent''
-\parencite[e.g.][Section~7.3]{bottouOptimizationMethodsLargeScale2018}.
+(Section~\ref{sec: coordinate descent}).
 
 
 \section{Quadratic Loss Functions}\label{sec: quadratic loss SGD}
@@ -458,10 +468,12 @@ rate of GD actually worsens with finer discretization \(N\)
 \begin{align*}
 	(1-h)^N = (1-\tfrac{T}N)^N \nearrow \exp(-T) \qquad (N\to\infty).
 \end{align*}
-But it does not worsen much, if the learning rate is small to begin with. A
-learning rate of one on the other hand allows instant convergence while \ref{eq:
+This is surprising as more information, more gradient evaluations should help
+convergence, which seems not to be the case. To be fair, it does not worsen
+much, if the learning rate is small to begin with. But a learning rate of one
+allows instant convergence while \ref{eq:
 gradient flow} only converges for \(T\to\infty\). So even if we would get
-the additional gradient evaluations for free, a finer discretization is worse. 
+the additional gradient evaluations for free, a finer discretization is worse!
 
 Another view to make this more intuitive is the analysis we did when selecting
 optimal learning rates for GD, where the rates of the eigenspaces improved until
@@ -504,8 +516,8 @@ This is a bit worse than the rate \(O(\frac1N)\) we can achieve with the mean
 	\E\|\overline{X}_N - \E[X]\|^2 = \frac{\E\|X-\E[X]\|^2}{N},
 \end{align*}
 which is the best linear unbiased estimator (BLUE) for the expected value.
-Making only one step and increasing the batch size to our sample size realizes
-the mean. 
+Note that making only one step and increasing the batch size (Section~\ref{sec:
+batch learning}) to our sample size, realizes the mean. 
 
 \subsubsection{Decreasing Learning Rates}
 
@@ -550,7 +562,8 @@ we get
 \begin{align}
 	\label{eq: expected square error in quadratic case}
 	\E\|\Weights_{n+1} - \minimum\|^2
-	&= \sum_{j=1}^\dimension (1-\lr_n \hesseEV_j)^2 \E\langle\Weights_{n+1}-\minimum\rangle^2
+	&= \sum_{j=1}^\dimension (1-\lr_n \hesseEV_j)^2
+	\E\langle\Weights_n-\minimum, v_j\rangle^2
 	+ \lr_n^2 \E\langle \martIncr_{n+1}, v_j\rangle^2.
 \end{align}
 Optimizing over \(\lr_n\) by taking the derivative of the term above with
@@ -635,8 +648,8 @@ triangle inequality of the \(L^2\) norm \(\|X\|_{L^2} := \sqrt{\E\|X\|^2}\)
 	\le \|X\|_{V,\infty} + \|Y\|_{V,\infty}.
 \end{align*}
 As we have used the \(L^2\) norm until now, let us consider its relation
-to this new norm. As we are in a finite dimensional real vector space, the norms
-are equivalent, more specifically we have
+to this new norm. As we work with a finite dimensional real vector space, the
+norms are equivalent, more specifically we have
 \begin{align*}
 	\|X\|_{V,\infty}^2
 	= \max_{i=1,\dots,\dimension} \E\langle X, v_i\rangle^2
@@ -717,7 +730,7 @@ Armed with this norm, we can now tackle our problem again.
 	if we assume bounded variance. So let us optimize over this bound. Since
 	we are looking at a maximum over parabolas in \(\lr_n\), the first order
 	condition would be enough as this is a convex function. But while the maximum is
-	continuous we have a discontinuity in the derivative 
+	continuous, we have a discontinuity in the derivative 
 	\begin{align*}
 		\frac{d}{d\lr_n}
 		= \begin{cases}
@@ -821,7 +834,7 @@ Armed with this norm, we can now tackle our problem again.
 	in the asymptotic case, our bound reduces to
 	\begin{align*}
 		\|\Weights_{n+1} -\minimum\|_{V,\infty}^2
-		&\le (1- \lr_n^* \hesseEV_1)\|\Weights_n-\minimum\|_{V,\infty}^2\\
+		&\le (1- \lr_n^* \hesseEV_1[2-\lr_n^*(\lr_n^*)^{-1}])\|\Weights_n-\minimum\|_{V,\infty}^2\\
 		&= \left(1- \tfrac{1}{1+ \tfrac{\tilde{\stdBound}^2}{\hesseEV_1^2\|\Weights_n-\minimum\|^2}}\right)
 		\|\Weights_n-\minimum\|_{V,\infty}^2\\
 		&= \left(1- \tfrac{
@@ -907,11 +920,11 @@ Armed with this norm, we can now tackle our problem again.
 	The condition
 	\begin{align*}
 		\E\|\martIncr\|_{V,\infty}^2
-		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension,
+		\le \tilde{\stdBound}^2 = \stdBound^2 \hesseEV_1\hesseEV_\dimension
 	\end{align*}
-	might seem strange, but this definition allows \(\stdBound\) to be scale
-	invariant. i.e.\ when we scale \(\loss(\weights, Z)\) we scale \(\hesseEV_j\)
-	linearly as well as \(\E\|\martIncr_n\|^2\) quadratically. So the
+	might seem strange. But this definition allows \(\stdBound\) to be scale
+	invariant. I.e.\ when we scale \(\loss(\weights, Z)\) we scale \(\hesseEV_j\)
+	linearly, as well as \(\E\|\martIncr_n\|^2\) quadratically. So the
 	bound \(\stdBound\) is scale invariant while \(\tilde{\stdBound}\) is not.
 	And with scale invariance we get convergence rates dependent only on the
 	condition number.
@@ -1030,12 +1043,12 @@ application of Lemma~\ref{lem: bregmanDiv lower bound (strongly convex)}.
 	In the classical case we just wanted to select \(\lr_n\) as large as possible,
 	i.e.\ \(\lr_n=\tfrac{2}{\ubound+\lbound}\). But in the stochastic setting there
 	are adverse effects of large learning rates due to noise. Now as our upper bound
-	is a convex parabola in \(\lr_n\) we can just use the first order condition
+	is a convex parabola in \(\lr_n\), we can just use the first order condition
 	\begin{align*}
 		\frac{d}{d\lr_n}
 		= -2\tfrac{\ubound\lbound}{\ubound+\lbound}
 		\E\|\Weights_n - \minimum\|^2 + 2\lr_n \stdBound^2\ubound\lbound
-		\xeq{!} 0
+		\xeq{!} 0,
 	\end{align*}
 	to find the best upper bound
 	\begin{align}\label{eq: optimal learning rate SGD}
@@ -1051,7 +1064,7 @@ application of Lemma~\ref{lem: bregmanDiv lower bound (strongly convex)}.
 		2\stdBound^2 \le \E\|\Weights_n - \minimum\|^2.
 	\end{align*}
 	We find again: the stochastic variance only becomes a problem once we are
-	close to the minimum. Before in the transient phase we basically want to
+	close to the minimum. Before, in the transient phase, we basically want to
 	treat our problem like the classical one. Using Lemma~\ref{lem: SGD bound
 	with noise} here, we get a linear convergence rate
 	\begin{align*}
@@ -1163,8 +1176,8 @@ and see what happens.
 		+ \tilde{\stdBound}^2 O(n^{-1} + n^{-2\hesseEV_1 a})
 	\end{align*}
 	In particular \(b\) does not matter. Its lower bound is only required so that
-	the learning rate starts below \(\tfrac1{\hesseEV_\dimension}\), eventually
-	that would happen anyway having no bearing on the asymptotic behavior.
+	the learning rate starts below \(\tfrac1{\hesseEV_\dimension}\). Eventually
+	that would happen anyway, having no bearing on the asymptotic behavior.
 	Selecting \(a\ge\tfrac{1}{2\hesseEV_1}\), ensures a convergence rate of
 	\(O(\tfrac1n)\). A possible selection to
 	achieve \(O(\tfrac1n)\) convergence is thus for example \(a=1/\hesseEV_1\),
@@ -1172,9 +1185,9 @@ and see what happens.
 	\begin{align*}
 		\lr_n = \frac{1}{\hesseEV_1(n+\condition)}.
 	\end{align*}
-	For \(\hesseEV_1=\hesseEV_\dimension=1\), this results in the mean we found
-	optimal in our expected value search in Subsection~\ref{subsec: variance
-	reduction}
+	For \(\hesseEV_1=\hesseEV_\dimension=1\), this results in the mean, which we
+	found is optimal in our expected value search in Subsection~\ref{subsec:
+	variance reduction}
 \end{theorem}
 \begin{proof}
 	First recall that for quadratic loss functions we derived the explicit
@@ -1221,14 +1234,14 @@ and see what happens.
 	\end{align*}
 	which would be the product equivalent of a telescoping sum as we have used in
 	(\ref{eq: telescoping product}). To make the product go away, we could use
-	\(1+x\le \exp(x)\) inside the square to convert it into a sum. But since \(x\to
+	\(1+x\le \exp(x)\) inside the square, to convert it into a sum. But since \(x\to
 	x^2\) is only monotonous for positive \(x\), we need
 	\begin{align*}
 		1-\lr_k \hesseEV_j \ge 0 \qquad \forall k\ge 0, \forall j \in\{1,\dots,\dimension\}.
 	\end{align*}
 	This is why we need the requirement \(b\ge a\hesseEV_\dimension\).
 
-	Enacting this idea using the exponential function bound \(1-x\le\exp(-x)\), we
+	Enacting this idea with the exponential function bound \(1-x\le\exp(-x)\), we
 	get
 	\begin{align}
 		\nonumber
@@ -1364,17 +1377,17 @@ in Theorem~\ref{thm: SGD converges to area}. But convergence in this theorem is
 exponential, meaning we do not actually converge in finite time. And due to
 stochasticity it is difficult to tell when we actually stop making progress.
 Especially because a plateau in the loss could also be due to a saddle point
-region cf. Figure~\ref{fig: visualize saddle point gd}.
+region (recall Figure~\ref{fig: visualize saddle point gd}).
 
 Detecting convergence is thus its own research field \parencite[for a recent
 approach including an overview of previous work see
 e.g.][]{pesmeConvergenceDiagnosticBasedStep2020}. One prominent conjecture is,
 that the dot product of the weight updates becomes more random when we have
-converged. Since we do not follow a straight gradient path anymore with
+converged. Since then, we do not follow a straight gradient path anymore, with
 gradients pointing in roughly the same direction.
 
 Another problem with diminishing learning rates is: If we reduce learning rates
-too fast (e.g. \(\tfrac{1}{n+1}\) when \(\hesseEV_1=\tfrac14\) requires something
+too fast (e.g. \(\tfrac{1}{n+1}\), when \(\hesseEV_1=\tfrac14\) requires something
 like \(\tfrac{2}{n+b}\)), then we have seen in Theorem~\ref{thm: convergence
 rates for diminishing lr schedules} that our convergence rate is reduced below
 \(O(\tfrac1n)\). Since \(\hesseEV_1\) can be arbitrarily small our convergence rate
@@ -1384,7 +1397,7 @@ So we want to avoid reducing the learning rate too fast. One possibility is
 choosing a learning rate schedule with \(O(n^{-\alpha})\) where \(\tfrac12<\alpha<1\),
 which sacrifices convergence speed on purpose to avoid it becoming arbitrarily
 bad. Another idea is to recycle the ``convergence detection'' algorithm we
-need anyway to transition from the transient phase into the asymptotic phase.
+need anyway, to transition from the transient phase into the asymptotic phase.
 In other words: Use piecewise constant learning rates.
 
 \textcite{smithDonDecayLearning2018} argue that there is another benefit to
@@ -1394,8 +1407,8 @@ system to converge to the global minimum, which may be sharp. Meanwhile
 annealing the temperature in a series of discrete steps can trap the system in a
 “robust” minimum whose cost may be higher but whose curvature is lower. We
 suspect a similar intuition may hold in deep learning.''
-In other words: for a constant learning rate the area to which SGD can converge
-to has a minimal size. So it will disregard all holes (local minima) which are
+In other words: for a constant learning rate, the area to which SGD can converge
+has a minimal size. So it will disregard all holes (local minima) which are
 smaller than this size. Sharply decreasing the learning rate while over a larger
 crater will keep SGD in this general area.
 
@@ -1462,7 +1475,7 @@ Let the points where we half the learning rate
 	\begin{align*}
 		\log(\tfrac12)
 		&\le (N(r+1)-N(r)-1)\log\left(1-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}\right)\\
-		&\le (N(r+1)-N(r)-1)\left(-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}\right).
+		&\le (N(r+1)-N(r)-1)\left(-2^{1-r}\frac{\ubound\lbound}{(\ubound+\lbound)^2}\right),
 	\end{align*}
 	due to \(\log(1+x)\le x\). Dividing by the negative multiple on the right we
 	finally get
@@ -1498,21 +1511,21 @@ This approach retains the convergence rate of \(O(\tfrac1n)\) even if we wait to
 E.g. if we do not wait until we are at twice the asymptotic bound, but \(1.5\)
 times the asymptotic bound, then this represents a halving of the distance to
 the asymptotic bound. Due to exponential convergence to this bound, this should
-take roughly double the amount of time. If we spend double the amount of time in
-every learning rate, then the amount of time to reach some level \(r\) doubles.
-This simply halves our rate of convergence but does not change the fact it is
+take roughly double the amount of time. If we spend double the amount of time at
+every learning rate step, then the amount of time to reach some level \(r\)
+doubles. This does not change the fact it is \(O(\tfrac1n)\),
+which reinforces the notion that it is better to keep learning rates high,
+rather than reducing them too quickly. As that would slow progress down below
 \(O(\tfrac1n)\).
-
-This reinforces the notion that it is better to keep learning rates too high
-rather than to reduce them too quickly, which slows progress down below \(O(\tfrac1n)\).
 
 \section{General Convex Case -- Averaging}\label{sec: SGD with Averaging}
 
-As the noise prevents us from using Lemma~\ref{lem: bregmanDiv lower bound} in
-place of Lemma~\ref{lem: bregmanDiv lower bound (strongly convex)} to ensure a
-decreasing distance from the optimum, we cannot use the same approach we used
-in the classical convex loss function setting (Section~\ref{sec: convex convergence theorems})
-as we did in Lemma~\ref{lem: SGD bound with noise} for strongly convex functions.
+So far, we only discussed \emph{strongly} convex functions. In the classical
+convex loss function setting (Section~\ref{sec: convex convergence theorems}),
+we used Lemma~\ref{lem: bregmanDiv lower bound} in place of Lemma~\ref{lem:
+bregmanDiv lower bound (strongly convex)} to ensure a decreasing distance from
+the optimum. But the noise prevents us from doing the same here, like we did in
+Lemma~\ref{lem: SGD bound with noise} for strongly convex functions.
 
 \textcite{nemirovskiRobustStochasticApproximation2009} showed that the approach
 developed to deal with non Lipschitz continuous gradients and subgradients (cf.
@@ -1521,21 +1534,21 @@ stochastic setting. The price for this generality is a greatly reduced
 convergence speed.
 
 In this setting we assume \(\Loss \in \lipGradientSet[0,0]{\lipConst}\).
-And instead of the Lemmas mentioned above we simply use the
+And instead of the Lemmas mentioned above, we simply use the
 (subgradient) definition of convexity
 \begin{align*}
 	\Loss(\minimum)
 	\ge \Loss(\Weights_n) + 
 	\langle\nabla\Loss(\Weights_n), -(\Weights_n - \minimum)\rangle
 \end{align*}
-in (\ref{eq: getting rid of the scalar product (SGD)})
+in (\ref{eq: getting rid of the scalar product (SGD)}), i.e.
 \begin{align*}
 	&\|\Weights_n - \minimum - \lr_n\nabla\Loss(\Weights_n)\|^2\\
 	&\le \|\Weights_n - \minimum\|^2
 	- 2\lr_n\underbrace{\langle\nabla\Loss(\Weights_n), \Weights_n-\minimum\rangle}_{
 		\ge \Loss(\Weights_n) - \Loss(\minimum)
 	}
-	+ \lr_n^2 \|\nabla\Loss(\Weights_n)\|^2
+	+ \lr_n^2 \|\nabla\Loss(\Weights_n)\|^2,
 \end{align*}
 to obtain
 \begin{align*}
@@ -1547,38 +1560,41 @@ to obtain
 		&+ \lr_n^2 [
 			\underbrace{\E\|\nabla\Loss(\Weights_n)\|^2}_{\le \lipConst^2}
 			+ \underbrace{\E\|\martIncr_{n+1}\|^2}_{\le \stdBound^2}
-		]
+		],
 	\end{aligned}
 \end{align*}
 as \(\Loss\in\lipGradientSet[0,0]{\lipConst}\) implies Lipschitz continuity and thus bounded
 gradients. Note that splitting \(\nabla\loss\) into \(\nabla\Loss\) and \(\martIncr\)
 was of no use here as we end up summing them anyway. \textcite{nemirovskiRobustStochasticApproximation2009}
 uses bounded \(\E\|\nabla\loss\|^2\) from the start to get the same result.
-This results in
-\begin{align*}
+Reordering the previous equation leads to
+\begin{align}
+	\nonumber
 	&2\sum_{n=0}^{N-1} \lr_n\E[\Loss(\Weights_n)-\Loss(\minimum)]\\
+	\nonumber
 	&\le \sum_{n=0}^{N-1} \E\|\Weights_n -\minimum\|^2 - \E\|\Weights_{n+1}-\minimum\|^2
 	+ \lr_n^2 [\lipConst^2 + \stdBound^2]\\
+	\label{eq: sgd averaging}
 	&\le \E\|\weights_0 - \minimum\|^2 + [\lipConst^2+\stdBound^2]\sum_{n=0}^{N-1} \lr_n^2.
-\end{align*}
+\end{align}
 Dividing both sides by \(2\sum_{n=0}^{N-1}\lr_n=2T\) turns the term on the left
 into a convex combination allowing us to finally get 
 \begin{align*}
 	\E\left[\Loss\left(\sum_{n=0}^{N-1} \frac{\lr_n}{T}\Weights_n\right)\right]-\Loss(\minimum)
-	&\le \sum_{n=0}^{N-1} \frac{\lr_n}{T}\E[\Loss(\Weights_n)]-\Loss(\minimum)\\
-	&\le \frac{
+	&\xle{\text{conv.}} \sum_{n=0}^{N-1} \frac{\lr_n}{T}\E[\Loss(\Weights_n)]-\Loss(\minimum)\\
+	&\lxle{(\ref{eq: sgd averaging})} \frac{
 		\|\weights_0 - \minimum\|^2 + [\lipConst^2+\stdBound^2]\sum_{n=0}^N \lr_n^2
 	}{
 		2T
 	}.
 \end{align*}
 Now if there was no stochasticity, one could instead use the minimum of
-\(\Loss(\Weights_n)\) instead which is how one obtains the result in
-Subsection~\ref{subsec: subgradient method}. But since we do have randomness
+\(\Loss(\Weights_n)\) instead, which is how one obtains the result in
+Subsection~\ref{subsec: subgradient method}. But since we do have randomness,
 it appears to make sense to average the weights \(\Weights_n\) we collect over
 time.
 Now we can ask ourselves which learning rates \(\lr_n\) we should pick to
-minimize our bound. Now due to convexity of the square we have
+minimize our bound. Due to convexity of the square we have
 \begin{align*}
 	1 = \left(\frac{1}{N}\sum_{n=0}^{N-1}\frac{N}{T}\lr_n\right)^2
 	\xle{\text{conv.}} \frac{1}{N}\sum_{n=0}^{N-1}\left(\frac{N}{T}\lr_n\right)^2
@@ -1627,20 +1643,20 @@ of the loss function \(\Loss\) as our averaging of weights is only a
 guaranteed improvement because of convexity. While \ref{eq: gradient descent} should work
 intuitively on non-convex functions as well, with worse rates of convergence in
 eigenspaces with small eigenvalues (cf. Remark~\ref{rem: rate is retained for
-larger eigenvalues}) this averaging technique will generally not play nicely
+larger eigenvalues}), this averaging technique will generally not play nicely
 with non-convex functions.
 
 Sure, if we moved into a convex area relatively quickly and stayed there for
 most of our learning time, then the first few weights outside this convex
 area will be negligible for the average.
-But it might still make sense to wait with the averaging until the time it is
-actually needed to resume convergence especially since the rate of convergence
+But it might still make sense to wait with the averaging, until the time it is
+actually needed to resume convergence. Especially since the rate of convergence
 is so much worse\footnote{
 	At least as far as we know -- \textcite{bachNonstronglyconvexSmoothStochastic2013}
 	recover the convergence rate \(O(\tfrac1N)\) only for a very specific model.
 }.
 
-\section{Batch Learning}
+\section{Batch Learning}\label{sec: batch learning}
 
 Instead of using \(\nabla\loss(\Weights_n, X_{n+1}, Y_{n+1})\) at time \(n\) as an
 estimator for \(\nabla\Loss(\Weights_n)\) we could use the average of a
@@ -1662,11 +1678,12 @@ with reduced variance
 \begin{align*}
 	\E\|\martIncr_n^{(m)}\|^2 = \tfrac1m\E\|\martIncr_n^{(1)}\|^2 \le \tfrac1m \tilde{\stdBound}^2.
 \end{align*}
-Now while this variance reduction does reduce our upper bound on the distance
+While this variance reduction does reduce our upper bound on the distance
 between SGD and GD (cf. Theorem~\ref{thm: distance SGD vs GD}), this reduction
 comes at a cost: We now have to do \(m\) gradient evaluations per iteration!
-We would incur an equivalent cost, if we reduced our discretization to
-\begin{align*}
+We would incur an equivalent cost, if we reduced our discretization size \(\lr\)
+to
+ \begin{align*}
 	\tilde{\lr}:=\frac{\lr}{m}=\frac{T}{Nm}.
 \end{align*}
 This increases the number of iterations to reach \(T\) to \(Nm\), which implies
@@ -1689,35 +1706,38 @@ and GD, then we can see that these actions have quite a similar effect
 	}_{\widetilde{\martIncr}_k}.
 \end{align*}
 The difference is, that batch learning stays on some \(\Weights_k\) and collects
-\(m\) pieces of information before it makes a big step based on this information
+\(m\) pieces of information before it makes a big step based on this information,
 while SGD just makes \(m\) small steps.
 
 This notion is reflected in the upper bound in Theorem~\ref{thm: distance SGD vs
-GD} where these two actions have the same effect on our distance bound between SGD and
-GD (especially if \(\Loss\) is convex as we can then get rid of the exponential
-term as hinted at in the proof of the theorem). But as we have seen in
+GD}, where these two actions have the same effect on our distance bound between SGD and
+GD\footnote{
+	Especially if \(\Loss\) is convex, since we can get rid of the exponential
+	term then. As hinted at in the proof of the theorem.
+}. But as we have seen in
 Subsection \ref{subsec: variance reduction} for constant learning rates, halving
 them is ever so slightly worse than simply reducing the variance
 with batches as GD converges faster than Gradient Flow. But as GD converges
 to Gradient Flow, this effect is less pronounced for smaller learning rates.
 
-In the same section we also see that for diminishing learning rates we get
-equivalent improvements on the variance.
-In that case, instead of running GD for the same ``time'' in Gradient Flow and
-reducing the discretization size, we would actually increase this ``time''
-logarithmically, i.e.\ increase the number of steps which decrease at rate
-\(O(\tfrac1n)\) resulting in a logarithmic time increase 
-\[
-	\sum_{k=0}^n\tfrac{1}{k}\approx\log(n).
+In the same section we also see, that diminishing learning rates result in an
+equivalent improvement on the variance. Instead of running GD for the same
+``time'' in Gradient Flow, and reducing the discretization size, we would
+actually increase this ``time'' here. In other words: do more steps with
+diminishing learning rates \(O(\tfrac1n)\) resulting in a logarithmic time
+increase 
+ \[
+	\sum_{k=0}^n\tfrac{1}{k}\approx\log(n)
 \]
+of \ref{eq: gradient flow}.
 This effect can best be seen in Theorem~\ref{thm: convergence rates for
-diminishing lr schedules} where increasing the number of steps improves the ``GD
+diminishing lr schedules}, where increasing the number of steps improves the ``GD
 part'' as well as the variance reduction part, while increasing the batch size
-has this effect only on the variance. In other words: increasing the number of
-steps continues optimization as well as reduce variance, while batches
-\emph{only} reduce variance.
+has this effect only on the variance. In other words, increasing the number of
+steps continues optimization as well as reduces variance, while batches
+\emph{only} reduces variance.
 
-Even worse, in the transient case we found in Theorem~\ref{thm:
+Even worse: in the transient case, we found in Theorem~\ref{thm:
 optimal rates quadratic case} and \ref{thm: optimal rates SGD} that the variance is
 completely irrelevant and increasing the batch size has no positive effect at
 all. And while the second of the two phases of SGD \parencite[first observed
