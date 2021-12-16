@@ -1,4 +1,4 @@
-\documentclass[11pt, a4paper]{book}
+\documentclass[11pt, a4paper, BCOR=20mm]{scrbook}
 
 %%% ENCODING, FONT & LOCALIZATION
 \usepackage[utf8]{inputenc} % use unicode input-encoding (allows unicode characters in the .tex files, default: Asci)
@@ -19,7 +19,7 @@
 \usepackage{xcolor}
 
 %%% EDITING (Annotations, TODO, etc.) 
-\usepackage[draft]{fixme} %final removes annotations %draft includes annotations
+\usepackage[final]{fixme} %final removes annotations %draft includes annotations
 \fxsetup{theme=color}
 %%\fxnote{some note} ,\fxwarning{}, \fxerror{}, \fxfatal{} <- does not allow [final] to compile
 
@@ -53,7 +53,7 @@
 %> see also Macros.sty
 
 %%% BIBLIOGRAPHY
-\usepackage[style=authoryear, backend=biber, date=iso, urldate=iso, maxcitenames=2]{biblatex}
+\usepackage[style=authoryear, backend=biber, seconds=true, date=iso, urldate=iso, maxcitenames=2]{biblatex}
 \addbibresource{references.bib}
 \setcounter{biburlnumpenalty}{7000} % penalty 0-10000 for margin overlap after number
 \setcounter{biburllcpenalty}{7000} % penalty for overlap after lower case letter
@@ -72,7 +72,7 @@
 \subtitellineI{through the Lens of Machine Learning}
 %\subtitellineII{}
 \Supervisor{Prof. Dr. Leif Döring}
-\DueDate{20.01.2022}
+\DueDate{20.12.2021}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DOCUMENT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
