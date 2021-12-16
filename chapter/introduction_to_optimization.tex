@@ -21,7 +21,7 @@ Then we want to minimize the expected loss over all (possible) examples, i.e.
 \begin{align*}
 	\Loss(\weights) := \E_{Z\sim \dist} [\loss(\weights, Z)].
 \end{align*}
-In general we do not have access to this expected loss. Instead we usually
+In general, we do not have access to this expected loss. Instead we usually
 assume to be in possession of only a sample \(\sample=(Z_1, \dots,
 Z_{\sampleSize})\) of data, drawn (independently) from distribution \(\dist\).
 This gives rise to the ``empirical risk''
