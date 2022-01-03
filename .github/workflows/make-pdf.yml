@@ -26,11 +26,11 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Turn of Draft Mode
-        run: sed -i 's/draft/final/' Masterthesis.tex
+        run: sed -i 's/draft/final/' ms.tex
 
       - uses: xu-cheng/latex-action@v2
         with:
-          root_file: "Masterthesis.tex"
+          root_file: "ms.tex"
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2.2.4
@@ -38,7 +38,7 @@ jobs:
           # Artifact name
           name: masterthesis.pdf 
           # A file, directory or wildcard pattern that describes what to upload
-          path: "Masterthesis.pdf"
+          path: "ms.pdf"
           # The desired behavior if no files are found using the provided path.
           if-no-files-found: error
           # Duration after which artifact will expire in days. 0 means using default retention.
